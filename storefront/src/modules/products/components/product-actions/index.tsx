@@ -133,13 +133,44 @@ export default function ProductActions({
           )}
         </div>
 
+        <div className="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg mb-6">
+          <div className="text-sm mb-2">November 5-30</div>
+          <div className="text-lg font-bold">Black Friday!</div>
+        </div>
+
         <ProductPrice product={product} variant={selectedVariant} />
+
+        <div className="my-4">
+          <div className="flex items-center gap-2 text-green-600 mb-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="text-sm">95 pcs in your city</span>
+          </div>
+          <div className="text-sm text-gray-600">93 pcs in stock</div>
+        </div>
+
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center gap-2 text-sm">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Pickup: today, free, from 4 stores</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span>By courier: today, from 290 P</span>
+          </div>
+        </div>
 
         <Button
           onClick={handleAddToCart}
           disabled={!inStock || !selectedVariant || !!disabled || isAdding}
           variant="primary"
-          className="w-full h-10"
+          className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg mb-3"
           isLoading={isAdding}
           data-testid="add-product-button"
         >
@@ -149,6 +180,15 @@ export default function ProductActions({
             ? "Out of stock"
             : "Add to cart"}
         </Button>
+        <Button
+          variant="secondary"
+          className="w-full h-10 bg-gray-100 hover:bg-gray-200 text-gray-800"
+        >
+          Quick Order
+        </Button>
+        <div className="text-sm text-gray-600 mt-4">
+          <span className="font-semibold">5,750 P</span> × 4 payments in installments
+        </div>
         <MobileActions
           product={product}
           variant={selectedVariant}

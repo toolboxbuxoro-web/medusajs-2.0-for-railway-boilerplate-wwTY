@@ -1,6 +1,8 @@
 import { HttpTypes } from "@medusajs/types"
 import { notFound } from "next/navigation"
 import { NextRequest, NextResponse } from "next/server"
+import createMiddleware from 'next-intl/middleware';
+import { locales, defaultLocale } from './i18n';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -62,7 +64,10 @@ async function getCountryCode(
       .get("x-vercel-ip-country")
       ?.toLowerCase()
 
-    const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+    // Get URL parts after locale: /[locale]/[countryCode]/...
+    const pathParts = request.nextUrl.pathname.split("/").filter(Boolean)
+    // Skip locale (first part) to get countryCode (second part if it exists)
+    const urlCountryCode = pathParts[1]?.toLowerCase()
 
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
@@ -84,8 +89,15 @@ async function getCountryCode(
   }
 }
 
+// Create next-intl middleware
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'always'
+});
+
 /**
- * Middleware to handle region selection and onboarding status.
+ * Middleware to handle locale, region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -95,14 +107,33 @@ export async function middleware(request: NextRequest) {
   const onboardingCookie = request.cookies.get("_medusa_onboarding")
   const cartIdCookie = request.cookies.get("_medusa_cart_id")
 
+  // First, handle locale with next-intl - this will add locale to URL if missing
+  const intlResponse = intlMiddleware(request);
+  
+  // Check if intlMiddleware is redirecting (adding locale to URL)
+  if (intlResponse.headers.get('location')) {
+    // Let intl middleware handle the redirect
+    return intlResponse;
+  }
+  
+  // At this point, URL should have locale, extract it
+  const pathParts = request.nextUrl.pathname.split("/").filter(Boolean)
+  const locale = pathParts[0]
+  const hasLocale = locales.includes(locale as any)
+  
+  // If no valid locale found, something is wrong, return intl response
+  if (!hasLocale) {
+    return intlResponse;
+  }
+  
   const regionMap = await getRegionMap()
-
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
-  const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
+  // Check if URL has country code: /[locale]/[countryCode]/...
+  const urlCountryCode = pathParts[1]
+  const urlHasCountryCode = countryCode && urlCountryCode === countryCode
 
-  // check if one of the country codes is in the url
+  // If everything is in place, continue
   if (
     urlHasCountryCode &&
     (!isOnboarding || onboardingCookie) &&
@@ -111,25 +142,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
-
+  // Build redirect path
+  const redirectPathParts = pathParts.slice(1) // Remove locale
+  const redirectPath = redirectPathParts.length > 0 ? `/${redirectPathParts.join("/")}` : ""
   const queryString = request.nextUrl.search ? request.nextUrl.search : ""
 
   let redirectUrl = request.nextUrl.href
-
   let response = NextResponse.redirect(redirectUrl, 307)
 
-  // If no country code is set, we redirect to the relevant region.
-  if (!urlHasCountryCode && countryCode) {
-    redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
+  // Build URL with locale and country code: /[locale]/[countryCode]/...
+  if (countryCode && !urlHasCountryCode) {
+    const cleanPath = redirectPath.startsWith(`/${countryCode}`) 
+      ? redirectPath.slice(countryCode.length + 1) 
+      : redirectPath
+    redirectUrl = `${request.nextUrl.origin}/${locale}/${countryCode}${cleanPath}${queryString}`
+    response = NextResponse.redirect(redirectUrl, 307)
   }
 
   // If a cart_id is in the params, we set it as a cookie and redirect to the address step.
   if (cartId && !checkoutStep) {
-    redirectUrl = `${redirectUrl}&step=address`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
+    const url = new URL(response.headers.get('location') || redirectUrl);
+    url.searchParams.set('step', 'address');
+    response = NextResponse.redirect(url.toString(), 307)
     response.cookies.set("_medusa_cart_id", cartId, { maxAge: 60 * 60 * 24 })
   }
 

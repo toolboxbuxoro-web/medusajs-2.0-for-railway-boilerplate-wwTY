@@ -15,24 +15,43 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="flex-1 small:py-12" data-testid="account-page">
-      <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-white flex flex-col">
-        <div className="grid grid-cols-1  small:grid-cols-[240px_1fr] py-12">
-          <div>{customer && <AccountNav customer={customer} />}</div>
-          <div className="flex-1">{children}</div>
-        </div>
-        <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-gray-200 py-12 gap-8">
-          <div>
-            <h3 className="text-xl-semi mb-4">Got questions?</h3>
-            <span className="txt-medium">
-              You can find frequently asked questions and answers on our
-              customer service page.
-            </span>
+    <div className="flex-1 py-4 sm:py-8 lg:py-12 bg-gray-50 min-h-screen" data-testid="account-page">
+      <div className="content-container">
+        <div className="max-w-5xl mx-auto">
+          {/* Mobile Nav - Horizontal scroll */}
+          <div className="lg:hidden mb-4 -mx-4 px-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-2">
+              {customer && <AccountNav customer={customer} />}
+            </div>
           </div>
-          <div>
-            <UnderlineLink href="/customer-service">
-              Customer Service
-            </UnderlineLink>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4 lg:gap-8">
+            {/* Desktop Nav - Sidebar */}
+            <div className="hidden lg:block">
+              <div className="sticky top-24 bg-white rounded-lg border border-gray-200 p-4">
+                {customer && <AccountNav customer={customer} />}
+              </div>
+            </div>
+            
+            {/* Main Content */}
+            <div className="flex-1 bg-white rounded-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
+              {children}
+            </div>
+          </div>
+
+          {/* Help Section */}
+          <div className="mt-6 lg:mt-8 bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Got questions?</h3>
+                <p className="text-sm sm:text-base text-gray-600">
+                  Find answers on our customer service page.
+                </p>
+              </div>
+              <UnderlineLink href="/customer-service" className="flex-shrink-0">
+                Customer Service
+              </UnderlineLink>
+            </div>
           </div>
         </div>
       </div>

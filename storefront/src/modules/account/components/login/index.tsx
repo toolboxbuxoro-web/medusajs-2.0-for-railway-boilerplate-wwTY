@@ -5,6 +5,7 @@ import Input from "@modules/common/components/input"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { login } from "@lib/data/customer"
+import { useTranslations } from 'next-intl'
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -12,20 +13,21 @@ type Props = {
 
 const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useFormState(login, null)
+  const t = useTranslations('account')
 
   return (
     <div
       className="max-w-sm w-full flex flex-col items-center"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">Welcome back</h1>
+      <h1 className="text-large-semi uppercase mb-6">{t('welcome_back')}</h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-8">
-        Sign in to access an enhanced shopping experience.
+        {t('sign_in_description')}
       </p>
       <form className="w-full" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
-            label="Email"
+            label={t('email')}
             name="email"
             type="email"
             title="Enter a valid email address."
@@ -34,7 +36,7 @@ const Login = ({ setCurrentView }: Props) => {
             data-testid="email-input"
           />
           <Input
-            label="Password"
+            label={t('password')}
             name="password"
             type="password"
             autoComplete="current-password"
@@ -44,17 +46,17 @@ const Login = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage error={message} data-testid="login-error-message" />
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-          Sign in
+          {t('sign_in')}
         </SubmitButton>
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        Not a member?{" "}
+        {t('not_a_member')}{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
           className="underline"
           data-testid="register-button"
         >
-          Join us
+          {t('join_us')}
         </button>
         .
       </span>

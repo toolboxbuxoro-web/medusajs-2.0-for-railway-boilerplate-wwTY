@@ -1,17 +1,13 @@
-import { getBaseURL } from "@lib/util/env"
-import { Metadata } from "next"
-import "styles/globals.css"
+import { locales, type Locale } from '../i18n';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
+export function generateStaticParams() {
+  return locales.map((locale: Locale) => ({ locale }));
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
-  return (
-    <html lang="en" data-mode="light">
-      <body>
-        <main className="relative">{props.children}</main>
-      </body>
-    </html>
-  )
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
 }

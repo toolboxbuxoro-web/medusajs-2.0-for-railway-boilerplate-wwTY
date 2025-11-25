@@ -24,144 +24,91 @@ const AccountNav = ({
     await signout(countryCode)
   }
 
+  const navItems = [
+    { href: "/account", label: "Overview", icon: <User size={18} />, testId: "overview-link" },
+    { href: "/account/profile", label: "Profile", icon: <User size={18} />, testId: "profile-link" },
+    { href: "/account/addresses", label: "Addresses", icon: <MapPin size={18} />, testId: "addresses-link" },
+    { href: "/account/orders", label: "Orders", icon: <Package size={18} />, testId: "orders-link" },
+  ]
+
+  const isActive = (href: string) => {
+    const routePath = route?.split(countryCode)[1]
+    if (href === "/account") {
+      return routePath === href || routePath === "/account/"
+    }
+    return routePath?.startsWith(href)
+  }
+
   return (
     <div>
-      <div className="small:hidden" data-testid="mobile-account-nav">
-        {route !== `/${countryCode}/account` ? (
-          <LocalizedClientLink
-            href="/account"
-            className="flex items-center gap-x-2 text-small-regular py-2"
-            data-testid="account-main-link"
+      {/* Mobile: Horizontal scroll nav */}
+      <div className="lg:hidden" data-testid="mobile-account-nav">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {navItems.map((item) => (
+            <LocalizedClientLink
+              key={item.href}
+              href={item.href}
+              className={clx(
+                "flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                isActive(item.href)
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              )}
+              data-testid={item.testId}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </LocalizedClientLink>
+          ))}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-red-100 hover:text-red-600 transition-colors"
+            data-testid="logout-button"
           >
-            <>
-              <ChevronDown className="transform rotate-90" />
-              <span>Account</span>
-            </>
-          </LocalizedClientLink>
-        ) : (
-          <>
-            <div className="text-xl-semi mb-4 px-8">
-              Hello {customer?.first_name}
-            </div>
-            <div className="text-base-regular">
-              <ul>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/profile"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
-                    data-testid="profile-link"
-                  >
-                    <>
-                      <div className="flex items-center gap-x-2">
-                        <User size={20} />
-                        <span>Profile</span>
-                      </div>
-                      <ChevronDown className="transform -rotate-90" />
-                    </>
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/addresses"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
-                    data-testid="addresses-link"
-                  >
-                    <>
-                      <div className="flex items-center gap-x-2">
-                        <MapPin size={20} />
-                        <span>Addresses</span>
-                      </div>
-                      <ChevronDown className="transform -rotate-90" />
-                    </>
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/orders"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
-                    data-testid="orders-link"
-                  >
-                    <div className="flex items-center gap-x-2">
-                      <Package size={20} />
-                      <span>Orders</span>
-                    </div>
-                    <ChevronDown className="transform -rotate-90" />
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
-                    onClick={handleLogout}
-                    data-testid="logout-button"
-                  >
-                    <div className="flex items-center gap-x-2">
-                      <ArrowRightOnRectangle />
-                      <span>Log out</span>
-                    </div>
-                    <ChevronDown className="transform -rotate-90" />
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="hidden small:block" data-testid="account-nav">
-        <div>
-          <div className="pb-4">
-            <h3 className="text-base-semi">Account</h3>
-          </div>
-          <div className="text-base-regular">
-            <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
-              <li>
-                <AccountNavLink
-                  href="/account"
-                  route={route!}
-                  data-testid="overview-link"
-                >
-                  Overview
-                </AccountNavLink>
-              </li>
-              <li>
-                <AccountNavLink
-                  href="/account/profile"
-                  route={route!}
-                  data-testid="profile-link"
-                >
-                  Profile
-                </AccountNavLink>
-              </li>
-              <li>
-                <AccountNavLink
-                  href="/account/addresses"
-                  route={route!}
-                  data-testid="addresses-link"
-                >
-                  Addresses
-                </AccountNavLink>
-              </li>
-              <li>
-                <AccountNavLink
-                  href="/account/orders"
-                  route={route!}
-                  data-testid="orders-link"
-                >
-                  Orders
-                </AccountNavLink>
-              </li>
-              <li className="text-grey-700">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  data-testid="logout-button"
-                >
-                  Log out
-                </button>
-              </li>
-            </ul>
-          </div>
+            <ArrowRightOnRectangle className="w-4.5 h-4.5" />
+            <span>Log out</span>
+          </button>
         </div>
+      </div>
+
+      {/* Desktop: Vertical nav */}
+      <div className="hidden lg:block" data-testid="account-nav">
+        <div className="pb-4 mb-4 border-b border-gray-200">
+          <h3 className="font-semibold text-gray-900">
+            {customer?.first_name ? `Hello, ${customer.first_name}` : 'My Account'}
+          </h3>
+        </div>
+        <ul className="space-y-1">
+          {navItems.map((item) => (
+            <li key={item.href}>
+              <LocalizedClientLink
+                href={item.href}
+                className={clx(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
+                  isActive(item.href)
+                    ? "bg-red-50 text-red-600 font-semibold"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                )}
+                data-testid={item.testId}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </LocalizedClientLink>
+            </li>
+          ))}
+          <li className="pt-2 mt-2 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
+              data-testid="logout-button"
+            >
+              <ArrowRightOnRectangle className="w-4.5 h-4.5" />
+              <span>Log out</span>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   )

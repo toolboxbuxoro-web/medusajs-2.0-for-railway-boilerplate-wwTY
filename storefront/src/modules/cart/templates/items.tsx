@@ -1,48 +1,89 @@
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Table } from "@medusajs/ui"
+import { Heading } from "@medusajs/ui"
 
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
+import ItemCard from "./item-card"
 
 type ItemsTemplateProps = {
   items?: HttpTypes.StoreCartLineItem[]
 }
 
 const ItemsTemplate = ({ items }: ItemsTemplateProps) => {
+  const cartId = Math.random().toString(36).substr(2, 9).toUpperCase()
+  const itemCount = items?.length || 0
+
   return (
-    <div>
-      <div className="pb-3 flex items-center">
-        <Heading className="text-[2rem] leading-[2.75rem]">Cart</Heading>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="p-4 sm:p-6 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <Heading className="text-xl sm:text-2xl font-bold">
+            Cart ({itemCount})
+          </Heading>
+          {items && items.length > 0 && (
+            <div className="text-xs sm:text-sm text-gray-500">ID: {cartId}</div>
+          )}
+        </div>
       </div>
-      <Table>
-        <Table.Header className="border-t-0">
-          <Table.Row className="text-ui-fg-subtle txt-medium-plus">
-            <Table.HeaderCell className="!pl-0">Item</Table.HeaderCell>
-            <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell>Quantity</Table.HeaderCell>
-            <Table.HeaderCell className="hidden small:table-cell">
-              Price
-            </Table.HeaderCell>
-            <Table.HeaderCell className="!pr-0 text-right">
-              Total
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {items
-            ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return <Item key={item.id} item={item} />
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+      
+      {/* Quick Add - Hidden on small mobile */}
+      <div className="hidden sm:block p-4 sm:p-6 border-b border-gray-200">
+        <input
+          type="text"
+          placeholder="Quick add: enter item name or code..."
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+        />
+      </div>
+
+      {/* Selection Controls */}
+      <div className="px-4 sm:px-6 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" className="w-4 h-4 text-red-600 rounded border-gray-300" />
+            <span className="text-xs sm:text-sm font-semibold">Select all</span>
+          </label>
+          <button className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 hover:text-red-600 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span className="hidden sm:inline">Delete selected</span>
+            <span className="sm:hidden">Delete</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Items List */}
+      <div className="divide-y divide-gray-200">
+        {items
+          ? items
+              .sort((a, b) => {
+                return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+              })
+              .map((item) => {
+                return <ItemCard key={item.id} item={item} />
+              })
+          : repeat(3).map((i) => {
+              return (
+                <div key={i} className="p-4 sm:p-6">
+                  <SkeletonLineItem />
+                </div>
+              )
+            })}
+      </div>
+
+      {/* Empty State */}
+      {items && items.length === 0 && (
+        <div className="p-8 sm:p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <p className="text-gray-500 text-sm">Your cart is empty</p>
+        </div>
+      )}
     </div>
   )
 }
