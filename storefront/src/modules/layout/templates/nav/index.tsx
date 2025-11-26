@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Suspense } from "react"
 
 import { listRegions } from "@lib/data/regions"
@@ -28,22 +29,28 @@ export default async function Nav({ locale }: NavProps) {
   return (
     <ScrollAwareNav>
       <div className="relative bg-white border-b border-gray-200">
-        {/* Main Header - Sticky */}
-        <header className="bg-white sticky top-0 z-[100] border-b border-gray-200 shadow-sm transition-all duration-300 navbar-header">
+        {/* Main Header - Fixed */}
+        <header className="bg-white fixed w-full top-0 z-[100] border-b border-gray-200 shadow-sm transition-all duration-300 navbar-header">
           <div className="content-container flex items-center justify-between h-16 md:h-20 gap-3 md:gap-6 transition-all duration-300 navbar-header-content">
             {/* Mobile Menu Button */}
             <MobileMenu categories={mainCategories} />
 
             {/* Logo */}
-            <div className="flex items-center">
-              <LocalizedClientLink
-                href="/"
-                className="text-xl md:text-2xl font-bold text-red-600 hover:text-red-700 transition-all duration-300 navbar-logo"
-                data-testid="nav-store-link"
-              >
-                {t('logo')}
-              </LocalizedClientLink>
-            </div>
+          <div className="flex items-center">
+            <LocalizedClientLink
+              href="/"
+              className="flex items-center gap-2"
+              data-testid="nav-store-link"
+            >
+              <Image
+                src="/logo.png"
+                alt={t("logo")}
+                width={120}
+                height={40}
+                className="block object-contain"
+              />
+            </LocalizedClientLink>
+          </div>
 
             {/* Search Bar - Hidden on small mobile, visible on tablet+ */}
             <div className="hidden sm:flex flex-1 max-w-xl lg:max-w-2xl navbar-search">
@@ -117,6 +124,9 @@ export default async function Nav({ locale }: NavProps) {
             </div>
           </div>
         </header>
+
+        {/* Spacer for fixed header */}
+        <div className="h-16 md:h-20"></div>
 
         {/* Navigation Bar - Categories */}
         <nav className="hidden md:block bg-white border-t border-gray-200 navbar-categories transition-all duration-300">

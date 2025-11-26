@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { getTranslations } from 'next-intl/server'
 
 import ProfilePhone from "@modules/account//components/profile-phone"
 import ProfileBillingAddress from "@modules/account/components/profile-billing-address"
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export default async function Profile() {
   const customer = await getCustomer()
   const regions = await listRegions()
+  const t = await getTranslations('account')
 
   if (!customer || !regions) {
     notFound()
@@ -26,11 +28,9 @@ export default async function Profile() {
   return (
     <div className="w-full" data-testid="profile-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">Profile</h1>
+        <h1 className="text-2xl-semi">{t('profile')}</h1>
         <p className="text-base-regular">
-          View and update your profile information, including your name, email,
-          and phone number. You can also update your billing address, or change
-          your password.
+          {t('profile_description')}
         </p>
       </div>
       <div className="flex flex-col gap-y-8 w-full">

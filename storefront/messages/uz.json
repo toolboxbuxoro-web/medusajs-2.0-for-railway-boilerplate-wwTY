@@ -71,7 +71,21 @@
     "billing_address": "To'lov manzili",
     "edit": "Tahrirlash",
     "save_changes": "O'zgarishlarni saqlash",
-    "cancel": "Bekor qilish"
+    "cancel": "Bekor qilish",
+    "profile_completion": "Profil to'ldirilishi",
+    "completed": "Tugallandi",
+    "saved_addresses": "Saqlangan manzillar",
+    "order_placed": "Buyurtma berildi",
+    "order_number": "Buyurtma raqami",
+    "total_amount": "Jami summa",
+    "no_recent_orders": "Oxirgi buyurtmalar topilmadi",
+    "orders_description": "Oldingi buyurtmalaringiz va ularning holatini ko'ring. Kerak bo'lsa, buyurtmalaringiz uchun qaytarish yoki almashtirish yaratishingiz mumkin.",
+    "profile_description": "Profil ma'lumotlaringizni, jumladan ismingiz, elektron pochtangiz va telefon raqamingizni ko'ring va yangilang. Shuningdek, to'lov manzilingizni yangilashingiz yoki parolingizni o'zgartirishingiz mumkin.",
+    "shipping_addresses": "Yetkazib berish manzillari",
+    "addresses_description": "Yetkazib berish manzillaringizni ko'ring va yangilang, xohlagancha qo'shishingiz mumkin. Manzillarni saqlash ularni buyurtma berish paytida mavjud qiladi.",
+    "no_orders_title": "Bu yerda hech narsa yo'q",
+    "no_orders_message": "Hali buyurtmalaringiz yo'q, keling buni o'zgartiraylik :)",
+    "continue_shopping": "Xaridni davom ettirish"
   },
   "cart": {
     "your_cart": "Xarid savati",
@@ -134,7 +148,22 @@
     "description": "Tavsif",
     "specifications": "Xususiyatlari",
     "reviews": "Sharhlar",
-    "related_products": "O'xshash mahsulotlar"
+    "related_products": "O'xshash mahsulotlar",
+    "black_friday": "QORA JUMA",
+    "easy_return": "Oson qaytarish",
+    "code": "Kod",
+    "warranty": "Kafolat",
+    "year": "yil",
+    "favorites": "Sevimlilar",
+    "compare": "Solishtirish",
+    "promo_dates": "5-30 noyabr",
+    "available_in_city": "Sizning shahringizda {{count}} dona",
+    "in_stock_count": "Omborda {{count}} dona",
+    "pickup_info": "Olib ketish: bugun, bepul, 4 ta do'kondan",
+    "courier_info": "Kuryer orqali: bugun, 290 P dan",
+    "select_variant": "Variantni tanlang",
+    "quick_order": "Tez buyurtma",
+    "installments": "to'lovlar bo'lib-bo'lib"
   },
   "search": {
     "search": "Qidiruv",
@@ -163,5 +192,22 @@
     "learn_more": "Batafsil",
     "view_more": "Ko'proq ko'rish",
     "show_less": "Kamroq ko'rish"
+  },
+  "store": {
+    "all_products": "Barcha mahsulotlar",
+    "browse_collection": "To'liq katalogni ko'rish",
+    "filters_sort": "Filtrlar va saralash",
+    "filters": "Filtrlar",
+    "sort_by": "Saralash",
+    "latest_arrivals": "Yangi kelganlar",
+    "price_low_high": "Narx: arzondan qimmatlarga",
+    "price_high_low": "Narx: qimmatdan arzonga",
+    "products_count": "mahsulot",
+    "no_products": "Mahsulotlar topilmadi",
+    "clear_filters": "Filtrlarni tozalash",
+    "apply_filters": "Qo'llash",
+    "categories": "Kategoriyalar",
+    "price_range": "Narx diapazoni",
+    "in_stock_only": "Faqat omborda mavjud"
   }
 }

@@ -3,6 +3,7 @@
 import { clx } from "@medusajs/ui"
 import { ArrowRightOnRectangle } from "@medusajs/icons"
 import { useParams, usePathname } from "next/navigation"
+import { useTranslations } from 'next-intl'
 
 import ChevronDown from "@modules/common/icons/chevron-down"
 import User from "@modules/common/icons/user"
@@ -19,16 +20,17 @@ const AccountNav = ({
 }) => {
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
+  const t = useTranslations('account')
 
   const handleLogout = async () => {
     await signout(countryCode)
   }
 
   const navItems = [
-    { href: "/account", label: "Overview", icon: <User size={18} />, testId: "overview-link" },
-    { href: "/account/profile", label: "Profile", icon: <User size={18} />, testId: "profile-link" },
-    { href: "/account/addresses", label: "Addresses", icon: <MapPin size={18} />, testId: "addresses-link" },
-    { href: "/account/orders", label: "Orders", icon: <Package size={18} />, testId: "orders-link" },
+    { href: "/account", label: t('overview'), icon: <User size={18} />, testId: "overview-link" },
+    { href: "/account/profile", label: t('profile'), icon: <User size={18} />, testId: "profile-link" },
+    { href: "/account/addresses", label: t('addresses'), icon: <MapPin size={18} />, testId: "addresses-link" },
+    { href: "/account/orders", label: t('orders'), icon: <Package size={18} />, testId: "orders-link" },
   ]
 
   const isActive = (href: string) => {
@@ -67,7 +69,7 @@ const AccountNav = ({
             data-testid="logout-button"
           >
             <ArrowRightOnRectangle className="w-4.5 h-4.5" />
-            <span>Log out</span>
+            <span>{t('logout')}</span>
           </button>
         </div>
       </div>
@@ -76,7 +78,7 @@ const AccountNav = ({
       <div className="hidden lg:block" data-testid="account-nav">
         <div className="pb-4 mb-4 border-b border-gray-200">
           <h3 className="font-semibold text-gray-900">
-            {customer?.first_name ? `Hello, ${customer.first_name}` : 'My Account'}
+            {customer?.first_name ? `${t('hello')}, ${customer.first_name}` : t('overview')}
           </h3>
         </div>
         <ul className="space-y-1">
@@ -105,7 +107,7 @@ const AccountNav = ({
               data-testid="logout-button"
             >
               <ArrowRightOnRectangle className="w-4.5 h-4.5" />
-              <span>Log out</span>
+              <span>{t('logout')}</span>
             </button>
           </li>
         </ul>

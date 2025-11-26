@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
+import { useTranslations } from 'next-intl'
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Heart from "@modules/common/icons/heart"
 import Compare from "@modules/common/icons/compare"
@@ -9,6 +10,7 @@ type ProductInfoProps = {
 }
 
 const ProductInfo = ({ product }: ProductInfoProps) => {
+  const t = useTranslations('product')
   const rating = 4.5
   const reviewCount = 18
 
@@ -19,11 +21,11 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
           {product.metadata?.black_friday && (
             <span className="inline-block bg-black text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded font-semibold">
-              BLACK FRIDAY
+              {t('black_friday')}
             </span>
           )}
           <span className="inline-block bg-blue-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded">
-            Easy Return
+            {t('easy_return')}
           </span>
         </div>
 
@@ -38,7 +40,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
 
         {/* Product Code & Rating */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
-          <span>Code: {product.metadata?.code || product.id.slice(0, 8)}</span>
+          <span>{t('code')}: {product.metadata?.code || product.id.slice(0, 8)}</span>
           <div className="flex items-center gap-2">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
@@ -53,21 +55,21 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
               ))}
             </div>
             <span className="font-semibold">{rating}</span>
-            <span>({reviewCount} reviews)</span>
+            <span>({reviewCount} {t('reviews')})</span>
           </div>
         </div>
 
         {/* Warranty & Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-2 sm:mt-4">
-          <span className="text-xs sm:text-sm text-gray-600">Warranty: 1 year</span>
+          <span className="text-xs sm:text-sm text-gray-600">{t('warranty')}: 1 {t('year')}</span>
           <div className="flex items-center gap-3 sm:gap-4">
             <button className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 hover:text-red-600 transition-colors">
               <Heart size="18" />
-              <span className="hidden sm:inline">Favorites</span>
+              <span className="hidden sm:inline">{t('favorites')}</span>
             </button>
             <button className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 hover:text-red-600 transition-colors">
               <Compare size="18" />
-              <span className="hidden sm:inline">Compare</span>
+              <span className="hidden sm:inline">{t('compare')}</span>
             </button>
           </div>
         </div>

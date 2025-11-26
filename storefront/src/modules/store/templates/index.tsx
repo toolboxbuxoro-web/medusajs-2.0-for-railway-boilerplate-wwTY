@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { getTranslations } from 'next-intl/server'
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
@@ -6,7 +7,7 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 
 import PaginatedProducts from "./paginated-products"
 
-const StoreTemplate = ({
+const StoreTemplate = async ({
   sortBy,
   page,
   countryCode,
@@ -17,6 +18,7 @@ const StoreTemplate = ({
 }) => {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
+  const t = await getTranslations('store')
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -24,10 +26,10 @@ const StoreTemplate = ({
         {/* Header */}
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <h1 className="heading-2" data-testid="store-page-title">
-            All Products
+            {t('all_products')}
           </h1>
           <p className="text-gray-600 text-sm sm:text-base mt-1">
-            Browse our complete collection
+            {t('browse_collection')}
           </p>
         </div>
 
