@@ -91,6 +91,12 @@ export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
 export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
+ * (optional) Payme configuration
+ */
+export const PAYME_ID = process.env.PAYME_ID;
+export const PAYME_KEY = process.env.PAYME_KEY;
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =

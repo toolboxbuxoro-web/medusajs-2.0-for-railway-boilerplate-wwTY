@@ -26,3 +26,7 @@ build
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Test Scripts
+src/scripts/test-payme-order.ts
+src/scripts/check-setup.ts

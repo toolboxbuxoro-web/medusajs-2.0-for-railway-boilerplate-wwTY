@@ -12,6 +12,7 @@ import Menu from "@modules/common/icons/menu"
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from "@modules/common/components/language-switcher"
 import MobileMenu from "@modules/layout/components/mobile-menu"
+import CatalogDropdown from "@modules/layout/components/catalog-dropdown"
 import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
 import { type Locale } from '../../../../i18n'
 
@@ -52,9 +53,10 @@ export default async function Nav({ locale }: NavProps) {
             </LocalizedClientLink>
           </div>
 
-            {/* Search Bar - Hidden on small mobile, visible on tablet+ */}
-            <div className="hidden sm:flex flex-1 max-w-xl lg:max-w-2xl navbar-search">
-              <form action="/search" method="get" className="relative w-full">
+            {/* Search Bar & Catalog - Hidden on small mobile, visible on tablet+ */}
+            <div className="hidden sm:flex items-center gap-2 flex-1 max-w-xl lg:max-w-2xl navbar-search">
+              <CatalogDropdown categories={mainCategories} />
+              <form action="/search" method="get" className="relative flex-1">
                 <input
                   type="search"
                   name="q"
