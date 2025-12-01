@@ -38,7 +38,7 @@ export default async function createAdmin({ container }: ExecArgs) {
         users: [
           {
             email: adminEmail,
-            password: adminPassword,
+            // password: adminPassword, // Password not supported in CreateUserDTO
             first_name: adminFirstName,
             last_name: adminLastName,
           },

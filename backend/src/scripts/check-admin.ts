@@ -39,11 +39,8 @@ export default async function checkAdmin({ container }: ExecArgs) {
     logger.info(`Updated At: ${user.updated_at}`);
     
     // Проверяем, есть ли у пользователя пароль
-    if (user.password_hash) {
-      logger.info("✅ Password hash exists");
-    } else {
-      logger.warn("⚠️ Password hash is missing - user cannot login!");
-    }
+    // Note: In Medusa 2.0, password is handled by Auth Module, not User Module
+    logger.info("ℹ️  Password check skipped (handled by Auth Module)");
 
     logger.info("");
     logger.info("📝 To login:");
