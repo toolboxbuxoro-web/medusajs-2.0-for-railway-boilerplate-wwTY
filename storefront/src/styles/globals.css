@@ -354,3 +354,202 @@
 .navbar-mobile-search {
   transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
 }
+
+/* Checkout Page Modern Styles */
+@layer utilities {
+  /* Gradient backgrounds */
+  .gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .gradient-warm {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+
+  .gradient-cool {
+    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+  }
+
+  /* Glassmorphism effects */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl;
+  }
+
+  .glass-card-dark {
+    @apply bg-gray-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  /* Gradient borders */
+  .gradient-border {
+    position: relative;
+    background: white;
+    border-radius: 0.75rem;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.75rem;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  /* Checkout specific animations */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    background-size: 1000px 100%;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+@layer components {
+  /* Modern checkout container */
+  .checkout-container {
+    @apply min-h-screen bg-gray-50;
+  }
+
+  /* Modern form inputs for checkout */
+  .checkout-input {
+    @apply w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl 
+           focus:outline-none focus:border-transparent focus:ring-2 focus:ring-red-500
+           transition-all duration-300 text-gray-900 placeholder-gray-400
+           hover:border-red-300 hover:bg-white;
+  }
+
+  .checkout-input:focus {
+    @apply shadow-lg shadow-red-500/20;
+  }
+
+  /* Modern select dropdown */
+  .checkout-select {
+    @apply checkout-input appearance-none bg-white cursor-pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+
+  /* Modern checkbox */
+  .checkout-checkbox {
+    @apply w-5 h-5 rounded border-2 border-gray-300 text-red-600 
+           focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+           transition-all duration-200 cursor-pointer
+           hover:border-red-400;
+  }
+
+  /* Modern button styles */
+  .checkout-button {
+    @apply w-full px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 
+           text-white font-semibold rounded-xl
+           hover:from-red-700 hover:to-red-800
+           focus:outline-none focus:ring-4 focus:ring-red-500/50
+           transition-all duration-300 transform hover:scale-[1.02]
+           shadow-lg hover:shadow-xl;
+  }
+
+  .checkout-button-secondary {
+    @apply w-full px-6 py-3 bg-white
+           text-red-700 font-semibold rounded-xl border-2 border-red-200
+           hover:bg-red-50 hover:border-red-300
+           focus:outline-none focus:ring-4 focus:ring-red-500/50
+           transition-all duration-300;
+  }
+
+  /* Checkout card */
+  .checkout-card {
+    @apply bg-white rounded-2xl border border-gray-200
+           shadow-xl hover:shadow-2xl transition-all duration-300
+           p-6 sm:p-8;
+  }
+
+  .checkout-card-glass {
+    @apply bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-200
+           shadow-2xl hover:shadow-3xl transition-all duration-300
+           p-6 sm:p-8;
+  }
+
+  /* Step indicator */
+  .step-indicator {
+    @apply flex items-center justify-center w-10 h-10 rounded-full
+           bg-gradient-to-br from-red-600 to-red-700 text-white font-bold
+           shadow-lg;
+  }
+
+  .step-indicator-inactive {
+    @apply flex items-center justify-center w-10 h-10 rounded-full
+           bg-gray-200 text-gray-500 font-bold;
+  }
+
+  /* Modern divider */
+  .checkout-divider {
+    @apply border-t-2 border-gradient-to-r from-transparent via-red-200 to-transparent;
+  }
+
+  /* Summary card */
+  .summary-card {
+    @apply sticky top-4 bg-white
+           rounded-2xl border border-gray-200
+           shadow-2xl p-6 sm:p-8;
+  }
+
+  /* Badge with gradient */
+  .checkout-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+           bg-gradient-to-r from-red-600 to-red-700 text-white
+           shadow-md;
+  }
+
+  /* Icon container */
+  .checkout-icon {
+    @apply w-12 h-12 rounded-xl bg-gradient-to-br from-red-600 to-red-700
+           flex items-center justify-center text-white shadow-lg;
+  }
+}

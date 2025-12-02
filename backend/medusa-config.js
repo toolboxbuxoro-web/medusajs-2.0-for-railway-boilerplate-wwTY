@@ -1,4 +1,5 @@
 import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
+// Trigger restart
 import {
   ADMIN_CORS,
   AUTH_CORS,
@@ -52,6 +53,10 @@ const medusaConfig = {
     disable: SHOULD_DISABLE_ADMIN,
   },
   modules: [
+    {
+      key: "moysklad",
+      resolve: "./src/modules/moysklad",
+    },
     {
       key: Modules.FILE,
       resolve: '@medusajs/file',

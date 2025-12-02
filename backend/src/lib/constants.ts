@@ -30,17 +30,17 @@ export const REDIS_URL = process.env.REDIS_URL;
 /**
  * Admin CORS origins
  */
-export const ADMIN_CORS = process.env.ADMIN_CORS;
+export const ADMIN_CORS = process.env.ADMIN_CORS || 'http://localhost:7000,http://localhost:7001';
 
 /**
  * Auth CORS origins
  */
-export const AUTH_CORS = process.env.AUTH_CORS;
+export const AUTH_CORS = process.env.AUTH_CORS || 'http://localhost:7000,http://localhost:7001,http://localhost:8000,http://localhost:3000';
 
 /**
  * Store/frontend CORS origins
  */
-export const STORE_CORS = process.env.STORE_CORS;
+export const STORE_CORS = process.env.STORE_CORS || 'http://localhost:8000,http://localhost:3000';
 
 /**
  * JWT Secret used for signing JWT tokens

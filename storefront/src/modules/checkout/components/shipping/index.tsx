@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { setShippingMethod } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { useTranslations } from "next-intl"
 
 type ShippingProps = {
   cart: HttpTypes.StoreCart
@@ -28,6 +29,7 @@ const Shipping: React.FC<ShippingProps> = ({
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations("checkout")
 
   const isOpen = searchParams.get("step") === "delivery"
 
@@ -72,7 +74,7 @@ const Shipping: React.FC<ShippingProps> = ({
             }
           )}
         >
-          Delivery
+          {t("delivery_method")}
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
             <CheckCircleSolid />
           )}
@@ -87,7 +89,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
                 data-testid="edit-delivery-button"
               >
-                Edit
+                {t("edit")}
               </button>
             </Text>
           )}
@@ -141,16 +143,16 @@ const Shipping: React.FC<ShippingProps> = ({
             disabled={!cart.shipping_methods?.[0]}
             data-testid="submit-delivery-option-button"
           >
-            Continue to payment
+            {t("continue_to_payment")}
           </Button>
         </div>
       ) : (
         <div>
           <div className="text-small-regular">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
-              <div className="flex flex-col w-1/3">
+              <div className="flex flex-col w-full sm:w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Method
+                  {t("method")}
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
                   {selectedShippingMethod?.name}{" "}

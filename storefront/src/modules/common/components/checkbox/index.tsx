@@ -17,21 +17,19 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
   'data-testid': dataTestId
 }) => {
   return (
-    <div className="flex items-center space-x-2 ">
-      <Checkbox
-        className="text-base-regular flex items-center gap-x-2"
+    <div className="flex items-center space-x-3">
+      <input
+        type="checkbox"
         id="checkbox"
-        role="checkbox"
-        type="button"
         checked={checked}
-        aria-checked={checked}
-        onClick={onChange}
+        onChange={onChange}
         name={name}
         data-testid={dataTestId}
+        className="checkout-checkbox"
       />
       <Label
         htmlFor="checkbox"
-        className="!transform-none !txt-medium"
+        className="text-base font-medium text-gray-700 cursor-pointer select-none"
         size="large"
       >
         {label}

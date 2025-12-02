@@ -10,6 +10,7 @@ import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { useTranslations } from "next-intl"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -20,6 +21,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
 }) => {
+  const t = useTranslations("checkout")
   const notReady =
     !cart ||
     !cart.shipping_address ||
@@ -27,13 +29,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  // TODO: Add this once gift cards are implemented
-  // const paidByGiftcard =
-  //   cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
-  // if (paidByGiftcard) {
-  //   return <GiftCardPaymentButton />
-  // }
 
   const paymentSession = cart.payment_collection?.payment_sessions?.[0]
 
@@ -59,12 +55,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     default:
-      return <Button disabled>Select a payment method</Button>
+      return <Button disabled>{t("select_payment_method")}</Button>
   }
 }
 
 const GiftCardPaymentButton = () => {
   const [submitting, setSubmitting] = useState(false)
+  const t = useTranslations("checkout")
 
   const handleOrder = async () => {
     setSubmitting(true)
@@ -77,7 +74,7 @@ const GiftCardPaymentButton = () => {
       isLoading={submitting}
       data-testid="submit-order-button"
     >
-      Place order
+      {t("place_order")}
     </Button>
   )
 }
@@ -93,6 +90,7 @@ const StripePaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const t = useTranslations("checkout")
 
   const onPaymentCompleted = async () => {
     await placeOrder()
@@ -179,7 +177,7 @@ const StripePaymentButton = ({
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        Place order
+        {t("place_order")}
       </Button>
       <ErrorMessage
         error={errorMessage}
@@ -200,6 +198,7 @@ const PayPalPaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const t = useTranslations("checkout")
 
   const onPaymentCompleted = async () => {
     await placeOrder()
@@ -262,6 +261,7 @@ const PayPalPaymentButton = ({
 const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const t = useTranslations("checkout")
 
   const onPaymentCompleted = async () => {
     await placeOrder()
@@ -288,7 +288,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         size="large"
         data-testid="submit-order-button"
       >
-        Place order
+        {t("place_order")}
       </Button>
       <ErrorMessage
         error={errorMessage}
