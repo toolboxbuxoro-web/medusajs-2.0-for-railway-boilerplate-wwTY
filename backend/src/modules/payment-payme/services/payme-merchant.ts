@@ -23,6 +23,8 @@ export enum PaymeErrorCodes {
 export class PaymeMerchantService {
   protected logger_: Logger
   protected container_: any
+  // Sandbox mode: store test transactions in memory
+  private sandboxTransactions: Map<string, any> = new Map()
 
   constructor({ logger, container }: InjectedDependencies) {
     this.logger_ = logger
@@ -88,6 +90,15 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order ID is missing")
     }
 
+    // SANDBOX MODE: Accept test transactions without validating against real orders
+    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
+    
+    if (isSandbox) {
+      this.logger_.info(`[SANDBOX] CheckPerformTransaction for test order: ${orderId}, amount: ${amount}`)
+      // In sandbox mode, accept any order_id and amount
+      return { allow: true }
+    }
+
     const result = await this.getPaymentSession(orderId)
     
     if (!result || !result.cart) {
@@ -136,6 +147,40 @@ export class PaymeMerchantService {
     if (currentTime - time > TIMEOUT_MS) {
       throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
         "Transaction timeout: older than 12 hours")
+    }
+    
+    // SANDBOX MODE: Store test transactions in memory
+    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
+    
+    if (isSandbox) {
+      this.logger_.info(`[SANDBOX] CreateTransaction: id=${id}, order=${orderId}, amount=${amount}`)
+      
+      // Check if transaction already exists (idempotency)
+      if (this.sandboxTransactions.has(id)) {
+        const existing = this.sandboxTransactions.get(id)
+        return {
+          create_time: existing.create_time,
+          transaction: id,
+          state: existing.state
+        }
+      }
+      
+      // Create new sandbox transaction
+      this.sandboxTransactions.set(id, {
+        id,
+        order_id: orderId,
+        amount,
+        create_time: time,
+        state: 1,
+        perform_time: 0,
+        cancel_time: 0
+      })
+      
+      return {
+        create_time: time,
+        transaction: id,
+        state: 1
+      }
     }
     
     const result = await this.getPaymentSession(orderId)
@@ -295,6 +340,43 @@ export class PaymeMerchantService {
   async performTransactionWithSessionId(params: any) {
     const sessionId = params.id
     
+    // SANDBOX MODE: Handle test transactions
+    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
+    
+    if (isSandbox) {
+      if (!this.sandboxTransactions.has(sessionId)) {
+        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+      }
+      
+      const transaction = this.sandboxTransactions.get(sessionId)
+      
+      if (transaction.state === 2) {
+        // Already performed
+        return {
+          transaction: sessionId,
+          perform_time: transaction.perform_time,
+          state: 2
+        }
+      }
+      
+      if (transaction.state !== 1) {
+        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction not in created state")
+      }
+      
+      // Perform transaction
+      const performTime = Date.now()
+      transaction.state = 2
+      transaction.perform_time = performTime
+      
+      this.logger_.info(`[SANDBOX] PerformTransaction: id=${sessionId}, state=2`)
+      
+      return {
+        transaction: sessionId,
+        perform_time: performTime,
+        state: 2
+      }
+    }
+    
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
     let session
@@ -361,7 +443,41 @@ export class PaymeMerchantService {
   }
 
   async cancelTransaction(params: any) {
-    const { id, reason } = params // id is OUR session ID
+    const { id, reason } = params
+    
+    // SANDBOX MODE: Handle test transactions
+    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
+    
+    if (isSandbox) {
+      if (!this.sandboxTransactions.has(id)) {
+        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+      }
+      
+      const transaction = this.sandboxTransactions.get(id)
+      const state = transaction.state
+      const cancelTime = Date.now()
+      
+      if (state === 1) {
+        transaction.state = -1
+        transaction.cancel_time = cancelTime
+        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-1`)
+        return { transaction: id, cancel_time: cancelTime, state: -1 }
+      }
+      
+      if (state === 2) {
+        transaction.state = -2
+        transaction.cancel_time = cancelTime
+        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-2 (refund)`)
+        return { transaction: id, cancel_time: cancelTime, state: -2 }
+      }
+      
+      // Already cancelled
+      return {
+        transaction: id,
+        cancel_time: transaction.cancel_time || cancelTime,
+        state: state
+      }
+    }
     
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
@@ -422,7 +538,28 @@ export class PaymeMerchantService {
   }
 
   async checkTransaction(params: any) {
-    const { id } = params // OUR session ID
+    const { id } = params
+    
+    // SANDBOX MODE: Handle test transactions
+    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
+    
+    if (isSandbox) {
+      if (!this.sandboxTransactions.has(id)) {
+        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+      }
+      
+      const transaction = this.sandboxTransactions.get(id)
+      this.logger_.info(`[SANDBOX] CheckTransaction: id=${id}, state=${transaction.state}`)
+      
+      return {
+        create_time: transaction.create_time,
+        perform_time: transaction.perform_time,
+        cancel_time: transaction.cancel_time,
+        transaction: id,
+        state: transaction.state,
+        reason: null
+      }
+    }
     
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
