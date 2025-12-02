@@ -1,8 +1,8 @@
-import dotenv from "dotenv"
+import { loadEnv } from "@medusajs/utils"
 import path from "path"
 
 // Load env vars
-dotenv.config({ path: path.resolve(__dirname, "../../.env") })
+loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
 const PAYME_URL = "http://localhost:9000/payme"
 const PAYME_ID = process.env.PAYME_ID

@@ -6,7 +6,7 @@ export default async function fixProductAvailability({ container }: ExecArgs) {
   const logger = container.resolve("logger")
   const salesChannelService = container.resolve(Modules.SALES_CHANNEL)
   const stockLocationService = container.resolve(Modules.STOCK_LOCATION)
-  const remoteLink = container.resolve("remoteLink")
+  const remoteQuery = container.resolve("remoteQuery")
 
   logger.info("=== FIXING PRODUCT AVAILABILITY ===")
 
@@ -41,28 +41,28 @@ export default async function fixProductAvailability({ container }: ExecArgs) {
       
       logger.info(`✅ Linked "${channel.name}" to "${stockLocations[0].name}"`)
     } catch (error) {
-      logger.error(`❌ Failed to link "${channel.name}":`, error.message)
+      logger.error(`❌ Failed to link "${channel.name}": ${error.message}`)
     }
   }
 
   // 3. Verify the links
   logger.info("\n=== VERIFYING LINKS ===")
   try {
-    const links = await remoteLink.query({
+    const links = await remoteQuery({
       sales_channel: {
         fields: ["id", "name"]
       },
       stock_location: {
         fields: ["id", "name"]
       }
-    })
+    } as any)
     
     logger.info(`✅ Found ${links.length} sales channel-location link(s):`)
     links.forEach((link: any) => {
       logger.info(`   ${link.sales_channel?.name} -> ${link.stock_location?.name}`)
     })
   } catch (error) {
-    logger.warn("⚠️  Could not verify links:", error.message)
+    logger.warn(`⚠️  Could not verify links: ${error.message}`)
   }
 
   logger.info("\n=== FIX COMPLETE ===")

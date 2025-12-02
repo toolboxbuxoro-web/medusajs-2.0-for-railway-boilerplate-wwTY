@@ -7,7 +7,7 @@ export default async function diagnoseProductAvailability({ container }: ExecArg
   const inventoryService = container.resolve(Modules.INVENTORY)
   const salesChannelService = container.resolve(Modules.SALES_CHANNEL)
   const stockLocationService = container.resolve(Modules.STOCK_LOCATION)
-  const remoteLink = container.resolve("remoteLink")
+  const remoteQuery = container.resolve("remoteQuery")
 
   const TEST_SKU = "DRILL-18V-BASIC"
 
@@ -53,8 +53,9 @@ export default async function diagnoseProductAvailability({ container }: ExecArg
     return
   }
   
-  logger.info(`✅ Found ${levels.length} inventory level(s):`)
-  for (const level of levels) {
+  const levelsData = levels as any[]
+  logger.info(`✅ Found ${levelsData.length} inventory level(s):`)
+  for (const level of levelsData) {
     logger.info(`   - Location: ${level.location_id}`)
     logger.info(`     Stocked: ${level.stocked_quantity}`)
     logger.info(`     Reserved: ${level.reserved_quantity || 0}`)
@@ -80,7 +81,7 @@ export default async function diagnoseProductAvailability({ container }: ExecArg
   // 6. Check Variant-Inventory Link
   logger.info("\n6. VARIANT-INVENTORY LINK CHECK:")
   try {
-    const variantInventoryLinks = await remoteLink.query({
+    const variantInventoryLinks = await remoteQuery({
       variant: {
         fields: ["id"],
         filters: { id: variant.id }
@@ -88,7 +89,7 @@ export default async function diagnoseProductAvailability({ container }: ExecArg
       inventory: {
         fields: ["id", "sku"]
       }
-    })
+    } as any)
     
     if (variantInventoryLinks.length === 0) {
       logger.error("❌ No link between variant and inventory item!")
@@ -100,20 +101,20 @@ export default async function diagnoseProductAvailability({ container }: ExecArg
       })
     }
   } catch (error) {
-    logger.warn("⚠️  Could not check variant-inventory link:", error.message)
+    logger.warn(`⚠️  Could not check variant-inventory link: ${error.message}`)
   }
 
   // 7. Check Sales Channel-Location Link
   logger.info("\n7. SALES CHANNEL-LOCATION LINK CHECK:")
   try {
-    const channelLocationLinks = await remoteLink.query({
+    const channelLocationLinks = await remoteQuery({
       sales_channel: {
         fields: ["id", "name"]
       },
       stock_location: {
         fields: ["id", "name"]
       }
-    })
+    } as any)
     
     if (channelLocationLinks.length === 0) {
       logger.error("❌ No sales channels linked to stock locations!")
@@ -125,7 +126,7 @@ export default async function diagnoseProductAvailability({ container }: ExecArg
       })
     }
   } catch (error) {
-    logger.warn("⚠️  Could not check channel-location links:", error.message)
+    logger.warn(`⚠️  Could not check channel-location links: ${error.message}`)
   }
 
   logger.info("\n=== DIAGNOSTIC COMPLETE ===")
