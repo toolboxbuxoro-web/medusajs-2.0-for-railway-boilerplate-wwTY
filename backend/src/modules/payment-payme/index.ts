@@ -1,5 +1,10 @@
 import { PaymePaymentProviderService } from "./services/payme"
+import { ModuleProviderExports } from "@medusajs/framework/types"
 
-export default {
-  services: [PaymePaymentProviderService],
+const services = [PaymePaymentProviderService]
+
+const providerExport: ModuleProviderExports = {
+  services,
 }
+
+export default providerExport

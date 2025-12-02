@@ -144,7 +144,7 @@ const medusaConfig = {
               payme_id: PAYME_ID,
               payme_key: PAYME_KEY,
             },
-          }] : []),
+          }, console.log("✅ Payme provider added to config") && undefined].filter(Boolean) : [console.log("❌ Payme provider NOT added: Missing ID or KEY") && undefined].filter(Boolean)),
         ],
       },
     }
