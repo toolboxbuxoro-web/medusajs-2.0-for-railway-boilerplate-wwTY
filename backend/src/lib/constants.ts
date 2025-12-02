@@ -43,6 +43,11 @@ export const AUTH_CORS = process.env.AUTH_CORS || 'http://localhost:7000,http://
 export const STORE_CORS = process.env.STORE_CORS || 'http://localhost:8000,http://localhost:3000';
 
 /**
+ * Store/frontend URL (for redirects, emails, etc)
+ */
+export const STORE_URL = process.env.STORE_URL || 'http://localhost:8000';
+
+/**
  * JWT Secret used for signing JWT tokens
  */
 export const JWT_SECRET = assertValue(
