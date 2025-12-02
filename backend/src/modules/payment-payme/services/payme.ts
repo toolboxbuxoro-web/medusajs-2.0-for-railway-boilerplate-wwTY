@@ -49,26 +49,35 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
    */
   private generatePaymentUrl(orderId: string, amount: number): string {
     // Amount should be in tiyin (1 UZS = 100 tiyin)
-    const amountInTiyin = Math.round(amount)
+    const amountInTiyin = Math.round(amount * 100)
+    
+    // Get backend public URL for callback
+    const backendUrl = process.env.BACKEND_PUBLIC_URL || process.env.RAILWAY_PUBLIC_DOMAIN_VALUE || 'http://localhost:9000'
+    const callbackUrl = `${backendUrl}/store/payme/callback`
     
     // Create params object
+    // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=callback_url
     const params = {
       m: this.options_.payme_id,
       ac: {
         order_id: orderId
       },
       a: amountInTiyin,
-      c: `${process.env.BACKEND_PUBLIC_URL || 'http://localhost:9000'}/store/payme/callback`
+      c: `${process.env.STORE_URL || 'http://localhost:8000'}/checkout` 
     }
     
     // Encode params to base64
-    const encodedParams = Buffer.from(JSON.stringify(params)).toString('base64')
+    // Payme expects: https://checkout.paycom.uz/<base64_params>
+    // The string format is: m=merchant_id;ac.order_id=order_id;a=amount;c=callback_url
+    const paramString = `m=${params.m};ac.order_id=${params.ac.order_id};a=${params.a};c=${encodeURIComponent(params.c)}`
+    const encodedParams = Buffer.from(paramString).toString('base64')
     
     const paymentUrl = `${this.paymeUrl_}/${encodedParams}`
     
     this.logger_.info(`Generated Payme payment URL: ${JSON.stringify({
       order_id: orderId,
       amount: amountInTiyin,
+      callback_url: callbackUrl,
       url: paymentUrl
     })}`)
     
