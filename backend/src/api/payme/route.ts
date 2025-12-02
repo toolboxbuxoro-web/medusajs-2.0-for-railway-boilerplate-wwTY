@@ -26,9 +26,9 @@ export async function POST(
     const [username, password] = Buffer.from(credentials, "base64").toString().split(":")
     
     // Payme sends "Paycom" as username and the Key as password
-    // We check against PAYME_KEY from env
-    if (password !== process.env.PAYME_KEY) {
-      logger.warn(`Payme Auth Failed: Invalid key provided. Received: ${password?.substring(0, 5)}...`)
+    // We check against PAYME_KEY from env (trim to avoid whitespace issues)
+    if (password?.trim() !== process.env.PAYME_KEY?.trim()) {
+      logger.warn(`Payme Auth Failed: Invalid key provided`)
       throw new PaymeError(-32504, "Insufficient privilege")
     }
 

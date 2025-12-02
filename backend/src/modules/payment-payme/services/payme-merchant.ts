@@ -17,6 +17,7 @@ export enum PaymeErrorCodes {
   INVALID_ACCOUNT = -31050,
   COULD_NOT_CANCEL = -31007,
   COULD_NOT_PERFORM = -31008,
+  ORDER_ALREADY_PAID = -31099,
 }
 
 export class PaymeMerchantService {
@@ -95,24 +96,30 @@ export class PaymeMerchantService {
 
     const { cart, session } = result
 
-    // Check amount (Payme sends in tiyin, Medusa usually in lowest unit too)
-    // 1 UZS = 100 tiyin. 
-    // If Medusa currency is UZS, it might be stored as 100 (1.00 UZS) or 1 (1 tiyin) depending on configuration.
-    // Standard Medusa practice: amount is in lowest unit.
-    // So if item is 1000 UZS, Medusa stores 100000. Payme sends 100000.
-    
-    // However, we should check what amount is in the session or cart.
-    // If session exists, check session amount.
-    const amountToCheck = session ? session.amount : cart.total
-
-    if (Math.abs(amountToCheck - amount) > 1) { 
-      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Incorrect amount")
+    // CRITICAL: Check if order is already paid or has active transaction
+    if (session) {
+      const state = session.data?.payme_state
+      
+      // If transaction is completed (2) or cancelled after completion (-2)
+      if (state === 2 || state === -2) {
+        throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid", { order_id: orderId })
+      }
+      
+      // If there's an active transaction in created state (1)
+      if (state === 1) {
+        throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order has active transaction", { order_id: orderId })
+      }
     }
-    
-    if (session && session.status === "authorized") {
-       // Already paid? Payme might check before creating transaction.
-       // It's allowed to pay again if it's a new transaction? 
-       // Usually CheckPerform is for a new transaction.
+
+    // FIXED: Correct amount comparison
+    // Medusa stores in cents/kopecks (100 = 1.00 UZS)
+    // Payme sends in tiyin (10000 = 100.00 UZS)
+    // Need to multiply by 100 to convert to tiyin
+    const medusaAmountInTiyin = (session ? session.amount : cart.total) * 100
+
+    if (Math.abs(medusaAmountInTiyin - amount) > 1) { 
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+        `Amount mismatch: expected ${medusaAmountInTiyin}, got ${amount}`)
     }
 
     return { allow: true }
@@ -121,6 +128,15 @@ export class PaymeMerchantService {
   async createTransaction(params: any) {
     const { id, time, amount, account } = params
     const orderId = account.order_id
+    
+    // CRITICAL: Check timeout (12 hours)
+    const TIMEOUT_MS = 12 * 60 * 60 * 1000
+    const currentTime = Date.now()
+
+    if (currentTime - time > TIMEOUT_MS) {
+      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
+        "Transaction timeout: older than 12 hours")
+    }
     
     const result = await this.getPaymentSession(orderId)
     
@@ -131,43 +147,51 @@ export class PaymeMerchantService {
     const { session } = result
     
     if (!session) {
-      // Should we create one? Usually initiatePayment should have created it.
-      throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, "Payment session not found. Please initiate payment first.")
+      throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, 
+        "Payment session not found. Please initiate payment first.")
     }
 
-    // Check if transaction already exists in session data
+    // FIXED: Improved idempotency
     const currentData = session.data || {}
     
     if (currentData.payme_transaction_id) {
-      // Transaction exists. Check if it's the same ID.
-      if (currentData.payme_transaction_id !== id) {
-        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Order already has an active transaction")
+      // If it's the same transaction - return its state (idempotency)
+      if (currentData.payme_transaction_id === id) {
+        return {
+          create_time: currentData.payme_create_time,
+          transaction: session.id,
+          state: currentData.payme_state
+        }
       }
       
-      // Return existing state
-      return {
-        create_time: currentData.payme_create_time,
-        transaction: session.id, // Return OUR session ID
-        state: currentData.payme_state
+      // If there's a different transaction, check its status
+      const existingState = currentData.payme_state
+      
+      // If existing transaction is active (1) or completed (2), reject new one
+      if (existingState === 1 || existingState === 2) {
+        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
+          "Order already has an active transaction")
       }
+      
+      // If cancelled (-1, -2), allow creating a new transaction
+      // Continue execution...
     }
-
-    // Check for cancelled transaction? 
-    // If we want to allow re-payment after cancel, we might need to handle that.
     
-    // Check amount again
-    if (Math.abs(session.amount - amount) > 1) {
+    // FIXED: Correct amount comparison (multiply by 100 for tiyin)
+    const medusaAmountInTiyin = session.amount * 100
+
+    if (Math.abs(medusaAmountInTiyin - amount) > 1) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Incorrect amount")
     }
 
-    // Update Payment Session with new transaction info
+    // Create new transaction
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
     const newData = {
       ...currentData,
       payme_transaction_id: id,
       payme_create_time: time,
-      payme_state: 1 // Created
+      payme_state: 1
     }
 
     await paymentModule.updatePaymentSession({
@@ -177,7 +201,7 @@ export class PaymeMerchantService {
     
     return {
       create_time: time,
-      transaction: session.id, // Return OUR session ID as the transaction ID
+      transaction: session.id,
       state: 1
     }
   }
@@ -269,11 +293,10 @@ export class PaymeMerchantService {
   }
 
   async performTransactionWithSessionId(params: any) {
-    const sessionId = params.id // This is OUR session ID
+    const sessionId = params.id
     
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
-    // Fetch session
     let session
     try {
         session = await paymentModule.retrievePaymentSession(sessionId)
@@ -283,12 +306,8 @@ export class PaymeMerchantService {
 
     const currentData = session.data || {}
     
-    // Check if Payme ID matches (security check)
-    // Wait, `PerformTransaction` params doesn't send Payme ID again? 
-    // It sends `id` (which is our ID now).
-    
     if (currentData.payme_state === 2) {
-        // Already performed
+        // Already performed - return success (idempotency)
         return {
             transaction: sessionId,
             perform_time: currentData.payme_perform_time,
@@ -297,13 +316,21 @@ export class PaymeMerchantService {
     }
 
     if (currentData.payme_state !== 1) {
-        // Not in created state
-        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction not in created state")
+        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
+          "Transaction not in created state")
     }
     
-    // Check timeout? (Payme has timeout logic, usually 12 hours)
+    // CRITICAL: Check timeout (12 hours from creation)
+    const TIMEOUT_MS = 12 * 60 * 60 * 1000
+    const currentTime = Date.now()
+    const createTime = currentData.payme_create_time
+
+    if (currentTime - createTime > TIMEOUT_MS) {
+      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
+        "Transaction timeout: cannot perform after 12 hours")
+    }
     
-    // Perform
+    // Perform transaction
     const performTime = Date.now()
     
     const newData = {
@@ -317,26 +344,14 @@ export class PaymeMerchantService {
         data: newData
     })
     
-    // Authorize Payment in Medusa
-    // We need to signal that payment is done.
-    // Since we are in a backend API, we can't easily trigger the storefront workflow.
-    // But we can update the session status to "authorized".
-    // The `PaymePaymentProvider`'s `authorizePayment` method checks for `transaction_id`.
-    // We should ensure `transaction_id` is set.
-    
-    // Let's set `transaction_id` to Payme's ID (stored in `payme_id`).
+    // Authorize payment in Medusa
     await paymentModule.updatePaymentSession({
         id: sessionId,
         data: {
             ...newData,
-            transaction_id: currentData.payme_id // This signals to our Provider that it's authorized
+            transaction_id: currentData.payme_transaction_id
         }
     })
-    
-    // NOTE: This doesn't automatically complete the cart. 
-    // The storefront needs to check the status or we need a webhook listener to complete it.
-    // Or we can try to complete the cart here if we have the Cart Service.
-    // Medusa v2 uses workflows for cart completion.
     
     return {
         transaction: sessionId,
