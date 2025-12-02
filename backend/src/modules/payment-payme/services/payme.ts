@@ -31,16 +31,21 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
   static identifier = "payme"
   protected logger_: Logger
   protected options_: Options
-  protected paymeUrl_ = "https://checkout.paycom.uz"
+  protected paymeUrl_ = process.env.PAYME_URL || "https://checkout.paycom.uz"
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
     this.logger_ = container.logger
-    this.options_ = options
+    // Trim credentials to avoid whitespace issues
+    this.options_ = {
+      payme_id: options.payme_id?.trim(),
+      payme_key: options.payme_key?.trim()
+    }
     
     this.logger_.info(`Payme Payment Provider initialized: ${JSON.stringify({
-      payme_id: options.payme_id,
-      has_key: !!options.payme_key
+      payme_id: this.options_.payme_id,
+      has_key: !!this.options_.payme_key,
+      payme_url: this.paymeUrl_
     })}`)
   }
 
@@ -51,35 +56,41 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     // Amount should be in tiyin (1 UZS = 100 tiyin)
     const amountInTiyin = Math.round(amount * 100)
     
-    // Get backend public URL for callback
-    const backendUrl = process.env.BACKEND_PUBLIC_URL || process.env.RAILWAY_PUBLIC_DOMAIN_VALUE || 'http://localhost:9000'
-    const callbackUrl = `${backendUrl}/store/payme/callback`
+    // Get Store URL for redirect after payment
+    // Priority: STORE_URL -> MEDUSA_BACKEND_URL -> localhost
+    const storeUrl = process.env.STORE_URL || process.env.MEDUSA_BACKEND_URL || 'http://localhost:8000'
+    
+    // Ensure no trailing slash
+    const cleanStoreUrl = storeUrl.replace(/\/$/, "")
+    const returnUrl = `${cleanStoreUrl}/checkout`
+
+    this.logger_.info(`Generating Payme URL with: ${JSON.stringify({
+      payme_id: this.options_.payme_id,
+      store_url: cleanStoreUrl,
+      return_url: returnUrl,
+      amount: amountInTiyin
+    })}`)
     
     // Create params object
-    // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=callback_url
+    // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
     const params = {
       m: this.options_.payme_id,
       ac: {
         order_id: orderId
       },
       a: amountInTiyin,
-      c: `${process.env.STORE_URL || 'http://localhost:8000'}/checkout` 
+      c: returnUrl 
     }
     
     // Encode params to base64
     // Payme expects: https://checkout.paycom.uz/<base64_params>
-    // The string format is: m=merchant_id;ac.order_id=order_id;a=amount;c=callback_url
-    const paramString = `m=${params.m};ac.order_id=${params.ac.order_id};a=${params.a};c=${encodeURIComponent(params.c)}`
+    // The string format is: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
+    const paramString = `m=${params.m};ac.order_id=${params.ac.order_id};a=${params.a};c=${params.c}`
     const encodedParams = Buffer.from(paramString).toString('base64')
     
     const paymentUrl = `${this.paymeUrl_}/${encodedParams}`
     
-    this.logger_.info(`Generated Payme payment URL: ${JSON.stringify({
-      order_id: orderId,
-      amount: amountInTiyin,
-      callback_url: callbackUrl,
-      url: paymentUrl
-    })}`)
+    this.logger_.info(`Generated Payme payment URL: ${paymentUrl}`)
     
     return paymentUrl
   }
