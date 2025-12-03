@@ -176,7 +176,7 @@ export class PaymeMerchantService {
       // Check if there is ANY other active transaction for this order
       for (const t of PaymeMerchantService.sandboxTransactions.values()) {
         if (t.order_id === orderId && (t.state === 1 || t.state === 2)) {
-           throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Order already has an active transaction")
+           throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already has an active transaction")
         }
       }
       
