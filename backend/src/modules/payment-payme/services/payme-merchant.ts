@@ -23,8 +23,8 @@ export enum PaymeErrorCodes {
 export class PaymeMerchantService {
   protected logger_: Logger
   protected container_: any
-  // Sandbox mode: store test transactions in memory
-  private sandboxTransactions: Map<string, any> = new Map()
+  // Sandbox mode: store test transactions in memory (STATIC to persist across requests)
+  private static sandboxTransactions: Map<string, any> = new Map()
 
   constructor({ logger, container }: InjectedDependencies) {
     this.logger_ = logger
@@ -95,6 +95,14 @@ export class PaymeMerchantService {
     
     if (isSandbox) {
       this.logger_.info(`[SANDBOX] CheckPerformTransaction for test order: ${orderId}, amount: ${amount}`)
+      
+      // Check if there is already an active transaction for this order
+      for (const t of PaymeMerchantService.sandboxTransactions.values()) {
+        if (t.order_id === orderId && (t.state === 1 || t.state === 2)) {
+           throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already has an active transaction")
+        }
+      }
+
       // In sandbox mode, accept any order_id and amount
       return { allow: true }
     }
@@ -156,8 +164,8 @@ export class PaymeMerchantService {
       this.logger_.info(`[SANDBOX] CreateTransaction: id=${id}, order=${orderId}, amount=${amount}`)
       
       // Check if transaction already exists (idempotency)
-      if (this.sandboxTransactions.has(id)) {
-        const existing = this.sandboxTransactions.get(id)
+      if (PaymeMerchantService.sandboxTransactions.has(id)) {
+        const existing = PaymeMerchantService.sandboxTransactions.get(id)
         return {
           create_time: existing.create_time,
           transaction: id,
@@ -165,8 +173,15 @@ export class PaymeMerchantService {
         }
       }
       
+      // Check if there is ANY other active transaction for this order
+      for (const t of PaymeMerchantService.sandboxTransactions.values()) {
+        if (t.order_id === orderId && (t.state === 1 || t.state === 2)) {
+           throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Order already has an active transaction")
+        }
+      }
+      
       // Create new sandbox transaction
-      this.sandboxTransactions.set(id, {
+      PaymeMerchantService.sandboxTransactions.set(id, {
         id,
         order_id: orderId,
         amount,
@@ -344,11 +359,11 @@ export class PaymeMerchantService {
     const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
     
     if (isSandbox) {
-      if (!this.sandboxTransactions.has(sessionId)) {
+      if (!PaymeMerchantService.sandboxTransactions.has(sessionId)) {
         throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
       }
       
-      const transaction = this.sandboxTransactions.get(sessionId)
+      const transaction = PaymeMerchantService.sandboxTransactions.get(sessionId)
       
       if (transaction.state === 2) {
         // Already performed
@@ -449,11 +464,11 @@ export class PaymeMerchantService {
     const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
     
     if (isSandbox) {
-      if (!this.sandboxTransactions.has(id)) {
+      if (!PaymeMerchantService.sandboxTransactions.has(id)) {
         throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
       }
       
-      const transaction = this.sandboxTransactions.get(id)
+      const transaction = PaymeMerchantService.sandboxTransactions.get(id)
       const state = transaction.state
       const cancelTime = Date.now()
       
@@ -544,11 +559,11 @@ export class PaymeMerchantService {
     const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
     
     if (isSandbox) {
-      if (!this.sandboxTransactions.has(id)) {
+      if (!PaymeMerchantService.sandboxTransactions.has(id)) {
         throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
       }
       
-      const transaction = this.sandboxTransactions.get(id)
+      const transaction = PaymeMerchantService.sandboxTransactions.get(id)
       this.logger_.info(`[SANDBOX] CheckTransaction: id=${id}, state=${transaction.state}`)
       
       return {
