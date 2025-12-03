@@ -31,7 +31,7 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
   static identifier = "payme"
   protected logger_: Logger
   protected options_: Options
-  protected paymeUrl_ = process.env.PAYME_URL || "https://checkout.paycom.uz"
+  protected paymeUrl_: string
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
@@ -42,11 +42,20 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
       payme_key: options.payme_key?.trim()
     }
     
+    this.paymeUrl_ = this.formatPaymeUrl(process.env.PAYME_URL || "https://checkout.paycom.uz")
+    
     this.logger_.info(`Payme Payment Provider initialized: ${JSON.stringify({
       payme_id: this.options_.payme_id,
       has_key: !!this.options_.payme_key,
       payme_url: this.paymeUrl_
     })}`)
+  }
+
+  private formatPaymeUrl(url: string): string {
+    if (!url.startsWith("http")) {
+      return `https://${url}`
+    }
+    return url.replace(/\/$/, "")
   }
 
   /**
