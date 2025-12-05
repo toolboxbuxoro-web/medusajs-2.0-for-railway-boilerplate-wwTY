@@ -188,7 +188,8 @@ export class PaymeMerchantService {
         create_time: time,
         state: 1,
         perform_time: 0,
-        cancel_time: 0
+        cancel_time: 0,
+        reason: null
       })
       
       return {
@@ -475,14 +476,16 @@ export class PaymeMerchantService {
       if (state === 1) {
         transaction.state = -1
         transaction.cancel_time = cancelTime
-        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-1`)
+        transaction.reason = reason
+        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-1, reason=${reason}`)
         return { transaction: id, cancel_time: cancelTime, state: -1 }
       }
       
       if (state === 2) {
         transaction.state = -2
         transaction.cancel_time = cancelTime
-        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-2 (refund)`)
+        transaction.reason = reason
+        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-2 (refund), reason=${reason}`)
         return { transaction: id, cancel_time: cancelTime, state: -2 }
       }
       
@@ -572,7 +575,7 @@ export class PaymeMerchantService {
         cancel_time: transaction.cancel_time,
         transaction: id,
         state: transaction.state,
-        reason: null
+        reason: transaction.reason || null
       }
     }
     
