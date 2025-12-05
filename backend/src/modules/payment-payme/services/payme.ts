@@ -63,7 +63,8 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
    */
   private generatePaymentUrl(orderId: string, amount: number): string {
     // Amount should be in tiyin (1 UZS = 100 tiyin)
-    const amountInTiyin = Math.round(amount * 100)
+    // However, since we are storing amounts in tiyin (or treating main units as such), we pass it directly
+    const amountInTiyin = amount // Math.round(amount * 100)
     
     // Get Store URL for redirect after payment
     // Priority: STORE_URL -> MEDUSA_BACKEND_URL -> localhost

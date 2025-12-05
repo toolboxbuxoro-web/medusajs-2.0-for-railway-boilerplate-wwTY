@@ -26,7 +26,10 @@ export const convertToLocale = ({
     const { maximumFractionDigits: defaultFractionDigits } =
       formatter.resolvedOptions()
 
-    const value = amount / Math.pow(10, defaultFractionDigits || 0)
+    // Special case for UZS to treat as 0 decimals since we store main units
+    const fractionDigits = currency_code.toUpperCase() === 'UZS' ? 0 : defaultFractionDigits
+
+    const value = amount / Math.pow(10, fractionDigits || 0)
 
     return new Intl.NumberFormat(locale, {
       style: "currency",
