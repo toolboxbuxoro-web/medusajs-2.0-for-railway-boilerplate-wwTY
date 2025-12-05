@@ -67,7 +67,10 @@ async function getCountryCode(
     // Get URL parts after locale: /[locale]/[countryCode]/...
     const pathParts = request.nextUrl.pathname.split("/").filter(Boolean)
     // Skip locale (first part) to get countryCode (second part if it exists)
-    const urlCountryCode = pathParts[1]?.toLowerCase()
+    // Make sure we don't treat locale as countryCode
+    const urlCountryCode = pathParts.length > 1 && !locales.includes(pathParts[1] as any) 
+      ? pathParts[1]?.toLowerCase() 
+      : undefined
 
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode

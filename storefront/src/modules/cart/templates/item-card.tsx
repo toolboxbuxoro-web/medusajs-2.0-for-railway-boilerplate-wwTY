@@ -9,12 +9,15 @@ import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { convertToLocale } from "@lib/util/money"
+import { useTranslations } from "next-intl"
 
 type ItemCardProps = {
   item: HttpTypes.StoreCartLineItem
 }
 
 const ItemCard = ({ item }: ItemCardProps) => {
+  const t = useTranslations("cart")
+  const tProduct = useTranslations("product")
   const [quantity, setQuantity] = useState(item.quantity)
   const [updating, setUpdating] = useState(false)
 
@@ -61,7 +64,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
             {/* Black Friday Badge */}
             {item.variant?.product?.metadata?.black_friday && (
               <span className="inline-block bg-black text-white text-[10px] px-1.5 py-0.5 rounded mb-1">
-                Black Friday
+                {tProduct("black_friday")}
               </span>
             )}
 
@@ -74,8 +77,8 @@ const ItemCard = ({ item }: ItemCardProps) => {
 
             {/* Code & Availability */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 mb-2">
-              <span>Code: {item.variant?.sku || "N/A"}</span>
-              <span className="text-green-600">• Available today</span>
+              <span>{tProduct("code")}: {item.variant?.sku || "N/A"}</span>
+              <span className="text-green-600">• {t("available_today")}</span>
             </div>
 
             {/* Price & Quantity Row */}
@@ -124,7 +127,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Remove
+                {t("remove")}
               </DeleteButton>
             </div>
           </div>
@@ -136,7 +139,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
               <div className="flex-1">
                 {item.variant?.product?.metadata?.black_friday && (
                   <span className="inline-block bg-black text-white text-xs px-2 py-1 rounded mb-2">
-                    Black Friday
+                    {tProduct("black_friday")}
                   </span>
                 )}
                 <LocalizedClientLink href={`/products/${handle}`}>
@@ -145,9 +148,9 @@ const ItemCard = ({ item }: ItemCardProps) => {
                   </h3>
                 </LocalizedClientLink>
                 <p className="text-sm text-gray-600 mb-1">
-                  Code: {item.variant?.product?.metadata?.code || item.variant?.sku || "N/A"}
+                  {tProduct("code")}: {item.variant?.product?.metadata?.code || item.variant?.sku || "N/A"}
                 </p>
-                <p className="text-sm text-green-600 mb-3">Can be picked up today</p>
+                <p className="text-sm text-green-600 mb-3">{t("can_be_picked_up_today")}</p>
 
                 <div className="flex items-center gap-4">
                   {/* Quantity Controls */}
@@ -173,7 +176,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Remove
+                    {t("remove")}
                   </DeleteButton>
                 </div>
               </div>

@@ -43,35 +43,28 @@ export default function LanguageSwitcher() {
     // URL structure: /[locale]/[countryCode]/...
     const pathParts = pathname.split('/').filter(Boolean)
     
-    // Get countryCode from params (should be second segment)
-    const countryCode = params.countryCode as string || ''
+    // Get countryCode from params (should be second segment after locale)
+    const countryCode = params.countryCode as string
     
-    // Build new path: replace locale (first segment) and keep rest
-    let newPathParts: string[] = []
+    // Build new path
+    let newPath = ''
     
     if (pathParts.length > 0 && locales.includes(pathParts[0] as Locale)) {
-      // Path has locale as first segment: /[locale]/[countryCode]/...
-      if (countryCode && pathParts.length > 1 && pathParts[1] === countryCode) {
-        // Has countryCode: replace locale, keep countryCode and rest
-        newPathParts = [locale, ...pathParts.slice(1)]
+      // Current path has locale as first segment
+      if (countryCode && pathParts.length > 1) {
+        // Has countryCode: /[locale]/[countryCode]/rest...
+        // Replace locale, keep countryCode and rest
+        const restPath = pathParts.slice(2).join('/')
+        newPath = `/${locale}/${countryCode}${restPath ? '/' + restPath : ''}`
       } else {
-        // No countryCode in path: replace locale, add countryCode if available
-        if (countryCode) {
-          newPathParts = [locale, countryCode, ...pathParts.slice(1)]
-        } else {
-          newPathParts = [locale, ...pathParts.slice(1)]
-        }
+        // No countryCode: /[locale]/rest...
+        const restPath = pathParts.slice(1).join('/')
+        newPath = `/${locale}${restPath ? '/' + restPath : ''}`
       }
     } else {
-      // No locale in path (shouldn't happen with middleware, but handle it)
-      if (countryCode) {
-        newPathParts = [locale, countryCode, ...pathParts]
-      } else {
-        newPathParts = [locale, ...pathParts]
-      }
+      // No locale in path (shouldn't happen, but handle it)
+      newPath = `/${locale}${pathname}`
     }
-
-    const newPath = `/${newPathParts.join('/')}`
     
     // Preserve query string
     const searchParams = window.location.search

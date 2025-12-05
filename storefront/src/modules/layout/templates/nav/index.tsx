@@ -17,7 +17,7 @@ import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
 import { type Locale } from '../../../../i18n'
 
 type NavProps = {
-  locale?: string
+  locale: string
 }
 
 export default async function Nav({ locale }: NavProps) {
@@ -25,7 +25,7 @@ export default async function Nav({ locale }: NavProps) {
   const { product_categories } = await getCategoriesList(0, 20)
   const mainCategories = product_categories?.filter(cat => !cat.parent_category) || []
   
-  const t = await getTranslations('nav')
+  const t = await getTranslations({locale, namespace: 'nav'})
 
   return (
     <ScrollAwareNav>

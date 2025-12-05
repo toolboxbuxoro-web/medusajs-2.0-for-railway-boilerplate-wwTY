@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import { bannerSlides } from "../../../../data/banner-slides"
 
@@ -72,13 +72,13 @@ export default function BannerSlider() {
                   
                   {/* CTA Button - responsive sizing */}
                   <div className="pt-1 sm:pt-2 lg:pt-3">
-                    <Link 
+                    <LocalizedClientLink 
                       href={slide.href} 
                       className="group inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 lg:px-7 py-2 sm:py-2.5 lg:py-3.5 rounded-full bg-white text-red-600 font-bold text-[10px] sm:text-xs lg:text-sm uppercase tracking-wide shadow-lg sm:shadow-xl shadow-black/20 hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/50 sm:border-2"
                     >
                       <span>{slide.cta}</span>
                       <span aria-hidden="true" className="text-sm sm:text-base lg:text-lg group-hover:translate-x-1 transition-transform duration-300">→</span>
-                    </Link>
+                    </LocalizedClientLink>
                   </div>
                 </div>
               </div>
