@@ -15,19 +15,23 @@ type OrderDetailsTemplateProps = {
   order: HttpTypes.StoreOrder
 }
 
+import { useTranslations } from 'next-intl'
+
 const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
   order,
 }) => {
+  const t = useTranslations('order')
+  
   return (
     <div className="flex flex-col justify-center gap-y-4">
       <div className="flex gap-2 justify-between items-center">
-        <h1 className="text-2xl-semi">Order details</h1>
+        <h1 className="text-2xl-semi">{t('order_details')}</h1>
         <LocalizedClientLink
           href="/account/orders"
           className="flex gap-2 items-center text-ui-fg-subtle hover:text-ui-fg-base"
           data-testid="back-to-overview-button"
         >
-          <XMark /> Back to overview
+          <XMark /> {t('back_to_overview')}
         </LocalizedClientLink>
       </div>
       <div

@@ -13,8 +13,12 @@ type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
 }
 
+import { useTranslations } from 'next-intl'
+
 const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
+  const t = useTranslations('account')
+  const tCheckout = useTranslations('checkout')
 
   const updateCustomerPhone = async (
     _currentState: Record<string, unknown>,
@@ -48,7 +52,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={formAction} className="w-full">
       <AccountInfo
-        label="Phone"
+        label={t('phone')}
         currentInfo={`${customer.phone}`}
         isSuccess={successState}
         isError={!!state.error}
@@ -58,7 +62,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
       >
         <div className="grid grid-cols-1 gap-y-2">
           <Input
-            label="Phone"
+            label={tCheckout('phone')}
             name="phone"
             type="phone"
             autoComplete="phone"

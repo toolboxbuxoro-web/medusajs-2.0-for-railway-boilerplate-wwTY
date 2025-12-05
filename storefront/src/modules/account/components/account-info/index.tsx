@@ -16,17 +16,22 @@ type AccountInfoProps = {
   'data-testid'?: string
 }
 
+import { useTranslations } from 'next-intl'
+
 const AccountInfo = ({
   label,
   currentInfo,
   isSuccess,
   isError,
   clearState,
-  errorMessage = "An error occurred, please try again",
+  errorMessage,
   children,
   'data-testid': dataTestid
 }: AccountInfoProps) => {
   const { state, close, toggle } = useToggleState()
+  const t = useTranslations('account')
+  const tCommon = useTranslations('common')
+  const defaultErrorMessage = t('error_occurred')
 
   const { pending } = useFormStatus()
 
@@ -63,7 +68,7 @@ const AccountInfo = ({
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "Cancel" : "Edit"}
+            {state ? t('cancel') : t('edit')}
           </Button>
         </div>
       </div>
@@ -82,7 +87,7 @@ const AccountInfo = ({
           data-testid="success-message"
         >
           <Badge className="p-2 my-4" color="green">
-            <span>{label} updated succesfully</span>
+            <span>{label} {t('updated_successfully')}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -101,7 +106,7 @@ const AccountInfo = ({
           data-testid="error-message"
         >
           <Badge className="p-2 my-4" color="red">
-            <span>{errorMessage}</span>
+            <span>{errorMessage || defaultErrorMessage}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -126,7 +131,7 @@ const AccountInfo = ({
                 type="submit"
                 data-testid="save-button"
               >
-                Save changes
+                {t('save_changes')}
               </Button>
             </div>
           </div>

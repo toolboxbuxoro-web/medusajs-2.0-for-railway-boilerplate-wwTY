@@ -152,20 +152,21 @@ const Register = ({ setCurrentView }: Props) => {
 
         {/* Terms */}
         <p className="text-xs sm:text-sm text-gray-500 text-center">
-          Создавая аккаунт, вы соглашаетесь с{" "}
+          {t('terms_agreement_start')}
           <LocalizedClientLink
             href="/content/privacy-policy"
             className="text-red-600 hover:underline"
           >
-            Политикой конфиденциальности
-          </LocalizedClientLink>{" "}
-          и{" "}
+            {t('privacy_policy')}
+          </LocalizedClientLink>
+          {t('and')}
           <LocalizedClientLink
             href="/content/terms-of-use"
             className="text-red-600 hover:underline"
           >
-            Условиями использования
+            {t('terms_of_use')}
           </LocalizedClientLink>
+          {t('terms_agreement_end')}
         </p>
 
         <button

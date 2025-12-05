@@ -54,16 +54,16 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
           <div className="mt-6 lg:mt-8 bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-5 sm:p-6 shadow-lg">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="text-white">
-                <h3 className="text-lg sm:text-xl font-semibold mb-1">Есть вопросы?</h3>
+                <h3 className="text-lg sm:text-xl font-semibold mb-1">{t('have_questions')}</h3>
                 <p className="text-sm sm:text-base text-white/80">
-                  Найдите ответы на странице поддержки клиентов.
+                  {t('find_answers')}
                 </p>
               </div>
               <a 
                 href="/customer-service" 
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-red-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0 text-sm sm:text-base"
               >
-                Поддержка
+                {t('support')}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
