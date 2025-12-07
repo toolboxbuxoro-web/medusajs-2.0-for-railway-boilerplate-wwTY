@@ -243,8 +243,8 @@
     "favorites": "Sevimlilar",
     "compare": "Solishtirish",
     "promo_dates": "5-30 noyabr",
-    "available_in_city": "Sizning shahringizda {{count}} dona",
-    "in_stock_count": "Omborda {{count}} dona",
+    "available_in_city": "Sizning shahringizda {count} dona",
+    "in_stock_count": "Omborda {count} dona",
     "pickup_info": "Olib ketish: bugun, bepul, 4 ta do'kondan",
     "courier_info": "Kuryer orqali: bugun, 290 P dan",
     "select_variant": "Variantni tanlang",
@@ -294,7 +294,9 @@
     "apply_filters": "Qo'llash",
     "categories": "Kategoriyalar",
     "price_range": "Narx diapazoni",
-    "in_stock_only": "Faqat omborda mavjud"
+    "in_stock_only": "Faqat omborda mavjud",
+    "favorites": "Sevimlilar",
+    "no_favorites": "Sizda hali sevimli mahsulotlar yo'q"
   },
   "order": {
     "order_details": "Buyurtma tafsilotlari",

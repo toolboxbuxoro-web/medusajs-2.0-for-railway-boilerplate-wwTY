@@ -1,6 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react"
 import { Button, clx } from "@medusajs/ui"
 import React, { Fragment, useMemo } from "react"
+import { useTranslations } from "next-intl"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import ChevronDown from "@modules/common/icons/chevron-down"
@@ -34,6 +35,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   optionsDisabled,
 }) => {
   const { state, open, close } = useToggleState()
+  const t = useTranslations('product')
 
   const price = getProductPrice({
     product: product,
@@ -67,62 +69,44 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           leaveTo="opacity-0"
         >
           <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
+            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
             data-testid="mobile-actions"
           >
-            <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title">{product.title}</span>
-              <span>—</span>
-              {selectedPrice ? (
-                <div className="flex items-end gap-x-2 text-ui-fg-base">
-                  {selectedPrice.price_type === "sale" && (
-                    <p>
-                      <span className="line-through text-small-regular">
+            <div className="flex items-center justify-between w-full gap-x-4">
+              <div className="flex flex-col">
+                {selectedPrice ? (
+                  <div className="flex flex-col items-start">
+                    {selectedPrice.price_type === "sale" && (
+                      <span className="line-through text-gray-500 text-xs">
                         {selectedPrice.original_price}
                       </span>
-                    </p>
-                  )}
-                  <span
-                    className={clx({
-                      "text-ui-fg-interactive":
-                        selectedPrice.price_type === "sale",
-                    })}
-                  >
-                    {selectedPrice.calculated_price}
-                  </span>
-                </div>
-              ) : (
-                <div></div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 w-full gap-x-4">
-              <Button
-                onClick={open}
-                variant="secondary"
-                className="w-full"
-                data-testid="mobile-actions-button"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "Select Options"}
-                  </span>
-                  <ChevronDown />
-                </div>
-              </Button>
+                    )}
+                    <span
+                      className={clx("text-xl font-bold", {
+                        "text-red-600": selectedPrice.price_type === "sale",
+                        "text-gray-900": selectedPrice.price_type !== "sale",
+                      })}
+                    >
+                      {selectedPrice.calculated_price}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="h-6 w-20 bg-gray-100 animate-pulse rounded" />
+                )}
+              </div>
+              
               <Button
                 onClick={handleAddToCart}
-                disabled={!inStock || !variant}
-                className="w-full"
+                disabled={!inStock || !variant || isAdding}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold h-12 rounded-lg"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
                 {!variant
-                  ? "Select variant"
+                  ? t('select_variant')
                   : !inStock
-                  ? "Out of stock"
-                  : "Add to cart"}
+                  ? t('out_of_stock')
+                  : t('add_to_cart')}
               </Button>
             </div>
           </div>

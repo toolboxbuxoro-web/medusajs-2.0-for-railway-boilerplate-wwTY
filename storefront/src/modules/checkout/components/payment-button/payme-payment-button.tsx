@@ -16,11 +16,22 @@ export const PaymePaymentButton = ({
   const t = useTranslations("checkout")
 
   const session = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
+    (s) => s.provider_id === "payme"
   )
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setSubmitting(true)
+
+    // If payment is already authorized, place the order
+    if (session?.status === "authorized") {
+      try {
+        await placeOrder()
+      } catch (err) {
+        setSubmitting(false)
+        console.error("Error placing order:", err)
+      }
+      return
+    }
     
     const paymentUrl = (session?.data as any)?.payment_url
     
@@ -40,7 +51,7 @@ export const PaymePaymentButton = ({
       size="large"
       data-testid={dataTestId}
     >
-      {t("place_order")}
+      {session?.status === "authorized" ? t("place_order") : t("place_order")}
     </Button>
   )
 }

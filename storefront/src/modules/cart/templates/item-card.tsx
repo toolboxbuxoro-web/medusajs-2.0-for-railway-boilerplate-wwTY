@@ -10,12 +10,15 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "@modules/products/components/thumbnail"
 import { convertToLocale } from "@lib/util/money"
 import { useTranslations } from "next-intl"
+import Marquee from "@modules/common/components/marquee"
 
 type ItemCardProps = {
   item: HttpTypes.StoreCartLineItem
+  selected: boolean
+  onSelect: () => void
 }
 
-const ItemCard = ({ item }: ItemCardProps) => {
+const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
   const t = useTranslations("cart")
   const tProduct = useTranslations("product")
   const [quantity, setQuantity] = useState(item.quantity)
@@ -44,7 +47,12 @@ const ItemCard = ({ item }: ItemCardProps) => {
       <div className="flex gap-3 sm:gap-4">
         {/* Checkbox */}
         <div className="flex-shrink-0 hidden sm:flex items-start pt-1">
-          <input type="checkbox" className="w-4 h-4 text-red-600 rounded border-gray-300" />
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500" 
+            checked={selected}
+            onChange={onSelect}
+          />
         </div>
 
         {/* Image */}
@@ -69,10 +77,11 @@ const ItemCard = ({ item }: ItemCardProps) => {
             )}
 
             {/* Title */}
-            <LocalizedClientLink href={`/products/${handle}`}>
-              <h3 className="font-semibold text-sm sm:text-base leading-tight line-clamp-2 hover:text-red-600 transition-colors mb-1">
+            {/* Title */}
+            <LocalizedClientLink href={`/products/${handle}`} className="block w-full overflow-hidden">
+              <Marquee className="font-semibold text-sm sm:text-base mb-1 text-gray-900 hover:text-red-600 transition-colors">
                 {item.product_title}
-              </h3>
+              </Marquee>
             </LocalizedClientLink>
 
             {/* Code & Availability */}
@@ -124,9 +133,6 @@ const ItemCard = ({ item }: ItemCardProps) => {
             {/* Delete Button */}
             <div className="mt-2 pt-2 border-t border-gray-100">
               <DeleteButton id={item.id} className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
                 {t("remove")}
               </DeleteButton>
             </div>
@@ -136,16 +142,16 @@ const ItemCard = ({ item }: ItemCardProps) => {
           <div className="hidden lg:block">
             <div className="flex justify-between gap-4">
               {/* Left Side */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 {item.variant?.product?.metadata?.black_friday && (
                   <span className="inline-block bg-black text-white text-xs px-2 py-1 rounded mb-2">
                     {tProduct("black_friday")}
                   </span>
                 )}
-                <LocalizedClientLink href={`/products/${handle}`}>
-                  <h3 className="font-semibold text-lg mb-1 hover:text-red-600 transition-colors">
+                <LocalizedClientLink href={`/products/${handle}`} className="block w-full overflow-hidden">
+                  <Marquee className="font-semibold text-lg mb-1 text-gray-900 hover:text-red-600 transition-colors">
                     {item.product_title}
-                  </h3>
+                  </Marquee>
                 </LocalizedClientLink>
                 <p className="text-sm text-gray-600 mb-1">
                   {tProduct("code")}: {item.variant?.product?.metadata?.code || item.variant?.sku || "N/A"}
@@ -173,9 +179,6 @@ const ItemCard = ({ item }: ItemCardProps) => {
                   </div>
 
                   <DeleteButton id={item.id} className="text-sm text-gray-600 hover:text-red-600 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
                     {t("remove")}
                   </DeleteButton>
                 </div>

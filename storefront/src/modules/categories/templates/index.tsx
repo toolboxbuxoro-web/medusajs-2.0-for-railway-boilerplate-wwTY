@@ -8,17 +8,20 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
+import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 
 export default function CategoryTemplate({
   categories,
   sortBy,
   page,
   countryCode,
+  locale,
 }: {
   categories: HttpTypes.StoreProductCategory[]
   sortBy?: SortOptions
   page?: string
   countryCode: string
+  locale: string
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -48,18 +51,18 @@ export default function CategoryTemplate({
                 className="hover:text-red-600"
                 data-testid="sort-by-link"
               >
-                {parent.name}
+                {getLocalizedCategoryName(parent, locale)}
               </LocalizedClientLink>
             </span>
           ))}
           <span className="mx-1 sm:mx-2">/</span>
-          <span className="text-gray-900 font-medium">{category.name}</span>
+          <span className="text-gray-900 font-medium">{getLocalizedCategoryName(category, locale)}</span>
         </nav>
 
         {/* Header */}
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <h1 className="heading-2" data-testid="category-page-title">
-            {category.name}
+            {getLocalizedCategoryName(category, locale)}
           </h1>
           {category.description && (
             <p className="text-gray-600 text-sm sm:text-base mt-2 max-w-2xl">
@@ -78,7 +81,7 @@ export default function CategoryTemplate({
                   href={`/categories/${c.handle}`}
                   className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white border border-gray-200 rounded-full text-xs sm:text-sm font-medium hover:border-red-600 hover:text-red-600 transition-colors"
                 >
-                  {c.name}
+                  {getLocalizedCategoryName(c, locale)}
                 </LocalizedClientLink>
               ))}
             </div>

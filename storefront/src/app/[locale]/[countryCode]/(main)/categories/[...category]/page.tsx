@@ -2,13 +2,14 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
+import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 type Props = {
-  params: { category: string[]; countryCode: string }
+  params: { category: string[]; countryCode: string; locale: string }
   searchParams: {
     sortBy?: SortOptions
     page?: string
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
 
     const title = product_categories
-      .map((category: StoreProductCategory) => category.name)
+      .map((category: StoreProductCategory) => getLocalizedCategoryName(category, params.locale))
       .join(" | ")
 
     const description =
@@ -85,6 +86,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       sortBy={sortBy}
       page={page}
       countryCode={params.countryCode}
+      locale={params.locale}
     />
   )
 }

@@ -37,7 +37,7 @@ const AccountInfo = ({
 
   const handleToggle = () => {
     clearState()
-    setTimeout(() => toggle(), 100)
+    toggle()
   }
 
   useEffect(() => {
@@ -78,17 +78,19 @@ const AccountInfo = ({
         <Disclosure.Panel
           static
           className={clx(
-            "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
+            "grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
             {
-              "max-h-[1000px] opacity-100": isSuccess,
-              "max-h-0 opacity-0": !isSuccess,
+              "grid-rows-[1fr] opacity-100": isSuccess,
+              "grid-rows-[0fr] opacity-0": !isSuccess,
             }
           )}
           data-testid="success-message"
         >
-          <Badge className="p-2 my-4" color="green">
-            <span>{label} {t('updated_successfully')}</span>
-          </Badge>
+          <div className="overflow-hidden">
+            <Badge className="p-2 my-4" color="green">
+              <span>{label} {t('updated_successfully')}</span>
+            </Badge>
+          </div>
         </Disclosure.Panel>
       </Disclosure>
 
@@ -97,17 +99,19 @@ const AccountInfo = ({
         <Disclosure.Panel
           static
           className={clx(
-            "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
+            "grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
             {
-              "max-h-[1000px] opacity-100": isError,
-              "max-h-0 opacity-0": !isError,
+              "grid-rows-[1fr] opacity-100": isError,
+              "grid-rows-[0fr] opacity-0": !isError,
             }
           )}
           data-testid="error-message"
         >
-          <Badge className="p-2 my-4" color="red">
-            <span>{errorMessage || defaultErrorMessage}</span>
-          </Badge>
+          <div className="overflow-hidden">
+            <Badge className="p-2 my-4" color="red">
+              <span>{errorMessage || defaultErrorMessage}</span>
+            </Badge>
+          </div>
         </Disclosure.Panel>
       </Disclosure>
 
@@ -115,14 +119,14 @@ const AccountInfo = ({
         <Disclosure.Panel
           static
           className={clx(
-            "transition-[max-height,opacity] duration-300 ease-in-out overflow-visible",
+            "grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
             {
-              "max-h-[1000px] opacity-100": state,
-              "max-h-0 opacity-0": !state,
+              "grid-rows-[1fr] opacity-100": state,
+              "grid-rows-[0fr] opacity-0": !state,
             }
           )}
         >
-          <div className="flex flex-col gap-y-2 py-4">
+          <div className="flex flex-col gap-y-2 py-4 overflow-hidden">
             <div>{children}</div>
             <div className="flex items-center justify-end mt-2">
               <Button

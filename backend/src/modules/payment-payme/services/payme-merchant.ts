@@ -23,8 +23,6 @@ export enum PaymeErrorCodes {
 export class PaymeMerchantService {
   protected logger_: Logger
   protected container_: any
-  // Sandbox mode: store test transactions in memory (STATIC to persist across requests)
-  private static sandboxTransactions: Map<string, any> = new Map()
 
   constructor({ logger, container }: InjectedDependencies) {
     this.logger_ = logger
@@ -90,23 +88,7 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order ID is missing")
     }
 
-    // SANDBOX MODE: Accept test transactions without validating against real orders
-    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
-    
-    if (isSandbox) {
-      this.logger_.info(`[SANDBOX] CheckPerformTransaction for test order: ${orderId}, amount: ${amount}`)
-      
-      // Check if there is already an active transaction for this order
-      for (const t of PaymeMerchantService.sandboxTransactions.values()) {
-        if (t.order_id === orderId && (t.state === 1 || t.state === 2)) {
-           throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already has an active transaction")
-        }
-      }
-
-      // In sandbox mode, accept any order_id and amount
-      return { allow: true }
-    }
-
+    // Try to find the order in Medusa first
     const result = await this.getPaymentSession(orderId)
     
     if (!result || !result.cart) {
@@ -133,8 +115,11 @@ export class PaymeMerchantService {
     // FIXED: Correct amount comparison
     // Medusa stores in cents/kopecks (100 = 1.00 UZS)
     // Payme sends in tiyin (10000 = 100.00 UZS)
-    // Need to multiply by 100 to convert to tiyin
-    const medusaAmountInTiyin = (session ? session.amount : cart.total) * 100
+    // Need to multiply by 100 to convert to tiyin IF Medusa stores 1 UZS = 1 unit.
+    // BUT usually Medusa stores 1 UZS = 100 units (2 decimals).
+    // So Medusa 100 = 1.00 UZS = 100 tiyin.
+    // So they should match directly.
+    const medusaAmountInTiyin = (session ? session.amount : cart.total)
 
     if (Math.abs(medusaAmountInTiyin - amount) > 1) { 
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
@@ -155,48 +140,6 @@ export class PaymeMerchantService {
     if (currentTime - time > TIMEOUT_MS) {
       throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
         "Transaction timeout: older than 12 hours")
-    }
-    
-    // SANDBOX MODE: Store test transactions in memory
-    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
-    
-    if (isSandbox) {
-      this.logger_.info(`[SANDBOX] CreateTransaction: id=${id}, order=${orderId}, amount=${amount}`)
-      
-      // Check if transaction already exists (idempotency)
-      if (PaymeMerchantService.sandboxTransactions.has(id)) {
-        const existing = PaymeMerchantService.sandboxTransactions.get(id)
-        return {
-          create_time: existing.create_time,
-          transaction: id,
-          state: existing.state
-        }
-      }
-      
-      // Check if there is ANY other active transaction for this order
-      for (const t of PaymeMerchantService.sandboxTransactions.values()) {
-        if (t.order_id === orderId && (t.state === 1 || t.state === 2)) {
-           throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already has an active transaction")
-        }
-      }
-      
-      // Create new sandbox transaction
-      PaymeMerchantService.sandboxTransactions.set(id, {
-        id,
-        order_id: orderId,
-        amount,
-        create_time: time,
-        state: 1,
-        perform_time: 0,
-        cancel_time: 0,
-        reason: null
-      })
-      
-      return {
-        create_time: time,
-        transaction: id,
-        state: 1
-      }
     }
     
     const result = await this.getPaymentSession(orderId)
@@ -239,7 +182,7 @@ export class PaymeMerchantService {
     }
     
     // FIXED: Correct amount comparison (multiply by 100 for tiyin)
-    const medusaAmountInTiyin = session.amount * 100
+    const medusaAmountInTiyin = session.amount
 
     if (Math.abs(medusaAmountInTiyin - amount) > 1) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Incorrect amount")
@@ -356,43 +299,6 @@ export class PaymeMerchantService {
   async performTransactionWithSessionId(params: any) {
     const sessionId = params.id
     
-    // SANDBOX MODE: Handle test transactions
-    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
-    
-    if (isSandbox) {
-      if (!PaymeMerchantService.sandboxTransactions.has(sessionId)) {
-        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
-      }
-      
-      const transaction = PaymeMerchantService.sandboxTransactions.get(sessionId)
-      
-      if (transaction.state === 2) {
-        // Already performed
-        return {
-          transaction: sessionId,
-          perform_time: transaction.perform_time,
-          state: 2
-        }
-      }
-      
-      if (transaction.state !== 1) {
-        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction not in created state")
-      }
-      
-      // Perform transaction
-      const performTime = Date.now()
-      transaction.state = 2
-      transaction.perform_time = performTime
-      
-      this.logger_.info(`[SANDBOX] PerformTransaction: id=${sessionId}, state=2`)
-      
-      return {
-        transaction: sessionId,
-        perform_time: performTime,
-        state: 2
-      }
-    }
-    
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
     let session
@@ -461,42 +367,6 @@ export class PaymeMerchantService {
   async cancelTransaction(params: any) {
     const { id, reason } = params
     
-    // SANDBOX MODE: Handle test transactions
-    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
-    
-    if (isSandbox) {
-      if (!PaymeMerchantService.sandboxTransactions.has(id)) {
-        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
-      }
-      
-      const transaction = PaymeMerchantService.sandboxTransactions.get(id)
-      const state = transaction.state
-      const cancelTime = Date.now()
-      
-      if (state === 1) {
-        transaction.state = -1
-        transaction.cancel_time = cancelTime
-        transaction.reason = reason
-        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-1, reason=${reason}`)
-        return { transaction: id, cancel_time: cancelTime, state: -1 }
-      }
-      
-      if (state === 2) {
-        transaction.state = -2
-        transaction.cancel_time = cancelTime
-        transaction.reason = reason
-        this.logger_.info(`[SANDBOX] CancelTransaction: id=${id}, state=-2 (refund), reason=${reason}`)
-        return { transaction: id, cancel_time: cancelTime, state: -2 }
-      }
-      
-      // Already cancelled
-      return {
-        transaction: id,
-        cancel_time: transaction.cancel_time || cancelTime,
-        state: state
-      }
-    }
-    
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
     let session
@@ -557,27 +427,6 @@ export class PaymeMerchantService {
 
   async checkTransaction(params: any) {
     const { id } = params
-    
-    // SANDBOX MODE: Handle test transactions
-    const isSandbox = process.env.PAYME_SANDBOX_MODE === 'true'
-    
-    if (isSandbox) {
-      if (!PaymeMerchantService.sandboxTransactions.has(id)) {
-        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
-      }
-      
-      const transaction = PaymeMerchantService.sandboxTransactions.get(id)
-      this.logger_.info(`[SANDBOX] CheckTransaction: id=${id}, state=${transaction.state}`)
-      
-      return {
-        create_time: transaction.create_time,
-        perform_time: transaction.perform_time,
-        cancel_time: transaction.cancel_time,
-        transaction: id,
-        state: transaction.state,
-        reason: transaction.reason || null
-      }
-    }
     
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     

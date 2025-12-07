@@ -13,7 +13,7 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
           className="text-sm sm:text-base text-gray-400 line-through font-medium"
           data-testid="original-price"
         >
-          {price.original_price}
+          {price.original_price.replace(/\.00$/, "")}
         </Text>
       )}
       <Text
@@ -26,7 +26,7 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
         )}
         data-testid="price"
       >
-        {price.calculated_price}
+        {price.calculated_price.replace(/\.00$/, "")}
       </Text>
       {price.price_type === "sale" && (
         <span className="text-xs font-semibold text-white bg-red-600 px-2 py-0.5 rounded-full">

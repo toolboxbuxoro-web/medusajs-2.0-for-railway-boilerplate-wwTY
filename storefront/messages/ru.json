@@ -243,8 +243,8 @@
     "favorites": "Избранное",
     "compare": "Сравнить",
     "promo_dates": "5-30 ноября",
-    "available_in_city": "{{count}} шт. в вашем городе",
-    "in_stock_count": "{{count}} шт. в наличии",
+    "available_in_city": "{count} шт. в вашем городе",
+    "in_stock_count": "{count} шт. в наличии",
     "pickup_info": "Самовывоз: сегодня, бесплатно, из 4 магазинов",
     "courier_info": "Курьером: сегодня, от 290 P",
     "select_variant": "Выберите вариант",
@@ -294,7 +294,9 @@
     "apply_filters": "Применить",
     "categories": "Категории",
     "price_range": "Диапазон цен",
-    "in_stock_only": "Только в наличии"
+    "in_stock_only": "Только в наличии",
+    "favorites": "Избранное",
+    "no_favorites": "У вас пока нет избранных товаров"
   },
   "order": {
     "order_details": "Детали заказа",

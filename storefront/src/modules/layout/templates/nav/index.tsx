@@ -14,7 +14,9 @@ import LanguageSwitcher from "@modules/common/components/language-switcher"
 import MobileMenu from "@modules/layout/components/mobile-menu"
 import CatalogDropdown from "@modules/layout/components/catalog-dropdown"
 import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
+import FavoritesButton from "@modules/layout/components/favorites-button"
 import { type Locale } from '../../../../i18n'
+import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 
 type NavProps = {
   locale: string
@@ -34,7 +36,7 @@ export default async function Nav({ locale }: NavProps) {
         <header className="bg-white fixed w-full top-0 z-[100] border-b border-gray-200 shadow-sm transition-all duration-300 navbar-header">
           <div className="content-container flex items-center justify-between h-16 md:h-20 gap-3 md:gap-6 transition-all duration-300 navbar-header-content">
             {/* Mobile Menu Button */}
-            <MobileMenu categories={mainCategories} />
+            <MobileMenu categories={mainCategories} locale={locale} />
 
             {/* Logo */}
           <div className="flex items-center">
@@ -55,7 +57,7 @@ export default async function Nav({ locale }: NavProps) {
 
             {/* Search Bar & Catalog - Hidden on small mobile, visible on tablet+ */}
             <div className="hidden sm:flex items-center gap-2 flex-1 max-w-xl lg:max-w-2xl navbar-search">
-              <CatalogDropdown categories={mainCategories} />
+              <CatalogDropdown categories={mainCategories} locale={locale} />
               <form action="/search" method="get" className="relative flex-1">
                 <input
                   type="search"
@@ -88,6 +90,11 @@ export default async function Nav({ locale }: NavProps) {
                 <LanguageSwitcher />
               </div>
               
+              {/* Favorites */}
+              <div className="hidden md:block">
+                <FavoritesButton />
+              </div>
+
               {/* Cart */}
               <Suspense
                 fallback={
@@ -147,7 +154,7 @@ export default async function Nav({ locale }: NavProps) {
                 href={`/categories/${category.handle}`}
                 className="px-2 lg:px-3 h-full flex items-center hover:text-red-600 transition-colors whitespace-nowrap text-sm lg:text-base"
               >
-                {category.name}
+                {getLocalizedCategoryName(category, locale)}
               </LocalizedClientLink>
             ))}
           </div>

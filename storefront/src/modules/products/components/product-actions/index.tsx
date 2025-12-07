@@ -14,6 +14,8 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { getProductPrice } from "@lib/util/get-product-price"
+import { convertToLocale } from "@lib/util/money"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -110,6 +112,19 @@ export default function ProductActions({
     setIsAdding(false)
   }
 
+  const { variantPrice, cheapestPrice } = getProductPrice({
+    product,
+    variantId: selectedVariant?.id,
+  })
+
+  const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+  const isOnSale = selectedPrice?.price_type === "sale"
+  const installmentPrice = selectedPrice?.calculated_price_number ? selectedPrice.calculated_price_number / 4 : 0
+  const formattedInstallmentPrice = selectedPrice ? convertToLocale({
+      amount: installmentPrice,
+      currency_code: selectedPrice.currency_code,
+    }) : ""
+
   return (
     <>
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
@@ -135,10 +150,13 @@ export default function ProductActions({
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg mb-6">
-          <div className="text-sm mb-2">{t('promo_dates')}</div>
-          <div className="text-lg font-bold">{t('black_friday')}!</div>
-        </div>
+        {isOnSale && (
+          <div className="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg mb-6">
+            <div className="text-lg font-bold">
+              {t('promotions')} -{selectedPrice?.percentage_diff}%
+            </div>
+          </div>
+        )}
 
         <ProductPrice product={product} variant={selectedVariant} />
 
@@ -147,9 +165,9 @@ export default function ProductActions({
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            <span className="text-sm">{t('available_in_city', { count: 95 })}</span>
+            <span className="text-sm">{t('available_in_city', { count: selectedVariant?.inventory_quantity || 0 })}</span>
           </div>
-          <div className="text-sm text-gray-600">{t('in_stock_count', { count: 93 })}</div>
+          <div className="text-sm text-gray-600">{t('in_stock_count', { count: selectedVariant?.inventory_quantity || 0 })}</div>
         </div>
 
         <div className="space-y-3 mb-6">
@@ -188,9 +206,11 @@ export default function ProductActions({
         >
           {t('quick_order')}
         </Button>
-        <div className="text-sm text-gray-600 mt-4">
-          <span className="font-semibold">5,750 P</span> × 4 {t('installments')}
-        </div>
+        {formattedInstallmentPrice && (
+          <div className="text-sm text-gray-600 mt-4">
+            <span className="font-semibold">{formattedInstallmentPrice}</span> × 4 {t('installments')}
+          </div>
+        )}
         <MobileActions
           product={product}
           variant={selectedVariant}

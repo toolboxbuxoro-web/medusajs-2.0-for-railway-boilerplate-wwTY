@@ -4,12 +4,14 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
+import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 
 type MobileMenuProps = {
   categories: HttpTypes.StoreProductCategory[]
+  locale: string
 }
 
-export default function MobileMenu({ categories }: MobileMenuProps) {
+export default function MobileMenu({ categories, locale }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -158,7 +160,7 @@ export default function MobileMenu({ categories }: MobileMenuProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </span>
-                  {category.name}
+                  {getLocalizedCategoryName(category, locale)}
                 </LocalizedClientLink>
               ))}
             </div>

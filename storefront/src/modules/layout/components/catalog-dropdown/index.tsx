@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl'
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { ChevronDown } from "@medusajs/icons"
+import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 
 type CatalogDropdownProps = {
   categories: HttpTypes.StoreProductCategory[]
+  locale: string
 }
 
-export default function CatalogDropdown({ categories }: CatalogDropdownProps) {
+export default function CatalogDropdown({ categories, locale }: CatalogDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const t = useTranslations('nav')
@@ -66,7 +68,7 @@ export default function CatalogDropdown({ categories }: CatalogDropdownProps) {
                 className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-50 hover:text-red-600 transition-colors group"
                 onClick={() => setIsOpen(false)}
               >
-                <span className="text-sm md:text-base">{category.name}</span>
+                <span className="text-sm md:text-base">{getLocalizedCategoryName(category, locale)}</span>
                 {category.category_children && category.category_children.length > 0 && (
                   <span className="text-xs text-gray-400 group-hover:text-red-600">
                     {category.category_children.length}

@@ -1,41 +1,55 @@
 "use client"
 
 import { Button } from "@medusajs/ui"
-import CartTotals from "@modules/common/components/cart-totals"
 import DiscountCode from "@modules/checkout/components/discount-code"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { convertToLocale } from "@lib/util/money"
-import MapPin from "@modules/common/icons/map-pin"
 import { useTranslations } from 'next-intl'
 
 type SummaryProps = {
-  cart: HttpTypes.StoreCart & {
-    promotions: HttpTypes.StorePromotion[]
-  }
+  cart: HttpTypes.StoreCart
+  selectedItemIds: string[]
+  handleCheckout: () => void
+  isProcessing: boolean
 }
 
-function getCheckoutStep(cart: HttpTypes.StoreCart) {
-  if (!cart?.shipping_address?.address_1 || !cart.email) {
-    return "address"
-  } else if (cart?.shipping_methods?.length === 0) {
-    return "delivery"
-  } else {
-    return "payment"
-  }
-}
-
-const Summary = ({ cart }: SummaryProps) => {
-  const step = getCheckoutStep(cart)
+const Summary = ({ cart, selectedItemIds, handleCheckout, isProcessing }: SummaryProps) => {
   const t = useTranslations('cart')
   const tCheckout = useTranslations('checkout')
-  const totalItems = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0
-  const totalWeight = cart?.items?.reduce((acc, item) => {
+
+  // Calculate totals based on selection
+  const selectedItems = cart?.items?.filter(item => selectedItemIds.includes(item.id)) || []
+  const allSelected = cart?.items?.length === selectedItems.length
+
+  const totalItems = selectedItems.reduce((acc, item) => acc + item.quantity, 0)
+  const totalWeight = selectedItems.reduce((acc, item) => {
     const weight = item.variant?.product?.metadata?.weight 
       ? Number(item.variant.product.metadata.weight) * item.quantity 
       : 0
     return acc + weight
-  }, 0) || 0
+  }, 0)
+
+  // Calculate financial totals
+  // If all selected, use cart totals (which include shipping, tax, etc correctly)
+  // If partial, sum up line items (approximation, excludes shipping/tax unless we sum them too)
+  
+  let subtotal = 0
+  let discount_total = 0
+  let total = 0
+
+  if (allSelected) {
+    subtotal = cart.subtotal || 0
+    discount_total = cart.discount_total || 0
+    total = cart.total || 0
+  } else {
+    // Sum up line items
+    // Note: This might miss order-level discounts that aren't distributed to lines, 
+    // and definitely misses shipping/tax if they are not on lines.
+    // However, for "Selected Items" view, this is the best we can do client-side.
+    subtotal = selectedItems.reduce((acc, item) => acc + (item.subtotal || 0), 0)
+    discount_total = selectedItems.reduce((acc, item) => acc + (item.discount_total || 0), 0)
+    total = selectedItems.reduce((acc, item) => acc + (item.total || 0), 0)
+  }
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -45,47 +59,11 @@ const Summary = ({ cart }: SummaryProps) => {
       </div>
 
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-        {/* Delivery Method */}
-        <div className="pb-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold">{t("pickup")}</span>
-            <button className="text-xs sm:text-sm text-red-600 hover:text-red-700">{t("change")}</button>
-          </div>
-          <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
-            <MapPin size="14" className="mt-0.5 flex-shrink-0" />
-            <span className="line-clamp-2">{t("pickup_point_placeholder")}</span>
-          </div>
-        </div>
 
-        {/* Date */}
-        <div className="pb-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-semibold">{t("date")}</span>
-            <button className="text-xs sm:text-sm text-red-600 hover:text-red-700">{t("change")}</button>
-          </div>
-          <p className="text-xs sm:text-sm text-gray-600">{t("pickup_today")}</p>
-        </div>
-
-        {/* Buyer */}
-        <div className="pb-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold">{t("buyer")}</span>
-            <button className="text-xs sm:text-sm text-red-600 hover:text-red-700">{t("provide_details")}</button>
-          </div>
-        </div>
-
-        {/* Payment */}
-        <div className="pb-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-semibold">{tCheckout("payment")}</span>
-            <button className="text-xs sm:text-sm text-red-600 hover:text-red-700">{t("change")}</button>
-          </div>
-          <p className="text-xs sm:text-sm text-gray-600">{t("payment_via_sbp")}</p>
-        </div>
 
         {/* Promo Code */}
         <div className="pb-4 border-b border-gray-200">
-          <DiscountCode cart={cart} />
+        <DiscountCode cart={cart as any} />
         </div>
 
         {/* Order Breakdown */}
@@ -96,17 +74,17 @@ const Summary = ({ cart }: SummaryProps) => {
             </span>
             <span className="font-semibold">
               {convertToLocale({
-                amount: cart.subtotal || 0,
+                amount: subtotal,
                 currency_code: cart.currency_code || "USD",
               })}
             </span>
           </div>
-          {cart.discount_total && cart.discount_total > 0 && (
+          {discount_total > 0 && (
             <div className="flex justify-between text-xs sm:text-sm">
               <span className="text-green-600">{t("your_benefit")}</span>
               <span className="text-green-600 font-semibold">
                 -{convertToLocale({
-                  amount: cart.discount_total,
+                  amount: discount_total,
                   currency_code: cart.currency_code || "USD",
                 })}
               </span>
@@ -119,22 +97,21 @@ const Summary = ({ cart }: SummaryProps) => {
           <span className="text-base sm:text-lg font-bold">{t("total")}</span>
           <span className="text-xl sm:text-2xl font-bold text-red-600">
             {convertToLocale({
-              amount: cart.total || 0,
+              amount: total,
               currency_code: cart.currency_code || "USD",
             })}
           </span>
         </div>
 
         {/* Checkout Button */}
-        <LocalizedClientLink
-          href={"/checkout?step=" + step}
+        <Button 
+          onClick={handleCheckout}
+          disabled={isProcessing || selectedItemIds.length === 0}
+          className="w-full h-11 sm:h-12 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm sm:text-base rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="checkout-button"
-          className="block"
         >
-          <Button className="w-full h-11 sm:h-12 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm sm:text-base rounded-lg">
-            {tCheckout('place_order')}
-          </Button>
-        </LocalizedClientLink>
+          {isProcessing ? tCheckout('processing') : tCheckout('place_order')}
+        </Button>
 
         {/* Security Badge */}
         <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
