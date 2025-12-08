@@ -84,6 +84,8 @@ export class PaymeMerchantService {
     const { amount, account } = params
     const orderId = account.order_id
 
+    this.logger_.info(`[CheckPerformTransaction] Received: orderId=${orderId}, paymeAmount=${amount}`)
+
     if (!orderId) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order ID is missing")
     }
@@ -96,6 +98,11 @@ export class PaymeMerchantService {
     }
 
     const { cart, session } = result
+
+    this.logger_.info(`[CheckPerformTransaction] Found cart: id=${cart.id}, total=${cart.total}, currency=${cart.currency_code}`)
+    if (session) {
+      this.logger_.info(`[CheckPerformTransaction] Found session: id=${session.id}, amount=${session.amount}, status=${session.status}`)
+    }
 
     // CRITICAL: Check if order is already paid or has active transaction
     if (session) {
@@ -112,26 +119,36 @@ export class PaymeMerchantService {
       }
     }
 
-    // FIXED: Correct amount comparison
-    // Medusa stores in cents/kopecks (100 = 1.00 UZS)
-    // Payme sends in tiyin (10000 = 100.00 UZS)
-    // Need to multiply by 100 to convert to tiyin IF Medusa stores 1 UZS = 1 unit.
-    // BUT usually Medusa stores 1 UZS = 100 units (2 decimals).
-    // So Medusa 100 = 1.00 UZS = 100 tiyin.
-    // So they should match directly.
-    const medusaAmountInTiyin = (session ? session.amount : cart.total)
-
-    if (Math.abs(medusaAmountInTiyin - amount) > 1) { 
+    // Amount validation
+    // Payme sends amount in TIYIN (1 UZS = 100 tiyin)
+    const medusaAmount = session ? session.amount : cart.total
+    const currencyCode = cart.currency_code?.toUpperCase()
+    
+    // Log all possible interpretations for debugging
+    this.logger_.info(`[CheckPerformTransaction] Amount analysis:`)
+    this.logger_.info(`  - medusaAmount (raw): ${medusaAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
+    this.logger_.info(`  - currency: ${currencyCode}`)
+    this.logger_.info(`  - If Medusa stores tiyin, match: ${Math.abs(medusaAmount - amount) <= 1}`)
+    this.logger_.info(`  - If Medusa stores UZS (x100): ${Math.abs(medusaAmount * 100 - amount) <= 1}`)
+    
+    // Direct comparison - amounts should match
+    // If this fails, logs will tell us the conversion needed
+    if (Math.abs(medusaAmount - amount) > 1) { 
+      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! medusaAmount=${medusaAmount}, paymeAmount=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-        `Amount mismatch: expected ${medusaAmountInTiyin}, got ${amount}`)
+        `Amount mismatch: expected ${medusaAmount}, got ${amount}`)
     }
 
+    this.logger_.info(`[CheckPerformTransaction] ✅ Validation passed, returning allow: true`)
     return { allow: true }
   }
 
   async createTransaction(params: any) {
     const { id, time, amount, account } = params
     const orderId = account.order_id
+
+    this.logger_.info(`[CreateTransaction] Received: id=${id}, orderId=${orderId}, amount=${amount} tiyin, time=${time}`)
     
     // CRITICAL: Check timeout (12 hours)
     const TIMEOUT_MS = 12 * 60 * 60 * 1000
@@ -148,7 +165,7 @@ export class PaymeMerchantService {
        throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
-    const { session } = result
+    const { cart, session } = result
     
     if (!session) {
       throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, 
@@ -181,11 +198,23 @@ export class PaymeMerchantService {
       // Continue execution...
     }
     
-    // FIXED: Correct amount comparison (multiply by 100 for tiyin)
-    const medusaAmountInTiyin = session.amount
-
-    if (Math.abs(medusaAmountInTiyin - amount) > 1) {
-      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Incorrect amount")
+    // Amount validation - direct comparison with detailed logging
+    const medusaAmount = session.amount
+    const currencyCode = cart.currency_code?.toUpperCase()
+    
+    // Log all possible interpretations for debugging
+    this.logger_.info(`[CreateTransaction] Amount analysis:`)
+    this.logger_.info(`  - medusaAmount (raw): ${medusaAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
+    this.logger_.info(`  - currency: ${currencyCode}`)
+    this.logger_.info(`  - If Medusa stores tiyin, match: ${Math.abs(medusaAmount - amount) <= 1}`)
+    this.logger_.info(`  - If Medusa stores UZS (x100): ${Math.abs(medusaAmount * 100 - amount) <= 1}`)
+    
+    // Direct comparison - amounts should match
+    if (Math.abs(medusaAmount - amount) > 1) {
+      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! medusaAmount=${medusaAmount}, paymeAmount=${amount}`)
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+        `Amount mismatch: expected ${medusaAmount}, got ${amount}`)
     }
 
     // Create new transaction

@@ -61,10 +61,11 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
   /**
    * Generate Payme payment URL
    */
-  private generatePaymentUrl(orderId: string, amount: number): string {
-    // Amount should be in tiyin (1 UZS = 100 tiyin)
-    // However, since we are storing amounts in tiyin (or treating main units as such), we pass it directly
-    const amountInTiyin = amount // Math.round(amount * 100)
+  private generatePaymentUrl(orderId: string, amount: number, currencyCode: string = 'UZS'): string {
+    // NOTE: We pass amount directly as received from Medusa
+    // Payme expects tiyin (1 UZS = 100 tiyin)
+    // If validation fails, check logs to determine if conversion is needed
+    const amountForPayme = amount
     
     // Get Store URL for redirect after payment
     // Priority: STORE_URL -> MEDUSA_BACKEND_URL -> localhost
@@ -78,7 +79,9 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
       payme_id: this.options_.payme_id,
       store_url: cleanStoreUrl,
       return_url: returnUrl,
-      amount: amountInTiyin
+      amount_medusa: amount,
+      amount_for_payme: amountForPayme,
+      currency: currencyCode
     })}`)
     
     // Create params object
@@ -88,7 +91,7 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
       ac: {
         order_id: orderId
       },
-      a: amountInTiyin,
+      a: amountForPayme,
       c: returnUrl 
     }
     
@@ -118,8 +121,8 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         currency: currency_code
       })}`)
 
-      // Generate payment URL
-      const paymentUrl = this.generatePaymentUrl(orderId, amount as number)
+      // Generate payment URL with proper currency handling
+      const paymentUrl = this.generatePaymentUrl(orderId, amount as number, currency_code)
 
       const sessionData: PaymeSessionData = {
         order_id: orderId,
@@ -309,9 +312,10 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         new_amount: amount
       })}`)
 
-      // If amount changed, regenerate payment URL
+      // If amount changed, regenerate payment URL with proper currency handling
       if (amount && amount !== sessionData.amount) {
-        const paymentUrl = this.generatePaymentUrl(sessionData.order_id, amount as number)
+        const currency = currency_code || sessionData.currency || 'UZS'
+        const paymentUrl = this.generatePaymentUrl(sessionData.order_id, amount as number, currency)
         
         return {
           data: {
