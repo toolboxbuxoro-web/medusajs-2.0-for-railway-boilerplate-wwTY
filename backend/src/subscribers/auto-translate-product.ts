@@ -1,6 +1,6 @@
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
-import { IProductModuleService } from "@medusajs/types"
-import { Modules } from "@medusajs/utils"
+import { IProductModuleService } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { translateText } from "../lib/translation-service"
 
 export default async function autoTranslateProduct({
