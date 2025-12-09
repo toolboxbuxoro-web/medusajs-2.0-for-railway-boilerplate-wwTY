@@ -63,11 +63,15 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
 
   /**
    * Generate Payme payment URL
+   * @param orderId - Cart ID used as order identifier
+   * @param amount - Amount in tiyin (Medusa 2.0 stores amounts in minor units)
+   * @param currencyCode - Currency code (default UZS)
    */
   private generatePaymentUrl(orderId: string, amount: number, currencyCode: string = 'UZS'): string {
     // Payme expects amount in TIYIN (1 UZS = 100 tiyin)
-    // Medusa passes amount in UZS (e.g. 60728.64), so blocking conversion to tiyin is needed.
-    const amountForPayme = Math.round(amount * 100)
+    // Medusa 2.0 already stores amounts in minor units (tiyin for UZS)
+    // So we just round to ensure it's an integer, NO multiplication needed
+    const amountForPayme = Math.round(amount)
     
     // Get Store URL for redirect after payment
     // Priority: STORE_URL -> MEDUSA_BACKEND_URL -> localhost
@@ -77,13 +81,13 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     const cleanStoreUrl = storeUrl.replace(/\/$/, "")
     const returnUrl = `${cleanStoreUrl}/checkout`
 
-    this.logger_.info(`Generating Payme URL with: ${JSON.stringify({
+    this.logger_.info(`[Payme] generatePaymentUrl: ${JSON.stringify({
       payme_id: this.options_.payme_id,
-      store_url: cleanStoreUrl,
-      return_url: returnUrl,
-      amount_medusa: amount,
+      order_id: orderId,
+      amount_from_medusa: amount,
       amount_for_payme: amountForPayme,
-      currency: currencyCode
+      currency: currencyCode,
+      return_url: returnUrl
     })}`)
     
     // Create params object

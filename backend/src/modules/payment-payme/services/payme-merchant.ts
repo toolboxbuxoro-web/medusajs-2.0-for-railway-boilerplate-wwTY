@@ -123,25 +123,22 @@ export class PaymeMerchantService {
 
     // Amount validation
     // Payme sends amount in TIYIN (1 UZS = 100 tiyin)
-    const medusaAmount = session ? session.amount : cart.total
+    // Medusa 2.0 stores amounts in minor units (tiyin for UZS), so NO conversion needed
+    const expectedAmount = Math.round(cart.total)
     const currencyCode = cart.currency_code?.toUpperCase()
-    
-    // Convert Medusa amount to tiyin for comparison
-    // Medusa stores UZS as float (e.g. 100.00), Payme wants integer tiyin (e.g. 10000)
-    const medusaAmountInTiyin = Math.round(medusaAmount * 100)
 
-    // Log all possible interpretations for debugging
-    this.logger_.info(`[CheckPerformTransaction] Amount analysis:`)
-    this.logger_.info(`  - medusaAmount (raw): ${medusaAmount}`)
-    this.logger_.info(`  - medusaAmountInTiyin: ${medusaAmountInTiyin}`)
-    this.logger_.info(`  - paymeAmount (tiyin): ${amount}`)
+    // Log for debugging
+    this.logger_.info(`[CheckPerformTransaction] Amount comparison:`)
+    this.logger_.info(`  - cart.total (tiyin): ${cart.total}`)
+    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
     this.logger_.info(`  - currency: ${currencyCode}`)
     
-    // Comparison - both are in tiyins now
-    if (Math.abs(medusaAmountInTiyin - amount) > 10) { // Allow small difference for float math
-      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! medusaAmountInTiyin=${medusaAmountInTiyin}, paymeAmount=${amount}`)
+    // Direct comparison - both should be in tiyin
+    if (expectedAmount !== amount) {
+      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-        `Amount mismatch: expected ${medusaAmountInTiyin}, got ${amount}`)
+        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
     this.logger_.info(`[CheckPerformTransaction] ✅ Validation passed, returning allow: true`)
@@ -202,26 +199,22 @@ export class PaymeMerchantService {
       // Continue execution...
     }
     
-    // Amount validation - direct comparison with detailed logging
-    const medusaAmount = session.amount
+    // Amount validation - Medusa 2.0 stores amounts in tiyin (minor units)
+    const expectedAmount = Math.round(cart.total)
     const currencyCode = cart.currency_code?.toUpperCase()
-    
-    // Convert Medusa amount to tiyin for comparison
-    // Medusa stores UZS as float (e.g. 100.00), Payme wants integer tiyin (e.g. 10000)
-    const medusaAmountInTiyin = Math.round(medusaAmount * 100)
 
     // Log for debugging
-    this.logger_.info(`[CreateTransaction] Amount analysis:`)
-    this.logger_.info(`  - medusaAmount (raw): ${medusaAmount}`)
-    this.logger_.info(`  - medusaAmountInTiyin: ${medusaAmountInTiyin}`)
-    this.logger_.info(`  - paymeAmount (tiyin): ${amount}`)
+    this.logger_.info(`[CreateTransaction] Amount comparison:`)
+    this.logger_.info(`  - cart.total (tiyin): ${cart.total}`)
+    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
     this.logger_.info(`  - currency: ${currencyCode}`)
     
-    // Comparison - both are in tiyins now
-    if (Math.abs(medusaAmountInTiyin - amount) > 10) {
-      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! medusaAmountInTiyin=${medusaAmountInTiyin}, paymeAmount=${amount}`)
+    // Direct comparison - both should be in tiyin
+    if (expectedAmount !== amount) {
+      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-        `Amount mismatch: expected ${medusaAmountInTiyin}, got ${amount}`)
+        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
     // Create new transaction
