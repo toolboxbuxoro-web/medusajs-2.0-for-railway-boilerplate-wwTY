@@ -92,7 +92,9 @@ export class PaymeMerchantService {
 
     const cart = query[0]
 
-    if (!cart) {
+    // IMPORTANT: remoteQuery may return all carts if filter doesn't match
+    // Explicitly verify the cart ID matches what we requested
+    if (!cart || cart.id !== cartId) {
       this.logger_.warn(`[PaymeMerchant] Cart not found for id: ${cartId}`)
       return null
     }
