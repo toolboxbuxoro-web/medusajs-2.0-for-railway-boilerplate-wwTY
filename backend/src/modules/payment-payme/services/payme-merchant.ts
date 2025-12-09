@@ -244,7 +244,8 @@ export class PaymeMerchantService {
     // If a DIFFERENT transaction already exists (pending or completed), block
     if (currentData.payme_transaction_id && currentData.payme_state >= 1) {
       // State 1 = pending, State 2 = completed - both should block new transactions
-      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Another transaction is in progress for this order")
+      // Error code must be in range -31050 to -31099 per Payme spec
+      throw new PaymeError(-31051, "Another transaction is in progress for this order")
     }
 
     // Amount validation using session.amount
