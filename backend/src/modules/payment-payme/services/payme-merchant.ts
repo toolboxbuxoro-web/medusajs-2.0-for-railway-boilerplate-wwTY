@@ -441,10 +441,17 @@ export class PaymeMerchantService {
 
   /**
    * Get the expected amount for validation.
-   * Priority: session.data.amount (from URL) > cart.total
+   * Uses cart.total as the source of truth (always current).
    */
   private getExpectedAmount(session: any, cart: any): number {
     const sessionData = session.data || {}
-    return sessionData.amount ? Math.round(sessionData.amount) : Math.round(cart.total)
+    const sessionAmount = sessionData.amount ? Math.round(sessionData.amount) : null
+    const cartTotal = Math.round(cart.total)
+    
+    this.logger_.info(`[getExpectedAmount] session.data.amount=${sessionAmount}, cart.total=${cartTotal}`)
+    
+    // Use cart.total as it's always current
+    // session.data.amount can be stale if cart was modified after session creation
+    return cartTotal
   }
 }
