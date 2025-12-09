@@ -82,6 +82,44 @@ export class PaymeMerchantService {
     return { cart, session }
   }
 
+  /**
+   * Find payment session by Payme transaction ID
+   * Searches all Payme sessions to find one with matching payme_transaction_id
+   */
+  private async findSessionByPaymeTransactionId(paymeTransactionId: string) {
+    const remoteQuery = this.container_.resolve("remoteQuery")
+    
+    try {
+      // Query all payment sessions
+      const query = await remoteQuery({
+        entryPoint: "payment_session",
+        fields: [
+          "id",
+          "provider_id",
+          "data",
+          "amount",
+          "status",
+          "currency_code"
+        ]
+      })
+      
+      // Find session with matching payme_transaction_id in data
+      const session = query.find((s: any) => {
+        const data = s.data || {}
+        return data.payme_transaction_id === paymeTransactionId
+      })
+      
+      if (session) {
+        this.logger_.info(`[findSessionByPaymeTransactionId] Found session: ${session.id}`)
+      }
+      
+      return session
+    } catch (e) {
+      this.logger_.error(`[findSessionByPaymeTransactionId] Error: ${e.message}`)
+      return null
+    }
+  }
+
   async checkPerformTransaction(params: any) {
     const { amount, account } = params
     const orderId = account.order_id
@@ -429,13 +467,28 @@ export class PaymeMerchantService {
   async checkTransaction(params: any) {
     const { id } = params
     
+    this.logger_.info(`[CheckTransaction] Looking for transaction: ${id}`)
+    
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     
     let session
+    
+    // First, try to find by session.id (our ID returned in CreateTransaction)
     try {
         session = await paymentModule.retrievePaymentSession(id)
+        this.logger_.info(`[CheckTransaction] Found session by session.id: ${session.id}`)
     } catch (e) {
-        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+        // Not found by session.id, try to find by payme_transaction_id
+        this.logger_.info(`[CheckTransaction] Session not found by session.id, searching by payme_transaction_id...`)
+        
+        session = await this.findSessionByPaymeTransactionId(id)
+        
+        if (!session) {
+            this.logger_.error(`[CheckTransaction] Transaction not found: ${id}`)
+            throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+        }
+        
+        this.logger_.info(`[CheckTransaction] Found session by payme_transaction_id: ${session.id}`)
     }
     
     const data = session.data || {}
@@ -444,7 +497,7 @@ export class PaymeMerchantService {
         create_time: data.payme_create_time || 0,
         perform_time: data.payme_perform_time || 0,
         cancel_time: data.payme_cancel_time || 0,
-        transaction: id,
+        transaction: session.id, // Return OUR session ID
         state: data.payme_state || 0,
         reason: data.payme_cancel_reason || null
     }
