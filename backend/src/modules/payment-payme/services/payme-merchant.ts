@@ -122,23 +122,35 @@ export class PaymeMerchantService {
     }
 
     // Amount validation
-    // Payme sends amount in TIYIN (1 UZS = 100 tiyin)
-    // Medusa 2.0 stores amounts in minor units (tiyin for UZS), so NO conversion needed
-    const expectedAmount = Math.round(cart.total)
-    const currencyCode = cart.currency_code?.toUpperCase()
-
-    // Log for debugging
-    this.logger_.info(`[CheckPerformTransaction] Amount comparison:`)
-    this.logger_.info(`  - cart.total (tiyin): ${cart.total}`)
-    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
-    this.logger_.info(`  - paymeAmount: ${amount}`)
-    this.logger_.info(`  - currency: ${currencyCode}`)
-    
-    // Direct comparison - both should be in tiyin
-    if (expectedAmount !== amount) {
-      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
-      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+    // We must compare with the amount that was used to generate the payment URL
+    // This is stored in session.amount, NOT cart.total (which may have changed)
+    if (!session) {
+      // If no session, use cart.total as fallback
+      const expectedAmount = Math.round(cart.total)
+      this.logger_.info(`[CheckPerformTransaction] No session, using cart.total: ${expectedAmount}`)
+      
+      if (expectedAmount !== amount) {
+        this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! cart.total=${expectedAmount}, paymeAmount=${amount}`)
+        throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+          `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+      }
+    } else {
+      // Use session.amount - this is what was used to generate the URL
+      const expectedAmount = Math.round(session.amount)
+      const currencyCode = cart.currency_code?.toUpperCase()
+      
+      this.logger_.info(`[CheckPerformTransaction] Amount comparison:`)
+      this.logger_.info(`  - session.amount: ${session.amount}`)
+      this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+      this.logger_.info(`  - paymeAmount: ${amount}`)
+      this.logger_.info(`  - cart.total (for reference): ${cart.total}`)
+      this.logger_.info(`  - currency: ${currencyCode}`)
+      
+      if (expectedAmount !== amount) {
+        this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! session.amount=${expectedAmount}, paymeAmount=${amount}`)
+        throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+          `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+      }
     }
 
     this.logger_.info(`[CheckPerformTransaction] ✅ Validation passed, returning allow: true`)
@@ -199,20 +211,21 @@ export class PaymeMerchantService {
       // Continue execution...
     }
     
-    // Amount validation - Medusa 2.0 stores amounts in tiyin (minor units)
-    const expectedAmount = Math.round(cart.total)
+    // Amount validation - compare with session.amount (what was used to generate URL)
+    const expectedAmount = Math.round(session.amount)
     const currencyCode = cart.currency_code?.toUpperCase()
 
     // Log for debugging
     this.logger_.info(`[CreateTransaction] Amount comparison:`)
-    this.logger_.info(`  - cart.total (tiyin): ${cart.total}`)
+    this.logger_.info(`  - session.amount: ${session.amount}`)
     this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
     this.logger_.info(`  - paymeAmount: ${amount}`)
+    this.logger_.info(`  - cart.total (for reference): ${cart.total}`)
     this.logger_.info(`  - currency: ${currencyCode}`)
     
     // Direct comparison - both should be in tiyin
     if (expectedAmount !== amount) {
-      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
+      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! session.amount=${expectedAmount}, paymeAmount=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
         `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
