@@ -65,10 +65,9 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
    * Generate Payme payment URL
    */
   private generatePaymentUrl(orderId: string, amount: number, currencyCode: string = 'UZS'): string {
-    // NOTE: We pass amount directly as received from Medusa
-    // Payme expects tiyin (1 UZS = 100 tiyin)
-    // If validation fails, check logs to determine if conversion is needed
-    const amountForPayme = amount
+    // Payme expects amount in TIYIN (1 UZS = 100 tiyin)
+    // Medusa passes amount in UZS (e.g. 60728.64), so blocking conversion to tiyin is needed.
+    const amountForPayme = Math.round(amount * 100)
     
     // Get Store URL for redirect after payment
     // Priority: STORE_URL -> MEDUSA_BACKEND_URL -> localhost
