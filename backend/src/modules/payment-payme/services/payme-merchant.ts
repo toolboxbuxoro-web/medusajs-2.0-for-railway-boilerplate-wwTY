@@ -1,4 +1,3 @@
-import { MedusaError } from "@medusajs/framework/utils"
 import { Logger } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 
@@ -20,6 +19,24 @@ export enum PaymeErrorCodes {
   ORDER_ALREADY_PAID = -31099,
 }
 
+/**
+ * Custom error class for Payme JSON-RPC errors.
+ */
+export class PaymeError extends Error {
+  code: number
+  data: any
+
+  constructor(code: number, message: string, data?: any) {
+    super(message)
+    this.code = code
+    this.data = data
+  }
+}
+
+/**
+ * Service for handling Payme Merchant API JSON-RPC requests.
+ * Follows the standard Payme protocol for transaction lifecycle.
+ */
 export class PaymeMerchantService {
   protected logger_: Logger
   protected container_: any
@@ -29,6 +46,9 @@ export class PaymeMerchantService {
     this.container_ = container
   }
 
+  /**
+   * Route incoming JSON-RPC method calls to the appropriate handler.
+   */
   async handleRequest(method: string, params: any) {
     switch (method) {
       case "CheckPerformTransaction":
@@ -48,15 +68,18 @@ export class PaymeMerchantService {
     }
   }
 
+  /**
+   * Retrieve Payme payment session from a cart.
+   * @param cartId - The Medusa Cart ID (used as order_id).
+   */
   private async getPaymentSession(cartId: string) {
     const remoteQuery = this.container_.resolve("remoteQuery")
-    
-    // Use filters to find cart by ID
+
     const query = await remoteQuery({
       entryPoint: "cart",
       fields: [
-        "id", 
-        "total", 
+        "id",
+        "total",
         "currency_code",
         "payment_collection.payment_sessions.id",
         "payment_collection.payment_sessions.provider_id",
@@ -68,13 +91,12 @@ export class PaymeMerchantService {
     })
 
     const cart = query[0]
-    
+
     if (!cart) {
       this.logger_.warn(`[PaymeMerchant] Cart not found for id: ${cartId}`)
       return null
     }
 
-    // Find Payme session (provider_id can be pp_payme_payme)
     const session = cart.payment_collection?.payment_sessions?.find(
       (s: any) => s.provider_id?.includes("payme")
     )
@@ -83,181 +105,159 @@ export class PaymeMerchantService {
   }
 
   /**
-   * Find payment session by Payme transaction ID
-   * Searches all Payme sessions to find one with matching payme_transaction_id
+   * Find a Medusa Payment Session by Payme's transaction ID.
+   * This is a fallback lookup when we can't find by Medusa Session ID.
+   * @param paymeTransactionId - Payme's transaction ID.
    */
   private async findSessionByPaymeTransactionId(paymeTransactionId: string) {
     const remoteQuery = this.container_.resolve("remoteQuery")
-    
+
     try {
-      // Query all payment sessions
-      const query = await remoteQuery({
+      const allSessions = await remoteQuery({
         entryPoint: "payment_session",
-        fields: [
-          "id",
-          "provider_id",
-          "data",
-          "amount",
-          "status",
-          "currency_code"
-        ]
+        fields: ["id", "provider_id", "data", "amount", "status", "currency_code"]
       })
-      
-      // Find session with matching payme_transaction_id in data
-      const session = query.find((s: any) => {
+
+      const session = allSessions.find((s: any) => {
         const data = s.data || {}
         return data.payme_transaction_id === paymeTransactionId
       })
-      
-      if (session) {
-        this.logger_.info(`[findSessionByPaymeTransactionId] Found session: ${session.id}`)
-      }
-      
-      return session
+
+      return session || null
     } catch (e) {
-      this.logger_.error(`[findSessionByPaymeTransactionId] Error: ${e.message}`)
+      this.logger_.error(`[findSessionByPaymeTransactionId] Error: ${(e as Error).message}`)
       return null
     }
   }
 
+  /**
+   * Robust session lookup: first by Medusa Session ID, then by Payme Transaction ID.
+   * @param id - The ID to look up (could be either).
+   */
+  private async findSession(id: string) {
+    const paymentModule = this.container_.resolve(Modules.PAYMENT)
+
+    // 1. Try to find by Medusa Session ID
+    try {
+      const session = await paymentModule.retrievePaymentSession(id)
+      if (session) {
+        return session
+      }
+    } catch {
+      // Not found by Session ID, continue to fallback
+    }
+
+    // 2. Fallback: Find by Payme Transaction ID
+    const session = await this.findSessionByPaymeTransactionId(id)
+    if (session) {
+      return session
+    }
+
+    return null
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Payme JSON-RPC Method Handlers
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * CheckPerformTransaction: Validate that a payment can be performed.
+   * Called by Payme before CreateTransaction.
+   */
   async checkPerformTransaction(params: any) {
     const { amount, account } = params
-    const orderId = account.order_id
+    const orderId = account?.order_id
 
-    this.logger_.info(`[CheckPerformTransaction] Received: orderId=${orderId}, paymeAmount=${amount}`)
+    this.logger_.info(`[CheckPerformTransaction] orderId=${orderId}, amount=${amount}`)
 
     if (!orderId) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order ID is missing")
     }
 
-    // Find the order in Medusa
     const result = await this.getPaymentSession(orderId)
-    
+
     if (!result || !result.cart) {
-       this.logger_.error(`[CheckPerformTransaction] Cart not found: ${orderId}`)
-       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
+      throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
     const { cart, session } = result
 
-    this.logger_.info(`[CheckPerformTransaction] Found cart: id=${cart.id}, total=${cart.total}`)
-    
     if (!session) {
-      this.logger_.error(`[CheckPerformTransaction] Payment session not found for cart: ${orderId}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Payment session not found")
     }
 
-    this.logger_.info(`[CheckPerformTransaction] Found session: id=${session.id}, status=${session.status}`)
-
     // Check if order is already paid
-    const state = session.data?.payme_state
-    if (state === 2) {
+    if (session.data?.payme_state === 2) {
       throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // Amount validation: compare with session.data.amount OR cart.total as fallback
-    const sessionData = session.data || {}
-    // Priority: session.data.amount (URL amount) > cart.total (current cart)
-    const expectedAmount = sessionData.amount 
-      ? Math.round(sessionData.amount) 
-      : Math.round(cart.total)
-    
-    this.logger_.info(`[CheckPerformTransaction] Amount validation:`)
-    this.logger_.info(`  - session.data.amount (URL): ${sessionData.amount}`)
-    this.logger_.info(`  - cart.total: ${cart.total}`)
-    this.logger_.info(`  - expectedAmount (used): ${expectedAmount}`)
-    this.logger_.info(`  - paymeAmount: ${amount}`)
-    
+    // Amount validation
+    const expectedAmount = this.getExpectedAmount(session, cart)
+
     if (expectedAmount !== amount) {
-      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
-      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+      this.logger_.error(`[CheckPerformTransaction] Amount mismatch: expected=${expectedAmount}, got=${amount}`)
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
-    this.logger_.info(`[CheckPerformTransaction] ✅ Validation passed, returning allow: true`)
+    this.logger_.info(`[CheckPerformTransaction] Validation passed`)
     return { allow: true }
   }
 
+  /**
+   * CreateTransaction: Create a new payment transaction.
+   * Called by Payme after successful CheckPerformTransaction.
+   */
   async createTransaction(params: any) {
     const { id, time, amount, account } = params
-    const orderId = account.order_id
+    const orderId = account?.order_id
 
-    this.logger_.info(`[CreateTransaction] Received: id=${id}, orderId=${orderId}, amount=${amount} tiyin, time=${time}`)
-    
-    // CRITICAL: Check timeout (12 hours)
+    this.logger_.info(`[CreateTransaction] id=${id}, orderId=${orderId}, amount=${amount}`)
+
+    // Timeout check (max 12 hours)
     const TIMEOUT_MS = 12 * 60 * 60 * 1000
-    const currentTime = Date.now()
-
-    if (currentTime - time > TIMEOUT_MS) {
-      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
-        "Transaction timeout: older than 12 hours")
+    if (Date.now() - time > TIMEOUT_MS) {
+      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction timeout: older than 12 hours")
     }
-    
+
     const result = await this.getPaymentSession(orderId)
-    
+
     if (!result || !result.cart) {
-       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
+      throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
     const { cart, session } = result
-    
+
     if (!session) {
-      throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, 
-        "Payment session not found. Please initiate payment first.")
+      throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, "Payment session not found. Please initiate payment first.")
     }
 
-    // FIXED: Improved idempotency
     const currentData = session.data || {}
-    
-    if (currentData.payme_transaction_id) {
-      // If it's the same transaction - return its state (idempotency)
-      if (currentData.payme_transaction_id === id) {
-        return {
-          create_time: currentData.payme_create_time,
-          transaction: session.id,
-          state: currentData.payme_state
-        }
+
+    // Idempotency: If the same transaction ID exists, return its state
+    if (currentData.payme_transaction_id === id) {
+      return {
+        create_time: currentData.payme_create_time,
+        transaction: session.id,
+        state: currentData.payme_state
       }
-      
-      // Different transaction exists - check its state
-      const existingState = currentData.payme_state
-      
-      // Only block if transaction is COMPLETED (state=2)
-      // Completed transactions mean the order is already paid
-      if (existingState === 2) {
-        throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, 
-          "Order already paid")
-      }
-      
-      // For state=1 (created but not paid) or cancelled (-1, -2):
-      // Allow creating new transaction - user might have abandoned previous payment
-      this.logger_.info(`[CreateTransaction] Overwriting existing transaction (state=${existingState}) with new one`)
     }
-    
-    // Amount validation: compare with session.data.amount OR cart.total as fallback
-    const sessionData = session.data || {}
-    // Priority: session.data.amount (URL amount) > cart.total (current cart)
-    const expectedAmount = sessionData.amount 
-      ? Math.round(sessionData.amount) 
-      : Math.round(cart.total)
-    
-    this.logger_.info(`[CreateTransaction] Amount validation:`)
-    this.logger_.info(`  - session.data.amount (URL): ${sessionData.amount}`)
-    this.logger_.info(`  - cart.total: ${cart.total}`)
-    this.logger_.info(`  - expectedAmount (used): ${expectedAmount}`)
-    this.logger_.info(`  - paymeAmount: ${amount}`)
-    
+
+    // If a DIFFERENT transaction already exists and was completed, block
+    if (currentData.payme_transaction_id && currentData.payme_state === 2) {
+      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
+    }
+
+    // Amount validation
+    const expectedAmount = this.getExpectedAmount(session, cart)
+
     if (expectedAmount !== amount) {
-      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
-      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+      this.logger_.error(`[CreateTransaction] Amount mismatch: expected=${expectedAmount}, got=${amount}`)
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
-    this.logger_.info(`[CreateTransaction] Creating transaction for order=${orderId}, amount=${amount}`)
-
-    // Create new transaction
+    // Create or overwrite transaction
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
-    
+
     const newData = {
       ...currentData,
       payme_transaction_id: id,
@@ -268,293 +268,183 @@ export class PaymeMerchantService {
     await paymentModule.updatePaymentSession({
       id: session.id,
       amount: session.amount,
-      currency_code: cart.currency_code || "uzs", // Required by Medusa
+      currency_code: cart.currency_code || "uzs",
       data: newData
     })
-    
+
+    this.logger_.info(`[CreateTransaction] Created transaction for session=${session.id}`)
+
     return {
       create_time: time,
-      transaction: session.id,
+      transaction: session.id, // Return Medusa Session ID for subsequent calls
       state: 1
     }
   }
 
+  /**
+   * PerformTransaction: Finalize a payment.
+   * The `id` in params is our Session ID (returned from CreateTransaction).
+   */
   async performTransaction(params: any) {
     const { id } = params
-    
-    // We need to find the session by Payme Transaction ID. 
-    // Since we can't easily query JSON fields in all DBs via remoteQuery without specific setup,
-    // we might need to rely on the fact that we don't have the Cart ID in params here (only id).
-    // WAIT. Payme `PerformTransaction` params: { id: string }. NO account/order_id.
-    
-    // This is tricky. We need to find the Medusa Payment Session where data.payme_transaction_id == id.
-    // If we can't query by metadata, we are in trouble.
-    // BUT, usually we can store the mapping in a separate table OR we rely on the fact that we might not be able to find it easily.
-    
-    // Alternative: Payme allows passing custom params in the URL? No.
-    
-    // Let's try to query Payment Sessions. 
-    // If we can't filter by data, we might need to fetch active sessions? That's too many.
-    
-    // Re-read Payme docs or standard implementation. 
-    // Usually people store this in a separate table "payme_transactions".
-    
-    // For this boilerplate, let's assume we can use `paymentModule` to list payment sessions and filter? No, too heavy.
-    
-    // Let's look at `CheckPerformTransaction` again. It has `account`.
-    // `CreateTransaction` has `account`.
-    // `PerformTransaction` ONLY has `id`.
-    
-    // We MUST store the transaction ID -> Session ID mapping.
-    // Or we can use the `id` passed in `CreateTransaction` as the `transaction_id` in Medusa?
-    // No, Medusa generates its own IDs.
-    
-    // WORKAROUND:
-    // We will assume for now that we can't easily find the session without a separate table.
-    // BUT, we can try to use `remoteQuery` with a filter on `data` if the DB supports it (Postgres JSONB).
-    // Medusa Remote Query might support it.
-    
-    // Let's try to find the session.
-    const paymentModule = this.container_.resolve(Modules.PAYMENT)
-    
-    // We'll try to list payment sessions. 
-    // If we can't find it, we throw Transaction Not Found.
-    
-    // Since we are using Postgres, we might be able to filter.
-    // But `payment_session` data is `Record<string, unknown>`.
-    
-    // Let's try to use a raw query or a service method if available.
-    // Or, maybe we can just iterate over recent pending sessions? (Bad idea).
-    
-    // BETTER APPROACH for Boilerplate:
-    // We really should have a `PaymeTransaction` entity. 
-    // But to keep it simple and "boilerplate-y" without new migrations if possible:
-    // Can we use the `id` (Payme Transaction ID) as the Payment Session ID? 
-    // No, Payme generates it.
-    
-    // Let's try to search using `remoteQuery` with a filter.
-    // `payment_sessions` table has `data` column.
-    
-    const remoteQuery = this.container_.resolve("remoteQuery")
-    
-    // This is a potential performance bottleneck or impossible query depending on the abstraction.
-    // Let's assume we can't do it efficiently without a custom entity.
-    
-    // However, for the sake of this task, let's try to fetch sessions that are pending.
-    // Or, maybe we can assume the user passes the `order_id` in the URL? 
-    // Payme sends POST to the endpoint. We can't change the body.
-    
-    // WAIT! `CreateTransaction` returns `transaction` ID. 
-    // Does Payme allow us to return OUR ID as the transaction ID?
-    // "id": "5305e3bab097f420a62ced0b" (Payme's ID).
-    // The response must contain "transaction": "..." 
-    // If we return OUR session ID here, Payme will use it in subsequent requests (`PerformTransaction`, `CheckTransaction`).
-    // LET'S CHECK PAYME DOCS (Mental Check).
-    // Yes! The `CreateTransaction` response field `transaction` is "ID of the transaction in the merchant's system".
-    // Payme sends `id` (their ID) in params. We must store it.
-    // But we can return OUR ID (Session ID) as `transaction`.
-    // Then in `PerformTransaction`, `params.id` will be OUR Session ID!
-    
-    // THIS SOLVES EVERYTHING.
-    
-    // So:
-    // 1. In `CreateTransaction`, we store Payme's `id` in `session.data.payme_id`.
-    // 2. We return `session.id` as `transaction`.
-    // 3. In `PerformTransaction`, `params.id` will be `session.id`.
-    
-    return this.performTransactionWithSessionId(params)
-  }
 
-  async performTransactionWithSessionId(params: any) {
-    const sessionId = params.id
-    
-    const paymentModule = this.container_.resolve(Modules.PAYMENT)
-    
-    let session
-    try {
-        session = await paymentModule.retrievePaymentSession(sessionId)
-    } catch (e) {
-        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+    this.logger_.info(`[PerformTransaction] id=${id}`)
+
+    const session = await this.findSession(id)
+
+    if (!session) {
+      throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
     }
 
     const currentData = session.data || {}
-    
+    const paymentModule = this.container_.resolve(Modules.PAYMENT)
+
+    // Idempotency: If already performed, return success
     if (currentData.payme_state === 2) {
-        // Already performed - return success (idempotency)
-        return {
-            transaction: sessionId,
-            perform_time: currentData.payme_perform_time,
-            state: 2
-        }
+      return {
+        transaction: session.id,
+        perform_time: currentData.payme_perform_time,
+        state: 2
+      }
     }
 
+    // Can only perform a transaction in state 1 (created)
     if (currentData.payme_state !== 1) {
-        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
-          "Transaction not in created state")
+      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction not in created state")
     }
-    
-    // CRITICAL: Check timeout (12 hours from creation)
-    const TIMEOUT_MS = 12 * 60 * 60 * 1000
-    const currentTime = Date.now()
-    const createTime = currentData.payme_create_time
 
-    if (currentTime - createTime > TIMEOUT_MS) {
-      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
-        "Transaction timeout: cannot perform after 12 hours")
+    // Timeout check (12 hours from creation)
+    const TIMEOUT_MS = 12 * 60 * 60 * 1000
+    if (Date.now() - currentData.payme_create_time > TIMEOUT_MS) {
+      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction timeout: cannot perform after 12 hours")
     }
-    
+
     // Perform transaction
     const performTime = Date.now()
-    
+
     const newData = {
-        ...currentData,
-        payme_state: 2,
-        payme_perform_time: performTime
+      ...currentData,
+      payme_state: 2,
+      payme_perform_time: performTime,
+      transaction_id: currentData.payme_transaction_id // For Medusa tracking
     }
-    
+
     await paymentModule.updatePaymentSession({
-        id: sessionId,
-        amount: currentData.amount || 0,
-        currency_code: "uzs",
-        data: newData
+      id: session.id,
+      amount: session.amount || currentData.amount || 0,
+      currency_code: session.currency_code || "uzs",
+      data: newData
     })
-    
-    // Authorize payment in Medusa
-    await paymentModule.updatePaymentSession({
-        id: sessionId,
-        amount: currentData.amount || 0,
-        currency_code: "uzs",
-        data: {
-            ...newData,
-            transaction_id: currentData.payme_transaction_id
-        }
-    })
-    
+
+    this.logger_.info(`[PerformTransaction] Performed transaction for session=${session.id}`)
+
     return {
-        transaction: sessionId,
-        perform_time: performTime,
-        state: 2
+      transaction: session.id,
+      perform_time: performTime,
+      state: 2
     }
   }
 
+  /**
+   * CancelTransaction: Cancel a transaction.
+   */
   async cancelTransaction(params: any) {
     const { id, reason } = params
-    
-    const paymentModule = this.container_.resolve(Modules.PAYMENT)
-    
-    let session
-    try {
-        session = await paymentModule.retrievePaymentSession(id)
-    } catch (e) {
-        throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
+
+    this.logger_.info(`[CancelTransaction] id=${id}, reason=${reason}`)
+
+    const session = await this.findSession(id)
+
+    if (!session) {
+      throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
     }
-    
+
     const currentData = session.data || {}
-    const state = currentData.payme_state
-    
-    if (state === 1) {
-        // Cancel created transaction
-        await paymentModule.updatePaymentSession({
-            id,
-            amount: session.amount,
-            currency_code: "uzs",
-            data: {
-                ...currentData,
-                payme_state: -1,
-                payme_cancel_time: Date.now(),
-                payme_cancel_reason: reason
-            }
-        })
-        return {
-            transaction: id,
-            cancel_time: Date.now(),
-            state: -1
-        }
+    const paymentModule = this.container_.resolve(Modules.PAYMENT)
+    const cancelTime = Date.now()
+
+    let newState: number
+
+    if (currentData.payme_state === 1) {
+      // Cancel before performance
+      newState = -1
+    } else if (currentData.payme_state === 2) {
+      // Cancel after performance (refund)
+      newState = -2
+    } else {
+      // Already cancelled, return current state
+      return {
+        transaction: session.id,
+        cancel_time: currentData.payme_cancel_time || cancelTime,
+        state: currentData.payme_state
+      }
     }
-    
-    if (state === 2) {
-        // Cancel performed transaction (Refund)
-        // Check if we can refund (e.g. money sent to merchant)
-        // For now, allow refund.
-         await paymentModule.updatePaymentSession({
-            id,
-            amount: session.amount,
-            currency_code: "uzs",
-            data: {
-                ...currentData,
-                payme_state: -2,
-                payme_cancel_time: Date.now(),
-                payme_cancel_reason: reason
-            }
-        })
-        return {
-            transaction: id,
-            cancel_time: Date.now(),
-            state: -2
-        }
-    }
-    
-    // Already cancelled
+
+    await paymentModule.updatePaymentSession({
+      id: session.id,
+      amount: session.amount,
+      currency_code: session.currency_code || "uzs",
+      data: {
+        ...currentData,
+        payme_state: newState,
+        payme_cancel_time: cancelTime,
+        payme_cancel_reason: reason
+      }
+    })
+
+    this.logger_.info(`[CancelTransaction] Cancelled session=${session.id}, newState=${newState}`)
+
     return {
-        transaction: id,
-        cancel_time: currentData.payme_cancel_time || Date.now(),
-        state: state
+      transaction: session.id,
+      cancel_time: cancelTime,
+      state: newState
     }
   }
 
+  /**
+   * CheckTransaction: Get the status of a transaction.
+   */
   async checkTransaction(params: any) {
     const { id } = params
-    
-    this.logger_.info(`[CheckTransaction] Looking for transaction: ${id}`)
-    
-    const paymentModule = this.container_.resolve(Modules.PAYMENT)
-    
-    let session
-    
-    // First, try to find by session.id (our ID returned in CreateTransaction)
-    try {
-        session = await paymentModule.retrievePaymentSession(id)
-        this.logger_.info(`[CheckTransaction] Found session by session.id: ${session.id}`)
-    } catch (e) {
-        // Not found by session.id, try to find by payme_transaction_id
-        this.logger_.info(`[CheckTransaction] Session not found by session.id, searching by payme_transaction_id...`)
-        
-        session = await this.findSessionByPaymeTransactionId(id)
-        
-        if (!session) {
-            this.logger_.error(`[CheckTransaction] Transaction not found: ${id}`)
-            throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
-        }
-        
-        this.logger_.info(`[CheckTransaction] Found session by payme_transaction_id: ${session.id}`)
+
+    this.logger_.info(`[CheckTransaction] id=${id}`)
+
+    const session = await this.findSession(id)
+
+    if (!session) {
+      throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
     }
-    
+
     const data = session.data || {}
-    
+
     return {
-        create_time: data.payme_create_time || 0,
-        perform_time: data.payme_perform_time || 0,
-        cancel_time: data.payme_cancel_time || 0,
-        transaction: session.id, // Return OUR session ID
-        state: data.payme_state || 0,
-        reason: data.payme_cancel_reason || null
+      create_time: data.payme_create_time || 0,
+      perform_time: data.payme_perform_time || 0,
+      cancel_time: data.payme_cancel_time || 0,
+      transaction: session.id,
+      state: data.payme_state || 0,
+      reason: data.payme_cancel_reason || null
     }
   }
 
+  /**
+   * GetStatement: Return list of transactions in a time range.
+   * Placeholder implementation.
+   */
   async getStatement(params: any) {
-    return {
-      transactions: []
-    }
+    return { transactions: [] }
   }
-}
 
-export class PaymeError extends Error {
-  code: number
-  data: any
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Helper Methods
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  constructor(code: number, message: string, data?: any) {
-    super(message)
-    this.code = code
-    this.data = data
+  /**
+   * Get the expected amount for validation.
+   * Priority: session.data.amount (from URL) > cart.total
+   */
+  private getExpectedAmount(session: any, cart: any): number {
+    const sessionData = session.data || {}
+    return sessionData.amount ? Math.round(sessionData.amount) : Math.round(cart.total)
   }
 }

@@ -1,8 +1,8 @@
-import { 
-  AbstractPaymentProvider, 
+import {
+  AbstractPaymentProvider,
   PaymentSessionStatus
 } from "@medusajs/framework/utils"
-import { 
+import {
   Logger,
   ProviderWebhookPayload,
   WebhookActionResult
@@ -26,8 +26,16 @@ interface PaymeSessionData {
   payment_url?: string
   transaction_id?: string
   status?: string
+  payme_transaction_id?: string
+  payme_state?: number
+  payme_create_time?: number
+  payme_perform_time?: number
 }
 
+/**
+ * Payme Payment Provider Service for Medusa 2.0.
+ * Handles payment URL generation and session lifecycle.
+ */
 export class PaymePaymentProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "payme"
   protected logger_: Logger
@@ -37,100 +45,68 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
     this.logger_ = container.logger
+
     // Trim credentials to avoid whitespace issues
     this.options_ = {
       payme_id: options.payme_id?.trim(),
       payme_key: options.payme_key?.trim(),
       payme_url: options.payme_url
     }
-    
+
     // Priority: options.payme_url -> env PAYME_URL -> default
-    this.paymeUrl_ = this.formatPaymeUrl(options.payme_url || process.env.PAYME_URL || "https://checkout.paycom.uz")
-    
-    this.logger_.info(`Payme Payment Provider initialized: ${JSON.stringify({
-      payme_id: this.options_.payme_id,
-      has_key: !!this.options_.payme_key,
-      payme_url: this.paymeUrl_
-    })}`)
+    this.paymeUrl_ = this.formatPaymeUrl(
+      options.payme_url || process.env.PAYME_URL || "https://checkout.paycom.uz"
+    )
+
+    this.logger_.info(`[Payme] Provider initialized with merchant: ${this.options_.payme_id}`)
   }
 
   private formatPaymeUrl(url: string): string {
-    if (!url.startsWith("http")) {
-      return `https://${url}`
+    let formatted = url
+    if (!formatted.startsWith("http")) {
+      formatted = `https://${formatted}`
     }
-    return url.replace(/\/$/, "")
+    return formatted.replace(/\/$/, "")
   }
 
   /**
-   * Generate Payme payment URL
-   * @param orderId - Cart ID used as order identifier
-   * @param amount - Amount in tiyin (Medusa 2.0 stores amounts in minor units)
-   * @param currencyCode - Currency code (default UZS)
+   * Generate Payme payment URL.
+   * @param orderId - Cart ID used as order identifier.
+   * @param amount - Amount in tiyin (Medusa 2.0 stores amounts in minor units).
+   * @param currencyCode - Currency code (default UZS).
    */
-  private generatePaymentUrl(orderId: string, amount: number, currencyCode: string = 'UZS'): string {
-    // Payme expects amount in TIYIN (1 UZS = 100 tiyin)
+  private generatePaymentUrl(orderId: string, amount: number, currencyCode: string = "UZS"): string {
     // Medusa 2.0 already stores amounts in minor units (tiyin for UZS)
-    // So we just round to ensure it's an integer, NO multiplication needed
     const amountForPayme = Math.round(amount)
-    
+
     // Get Store URL for redirect after payment
-    // Priority: STORE_URL -> MEDUSA_BACKEND_URL -> localhost
-    const storeUrl = process.env.STORE_URL || process.env.MEDUSA_BACKEND_URL || 'http://localhost:8000'
-    
-    // Ensure no trailing slash
+    const storeUrl = process.env.STORE_URL || process.env.MEDUSA_BACKEND_URL || "http://localhost:8000"
     const cleanStoreUrl = storeUrl.replace(/\/$/, "")
     const returnUrl = `${cleanStoreUrl}/checkout`
 
-    this.logger_.info(`[Payme] generatePaymentUrl: ${JSON.stringify({
-      payme_id: this.options_.payme_id,
-      order_id: orderId,
-      amount_from_medusa: amount,
-      amount_for_payme: amountForPayme,
-      currency: currencyCode,
-      return_url: returnUrl
-    })}`)
-    
-    // Create params object
     // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
-    const params = {
-      m: this.options_.payme_id,
-      ac: {
-        order_id: orderId
-      },
-      a: amountForPayme,
-      c: returnUrl 
-    }
-    
-    // Encode params to base64
-    // Payme expects: https://checkout.paycom.uz/<base64_params>
-    // The string format is: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
-    const paramString = `m=${params.m};ac.order_id=${params.ac.order_id};a=${params.a};c=${params.c}`
-    const encodedParams = Buffer.from(paramString).toString('base64')
-    
+    const paramString = `m=${this.options_.payme_id};ac.order_id=${orderId};a=${amountForPayme};c=${returnUrl}`
+    const encodedParams = Buffer.from(paramString).toString("base64")
+
     const paymentUrl = `${this.paymeUrl_}/${encodedParams}`
-    
-    this.logger_.info(`Generated Payme payment URL: ${paymentUrl}`)
-    
+
+    this.logger_.info(`[Payme] Generated payment URL for order=${orderId}, amount=${amountForPayme}`)
+
     return paymentUrl
   }
 
-  async initiatePayment(
-    input: any
-  ): Promise<any> {
-    this.logger_.info(`[Payme] initiatePayment called with input: ${JSON.stringify(input)}`)
-    
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Payment Provider Interface Methods
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  async initiatePayment(input: any): Promise<any> {
     try {
       const { context, amount, currency_code } = input
       const orderId = context?.resource_id || crypto.randomUUID()
-      
-      this.logger_.info(`[Payme] Initiating payment: order_id=${orderId}, amount=${amount}, currency=${currency_code}`)
-      this.logger_.info(`[Payme] Using paymeUrl: ${this.paymeUrl_}`)
-      this.logger_.info(`[Payme] Using payme_id: ${this.options_.payme_id}`)
 
-      // Generate payment URL with proper currency handling
+      this.logger_.info(`[Payme] Initiating payment: order_id=${orderId}, amount=${amount}`)
+
       const paymentUrl = this.generatePaymentUrl(orderId, amount as number, currency_code)
-      
-      this.logger_.info(`[Payme] Generated payment URL: ${paymentUrl}`)
 
       const sessionData: PaymeSessionData = {
         order_id: orderId,
@@ -140,66 +116,50 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         status: "pending"
       }
 
-      this.logger_.info(`[Payme] Returning session data: ${JSON.stringify(sessionData)}`)
-
-      return {
-        data: sessionData
-      }
+      return { data: sessionData }
     } catch (error) {
-      this.logger_.error(`[Payme] Error initiating payment: ${error.message}`, error)
+      this.logger_.error(`[Payme] Error initiating payment: ${(error as Error).message}`)
       return {
-        error: error.message,
+        error: (error as Error).message,
         code: "PAYME_INITIATE_ERROR",
         detail: error
       }
     }
   }
 
-  async authorizePayment(
-    input: any
-  ): Promise<any> {
-    console.log("Authorizing Payme payment", { input })
-    
+  async authorizePayment(input: any): Promise<any> {
     try {
       const sessionData = (input.data || input) as PaymeSessionData
-      
-      this.logger_.info(`Authorizing Payme payment: ${JSON.stringify({
-        order_id: sessionData.order_id,
-        transaction_id: sessionData.transaction_id
-      })}`)
 
-      // In a real implementation, you would verify the payment with Payme API
-      // For now, we'll mark it as authorized if we have a transaction_id
-      const status = sessionData.transaction_id ? 
-        PaymentSessionStatus.AUTHORIZED : 
-        PaymentSessionStatus.PENDING
+      // Check if payment was completed by Payme (state=2 means performed)
+      const isAuthorized = sessionData.payme_state === 2 || sessionData.transaction_id
+
+      const status = isAuthorized
+        ? PaymentSessionStatus.AUTHORIZED
+        : PaymentSessionStatus.PENDING
 
       return {
         status,
         data: {
           ...sessionData,
-          status: status === PaymentSessionStatus.AUTHORIZED ? "authorized" : "pending"
+          status: isAuthorized ? "authorized" : "pending"
         }
       }
     } catch (error) {
-      this.logger_.error("Error authorizing Payme payment", error)
+      this.logger_.error(`[Payme] Error authorizing payment: ${(error as Error).message}`)
       return {
-        error: error.message,
+        error: (error as Error).message,
         code: "PAYME_AUTHORIZE_ERROR",
         detail: error
       }
     }
   }
 
-  async cancelPayment(
-    input: any
-  ): Promise<any> {
+  async cancelPayment(input: any): Promise<any> {
     try {
       const sessionData = (input.data || input) as PaymeSessionData
-      
-      this.logger_.info(`Canceling Payme payment: ${JSON.stringify({
-        order_id: sessionData.order_id
-      })}`)
+
+      this.logger_.info(`[Payme] Cancelling payment: order_id=${sessionData.order_id}`)
 
       return {
         data: {
@@ -208,25 +168,20 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         }
       }
     } catch (error) {
-      this.logger_.error("Error canceling Payme payment", error)
+      this.logger_.error(`[Payme] Error canceling payment: ${(error as Error).message}`)
       return {
-        error: error.message,
+        error: (error as Error).message,
         code: "PAYME_CANCEL_ERROR",
         detail: error
       }
     }
   }
 
-  async capturePayment(
-    input: any
-  ): Promise<any> {
+  async capturePayment(input: any): Promise<any> {
     try {
       const sessionData = (input.data || input) as PaymeSessionData
-      
-      this.logger_.info(`Capturing Payme payment: ${JSON.stringify({
-        order_id: sessionData.order_id,
-        transaction_id: sessionData.transaction_id
-      })}`)
+
+      this.logger_.info(`[Payme] Capturing payment: order_id=${sessionData.order_id}`)
 
       return {
         data: {
@@ -235,18 +190,16 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         }
       }
     } catch (error) {
-      this.logger_.error("Error capturing Payme payment", error)
+      this.logger_.error(`[Payme] Error capturing payment: ${(error as Error).message}`)
       return {
-        error: error.message,
+        error: (error as Error).message,
         code: "PAYME_CAPTURE_ERROR",
         detail: error
       }
     }
   }
 
-  async deletePayment(
-    input: any
-  ): Promise<any> {
+  async deletePayment(input: any): Promise<any> {
     const sessionData = (input.data || input) as PaymeSessionData
     return {
       data: {
@@ -256,33 +209,31 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     }
   }
 
-  async getPaymentStatus(
-    input: any
-  ): Promise<any> {
+  async getPaymentStatus(input: any): Promise<any> {
     const sessionData = (input.data || input) as PaymeSessionData
-    
-    if (sessionData.transaction_id || sessionData.status === "authorized" || sessionData.status === "captured") {
+
+    // Check Payme's state for definitive status
+    if (sessionData.payme_state === 2 || sessionData.status === "captured") {
       return PaymentSessionStatus.AUTHORIZED
     }
-    
+
+    if (sessionData.payme_state && sessionData.payme_state < 0) {
+      return PaymentSessionStatus.CANCELED
+    }
+
     if (sessionData.status === "canceled") {
       return PaymentSessionStatus.CANCELED
     }
-    
+
     return PaymentSessionStatus.PENDING
   }
 
-  async refundPayment(
-    input: any
-  ): Promise<any> {
+  async refundPayment(input: any): Promise<any> {
     try {
       const sessionData = (input.data || input) as PaymeSessionData
-      const refundAmount = input.amount || 0;
-      
-      this.logger_.info(`Refunding Payme payment: ${JSON.stringify({
-        order_id: sessionData.order_id,
-        refund_amount: refundAmount
-      })}`)
+      const refundAmount = input.amount || 0
+
+      this.logger_.info(`[Payme] Refunding payment: order_id=${sessionData.order_id}, amount=${refundAmount}`)
 
       return {
         data: {
@@ -292,41 +243,32 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         }
       }
     } catch (error) {
-      this.logger_.error("Error refunding Payme payment", error)
+      this.logger_.error(`[Payme] Error refunding payment: ${(error as Error).message}`)
       return {
-        error: error.message,
+        error: (error as Error).message,
         code: "PAYME_REFUND_ERROR",
         detail: error
       }
     }
   }
 
-  async retrievePayment(
-    input: any
-  ): Promise<any> {
+  async retrievePayment(input: any): Promise<any> {
     const sessionData = (input.data || input) as PaymeSessionData
-    return {
-      data: sessionData
-    }
+    return { data: sessionData }
   }
 
-  async updatePayment(
-    input: any
-  ): Promise<any> {
+  async updatePayment(input: any): Promise<any> {
     try {
       const { data, context, amount, currency_code } = input
       const sessionData = data as PaymeSessionData
 
-      this.logger_.info(`Updating Payme payment: ${JSON.stringify({
-        order_id: sessionData.order_id,
-        new_amount: amount
-      })}`)
+      this.logger_.info(`[Payme] Updating payment: order_id=${sessionData.order_id}`)
 
-      // If amount changed, regenerate payment URL with proper currency handling
+      // If amount changed, regenerate payment URL
       if (amount && amount !== sessionData.amount) {
-        const currency = currency_code || sessionData.currency || 'UZS'
+        const currency = currency_code || sessionData.currency || "UZS"
         const paymentUrl = this.generatePaymentUrl(sessionData.order_id, amount as number, currency)
-        
+
         return {
           data: {
             ...sessionData,
@@ -344,25 +286,19 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         }
       }
     } catch (error) {
-      this.logger_.error("Error updating Payme payment", error)
+      this.logger_.error(`[Payme] Error updating payment: ${(error as Error).message}`)
       return {
-        error: error.message,
+        error: (error as Error).message,
         code: "PAYME_UPDATE_ERROR",
         detail: error
       }
     }
   }
-  
-  async getWebhookActionAndData(
-    data: ProviderWebhookPayload['payload']
-  ): Promise<WebhookActionResult> {
+
+  async getWebhookActionAndData(data: ProviderWebhookPayload["payload"]): Promise<WebhookActionResult> {
     try {
-      this.logger_.info(`Processing Payme webhook: ${JSON.stringify(data)}`)
-      
-      // Cast data to any to access properties safely since payload is unknown
       const payload = data.data as any
-      
-      // Handle payment success callback
+
       if (payload?.status === "success" || payload?.transaction_id) {
         return {
           action: "authorized",
@@ -372,8 +308,7 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
           }
         }
       }
-      
-      // Handle payment cancellation
+
       if (payload?.status === "canceled") {
         return {
           action: "failed",
@@ -383,15 +318,11 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
           }
         }
       }
-      
-      return {
-        action: "not_supported"
-      }
+
+      return { action: "not_supported" }
     } catch (error) {
-      this.logger_.error("Error processing Payme webhook", error)
-      return {
-        action: "not_supported"
-      }
+      this.logger_.error(`[Payme] Error processing webhook: ${(error as Error).message}`)
+      return { action: "not_supported" }
     }
   }
 }

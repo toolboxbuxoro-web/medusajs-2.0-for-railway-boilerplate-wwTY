@@ -27,6 +27,10 @@ export const PaymePaymentButton = ({
   console.log("[Payme Button] All sessions:", cart.payment_collection?.payment_sessions)
   console.log("[Payme Button] Session found:", session)
   console.log("[Payme Button] Session data:", session?.data)
+  console.log("==========================================")
+  console.log("💳 CART ID FOR PAYME (order_id):", cart.id)
+  console.log("💰 CART TOTAL (amount):", cart.total)
+  console.log("==========================================")
 
   const handlePayment = async () => {
     setSubmitting(true)
