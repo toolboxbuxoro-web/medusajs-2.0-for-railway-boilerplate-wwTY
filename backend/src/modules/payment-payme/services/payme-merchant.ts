@@ -196,6 +196,11 @@ export class PaymeMerchantService {
     // Amount validation
     const expectedAmount = this.getExpectedAmount(session, cart)
 
+    // Reject empty cart (zero or negative amount)
+    if (expectedAmount <= 0) {
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Cart is empty or has invalid amount")
+    }
+
     if (expectedAmount !== amount) {
       this.logger_.error(`[CheckPerformTransaction] Amount mismatch: expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
