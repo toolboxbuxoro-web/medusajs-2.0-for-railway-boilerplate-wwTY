@@ -191,7 +191,8 @@ export class PaymeMerchantService {
 
     await paymentModule.updatePaymentSession({
       id: session.id,
-      amount: session.amount, // Required by Medusa
+      amount: session.amount,
+      currency_code: cart.currency_code || "uzs", // Required by Medusa
       data: newData
     })
     
@@ -337,14 +338,16 @@ export class PaymeMerchantService {
     
     await paymentModule.updatePaymentSession({
         id: sessionId,
-        amount: currentData.amount || 0, // Preserve original amount
+        amount: currentData.amount || 0,
+        currency_code: "uzs",
         data: newData
     })
     
     // Authorize payment in Medusa
     await paymentModule.updatePaymentSession({
         id: sessionId,
-        amount: currentData.amount || 0, // Preserve original amount
+        amount: currentData.amount || 0,
+        currency_code: "uzs",
         data: {
             ...newData,
             transaction_id: currentData.payme_transaction_id
@@ -377,7 +380,8 @@ export class PaymeMerchantService {
         // Cancel created transaction
         await paymentModule.updatePaymentSession({
             id,
-            amount: session.amount, // Preserve amount
+            amount: session.amount,
+            currency_code: "uzs",
             data: {
                 ...currentData,
                 payme_state: -1,
@@ -398,7 +402,8 @@ export class PaymeMerchantService {
         // For now, allow refund.
          await paymentModule.updatePaymentSession({
             id,
-            amount: session.amount, // Preserve amount
+            amount: session.amount,
+            currency_code: "uzs",
             data: {
                 ...currentData,
                 payme_state: -2,
