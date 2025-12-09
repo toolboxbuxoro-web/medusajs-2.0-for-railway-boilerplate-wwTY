@@ -1,5 +1,6 @@
 import { Logger } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
+import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 
 type InjectedDependencies = {
   logger: Logger
@@ -83,7 +84,8 @@ export class PaymeMerchantService {
         "payment_collection.payment_sessions.provider_id",
         "payment_collection.payment_sessions.data",
         "payment_collection.payment_sessions.amount",
-        "payment_collection.payment_sessions.status"
+        "payment_collection.payment_sessions.status",
+        "completed_at"
       ],
       filters: { id: cartId }
     })
@@ -149,8 +151,9 @@ export class PaymeMerchantService {
     }
 
     // Check if order is already paid
-    if (session.data?.payme_state === 2) {
-      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
+    // Check if order is already paid
+    if (cart.completed_at) {
+      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order (Cart) already completed")
     }
 
     // Amount validation - use cart.total as source of truth
@@ -224,7 +227,8 @@ export class PaymeMerchantService {
       ...currentData,
       payme_transaction_id: id,
       payme_create_time: time,
-      payme_state: 1
+      payme_state: 1,
+      cart_id: cart.id // Save cart ID for PerformTransaction
     }
 
     await paymentModule.updatePaymentSession({
@@ -277,6 +281,24 @@ export class PaymeMerchantService {
     const TIMEOUT_MS = 12 * 60 * 60 * 1000
     if (Date.now() - currentData.payme_create_time > TIMEOUT_MS) {
       throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction timeout: cannot perform after 12 hours")
+    }
+
+    // Attempt to complete the cart in Medusa
+    const cartId = currentData.cart_id
+    if (cartId) {
+      try {
+        await completeCartWorkflow(this.container_).run({
+          input: {
+            id: cartId
+          }
+        })
+        this.logger_.info(`[PaymeMerchant] Successfully completed cart ${cartId} for transaction ${id}`)
+      } catch (e) {
+        this.logger_.error(`[PaymeMerchant] Failed to complete cart ${cartId}: ${e}`)
+        // We still proceed to confirm the transaction to Payme to avoid desync
+      }
+    } else {
+        this.logger_.warn(`[PaymeMerchant] No cart_id found for transaction ${id}, skipping cart completion`)
     }
 
     // Perform transaction
