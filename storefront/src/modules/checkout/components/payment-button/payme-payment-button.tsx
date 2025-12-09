@@ -2,6 +2,7 @@ import { Button } from "@medusajs/ui"
 import { HttpTypes } from "@medusajs/types"
 import React, { useState } from "react"
 import { useTranslations } from "next-intl"
+import { placeOrder } from "@lib/data/cart"
 
 export const PaymePaymentButton = ({
   cart,
@@ -13,45 +14,69 @@ export const PaymePaymentButton = ({
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const t = useTranslations("checkout")
 
   const session = cart.payment_collection?.payment_sessions?.find(
     (s) => s.provider_id === "payme"
   )
 
+  console.log("[Payme Button] Session found:", session)
+  console.log("[Payme Button] Session data:", session?.data)
+
   const handlePayment = async () => {
     setSubmitting(true)
+    setErrorMessage(null)
+
+    console.log("[Payme Button] handlePayment called")
+    console.log("[Payme Button] Session status:", session?.status)
 
     // If payment is already authorized, place the order
     if (session?.status === "authorized") {
+      console.log("[Payme Button] Session is authorized, placing order...")
       try {
         await placeOrder()
-      } catch (err) {
+      } catch (err: any) {
         setSubmitting(false)
-        console.error("Error placing order:", err)
+        setErrorMessage(err.message || "Error placing order")
+        console.error("[Payme Button] Error placing order:", err)
       }
       return
     }
     
     const paymentUrl = (session?.data as any)?.payment_url
+    console.log("[Payme Button] Payment URL:", paymentUrl)
     
     if (paymentUrl) {
+      console.log("[Payme Button] Redirecting to Payme...")
       window.location.href = paymentUrl
     } else {
       setSubmitting(false)
-      console.error("Payme payment URL not found")
+      const errMsg = "Payment URL not found. Please refresh the page and try again."
+      setErrorMessage(errMsg)
+      console.error("[Payme Button] Payme payment URL not found in session.data:", session?.data)
     }
   }
 
   return (
-    <Button
-      disabled={notReady}
-      isLoading={submitting}
-      onClick={handlePayment}
-      size="large"
-      data-testid={dataTestId}
-    >
-      {session?.status === "authorized" ? t("place_order") : t("place_order")}
-    </Button>
+    <div className="flex flex-col gap-2">
+      <Button
+        disabled={notReady || !session}
+        isLoading={submitting}
+        onClick={handlePayment}
+        size="large"
+        data-testid={dataTestId}
+      >
+        {session?.status === "authorized" ? t("place_order") : t("place_order")}
+      </Button>
+      {errorMessage && (
+        <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+      )}
+      {!session && (
+        <p className="text-orange-500 text-sm text-center">
+          Payment session not initialized. Please go back and select payment method again.
+        </p>
+      )}
+    </div>
   )
 }
