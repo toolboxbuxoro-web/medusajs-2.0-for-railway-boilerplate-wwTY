@@ -36,60 +36,43 @@ export const PaymePaymentButton = ({
     setSubmitting(true)
     setErrorMessage(null)
 
-    console.log("[Payme Button] handlePayment called")
-    console.log("[Payme Button] Session status:", session?.status)
-
     // If payment is already authorized, place the order
     if (session?.status === "authorized") {
-      console.log("[Payme Button] Session is authorized, placing order...")
       try {
         await placeOrder()
       } catch (err: any) {
         setSubmitting(false)
         setErrorMessage(err.message || "Error placing order")
-        console.error("[Payme Button] Error placing order:", err)
       }
       return
     }
     
     try {
-      // Re-initiate payment to ensure we have the latest amount and URL
-      // This fixes the "Amount mismatch" error by forcing a fresh URL generation
-      console.log("[Payme Button] Re-initiating payment to ensure fresh URL...")
+      // Always generate fresh payment URL with current cart.total
+      // This prevents amount mismatch when cart was modified after session creation
+      console.log("[Payme] Generating fresh payment URL with cart.total:", cart.total)
       
-      // We need to import initiatePaymentSession dynamically or passing it as prop?
-      // Better to import it at top roughly
       const { initiatePaymentSession } = await import("@lib/data/cart")
       
       const resp = await initiatePaymentSession(cart, {
         provider_id: session?.provider_id || "pp_payme_payme"
       })
       
-      console.log("[Payme Button] Re-initiate response:", resp)
-      
       const paymentCollection = resp.payment_collection
       const newSession = paymentCollection?.payment_sessions?.find((s: any) => isPayme(s.provider_id))
       const newPaymentUrl = (newSession?.data as any)?.payment_url
       
-      console.log("[Payme Button] New Payment URL:", newPaymentUrl)
+      console.log("[Payme] Fresh URL generated:", newPaymentUrl)
       
       if (newPaymentUrl) {
-        console.log("[Payme Button] Redirecting to Payme...")
         window.location.href = newPaymentUrl
       } else {
-        // Fallback to existing session url if re-init didn't return one (unlikely)
-        const paymentUrl = (session?.data as any)?.payment_url
-        if (paymentUrl) {
-           console.log("[Payme Button] Using existing URL as fallback...")
-           window.location.href = paymentUrl
-        } else {
-           throw new Error("Payme payment URL not found")
-        }
+        throw new Error("Failed to generate payment URL")
       }
     } catch (err: any) {
       setSubmitting(false)
       setErrorMessage(err.message || "Error initiating payment")
-      console.error("[Payme Button] Error:", err)
+      console.error("[Payme] Error:", err)
     }
   }
 
