@@ -106,13 +106,20 @@ const Payment = ({
         })
         
         console.log("[Payment] initiatePaymentSession result:", result)
+        
+        // Force refresh to get updated cart data from server
+        console.log("[Payment] Refreshing page data...")
+        router.refresh()
+        
+        // Small delay to allow refresh to complete
+        await new Promise(resolve => setTimeout(resolve, 500))
       } else {
         console.log("[Payment] Active session exists, skipping initiation")
       }
 
       if (!shouldInputCard) {
         console.log("[Payment] Navigating to review step...")
-        return router.push(
+        router.push(
           pathname + "?" + createQueryString("step", "review"),
           {
             scroll: false,
