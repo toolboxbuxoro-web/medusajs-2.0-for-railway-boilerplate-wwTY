@@ -90,12 +90,15 @@ export class PaymeMerchantService {
       filters: { id: cartId }
     })
 
-    const cart = query[0]
+    // Handle both array and object with rows property
+    const carts = Array.isArray(query) ? query : (query?.rows || [])
 
-    // IMPORTANT: remoteQuery may return all carts if filter doesn't match
-    // Explicitly verify the cart ID matches what we requested
-    if (!cart || cart.id !== cartId) {
-      this.logger_.warn(`[PaymeMerchant] Cart not found for id: ${cartId}`)
+    // BUG FIX: remoteQuery may return all carts if filter doesn't work
+    // Search for the specific cart in the returned array
+    const cart = carts.find((c: any) => c.id === cartId)
+
+    if (!cart) {
+      this.logger_.warn(`[PaymeMerchant] Cart not found for id: ${cartId}. Query returned ${carts.length} carts.`)
       return null
     }
 
