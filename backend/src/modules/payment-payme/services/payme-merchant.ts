@@ -179,10 +179,21 @@ export class PaymeMerchantService {
     const result = await this.getPaymentSession(orderId)
 
     if (!result || !result.cart) {
+      this.logger_.warn(`[CheckPerformTransaction] Cart not found for orderId=${orderId}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
     const { cart, session } = result
+
+    // Log cart details for debugging
+    this.logger_.info(`[CheckPerformTransaction] ===== CART DETAILS =====`)
+    this.logger_.info(`[CheckPerformTransaction] cart.id = ${cart.id}`)
+    this.logger_.info(`[CheckPerformTransaction] cart.total = ${cart.total}`)
+    this.logger_.info(`[CheckPerformTransaction] cart.currency = ${cart.currency_code}`)
+    this.logger_.info(`[CheckPerformTransaction] session.id = ${session?.id}`)
+    this.logger_.info(`[CheckPerformTransaction] session.amount = ${session?.amount}`)
+    this.logger_.info(`[CheckPerformTransaction] session.data.amount = ${session?.data?.amount}`)
+    this.logger_.info(`[CheckPerformTransaction] ========================`)
 
     if (!session) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Payment session not found")
@@ -206,7 +217,7 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
-    this.logger_.info(`[CheckPerformTransaction] Validation passed`)
+    this.logger_.info(`[CheckPerformTransaction] Validation passed for cart=${cart.id}, amount=${amount}`)
     return { allow: true }
   }
 
