@@ -88,17 +88,30 @@ const Payment = ({
 
   const handleSubmit = async () => {
     setIsLoading(true)
+    console.log("[Payment] handleSubmit called")
+    console.log("[Payment] selectedPaymentMethod:", selectedPaymentMethod)
+    console.log("[Payment] activeSession:", activeSession)
+    console.log("[Payment] cart.payment_collection:", cart.payment_collection)
+    
     try {
       const shouldInputCard =
         isStripeFunc(selectedPaymentMethod) && !activeSession
 
       if (!activeSession) {
-        await initiatePaymentSession(cart, {
+        console.log("[Payment] No active session, calling initiatePaymentSession...")
+        console.log("[Payment] Provider ID to use:", selectedPaymentMethod)
+        
+        const result = await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })
+        
+        console.log("[Payment] initiatePaymentSession result:", result)
+      } else {
+        console.log("[Payment] Active session exists, skipping initiation")
       }
 
       if (!shouldInputCard) {
+        console.log("[Payment] Navigating to review step...")
         return router.push(
           pathname + "?" + createQueryString("step", "review"),
           {
@@ -107,6 +120,7 @@ const Payment = ({
         )
       }
     } catch (err: any) {
+      console.error("[Payment] Error in handleSubmit:", err)
       setError(err.message)
     } finally {
       setIsLoading(false)
