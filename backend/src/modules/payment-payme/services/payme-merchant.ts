@@ -123,34 +123,37 @@ export class PaymeMerchantService {
 
     // Amount validation
     // We must compare with the amount that was used to generate the payment URL
-    // This is stored in session.amount, NOT cart.total (which may have changed)
+    // This is stored in session.data.amount (what we saved in initiatePayment)
+    // NOT session.amount (which is set by Medusa Core and may differ)
     if (!session) {
-      // If no session, use cart.total as fallback
-      const expectedAmount = Math.round(cart.total)
-      this.logger_.info(`[CheckPerformTransaction] No session, using cart.total: ${expectedAmount}`)
-      
-      if (expectedAmount !== amount) {
-        this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! cart.total=${expectedAmount}, paymeAmount=${amount}`)
-        throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-          `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
-      }
-    } else {
-      // Use session.amount - this is what was used to generate the URL
-      const expectedAmount = Math.round(session.amount)
-      const currencyCode = cart.currency_code?.toUpperCase()
-      
-      this.logger_.info(`[CheckPerformTransaction] Amount comparison:`)
-      this.logger_.info(`  - session.amount: ${session.amount}`)
-      this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
-      this.logger_.info(`  - paymeAmount: ${amount}`)
-      this.logger_.info(`  - cart.total (for reference): ${cart.total}`)
-      this.logger_.info(`  - currency: ${currencyCode}`)
-      
-      if (expectedAmount !== amount) {
-        this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! session.amount=${expectedAmount}, paymeAmount=${amount}`)
-        throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
-          `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
-      }
+      // If no session at all, reject - we need a session to validate
+      throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Payment session not found")
+    }
+    
+    // Get amount from session.data - this is what we used to generate the URL
+    const sessionData = session.data || {}
+    const urlAmount = sessionData.amount
+    
+    if (!urlAmount) {
+      // Fallback to session.amount if data.amount is not set
+      this.logger_.warn(`[CheckPerformTransaction] session.data.amount not found, falling back to session.amount`)
+    }
+    
+    const expectedAmount = Math.round(urlAmount || session.amount)
+    const currencyCode = cart.currency_code?.toUpperCase()
+    
+    this.logger_.info(`[CheckPerformTransaction] Amount comparison:`)
+    this.logger_.info(`  - session.data.amount (URL amount): ${urlAmount}`)
+    this.logger_.info(`  - session.amount (Medusa): ${session.amount}`)
+    this.logger_.info(`  - expectedAmount (used for validation): ${expectedAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
+    this.logger_.info(`  - cart.total (for reference): ${cart.total}`)
+    this.logger_.info(`  - currency: ${currencyCode}`)
+    
+    if (expectedAmount !== amount) {
+      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
     this.logger_.info(`[CheckPerformTransaction] ✅ Validation passed, returning allow: true`)
@@ -211,13 +214,16 @@ export class PaymeMerchantService {
       // Continue execution...
     }
     
-    // Amount validation - compare with session.amount (what was used to generate URL)
-    const expectedAmount = Math.round(session.amount)
+    // Amount validation - compare with session.data.amount (what was used to generate URL)
+    const sessionData = session.data || {}
+    const urlAmount = sessionData.amount
+    const expectedAmount = Math.round(urlAmount || session.amount)
     const currencyCode = cart.currency_code?.toUpperCase()
 
     // Log for debugging
     this.logger_.info(`[CreateTransaction] Amount comparison:`)
-    this.logger_.info(`  - session.amount: ${session.amount}`)
+    this.logger_.info(`  - session.data.amount (URL): ${urlAmount}`)
+    this.logger_.info(`  - session.amount (Medusa): ${session.amount}`)
     this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
     this.logger_.info(`  - paymeAmount: ${amount}`)
     this.logger_.info(`  - cart.total (for reference): ${cart.total}`)
@@ -225,7 +231,7 @@ export class PaymeMerchantService {
     
     // Direct comparison - both should be in tiyin
     if (expectedAmount !== amount) {
-      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! session.amount=${expectedAmount}, paymeAmount=${amount}`)
+      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! expected=${expectedAmount}, paymeAmount=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
         `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
