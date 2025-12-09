@@ -155,17 +155,20 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // Amount validation: compare with session.data.amount (amount used to generate payment URL)
+    // Amount validation: compare with session.data.amount OR cart.total as fallback
     const sessionData = session.data || {}
-    const expectedAmount = sessionData.amount ? Math.round(sessionData.amount) : null
+    // Priority: session.data.amount (URL amount) > cart.total (current cart)
+    const expectedAmount = sessionData.amount 
+      ? Math.round(sessionData.amount) 
+      : Math.round(cart.total)
     
     this.logger_.info(`[CheckPerformTransaction] Amount validation:`)
     this.logger_.info(`  - session.data.amount (URL): ${sessionData.amount}`)
-    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+    this.logger_.info(`  - cart.total: ${cart.total}`)
+    this.logger_.info(`  - expectedAmount (used): ${expectedAmount}`)
     this.logger_.info(`  - paymeAmount: ${amount}`)
-    this.logger_.info(`  - cart.total (reference): ${cart.total}`)
     
-    if (expectedAmount !== null && expectedAmount !== amount) {
+    if (expectedAmount !== amount) {
       this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
         `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
@@ -231,17 +234,20 @@ export class PaymeMerchantService {
       this.logger_.info(`[CreateTransaction] Overwriting existing transaction (state=${existingState}) with new one`)
     }
     
-    // Amount validation: compare with session.data.amount (amount used to generate payment URL)
+    // Amount validation: compare with session.data.amount OR cart.total as fallback
     const sessionData = session.data || {}
-    const expectedAmount = sessionData.amount ? Math.round(sessionData.amount) : null
+    // Priority: session.data.amount (URL amount) > cart.total (current cart)
+    const expectedAmount = sessionData.amount 
+      ? Math.round(sessionData.amount) 
+      : Math.round(cart.total)
     
     this.logger_.info(`[CreateTransaction] Amount validation:`)
     this.logger_.info(`  - session.data.amount (URL): ${sessionData.amount}`)
-    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+    this.logger_.info(`  - cart.total: ${cart.total}`)
+    this.logger_.info(`  - expectedAmount (used): ${expectedAmount}`)
     this.logger_.info(`  - paymeAmount: ${amount}`)
-    this.logger_.info(`  - cart.total (reference): ${cart.total}`)
     
-    if (expectedAmount !== null && expectedAmount !== amount) {
+    if (expectedAmount !== amount) {
       this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
         `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
