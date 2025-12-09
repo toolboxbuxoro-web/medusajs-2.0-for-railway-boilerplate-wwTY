@@ -58,7 +58,6 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
       options.payme_url || process.env.PAYME_URL || "https://checkout.paycom.uz"
     )
 
-    this.logger_.info(`[Payme] Provider initialized with merchant: ${this.options_.payme_id}`)
   }
 
   private formatPaymeUrl(url: string): string {
@@ -93,8 +92,6 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
 
     const paymentUrl = `${this.paymeUrl_}/${encodedParams}`
 
-    this.logger_.info(`[Payme] Generated payment URL for order=${orderId}, amount=${amountForPayme}`)
-
     return paymentUrl
   }
 
@@ -107,7 +104,6 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
       const { context, amount, currency_code } = input
       const orderId = context?.resource_id || crypto.randomUUID()
 
-      this.logger_.info(`[Payme] Initiating payment: order_id=${orderId}, amount=${amount}`)
 
       const paymentUrl = this.generatePaymentUrl(orderId, amount as number, currency_code)
 

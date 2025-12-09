@@ -1,7 +1,8 @@
 import { Button } from "@medusajs/ui"
 import { HttpTypes } from "@medusajs/types"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { placeOrder } from "@lib/data/cart"
 import { isPayme } from "@lib/constants"
 
@@ -16,7 +17,9 @@ export const PaymePaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [checkingStatus, setCheckingStatus] = useState(false)
   const t = useTranslations("checkout")
+  const router = useRouter()
 
   const session = cart.payment_collection?.payment_sessions?.find(
     (s) => isPayme(s.provider_id)
@@ -25,6 +28,28 @@ export const PaymePaymentButton = ({
   // Check if cart is empty or has zero total
   const cartTotal = Number(cart.total) || 0
   const isCartEmpty = !cart.items?.length || cartTotal <= 0
+
+  // Проверка статуса после возврата с Payme
+  useEffect(() => {
+    if (!session || checkingStatus) return
+
+    // Если платеж авторизован - создаем заказ
+    if (session.status === "authorized") {
+      setCheckingStatus(true)
+      placeOrder().catch((err: any) => {
+        setCheckingStatus(false)
+        setErrorMessage(err.message || "Error placing order")
+      })
+      return
+    }
+
+    // Если payme_state=2 но статус не обновлен - обновляем страницу
+    const sessionData = session.data as any
+    if (sessionData?.payme_state === 2 && session.status !== "authorized") {
+      setCheckingStatus(true)
+      setTimeout(() => router.refresh(), 500)
+    }
+  }, [session, router, checkingStatus])
 
   const handlePayment = async () => {
     // Prevent payment for empty cart
@@ -73,13 +98,17 @@ export const PaymePaymentButton = ({
   return (
     <div className="flex flex-col gap-2">
       <Button
-        disabled={notReady || !session || isCartEmpty}
-        isLoading={submitting}
+        disabled={notReady || !session || isCartEmpty || checkingStatus}
+        isLoading={submitting || checkingStatus}
         onClick={handlePayment}
         size="large"
         data-testid={dataTestId}
       >
-        {session?.status === "authorized" ? t("place_order") : t("place_order")}
+        {checkingStatus 
+          ? t("checking_payment_status") || "Checking payment status..."
+          : session?.status === "authorized" 
+            ? t("place_order") 
+            : t("place_order")}
       </Button>
       {errorMessage && (
         <p className="text-red-500 text-sm text-center">{errorMessage}</p>

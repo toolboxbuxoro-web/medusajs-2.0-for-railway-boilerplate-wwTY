@@ -61,8 +61,6 @@ export class PaymeMerchantService {
         return this.cancelTransaction(params)
       case "CheckTransaction":
         return this.checkTransaction(params)
-      case "GetStatement":
-        return this.getStatement(params)
       default:
         throw new PaymeError(PaymeErrorCodes.METHOD_NOT_FOUND, "Method not found")
     }
@@ -107,55 +105,18 @@ export class PaymeMerchantService {
   }
 
   /**
-   * Find a Medusa Payment Session by Payme's transaction ID.
-   * This is a fallback lookup when we can't find by Medusa Session ID.
-   * @param paymeTransactionId - Payme's transaction ID.
-   */
-  private async findSessionByPaymeTransactionId(paymeTransactionId: string) {
-    const remoteQuery = this.container_.resolve("remoteQuery")
-
-    try {
-      const allSessions = await remoteQuery({
-        entryPoint: "payment_session",
-        fields: ["id", "provider_id", "data", "amount", "status", "currency_code"]
-      })
-
-      const session = allSessions.find((s: any) => {
-        const data = s.data || {}
-        return data.payme_transaction_id === paymeTransactionId
-      })
-
-      return session || null
-    } catch (e) {
-      this.logger_.error(`[findSessionByPaymeTransactionId] Error: ${(e as Error).message}`)
-      return null
-    }
-  }
-
-  /**
-   * Robust session lookup: first by Medusa Session ID, then by Payme Transaction ID.
-   * @param id - The ID to look up (could be either).
+   * Find payment session by Medusa Session ID.
+   * @param id - Medusa Session ID (returned from CreateTransaction).
    */
   private async findSession(id: string) {
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
-
-    // 1. Try to find by Medusa Session ID
+    
     try {
       const session = await paymentModule.retrievePaymentSession(id)
-      if (session) {
-        return session
-      }
-    } catch {
-      // Not found by Session ID, continue to fallback
-    }
-
-    // 2. Fallback: Find by Payme Transaction ID
-    const session = await this.findSessionByPaymeTransactionId(id)
-    if (session) {
       return session
+    } catch {
+      return null
     }
-
-    return null
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -170,7 +131,6 @@ export class PaymeMerchantService {
     const { amount, account } = params
     const orderId = account?.order_id
 
-    this.logger_.info(`[CheckPerformTransaction] orderId=${orderId}, amount=${amount}`)
 
     if (!orderId) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order ID is missing")
@@ -179,21 +139,10 @@ export class PaymeMerchantService {
     const result = await this.getPaymentSession(orderId)
 
     if (!result || !result.cart) {
-      this.logger_.warn(`[CheckPerformTransaction] Cart not found for orderId=${orderId}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
     const { cart, session } = result
-
-    // Log cart details for debugging
-    this.logger_.info(`[CheckPerformTransaction] ===== CART DETAILS =====`)
-    this.logger_.info(`[CheckPerformTransaction] cart.id = ${cart.id}`)
-    this.logger_.info(`[CheckPerformTransaction] cart.total = ${cart.total}`)
-    this.logger_.info(`[CheckPerformTransaction] cart.currency = ${cart.currency_code}`)
-    this.logger_.info(`[CheckPerformTransaction] session.id = ${session?.id}`)
-    this.logger_.info(`[CheckPerformTransaction] session.amount = ${session?.amount}`)
-    this.logger_.info(`[CheckPerformTransaction] session.data.amount = ${session?.data?.amount}`)
-    this.logger_.info(`[CheckPerformTransaction] ========================`)
 
     if (!session) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Payment session not found")
@@ -204,20 +153,17 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // Amount validation
-    const expectedAmount = this.getExpectedAmount(session, cart)
-
-    // Reject empty cart (zero or negative amount)
+    // Amount validation - use cart.total as source of truth
+    const expectedAmount = Math.round(cart.total)
+    
     if (expectedAmount <= 0) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Cart is empty or has invalid amount")
     }
 
     if (expectedAmount !== amount) {
-      this.logger_.error(`[CheckPerformTransaction] Amount mismatch: expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
-    this.logger_.info(`[CheckPerformTransaction] Validation passed for cart=${cart.id}, amount=${amount}`)
     return { allow: true }
   }
 
@@ -229,7 +175,6 @@ export class PaymeMerchantService {
     const { id, time, amount, account } = params
     const orderId = account?.order_id
 
-    this.logger_.info(`[CreateTransaction] id=${id}, orderId=${orderId}, amount=${amount}`)
 
     // Timeout check (max 12 hours)
     const TIMEOUT_MS = 12 * 60 * 60 * 1000
@@ -266,10 +211,9 @@ export class PaymeMerchantService {
     }
 
     // Amount validation
-    const expectedAmount = this.getExpectedAmount(session, cart)
-
+    const expectedAmount = Math.round(cart.total)
+    
     if (expectedAmount !== amount) {
-      this.logger_.error(`[CreateTransaction] Amount mismatch: expected=${expectedAmount}, got=${amount}`)
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
@@ -290,7 +234,6 @@ export class PaymeMerchantService {
       data: newData
     })
 
-    this.logger_.info(`[CreateTransaction] Created transaction for session=${session.id}`)
 
     return {
       create_time: time,
@@ -306,7 +249,6 @@ export class PaymeMerchantService {
   async performTransaction(params: any) {
     const { id } = params
 
-    this.logger_.info(`[PerformTransaction] id=${id}`)
 
     const session = await this.findSession(id)
 
@@ -354,7 +296,13 @@ export class PaymeMerchantService {
       data: newData
     })
 
-    this.logger_.info(`[PerformTransaction] Performed transaction for session=${session.id}`)
+    // Authorize payment session after successful PerformTransaction
+    try {
+      await paymentModule.authorizePaymentSession(session.id, { data: newData })
+    } catch (authError) {
+      // Log but don't fail - payment was successful
+      this.logger_.warn(`[PerformTransaction] Failed to authorize: ${(authError as Error).message}`)
+    }
 
     return {
       transaction: session.id,
@@ -369,7 +317,6 @@ export class PaymeMerchantService {
   async cancelTransaction(params: any) {
     const { id, reason } = params
 
-    this.logger_.info(`[CancelTransaction] id=${id}, reason=${reason}`)
 
     const session = await this.findSession(id)
 
@@ -410,7 +357,6 @@ export class PaymeMerchantService {
       }
     })
 
-    this.logger_.info(`[CancelTransaction] Cancelled session=${session.id}, newState=${newState}`)
 
     return {
       transaction: session.id,
@@ -425,7 +371,6 @@ export class PaymeMerchantService {
   async checkTransaction(params: any) {
     const { id } = params
 
-    this.logger_.info(`[CheckTransaction] id=${id}`)
 
     const session = await this.findSession(id)
 
@@ -445,31 +390,4 @@ export class PaymeMerchantService {
     }
   }
 
-  /**
-   * GetStatement: Return list of transactions in a time range.
-   * Placeholder implementation.
-   */
-  async getStatement(params: any) {
-    return { transactions: [] }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Helper Methods
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /**
-   * Get the expected amount for validation.
-   * Uses cart.total as the source of truth (always current).
-   */
-  private getExpectedAmount(session: any, cart: any): number {
-    const sessionData = session.data || {}
-    const sessionAmount = sessionData.amount ? Math.round(sessionData.amount) : null
-    const cartTotal = Math.round(cart.total)
-    
-    this.logger_.info(`[getExpectedAmount] session.data.amount=${sessionAmount}, cart.total=${cartTotal}`)
-    
-    // Use cart.total as it's always current
-    // session.data.amount can be stale if cart was modified after session creation
-    return cartTotal
-  }
 }

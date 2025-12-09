@@ -5,9 +5,8 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
-  const logger = req.scope.resolve("logger")
   const paymeMerchantService = new PaymeMerchantService({ 
-    logger, 
+    logger: req.scope.resolve("logger"), 
     container: req.scope 
   })
 
@@ -23,24 +22,16 @@ export async function POST(
       throw new PaymeError(-32504, "Insufficient privilege")
     }
 
-    const [username, password] = Buffer.from(credentials, "base64").toString().split(":")
+    const [, password] = Buffer.from(credentials, "base64").toString().split(":")
     
-    // Payme sends "Paycom" as username and the Key as password
-    // We check against PAYME_KEY from env (trim to avoid whitespace issues)
+    // Проверка ключа Payme
     if (password?.trim() !== process.env.PAYME_KEY?.trim()) {
-      logger.warn(`Payme Auth Failed: Invalid key provided`)
       throw new PaymeError(-32504, "Insufficient privilege")
     }
 
-    // 2. Parse JSON-RPC
-    const { method,params, id } = req.body as any
-    
-    logger.info(`Payme Request: ${method} - ${JSON.stringify(params)}`)
-
-    // 3. Handle Request
+    // Обработка JSON-RPC запроса
+    const { method, params, id } = req.body as any
     const result = await paymeMerchantService.handleRequest(method, params)
-
-    // 4. Send Response
     res.json({
       result,
       id,
@@ -48,8 +39,6 @@ export async function POST(
     })
 
   } catch (error) {
-    logger.error("Payme Error", error)
-    
     const id = (req.body as any)?.id || null
     
     if (error instanceof PaymeError) {
