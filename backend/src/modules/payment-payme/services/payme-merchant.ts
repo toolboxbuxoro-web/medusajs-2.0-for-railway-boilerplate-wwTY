@@ -206,8 +206,9 @@ export class PaymeMerchantService {
       const existingState = currentData.payme_state
       
       // If existing transaction is active (1) or completed (2), reject new one
+      // Payme expects error code in range -31050 to -31099 for account errors
       if (existingState === 1 || existingState === 2) {
-        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, 
+        throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, 
           "Order already has an active transaction")
       }
       
