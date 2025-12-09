@@ -127,6 +127,31 @@ export class PaymeMerchantService {
     }
   }
 
+  /**
+   * Find payment session by Payme transaction ID stored in session.data.
+   * @param paymeTransactionId - Payme's transaction ID.
+   */
+  private async findSessionByPaymeTransactionId(paymeTransactionId: string) {
+    try {
+      const pgConnection = this.container_.resolve("__pg_connection__")
+      
+      const result = await pgConnection.raw(`
+        SELECT id, amount, currency_code, status, data, payment_collection_id
+        FROM payment_session
+        WHERE data->>'payme_transaction_id' = ?
+          AND provider_id LIKE '%payme%'
+        ORDER BY created_at DESC
+        LIMIT 1
+      `, [paymeTransactionId])
+
+      const rows = result?.rows || result || []
+      return rows[0] || null
+    } catch (error) {
+      this.logger_.error(`[PaymeMerchant] Error finding session by payme_transaction_id: ${error}`)
+      return null
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Payme JSON-RPC Method Handlers
   // ─────────────────────────────────────────────────────────────────────────────
@@ -216,9 +241,10 @@ export class PaymeMerchantService {
       }
     }
 
-    // If a DIFFERENT transaction already exists and was completed, block
-    if (currentData.payme_transaction_id && currentData.payme_state === 2) {
-      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
+    // If a DIFFERENT transaction already exists (pending or completed), block
+    if (currentData.payme_transaction_id && currentData.payme_state >= 1) {
+      // State 1 = pending, State 2 = completed - both should block new transactions
+      throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Another transaction is in progress for this order")
     }
 
     // Amount validation using session.amount
@@ -262,14 +288,21 @@ export class PaymeMerchantService {
   async performTransaction(params: any) {
     const { id } = params
 
+    this.logger_.info(`[PaymeMerchant] PerformTransaction: id=${id}`)
 
-    const session = await this.findSession(id)
+    // Try finding by Medusa session ID first, fallback to Payme transaction ID
+    let session = await this.findSession(id)
+    if (!session) {
+      session = await this.findSessionByPaymeTransactionId(id)
+    }
 
     if (!session) {
       throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
     }
 
-    const currentData = session.data || {}
+    const currentData = typeof session.data === 'string' 
+      ? JSON.parse(session.data) 
+      : (session.data || {})
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
 
     // Idempotency: If already performed, return success
@@ -343,14 +376,21 @@ export class PaymeMerchantService {
   async cancelTransaction(params: any) {
     const { id, reason } = params
 
+    this.logger_.info(`[PaymeMerchant] CancelTransaction: id=${id}, reason=${reason}`)
 
-    const session = await this.findSession(id)
+    // Try finding by Medusa session ID first, fallback to Payme transaction ID
+    let session = await this.findSession(id)
+    if (!session) {
+      session = await this.findSessionByPaymeTransactionId(id)
+    }
 
     if (!session) {
       throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
     }
 
-    const currentData = session.data || {}
+    const currentData = typeof session.data === 'string' 
+      ? JSON.parse(session.data) 
+      : (session.data || {})
     const paymentModule = this.container_.resolve(Modules.PAYMENT)
     const cancelTime = Date.now()
 
@@ -393,18 +433,28 @@ export class PaymeMerchantService {
 
   /**
    * CheckTransaction: Get the status of a transaction.
+   * Note: Payme sends their transaction ID, not our session ID.
    */
   async checkTransaction(params: any) {
     const { id } = params
 
+    this.logger_.info(`[PaymeMerchant] CheckTransaction: payme_id=${id}`)
 
-    const session = await this.findSession(id)
+    // First try to find by Payme transaction ID (stored in session.data)
+    let session = await this.findSessionByPaymeTransactionId(id)
+    
+    // Fallback: try as Medusa session ID
+    if (!session) {
+      session = await this.findSession(id)
+    }
 
     if (!session) {
       throw new PaymeError(PaymeErrorCodes.TRANSACTION_NOT_FOUND, "Transaction not found")
     }
 
-    const data = session.data || {}
+    const data = typeof session.data === 'string' 
+      ? JSON.parse(session.data) 
+      : (session.data || {})
 
     return {
       create_time: data.payme_create_time || 0,
