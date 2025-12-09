@@ -189,7 +189,7 @@ export class PaymeMerchantService {
         "Payment session not found. Please initiate payment first.")
     }
 
-    // FIXED: Improved idempotency (using TIMEOUT_MS and currentTime from above)
+    // FIXED: Improved idempotency
     const currentData = session.data || {}
     
     if (currentData.payme_transaction_id) {
@@ -202,26 +202,19 @@ export class PaymeMerchantService {
         }
       }
       
-      // Check if existing transaction is stale (older than 12 hours)
-      const existingCreateTime = currentData.payme_create_time || 0
-      const isStale = (currentTime - existingCreateTime) > TIMEOUT_MS
+      // Different transaction exists - check its state
+      const existingState = currentData.payme_state
       
-      if (isStale) {
-        this.logger_.info(`[CreateTransaction] Existing transaction is stale (${existingCreateTime}), allowing new transaction`)
-        // Continue to create new transaction - will overwrite old data
-      } else {
-        // If there's a different transaction, check its status
-        const existingState = currentData.payme_state
-        
-        // If existing transaction is active (1) or completed (2), reject new one
-        // Payme expects error code in range -31050 to -31099 for account errors
-        if (existingState === 1 || existingState === 2) {
-          throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, 
-            "Order already has an active transaction")
-        }
+      // Only block if transaction is COMPLETED (state=2)
+      // Completed transactions mean the order is already paid
+      if (existingState === 2) {
+        throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, 
+          "Order already paid")
       }
       
-      // If cancelled (-1, -2) or stale, allow creating a new transaction
+      // For state=1 (created but not paid) or cancelled (-1, -2):
+      // Allow creating new transaction - user might have abandoned previous payment
+      this.logger_.info(`[CreateTransaction] Overwriting existing transaction (state=${existingState}) with new one`)
     }
     
     // SIMPLIFIED: Skip amount validation - trust Payme
