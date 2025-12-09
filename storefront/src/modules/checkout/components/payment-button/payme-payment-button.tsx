@@ -48,17 +48,44 @@ export const PaymePaymentButton = ({
       return
     }
     
-    const paymentUrl = (session?.data as any)?.payment_url
-    console.log("[Payme Button] Payment URL:", paymentUrl)
-    
-    if (paymentUrl) {
-      console.log("[Payme Button] Redirecting to Payme...")
-      window.location.href = paymentUrl
-    } else {
+    try {
+      // Re-initiate payment to ensure we have the latest amount and URL
+      // This fixes the "Amount mismatch" error by forcing a fresh URL generation
+      console.log("[Payme Button] Re-initiating payment to ensure fresh URL...")
+      
+      // We need to import initiatePaymentSession dynamically or passing it as prop?
+      // Better to import it at top roughly
+      const { initiatePaymentSession } = await import("@lib/data/cart")
+      
+      const resp = await initiatePaymentSession(cart, {
+        provider_id: session?.provider_id || "pp_payme_payme"
+      })
+      
+      console.log("[Payme Button] Re-initiate response:", resp)
+      
+      const paymentCollection = resp.payment_collection
+      const newSession = paymentCollection?.payment_sessions?.find((s: any) => isPayme(s.provider_id))
+      const newPaymentUrl = (newSession?.data as any)?.payment_url
+      
+      console.log("[Payme Button] New Payment URL:", newPaymentUrl)
+      
+      if (newPaymentUrl) {
+        console.log("[Payme Button] Redirecting to Payme...")
+        window.location.href = newPaymentUrl
+      } else {
+        // Fallback to existing session url if re-init didn't return one (unlikely)
+        const paymentUrl = (session?.data as any)?.payment_url
+        if (paymentUrl) {
+           console.log("[Payme Button] Using existing URL as fallback...")
+           window.location.href = paymentUrl
+        } else {
+           throw new Error("Payme payment URL not found")
+        }
+      }
+    } catch (err: any) {
       setSubmitting(false)
-      const errMsg = "Payment URL not found. Please refresh the page and try again."
-      setErrorMessage(errMsg)
-      console.error("[Payme Button] Payme payment URL not found in session.data:", session?.data)
+      setErrorMessage(err.message || "Error initiating payment")
+      console.error("[Payme Button] Error:", err)
     }
   }
 
