@@ -80,9 +80,12 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     const amountForPayme = Math.round(amount)
 
     // Get Store URL for redirect after payment
-    const storeUrl = process.env.STORE_URL || process.env.MEDUSA_BACKEND_URL || "http://localhost:8000"
+    // Use STORE_URL (storefront) for redirect, not MEDUSA_BACKEND_URL
+    const storeUrl = process.env.STORE_URL || "https://toolbox-tools.uz"
     const cleanStoreUrl = storeUrl.replace(/\/$/, "")
-    const returnUrl = `${cleanStoreUrl}/checkout`
+    
+    // Use API callback route that handles locale redirect
+    const returnUrl = `${cleanStoreUrl}/api/payme-callback`
 
     // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
     const paramString = `m=${this.options_.payme_id};ac.order_id=${orderId};a=${amountForPayme};c=${returnUrl}`
