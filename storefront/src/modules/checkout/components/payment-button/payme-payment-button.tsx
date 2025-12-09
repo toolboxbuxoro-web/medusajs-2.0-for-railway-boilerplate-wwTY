@@ -3,6 +3,7 @@ import { HttpTypes } from "@medusajs/types"
 import React, { useState } from "react"
 import { useTranslations } from "next-intl"
 import { placeOrder } from "@lib/data/cart"
+import { isPayme } from "@lib/constants"
 
 export const PaymePaymentButton = ({
   cart,
@@ -17,10 +18,13 @@ export const PaymePaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const t = useTranslations("checkout")
 
+  // Use isPayme to match provider_id correctly (pp_payme_payme)
   const session = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.provider_id === "payme"
+    (s) => isPayme(s.provider_id)
   )
 
+  console.log("[Payme Button] Looking for session with isPayme matcher")
+  console.log("[Payme Button] All sessions:", cart.payment_collection?.payment_sessions)
   console.log("[Payme Button] Session found:", session)
   console.log("[Payme Button] Session data:", session?.data)
 
