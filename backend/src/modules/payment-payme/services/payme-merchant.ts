@@ -51,6 +51,7 @@ export class PaymeMerchantService {
   private async getPaymentSession(cartId: string) {
     const remoteQuery = this.container_.resolve("remoteQuery")
     
+    // Use filters to find cart by ID
     const query = await remoteQuery({
       entryPoint: "cart",
       fields: [
@@ -63,18 +64,19 @@ export class PaymeMerchantService {
         "payment_collection.payment_sessions.amount",
         "payment_collection.payment_sessions.status"
       ],
-      variables: { id: cartId }
+      filters: { id: cartId }
     })
 
     const cart = query[0]
     
     if (!cart) {
+      this.logger_.warn(`[PaymeMerchant] Cart not found for id: ${cartId}`)
       return null
     }
 
-    // Find Payme session
+    // Find Payme session (provider_id can be pp_payme_payme)
     const session = cart.payment_collection?.payment_sessions?.find(
-      (s: any) => s.provider_id === "payme"
+      (s: any) => s.provider_id?.includes("payme")
     )
 
     return { cart, session }
