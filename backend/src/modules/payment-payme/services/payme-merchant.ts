@@ -155,9 +155,23 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // SIMPLIFIED: Just accept the payment - trust Payme's amount
-    // Amount validation removed to simplify integration
-    this.logger_.info(`[CheckPerformTransaction] ✅ Order found, returning allow: true`)
+    // Amount validation: compare with session.data.amount (amount used to generate payment URL)
+    const sessionData = session.data || {}
+    const expectedAmount = sessionData.amount ? Math.round(sessionData.amount) : null
+    
+    this.logger_.info(`[CheckPerformTransaction] Amount validation:`)
+    this.logger_.info(`  - session.data.amount (URL): ${sessionData.amount}`)
+    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
+    this.logger_.info(`  - cart.total (reference): ${cart.total}`)
+    
+    if (expectedAmount !== null && expectedAmount !== amount) {
+      this.logger_.error(`[CheckPerformTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+    }
+
+    this.logger_.info(`[CheckPerformTransaction] ✅ Validation passed, returning allow: true`)
     return { allow: true }
   }
 
@@ -217,7 +231,22 @@ export class PaymeMerchantService {
       this.logger_.info(`[CreateTransaction] Overwriting existing transaction (state=${existingState}) with new one`)
     }
     
-    // SIMPLIFIED: Skip amount validation - trust Payme
+    // Amount validation: compare with session.data.amount (amount used to generate payment URL)
+    const sessionData = session.data || {}
+    const expectedAmount = sessionData.amount ? Math.round(sessionData.amount) : null
+    
+    this.logger_.info(`[CreateTransaction] Amount validation:`)
+    this.logger_.info(`  - session.data.amount (URL): ${sessionData.amount}`)
+    this.logger_.info(`  - expectedAmount: ${expectedAmount}`)
+    this.logger_.info(`  - paymeAmount: ${amount}`)
+    this.logger_.info(`  - cart.total (reference): ${cart.total}`)
+    
+    if (expectedAmount !== null && expectedAmount !== amount) {
+      this.logger_.error(`[CreateTransaction] ❌ Amount mismatch! expected=${expectedAmount}, got=${amount}`)
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, 
+        `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
+    }
+
     this.logger_.info(`[CreateTransaction] Creating transaction for order=${orderId}, amount=${amount}`)
 
     // Create new transaction
