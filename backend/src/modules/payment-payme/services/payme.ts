@@ -12,6 +12,7 @@ import crypto from "crypto"
 type Options = {
   payme_id: string
   payme_key: string
+  payme_url?: string
 }
 
 type InjectedDependencies = {
@@ -39,10 +40,12 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     // Trim credentials to avoid whitespace issues
     this.options_ = {
       payme_id: options.payme_id?.trim(),
-      payme_key: options.payme_key?.trim()
+      payme_key: options.payme_key?.trim(),
+      payme_url: options.payme_url
     }
     
-    this.paymeUrl_ = this.formatPaymeUrl(process.env.PAYME_URL || "https://checkout.paycom.uz")
+    // Priority: options.payme_url -> env PAYME_URL -> default
+    this.paymeUrl_ = this.formatPaymeUrl(options.payme_url || process.env.PAYME_URL || "https://checkout.paycom.uz")
     
     this.logger_.info(`Payme Payment Provider initialized: ${JSON.stringify({
       payme_id: this.options_.payme_id,

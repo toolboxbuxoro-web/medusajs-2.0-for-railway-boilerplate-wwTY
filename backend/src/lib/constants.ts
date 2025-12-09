@@ -100,6 +100,7 @@ export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
  */
 export const PAYME_ID = process.env.PAYME_ID;
 export const PAYME_KEY = process.env.PAYME_KEY;
+export const PAYME_URL = process.env.PAYME_URL || 'https://checkout.paycom.uz';
 
 /**
  * Worker mode
