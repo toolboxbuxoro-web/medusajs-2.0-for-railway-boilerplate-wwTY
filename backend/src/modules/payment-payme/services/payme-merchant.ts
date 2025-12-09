@@ -296,13 +296,8 @@ export class PaymeMerchantService {
       data: newData
     })
 
-    // Authorize payment session after successful PerformTransaction
-    try {
-      await paymentModule.authorizePaymentSession(session.id, { data: newData })
-    } catch (authError) {
-      // Log but don't fail - payment was successful
-      this.logger_.warn(`[PerformTransaction] Failed to authorize: ${(authError as Error).message}`)
-    }
+    // Статус будет обновлен автоматически через authorizePayment провайдера
+    // когда frontend проверит статус сессии
 
     return {
       transaction: session.id,
