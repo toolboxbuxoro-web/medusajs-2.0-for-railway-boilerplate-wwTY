@@ -68,45 +68,48 @@ export class PaymeMerchantService {
   }
 
   /**
-   * Retrieve Payme payment session from a cart.
-   * @param cartId - The Medusa Cart ID (used as order_id).
+   * Find Payme payment session by order_id stored in session data.
+   * Uses raw SQL to query by JSON field since remoteQuery filters don't work reliably.
+   * @param orderId - The order_id (cart_id) passed from Payme.
    */
-  private async getPaymentSession(cartId: string) {
-    const remoteQuery = this.container_.resolve("remoteQuery")
+  private async getPaymentSessionByOrderId(orderId: string) {
+    try {
+      const pgConnection = this.container_.resolve("__pg_connection__")
+      
+      // Query payment_session by data->>'order_id'
+      const result = await pgConnection.raw(`
+        SELECT 
+          ps.id,
+          ps.amount,
+          ps.currency_code,
+          ps.status,
+          ps.data,
+          ps.payment_collection_id,
+          c.id as cart_id,
+          c.completed_at
+        FROM payment_session ps
+        JOIN cart_payment_collection cpc ON cpc.payment_collection_id = ps.payment_collection_id
+        JOIN cart c ON c.id = cpc.cart_id
+        WHERE ps.data->>'order_id' = ?
+          AND ps.provider_id LIKE '%payme%'
+        ORDER BY ps.created_at DESC
+        LIMIT 1
+      `, [orderId])
 
-    const query = await remoteQuery({
-      entryPoint: "cart",
-      fields: [
-        "id",
-        "total",
-        "currency_code",
-        "payment_collection.payment_sessions.id",
-        "payment_collection.payment_sessions.provider_id",
-        "payment_collection.payment_sessions.data",
-        "payment_collection.payment_sessions.amount",
-        "payment_collection.payment_sessions.status",
-        "completed_at"
-      ],
-      filters: { id: cartId }
-    })
+      const rows = result?.rows || result || []
+      const session = rows[0]
 
-    // Handle both array and object with rows property
-    const carts = Array.isArray(query) ? query : (query?.rows || [])
+      if (!session) {
+        this.logger_.warn(`[PaymeMerchant] No payment session found for order_id: ${orderId}`)
+        return null
+      }
 
-    // BUG FIX: remoteQuery may return all carts if filter doesn't work
-    // Search for the specific cart in the returned array
-    const cart = carts.find((c: any) => c.id === cartId)
-
-    if (!cart) {
-      this.logger_.warn(`[PaymeMerchant] Cart not found for id: ${cartId}. Query returned ${carts.length} carts.`)
+      this.logger_.info(`[PaymeMerchant] Found session ${session.id} for order_id ${orderId}`)
+      return session
+    } catch (error) {
+      this.logger_.error(`[PaymeMerchant] Error querying payment session: ${error}`)
       return null
     }
-
-    const session = cart.payment_collection?.payment_sessions?.find(
-      (s: any) => s.provider_id?.includes("payme")
-    )
-
-    return { cart, session }
   }
 
   /**
@@ -136,40 +139,44 @@ export class PaymeMerchantService {
     const { amount, account } = params
     const orderId = account?.order_id
 
+    this.logger_.info(`[PaymeMerchant] CheckPerformTransaction: order_id=${orderId}, amount=${amount}`)
 
     if (!orderId) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order ID is missing")
     }
 
-    const result = await this.getPaymentSession(orderId)
+    const session = await this.getPaymentSessionByOrderId(orderId)
 
-    if (!result || !result.cart) {
+    if (!session) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
-    const { cart, session } = result
-
-    if (!session) {
-      throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Payment session not found")
+    // Check if order is already paid (cart completed)
+    if (session.completed_at) {
+      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already completed")
     }
 
-    // Check if order is already paid
-    // Check if order is already paid
-    if (cart.completed_at) {
-      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order (Cart) already completed")
+    // Check if already paid via payme_state
+    const sessionData = typeof session.data === 'string' 
+      ? JSON.parse(session.data) 
+      : (session.data || {})
+    
+    if (sessionData.payme_state === 2) {
+      throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // Amount validation - use cart.total as source of truth
-    const expectedAmount = Math.round(cart.total)
+    // Amount validation - use session.amount as source of truth
+    const expectedAmount = Math.round(Number(session.amount))
     
     if (expectedAmount <= 0) {
-      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Cart is empty or has invalid amount")
+      throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Invalid amount")
     }
 
     if (expectedAmount !== amount) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
+    this.logger_.info(`[PaymeMerchant] CheckPerformTransaction SUCCESS for order_id=${orderId}`)
     return { allow: true }
   }
 
@@ -181,6 +188,7 @@ export class PaymeMerchantService {
     const { id, time, amount, account } = params
     const orderId = account?.order_id
 
+    this.logger_.info(`[PaymeMerchant] CreateTransaction: order_id=${orderId}, payme_id=${id}, amount=${amount}`)
 
     // Timeout check (max 12 hours)
     const TIMEOUT_MS = 12 * 60 * 60 * 1000
@@ -188,19 +196,16 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction timeout: older than 12 hours")
     }
 
-    const result = await this.getPaymentSession(orderId)
+    const session = await this.getPaymentSessionByOrderId(orderId)
 
-    if (!result || !result.cart) {
+    if (!session) {
       throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Order not found")
     }
 
-    const { cart, session } = result
-
-    if (!session) {
-      throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, "Payment session not found. Please initiate payment first.")
-    }
-
-    const currentData = session.data || {}
+    // Parse session data
+    const currentData = typeof session.data === 'string' 
+      ? JSON.parse(session.data) 
+      : (session.data || {})
 
     // Idempotency: If the same transaction ID exists, return its state
     if (currentData.payme_transaction_id === id) {
@@ -216,8 +221,8 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // Amount validation
-    const expectedAmount = Math.round(cart.total)
+    // Amount validation using session.amount
+    const expectedAmount = Math.round(Number(session.amount))
     
     if (expectedAmount !== amount) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
@@ -231,16 +236,17 @@ export class PaymeMerchantService {
       payme_transaction_id: id,
       payme_create_time: time,
       payme_state: 1,
-      cart_id: cart.id // Save cart ID for PerformTransaction
+      cart_id: session.cart_id // Save cart ID for PerformTransaction
     }
 
     await paymentModule.updatePaymentSession({
       id: session.id,
-      amount: session.amount,
-      currency_code: cart.currency_code || "uzs",
+      amount: Number(session.amount),
+      currency_code: session.currency_code || "uzs",
       data: newData
     })
 
+    this.logger_.info(`[PaymeMerchant] CreateTransaction SUCCESS: session_id=${session.id}`)
 
     return {
       create_time: time,
