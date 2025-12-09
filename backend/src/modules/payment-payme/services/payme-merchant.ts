@@ -189,7 +189,7 @@ export class PaymeMerchantService {
         "Payment session not found. Please initiate payment first.")
     }
 
-    // FIXED: Improved idempotency
+    // FIXED: Improved idempotency (using TIMEOUT_MS and currentTime from above)
     const currentData = session.data || {}
     
     if (currentData.payme_transaction_id) {
@@ -202,17 +202,26 @@ export class PaymeMerchantService {
         }
       }
       
-      // If there's a different transaction, check its status
-      const existingState = currentData.payme_state
+      // Check if existing transaction is stale (older than 12 hours)
+      const existingCreateTime = currentData.payme_create_time || 0
+      const isStale = (currentTime - existingCreateTime) > TIMEOUT_MS
       
-      // If existing transaction is active (1) or completed (2), reject new one
-      // Payme expects error code in range -31050 to -31099 for account errors
-      if (existingState === 1 || existingState === 2) {
-        throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, 
-          "Order already has an active transaction")
+      if (isStale) {
+        this.logger_.info(`[CreateTransaction] Existing transaction is stale (${existingCreateTime}), allowing new transaction`)
+        // Continue to create new transaction - will overwrite old data
+      } else {
+        // If there's a different transaction, check its status
+        const existingState = currentData.payme_state
+        
+        // If existing transaction is active (1) or completed (2), reject new one
+        // Payme expects error code in range -31050 to -31099 for account errors
+        if (existingState === 1 || existingState === 2) {
+          throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, 
+            "Order already has an active transaction")
+        }
       }
       
-      // If cancelled (-1, -2), allow creating a new transaction
+      // If cancelled (-1, -2) or stale, allow creating a new transaction
     }
     
     // SIMPLIFIED: Skip amount validation - trust Payme
