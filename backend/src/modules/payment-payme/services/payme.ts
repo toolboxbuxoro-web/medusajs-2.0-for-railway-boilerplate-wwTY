@@ -114,18 +114,20 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
   async initiatePayment(
     input: any
   ): Promise<any> {
+    this.logger_.info(`[Payme] initiatePayment called with input: ${JSON.stringify(input)}`)
+    
     try {
       const { context, amount, currency_code } = input
-      const orderId = context.resource_id || crypto.randomUUID()
+      const orderId = context?.resource_id || crypto.randomUUID()
       
-      this.logger_.info(`Initiating Payme payment: ${JSON.stringify({
-        order_id: orderId,
-        amount,
-        currency: currency_code
-      })}`)
+      this.logger_.info(`[Payme] Initiating payment: order_id=${orderId}, amount=${amount}, currency=${currency_code}`)
+      this.logger_.info(`[Payme] Using paymeUrl: ${this.paymeUrl_}`)
+      this.logger_.info(`[Payme] Using payme_id: ${this.options_.payme_id}`)
 
       // Generate payment URL with proper currency handling
       const paymentUrl = this.generatePaymentUrl(orderId, amount as number, currency_code)
+      
+      this.logger_.info(`[Payme] Generated payment URL: ${paymentUrl}`)
 
       const sessionData: PaymeSessionData = {
         order_id: orderId,
@@ -135,11 +137,13 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
         status: "pending"
       }
 
+      this.logger_.info(`[Payme] Returning session data: ${JSON.stringify(sessionData)}`)
+
       return {
         data: sessionData
       }
     } catch (error) {
-      this.logger_.error("Error initiating Payme payment", error)
+      this.logger_.error(`[Payme] Error initiating payment: ${error.message}`, error)
       return {
         error: error.message,
         code: "PAYME_INITIATE_ERROR",
