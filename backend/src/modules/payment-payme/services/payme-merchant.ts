@@ -32,8 +32,8 @@ export class PaymeError extends Error {
     this.code = code
     this.data = data
   }
-}
 
+}
 /**
  * Service for handling Payme Merchant API JSON-RPC requests.
  * Follows the standard Payme protocol for transaction lifecycle.
@@ -62,6 +62,8 @@ export class PaymeMerchantService {
         return this.cancelTransaction(params)
       case "CheckTransaction":
         return this.checkTransaction(params)
+      case "GetStatement":
+        return this.getStatement(params)
       default:
         throw new PaymeError(PaymeErrorCodes.METHOD_NOT_FOUND, "Method not found")
     }
@@ -467,4 +469,72 @@ export class PaymeMerchantService {
     }
   }
 
+  /**
+   * GetStatement: Get list of transactions for a given period.
+   * Used by Payme for reconciliation.
+   */
+  async getStatement(params: any) {
+    const { from, to } = params
+
+    this.logger_.info(`[PaymeMerchant] GetStatement: from=${from}, to=${to}`)
+
+    // Validate params
+    if (!from || !to) {
+      throw new PaymeError(PaymeErrorCodes.INVALID_ACCOUNT, "Missing from/to parameters")
+    }
+
+    try {
+      const pgConnection = this.container_.resolve("__pg_connection__")
+      
+      // Query transactions where data->>'payme_create_time' is between from and to
+      // We also look for provider_id 'payme'
+      // Note: We need to cast the JSON field to bigint/numeric to compare correctly, 
+      // but simplistic text comparison might fail if lengths differ. 
+      // Better to extract and cast.
+      const result = await pgConnection.raw(`
+        SELECT 
+          id,
+          amount,
+          currency_code,
+          data
+        FROM payment_session
+        WHERE provider_id LIKE '%payme%'
+          AND (data->>'payme_create_time')::bigint >= ?
+          AND (data->>'payme_create_time')::bigint <= ?
+        ORDER BY (data->>'payme_create_time')::bigint ASC
+      `, [from, to])
+
+      const rows = result?.rows || result || []
+
+      const transactions = rows.map((row: any) => {
+        const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data
+        
+        return {
+          id: data.payme_transaction_id, // Payme's ID
+          time: Number(data.payme_create_time),
+          amount: Number(row.amount), // Amount in tiyin/smallest unit
+          account: {
+            order_id: data.cart_id || data.order_id // Provide what we have
+          },
+          create_time: Number(data.payme_create_time),
+          perform_time: Number(data.payme_perform_time || 0),
+          cancel_time: Number(data.payme_cancel_time || 0),
+          transaction: row.id, // Our ID (Medusa Session ID)
+          state: Number(data.payme_state),
+          reason: data.payme_cancel_reason ? Number(data.payme_cancel_reason) : null
+        }
+      })
+
+      return {
+        transactions
+      }
+
+    } catch (error) {
+      this.logger_.error(`[PaymeMerchant] GetStatement error: ${error}`)
+      // Return empty list on error or throw? Payme expects clean response or error.
+      // If DB fails, internal error.
+      throw new PaymeError(PaymeErrorCodes.INTERNAL_ERROR, "Database error during GetStatement")
+    }
+  }
 }
+

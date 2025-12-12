@@ -66,12 +66,68 @@ export default async function testPaymeApiRoute({ container }: ExecArgs) {
     return []
   }
 
+  // Mock PG Connection
+  const mockPgConnection = {
+    raw: async (query: string, params: any[]) => {
+      // console.log(`[MockPG] Query: ${query.substring(0, 50)}...`) // debug if needed
+
+      // 1. getPaymentSessionByOrderId query
+      if (query.includes("WHERE ps.data->>'order_id' = ?")) {
+         return { rows: [{
+             id: MOCK_SESSION_ID,
+             amount: 10000,
+             currency_code: 'uzs',
+             status: 'pending',
+             data: sessionState.data, // PG usually returns object for jsonb, or string if raw text. Code handles both.
+             payment_collection_id: 'col_123',
+             cart_id: MOCK_CART_ID,
+             completed_at: null
+         }]}
+      }
+      
+      // 2. findSessionByPaymeTransactionId query
+      if (query.includes("WHERE data->>'payme_transaction_id' = ?")) {
+          // Only return if we have set the transaction ID
+          if (sessionState.data.payme_transaction_id === params[0]) {
+              return { rows: [{
+                id: MOCK_SESSION_ID,
+                amount: 10000,
+                currency_code: 'uzs',
+                status: 'pending',
+                data: sessionState.data
+             }]}
+          }
+          return { rows: [] }
+      }
+
+      // 3. GetStatement query
+      if (query.includes("(data->>'payme_create_time')::bigint >=")) {
+          // Return the session assuming it matches the time range
+          return { rows: [{
+             id: MOCK_SESSION_ID,
+             amount: 10000,
+             currency_code: 'uzs',
+             data: {
+                 ...sessionState.data,
+                 payme_transaction_id: MOCK_TRANS_ID,
+                 payme_create_time: Date.now(),
+                 payme_state: sessionState.data.payme_state || 2, // Assume completed for statement
+                 cart_id: MOCK_CART_ID
+             }
+          }]}
+      }
+      
+      return { rows: [] }
+    }
+  }
+
   // Mock Container
   const mockContainer = {
     resolve: (key: string) => {
       if (key === Modules.PAYMENT) return mockPaymentModule
       if (key === "remoteQuery") return mockRemoteQuery
       if (key === "logger") return logger
+      if (key === "__pg_connection__") return mockPgConnection
       return container.resolve(key)
     }
   }
@@ -121,7 +177,13 @@ export default async function testPaymeApiRoute({ container }: ExecArgs) {
     id: sessionIdAsTransId
   })
 
-  // 5. Verify Final State
+  // 5. GetStatement
+  await callPayme("GetStatement", {
+    from: Date.now() - 86400000, // 24 hours ago
+    to: Date.now() + 86400000    // 24 hours future
+  })
+
+  // 6. Verify Final State
   console.log("\n--- Final Verification ---")
   console.log("Session Data:", JSON.stringify(sessionState.data, null, 2))
   
