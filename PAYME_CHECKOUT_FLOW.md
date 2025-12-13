@@ -173,3 +173,5 @@ if (session?.status === "authorized") {
 ### Проблема: Заказ не создается автоматически
 **Решение**: Проверьте логику в `useEffect` PaymePaymentButton - должна проверять `status === "authorized"`
 
+
+

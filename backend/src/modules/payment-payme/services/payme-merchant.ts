@@ -154,6 +154,87 @@ export class PaymeMerchantService {
     }
   }
 
+  /**
+   * Fetch cart items for fiscalization (detail object).
+   * Returns items with title, price, count, MXIK code for Payme receipt.
+   * MXIK priority: product.metadata.mxik_code -> deepest category.metadata.mxik_code
+   * @param cartId - Cart ID to fetch items for.
+   */
+  private async getCartItemsForFiscalization(cartId: string) {
+    try {
+      const pgConnection = this.container_.resolve("__pg_connection__")
+      
+      // Query cart line items with product and deepest category metadata for MXIK code
+      // We use a subquery to select the category with the longest mpath (deepest in hierarchy)
+      // Priority: product mxik_code > deepest category mxik_code
+      const result = await pgConnection.raw(`
+        SELECT 
+          cli.id,
+          cli.title,
+          cli.quantity,
+          cli.unit_price,
+          cli.product_title,
+          cli.variant_title,
+          cli.product_id,
+          p.metadata as product_metadata,
+          deepest_cat.metadata as category_metadata
+        FROM cart_line_item cli
+        LEFT JOIN product p ON p.id = cli.product_id
+        LEFT JOIN LATERAL (
+          SELECT pc.metadata
+          FROM product_category_product pcp
+          JOIN product_category pc ON pc.id = pcp.product_category_id
+          WHERE pcp.product_id = p.id
+            AND pc.metadata->>'mxik_code' IS NOT NULL
+          ORDER BY LENGTH(COALESCE(pc.mpath, '')) DESC, pc.rank DESC
+          LIMIT 1
+        ) deepest_cat ON true
+        WHERE cli.cart_id = ?
+      `, [cartId])
+
+      const rows = result?.rows || result || []
+
+      // Build items array for fiscalization
+      const items = rows.map((row: any) => {
+        // Use product_title + variant_title if available, fallback to title
+        const title = row.product_title 
+          ? (row.variant_title ? `${row.product_title} - ${row.variant_title}` : row.product_title)
+          : (row.title || "Товар")
+
+        // Get MXIK code: first from product, then from deepest category with mxik_code
+        const productMetadata = typeof row.product_metadata === 'string' 
+          ? JSON.parse(row.product_metadata) 
+          : (row.product_metadata || {})
+        const categoryMetadata = typeof row.category_metadata === 'string' 
+          ? JSON.parse(row.category_metadata) 
+          : (row.category_metadata || {})
+        
+        // Priority: product mxik_code > deepest category mxik_code
+        const mxikCode = productMetadata.mxik_code || categoryMetadata.mxik_code || null
+
+        const item: any = {
+          title: title.substring(0, 128), // Payme limit: 128 chars
+          price: Math.round(Number(row.unit_price)), // Price per unit in tiyin
+          count: Number(row.quantity),
+          vat_percent: 12 // Standard VAT in Uzbekistan
+        }
+
+        // Add MXIK code if available
+        if (mxikCode) {
+          item.code = mxikCode
+        }
+
+        return item
+      })
+
+      this.logger_.info(`[PaymeMerchant] Found ${items.length} items for fiscalization, cart_id=${cartId}`)
+      return items
+    } catch (error) {
+      this.logger_.error(`[PaymeMerchant] Error fetching cart items: ${error}`)
+      return []
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Payme JSON-RPC Method Handlers
   // ─────────────────────────────────────────────────────────────────────────────
@@ -203,8 +284,19 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
-    this.logger_.info(`[PaymeMerchant] CheckPerformTransaction SUCCESS for order_id=${orderId}`)
-    return { allow: true }
+    // Fetch cart items for fiscalization
+    const items = await this.getCartItemsForFiscalization(session.cart_id)
+
+    this.logger_.info(`[PaymeMerchant] CheckPerformTransaction SUCCESS for order_id=${orderId}, items=${items.length}`)
+    
+    // Return with detail object for fiscalization (чекопечать)
+    return { 
+      allow: true,
+      detail: {
+        receipt_type: 0, // 0 = sale, 1 = return
+        items: items
+      }
+    }
   }
 
   /**
