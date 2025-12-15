@@ -48,9 +48,9 @@ export default async function Nav({ locale }: NavProps) {
               <Image
                 src="/logo.svg"
                 alt={t("logo")}
-                width={81}
-                height={40}
-                className="w-auto h-8 md:h-10 object-contain"
+                width={113}
+                height={56}
+                className="w-auto h-10 md:h-14 object-contain"
               />
             </LocalizedClientLink>
           </div>
