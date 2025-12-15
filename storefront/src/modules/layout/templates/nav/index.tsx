@@ -46,7 +46,7 @@ export default async function Nav({ locale }: NavProps) {
               data-testid="nav-store-link"
             >
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt={t("logo")}
                 width={120}
                 height={40}
