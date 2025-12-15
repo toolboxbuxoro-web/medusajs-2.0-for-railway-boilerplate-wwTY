@@ -2,14 +2,37 @@
 
 import { useEffect, useMemo, useState } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { useParams } from "next/navigation"
 
 import { bannerSlides } from "../../../../data/banner-slides"
+import type { Banner } from "@lib/data/banners"
 
 const AUTOPLAY_INTERVAL = 6000
 
-export default function BannerSlider() {
+type Slide = (typeof bannerSlides)[number] & Partial<Banner>
+
+export default function BannerSlider({ slides: serverSlides }: { slides?: Banner[] }) {
   const [current, setCurrent] = useState(0)
-  const slides = useMemo(() => bannerSlides, [])
+  const { locale } = useParams()
+
+  const slides = useMemo(() => {
+    if (serverSlides?.length) {
+      // normalize to the shape used by component
+      return serverSlides.map((b) => ({
+        id: b.id,
+        title: (locale === "uz" && b.title_uz) ? b.title_uz : (b.title || ""),
+        subtitle: (locale === "uz" && b.subtitle_uz) ? b.subtitle_uz : (b.subtitle || ""),
+        description: (locale === "uz" && b.description_uz) ? b.description_uz : (b.description || ""),
+        cta: (locale === "uz" && b.cta_uz) ? b.cta_uz : (b.cta || ""),
+        href: b.href || "/",
+        image_url: b.image_url,
+        // fallback background if image missing
+        background: "linear-gradient(135deg, #111827 0%, #374151 60%, #111827 100%)",
+      }))
+    }
+    return bannerSlides
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverSlides, locale])
   const total = slides.length
 
   useEffect(() => {
@@ -28,7 +51,15 @@ export default function BannerSlider() {
           <div
             key={slide.id}
             className={`absolute inset-0 transition-all duration-700 ease-out ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
-            style={{ background: slide.background }}
+            style={{
+              ...(slide.image_url
+                ? {
+                    backgroundImage: `url(${slide.image_url})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : { background: (slide as any).background }),
+            }}
           >
             {/* Decorative circles - hidden on mobile for better performance */}
             <div className="hidden sm:block absolute top-10 right-10 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 rounded-full bg-white/10 blur-3xl"></div>

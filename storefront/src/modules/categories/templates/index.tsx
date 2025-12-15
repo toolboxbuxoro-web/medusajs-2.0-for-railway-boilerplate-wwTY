@@ -31,6 +31,37 @@ export default function CategoryTemplate({
 
   if (!category || !countryCode) notFound()
 
+  const CategoryMedia = ({ c }: { c: HttpTypes.StoreProductCategory }) => {
+    const imageUrl = c.metadata?.image_url as string | undefined
+    const iconUrl = c.metadata?.icon_url as string | undefined
+
+    if (imageUrl) {
+      return (
+        <img
+          src={imageUrl}
+          alt={getLocalizedCategoryName(c, locale)}
+          className="w-full h-full object-cover"
+        />
+      )
+    }
+
+    if (iconUrl) {
+      return (
+        <img
+          src={iconUrl}
+          alt=""
+          className="w-10 h-10 object-contain"
+        />
+      )
+    }
+
+    return (
+      <span className="text-gray-400 font-bold text-lg">
+        {getLocalizedCategoryName(c, locale).slice(0, 1).toUpperCase()}
+      </span>
+    )
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="content-container py-4 sm:py-6 lg:py-8">
@@ -40,8 +71,8 @@ export default function CategoryTemplate({
             Home
           </LocalizedClientLink>
           <span className="mx-1 sm:mx-2">/</span>
-          <LocalizedClientLink href="/store" className="hover:text-red-600">
-            Store
+          <LocalizedClientLink href="/categories" className="hover:text-red-600">
+            Каталог
           </LocalizedClientLink>
           {parents.map((parent) => (
             <span key={parent.id}>
@@ -85,14 +116,22 @@ export default function CategoryTemplate({
         {/* Subcategories */}
         {category.category_children && category.category_children.length > 0 && (
           <div className="mb-6 sm:mb-8">
-            <div className="flex flex-wrap gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
               {category.category_children.map((c) => (
                 <LocalizedClientLink
                   key={c.id}
                   href={`/categories/${c.handle}`}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white border border-gray-200 rounded-full text-xs sm:text-sm font-medium hover:border-red-600 hover:text-red-600 transition-colors"
+                  className="group bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-gray-300 hover:shadow-sm transition-all"
                 >
-                  {getLocalizedCategoryName(c, locale)}
+                  <div className="min-w-0">
+                    <div className="font-semibold text-gray-900 text-sm sm:text-base leading-snug line-clamp-2">
+                      {getLocalizedCategoryName(c, locale)}
+                    </div>
+                  </div>
+
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
+                    <CategoryMedia c={c} />
+                  </div>
                 </LocalizedClientLink>
               ))}
             </div>

@@ -6,6 +6,7 @@ import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { getTranslations } from 'next-intl/server'
+import { listBanners } from "@lib/data/banners"
 
 export const metadata: Metadata = {
   title: "Toolbox - Профессиональные инструменты и оборудование",
@@ -21,6 +22,7 @@ export default async function Home({
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
   const t = await getTranslations('nav')
+  const banners = await listBanners()
 
   if (!collections || !region) {
     return null
@@ -29,7 +31,7 @@ export default async function Home({
   return (
     <>
       <div className="content-container px-4 md:px-6 pt-6 sm:pt-8">
-        <BannerSlider />
+        <BannerSlider slides={banners} />
       </div>
       
       {/* Featured Products Section */}
