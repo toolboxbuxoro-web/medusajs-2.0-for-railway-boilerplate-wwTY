@@ -21,6 +21,7 @@ const fetchStockFromMoySkladStep = createStep(
   "fetch-stock-from-moysklad",
   async ({ sku }: WorkflowInput, { container }) => {
     const moySkladService: MoySkladService = container.resolve(MOYSKLAD_MODULE)
+    // Service now uses correct Accept header: application/json;charset=utf-8
     const quantity = await moySkladService.retrieveStockBySku(sku)
     return new StepResponse(quantity)
   }

@@ -9,6 +9,7 @@ type ThumbnailProps = {
   // TODO: Fix image typings
   images?: any[] | null
   size?: "small" | "medium" | "large" | "full" | "square"
+  aspectRatio?: "3/4" | "9/16" | "11/14" | "1/1"
   isFeatured?: boolean
   className?: string
   "data-testid"?: string
@@ -19,6 +20,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   thumbnail,
   images,
   size = "small",
+  aspectRatio = "3/4",
   isFeatured,
   className,
   "data-testid": dataTestid,
@@ -26,15 +28,19 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
 }) => {
   const initialImage = thumbnail || images?.[0]?.url
 
+  // Determine aspect ratio: explicit prop takes priority, then size=square, then default
+  const effectiveAspectRatio = size === "square" ? "1/1" : aspectRatio
+
   return (
     <Container
       className={clx(
-        "relative w-full overflow-hidden p-4 bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150",
+        "relative w-full overflow-hidden bg-ui-bg-subtle rounded-large transition-shadow ease-in-out duration-150",
         className,
         {
-          "aspect-[11/14]": isFeatured,
-          "aspect-[9/16]": !isFeatured && size !== "square",
-          "aspect-[1/1]": size === "square",
+          "aspect-[3/4]": effectiveAspectRatio === "3/4",
+          "aspect-[9/16]": effectiveAspectRatio === "9/16",
+          "aspect-[11/14]": effectiveAspectRatio === "11/14",
+          "aspect-[1/1]": effectiveAspectRatio === "1/1",
           "w-[180px]": size === "small",
           "w-[290px]": size === "medium",
           "w-[440px]": size === "large",
