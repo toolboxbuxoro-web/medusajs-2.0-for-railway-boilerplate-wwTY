@@ -4,9 +4,10 @@ import { notFound } from "next/navigation"
 import ProductTemplate from "@modules/products/templates"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getProductByHandle, getProductsList } from "@lib/data/products"
+import { getLocalizedProductTitle } from "@lib/util/get-localized-product"
 
 type Props = {
-  params: { countryCode: string; handle: string }
+  params: { locale: string; countryCode: string; handle: string }
 }
 
 export const dynamic = "force-dynamic"
@@ -58,12 +59,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
+  const title = getLocalizedProductTitle(product, params.locale)
+
   return {
-    title: `${product.title} | Toolbox`,
-    description: `${product.title}`,
+    title: `${title} | Toolbox`,
+    description: `${title}`,
     openGraph: {
-      title: `${product.title} | Toolbox`,
-      description: `${product.title}`,
+      title: `${title} | Toolbox`,
+      description: `${title}`,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }
@@ -86,6 +89,7 @@ export default async function ProductPage({ params }: Props) {
       product={pricedProduct}
       region={region}
       countryCode={params.countryCode}
+      locale={params.locale}
     />
   )
 }

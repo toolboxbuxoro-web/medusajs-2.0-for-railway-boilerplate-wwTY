@@ -11,21 +11,28 @@ import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getLocalizedCollectionTitle, getLocalizedProductTitle } from "@lib/util/get-localized-product"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
+  locale: string
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
+  locale,
 }) => {
   if (!product || !product.id) {
     return notFound()
   }
+
+  const productTitle = getLocalizedProductTitle(product, locale)
+  const collectionTitle =
+    product.collection ? getLocalizedCollectionTitle(product.collection, locale) : null
 
   return (
     <>
@@ -38,12 +45,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             {product.collection && (
               <>
                 <LocalizedClientLink href={`/collections/${product.collection.handle}`} className="hover:text-red-600">
-                  {product.collection.title}
+                  {collectionTitle}
                 </LocalizedClientLink>
                 <span className="mx-1 sm:mx-2">/</span>
               </>
             )}
-            <span className="text-gray-900">{product.title}</span>
+            <span className="text-gray-900">{productTitle}</span>
           </nav>
 
           {/* Mobile Layout */}

@@ -9,3 +9,13 @@ export const getLocalizedCategoryName = (
   }
   return category.name
 }
+
+export const getLocalizedCategoryDescription = (
+  category: HttpTypes.StoreProductCategory,
+  locale: string
+) => {
+  if (locale === "uz" && category.metadata?.description_uz) {
+    return category.metadata.description_uz as string
+  }
+  return category.description
+}

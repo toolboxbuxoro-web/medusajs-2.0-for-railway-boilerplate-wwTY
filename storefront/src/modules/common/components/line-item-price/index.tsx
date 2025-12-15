@@ -5,6 +5,11 @@ import { getPricesForVariant } from "@lib/util/get-product-price"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 
+// Форматирует цену: убирает .00 и заменяет запятые на пробелы
+function formatPrice(priceString: string): string {
+  return priceString.replace(/\.00$/, "").replace(/,/g, " ")
+}
+
 type LineItemPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   style?: "default" | "tight"
@@ -36,10 +41,10 @@ const LineItemPrice = ({ item, style = "default" }: LineItemPriceProps) => {
                 className="line-through text-ui-fg-muted"
                 data-testid="product-original-price"
               >
-                {convertToLocale({
+                {formatPrice(convertToLocale({
                   amount: originalPrice,
                   currency_code,
-                })}
+                }))}
               </span>
             </p>
             {style === "default" && (
@@ -55,10 +60,10 @@ const LineItemPrice = ({ item, style = "default" }: LineItemPriceProps) => {
           })}
           data-testid="product-price"
         >
-          {convertToLocale({
+          {formatPrice(convertToLocale({
             amount: currentPrice,
             currency_code,
-          })}
+          }))}
         </span>
       </div>
     </div>

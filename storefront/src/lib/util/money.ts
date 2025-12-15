@@ -13,7 +13,7 @@ export const convertToLocale = ({
   currency_code,
   minimumFractionDigits,
   maximumFractionDigits,
-  locale = "en-US",
+  locale = "ru-RU",
 }: ConvertToLocaleParams) => {
   if (currency_code && !isEmpty(currency_code)) {
     const formatter = new Intl.NumberFormat(locale, {

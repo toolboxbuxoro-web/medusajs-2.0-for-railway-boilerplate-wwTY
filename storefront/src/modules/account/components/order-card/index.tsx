@@ -6,6 +6,8 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { useParams } from "next/navigation"
+import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
 
 type OrderCardProps = {
   order: HttpTypes.StoreOrder
@@ -13,6 +15,8 @@ type OrderCardProps = {
 
 const OrderCard = ({ order }: OrderCardProps) => {
   const t = useTranslations('account')
+  const { locale } = useParams()
+  const localeStr = String(locale || "ru")
   
   const numberOfLines = useMemo(() => {
     return (
@@ -59,7 +63,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
                   className="text-ui-fg-base font-semibold"
                   data-testid="item-title"
                 >
-                  {i.title}
+                  {getLocalizedLineItemTitle(i as any, localeStr)}
                 </span>
                 <span className="ml-2">x</span>
                 <span data-testid="item-quantity">{i.quantity}</span>

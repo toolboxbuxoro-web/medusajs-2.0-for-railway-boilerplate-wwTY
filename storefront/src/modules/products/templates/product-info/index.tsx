@@ -7,6 +7,7 @@ import { useParams } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import FavoriteButton from "@modules/products/components/favorite-button"
 import Compare from "@modules/common/icons/compare"
+import { getLocalizedProductDescription, getLocalizedProductTitle } from "@lib/util/get-localized-product"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -15,6 +16,7 @@ type ProductInfoProps = {
 const ProductInfo = ({ product }: ProductInfoProps) => {
   const t = useTranslations('product')
   const { locale } = useParams()
+  const localeStr = String(locale || "ru")
 
   return (
     <div id="product-info">
@@ -34,8 +36,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
           className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
           data-testid="product-title"
         >
-          {/* @ts-ignore */}
-          {locale === 'uz' && product.metadata?.title_uz ? product.metadata.title_uz : product.title}
+          {getLocalizedProductTitle(product, localeStr)}
         </Heading>
 
         {/* Product Code & Rating */}
@@ -56,8 +57,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
             className="text-sm sm:text-base text-gray-700 whitespace-pre-line mt-2 sm:mt-4 line-clamp-3 sm:line-clamp-none"
             data-testid="product-description"
           >
-            {/* @ts-ignore */}
-            {locale === 'uz' && product.metadata?.description_uz ? product.metadata.description_uz : product.description}
+            {getLocalizedProductDescription(product, localeStr)}
           </Text>
         )}
       </div>

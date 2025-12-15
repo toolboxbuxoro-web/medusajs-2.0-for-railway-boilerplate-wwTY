@@ -8,6 +8,45 @@ import { redirect } from "next/navigation"
 import { cache } from "react"
 import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
 
+type OtpPurpose = "register" | "reset_password" | "change_password"
+
+function normalizeUzPhone(input: string): string | null {
+  if (!input) return null
+  const digits = input.replace(/\D/g, "")
+  if (digits.startsWith("998") && digits.length === 12) return digits
+  if (digits.length === 9) return `998${digits}`
+  if (digits.length === 10 && digits.startsWith("0")) return `998${digits.slice(1)}`
+  return null
+}
+
+function backendBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+}
+
+async function otpRequest(phone: string, purpose: OtpPurpose) {
+  const resp = await fetch(`${backendBaseUrl()}/store/otp/request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone, purpose }),
+    cache: "no-store",
+  })
+  if (!resp.ok) {
+    throw new Error(await resp.text().catch(() => "Failed to send code"))
+  }
+}
+
+async function otpVerify(phone: string, purpose: OtpPurpose, code: string) {
+  const resp = await fetch(`${backendBaseUrl()}/store/otp/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone, purpose, code }),
+    cache: "no-store",
+  })
+  if (!resp.ok) return false
+  const json = await resp.json().catch(() => null)
+  return !!json?.verified
+}
+
 export const getCustomer = cache(async function () {
   return await sdk.store.customer
     .retrieve({}, { next: { tags: ["customer"] }, ...getAuthHeaders() })
@@ -29,6 +68,7 @@ export const updateCustomer = cache(async function (
 
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
+  const otpCode = (formData.get("otp_code") as string) || ""
   const customerForm = {
     email: formData.get("email") as string,
     first_name: formData.get("first_name") as string,
@@ -37,6 +77,24 @@ export async function signup(_currentState: unknown, formData: FormData) {
   }
 
   try {
+    // Require phone for SMS verification
+    const normalizedPhone = normalizeUzPhone(customerForm.phone)
+    if (!normalizedPhone) {
+      return "Введите корректный номер телефона (+998...)"
+    }
+
+    // Step 1: send OTP if not provided
+    if (!otpCode) {
+      await otpRequest(normalizedPhone, "register")
+      return "Код отправлен по SMS. Введите код и нажмите ещё раз."
+    }
+
+    // Step 2: verify OTP
+    const verified = await otpVerify(normalizedPhone, "register", otpCode)
+    if (!verified) {
+      return "Неверный код из SMS"
+    }
+
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
       password: password,
@@ -45,7 +103,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     const customHeaders = { authorization: `Bearer ${token}` }
     
     const { customer: createdCustomer } = await sdk.store.customer.create(
-      customerForm,
+      { ...customerForm, phone: `+${normalizedPhone}` },
       {},
       customHeaders
     )
@@ -62,6 +120,82 @@ export async function signup(_currentState: unknown, formData: FormData) {
   } catch (error: any) {
     return error.toString()
   }
+}
+
+export async function requestPasswordResetOtp(_currentState: unknown, formData: FormData) {
+  const phone = (formData.get("phone") as string) || ""
+  const normalized = normalizeUzPhone(phone)
+  if (!normalized) return "Введите корректный номер телефона (+998...)"
+  try {
+    await otpRequest(normalized, "reset_password")
+    return "Код отправлен по SMS"
+  } catch (e: any) {
+    return e?.message || "Ошибка отправки кода"
+  }
+}
+
+export async function resetPasswordWithOtp(_currentState: unknown, formData: FormData) {
+  const phone = (formData.get("phone") as string) || ""
+  const code = (formData.get("otp_code") as string) || ""
+  const newPassword = (formData.get("new_password") as string) || ""
+  const normalized = normalizeUzPhone(phone)
+  if (!normalized) return "Введите корректный номер телефона (+998...)"
+  if (!code || !newPassword) return "Введите код и новый пароль"
+
+  const resp = await fetch(`${backendBaseUrl()}/store/otp/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone: normalized, code, new_password: newPassword }),
+    cache: "no-store",
+  })
+
+  if (!resp.ok) {
+    return "Не удалось сбросить пароль"
+  }
+
+  return "Пароль обновлён. Теперь войдите с новым паролем."
+}
+
+export async function forgotPassword(_currentState: unknown, formData: FormData) {
+  const code = (formData.get("otp_code") as string) || ""
+  if (!code) {
+    return requestPasswordResetOtp(_currentState, formData)
+  }
+  return resetPasswordWithOtp(_currentState, formData)
+}
+
+export async function changePasswordWithOtp(_currentState: any, formData: FormData) {
+  const phone = (formData.get("phone") as string) || ""
+  const code = (formData.get("otp_code") as string) || ""
+  const oldPassword = (formData.get("old_password") as string) || ""
+  const newPassword = (formData.get("new_password") as string) || ""
+
+  const normalized = normalizeUzPhone(phone)
+  if (!normalized) return "Укажите корректный номер телефона в профиле"
+
+  // If no code, just send OTP
+  if (!code) {
+    await otpRequest(normalized, "change_password")
+    return "Код отправлен по SMS"
+  }
+
+  const resp = await fetch(`${backendBaseUrl()}/store/otp/change-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      phone: normalized,
+      code,
+      old_password: oldPassword,
+      new_password: newPassword,
+    }),
+    cache: "no-store",
+  })
+
+  if (!resp.ok) {
+    return "Не удалось изменить пароль"
+  }
+
+  return "Пароль изменён"
 }
 
 export async function login(_currentState: unknown, formData: FormData) {

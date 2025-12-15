@@ -8,7 +8,7 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedCategoryDescription, getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 
 export default function CategoryTemplate({
   categories,
@@ -61,12 +61,23 @@ export default function CategoryTemplate({
 
         {/* Header */}
         <div className="mb-4 sm:mb-6 lg:mb-8">
-          <h1 className="heading-2" data-testid="category-page-title">
-            {getLocalizedCategoryName(category, locale)}
-          </h1>
-          {category.description && (
+          <div className="flex items-center gap-3 sm:gap-4">
+            {category.metadata?.image_url && (
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden border border-gray-200 bg-white flex-shrink-0">
+                <img
+                  src={category.metadata.image_url as string}
+                  alt={getLocalizedCategoryName(category, locale)}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <h1 className="heading-2" data-testid="category-page-title">
+              {getLocalizedCategoryName(category, locale)}
+            </h1>
+          </div>
+          {getLocalizedCategoryDescription(category, locale) && (
             <p className="text-gray-600 text-sm sm:text-base mt-2 max-w-2xl">
-              {category.description}
+              {getLocalizedCategoryDescription(category, locale)}
             </p>
           )}
         </div>

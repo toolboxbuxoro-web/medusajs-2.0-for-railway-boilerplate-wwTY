@@ -125,6 +125,32 @@ const Register = ({ setCurrentView }: Props) => {
           </div>
         </div>
 
+        {/* SMS Code */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            {t('sms_code') || "Код из SMS"}
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8a2 2 0 01-2-2H6a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v6" />
+              </svg>
+            </div>
+            <input
+              name="otp_code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="123456"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm sm:text-base"
+              data-testid="otp-code-input"
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            {"Сначала нажмите “Создать аккаунт”, чтобы отправить код. Затем введите код и нажмите ещё раз."}
+          </p>
+        </div>
+
         {/* Password */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">

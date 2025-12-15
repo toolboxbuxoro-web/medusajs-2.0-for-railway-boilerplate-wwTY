@@ -4,10 +4,12 @@ import { useState } from "react"
 
 import Register from "@modules/account/components/register"
 import Login from "@modules/account/components/login"
+import ForgotPassword from "@modules/account/components/forgot-password"
 
 export enum LOGIN_VIEW {
   SIGN_IN = "sign-in",
   REGISTER = "register",
+  FORGOT_PASSWORD = "forgot-password",
 }
 
 const LoginTemplate = () => {
@@ -34,10 +36,10 @@ const LoginTemplate = () => {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 backdrop-blur-sm">
-          {currentView === "sign-in" ? (
-            <Login setCurrentView={setCurrentView} />
-          ) : (
-            <Register setCurrentView={setCurrentView} />
+          {currentView === LOGIN_VIEW.SIGN_IN && <Login setCurrentView={setCurrentView} />}
+          {currentView === LOGIN_VIEW.REGISTER && <Register setCurrentView={setCurrentView} />}
+          {currentView === LOGIN_VIEW.FORGOT_PASSWORD && (
+            <ForgotPassword setCurrentView={setCurrentView} />
           )}
         </div>
 

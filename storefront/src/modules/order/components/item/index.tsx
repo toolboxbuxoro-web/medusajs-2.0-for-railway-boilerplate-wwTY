@@ -1,16 +1,23 @@
+"use client"
+
 import { HttpTypes } from "@medusajs/types"
 import { Table, Text } from "@medusajs/ui"
+import { useParams } from "next/navigation"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
 }
 
 const Item = ({ item }: ItemProps) => {
+  const { locale } = useParams()
+  const localeStr = String(locale || "ru")
+
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
@@ -24,7 +31,7 @@ const Item = ({ item }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-name"
         >
-          {item.title}
+          {getLocalizedLineItemTitle(item, localeStr)}
         </Text>
         {item.variant && (
           <LineItemOptions variant={item.variant} data-testid="product-variant" />

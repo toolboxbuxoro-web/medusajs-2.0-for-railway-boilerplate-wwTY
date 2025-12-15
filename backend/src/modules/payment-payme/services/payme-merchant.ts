@@ -157,16 +157,14 @@ export class PaymeMerchantService {
   /**
    * Fetch cart items for fiscalization (detail object).
    * Returns items with title, price, count, MXIK code for Payme receipt.
-   * MXIK priority: product.metadata.mxik_code -> deepest category.metadata.mxik_code
+   * MXIK is taken from product.metadata.mxik_code only.
    * @param cartId - Cart ID to fetch items for.
    */
   private async getCartItemsForFiscalization(cartId: string) {
     try {
       const pgConnection = this.container_.resolve("__pg_connection__")
       
-      // Query cart line items with product and deepest category metadata for MXIK code
-      // We use a subquery to select the category with the longest mpath (deepest in hierarchy)
-      // Priority: product mxik_code > deepest category mxik_code
+      // Query cart line items with product metadata for MXIK code
       const result = await pgConnection.raw(`
         SELECT 
           cli.id,
@@ -176,19 +174,9 @@ export class PaymeMerchantService {
           cli.product_title,
           cli.variant_title,
           cli.product_id,
-          p.metadata as product_metadata,
-          deepest_cat.metadata as category_metadata
+          p.metadata as product_metadata
         FROM cart_line_item cli
         LEFT JOIN product p ON p.id = cli.product_id
-        LEFT JOIN LATERAL (
-          SELECT pc.metadata
-          FROM product_category_product pcp
-          JOIN product_category pc ON pc.id = pcp.product_category_id
-          WHERE pcp.product_id = p.id
-            AND pc.metadata->>'mxik_code' IS NOT NULL
-          ORDER BY LENGTH(COALESCE(pc.mpath, '')) DESC, pc.rank DESC
-          LIMIT 1
-        ) deepest_cat ON true
         WHERE cli.cart_id = ?
       `, [cartId])
 
@@ -201,16 +189,12 @@ export class PaymeMerchantService {
           ? (row.variant_title ? `${row.product_title} - ${row.variant_title}` : row.product_title)
           : (row.title || "Товар")
 
-        // Get MXIK code: first from product, then from deepest category with mxik_code
+        // Get MXIK code from product metadata only
         const productMetadata = typeof row.product_metadata === 'string' 
           ? JSON.parse(row.product_metadata) 
           : (row.product_metadata || {})
-        const categoryMetadata = typeof row.category_metadata === 'string' 
-          ? JSON.parse(row.category_metadata) 
-          : (row.category_metadata || {})
         
-        // Priority: product mxik_code > deepest category mxik_code
-        const mxikCode = productMetadata.mxik_code || categoryMetadata.mxik_code || null
+        const mxikCode = productMetadata.mxik_code || null
 
         const item: any = {
           title: title.substring(0, 128), // Payme limit: 128 chars

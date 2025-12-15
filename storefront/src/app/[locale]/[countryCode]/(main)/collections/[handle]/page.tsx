@@ -9,9 +9,10 @@ import { listRegions } from "@lib/data/regions"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { getLocalizedCollectionTitle } from "@lib/util/get-localized-product"
 
 type Props = {
-  params: { handle: string; countryCode: string }
+  params: { handle: string; countryCode: string; locale: string }
   searchParams: {
     page?: string
     sortBy?: SortOptions
@@ -58,9 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
+  const title = getLocalizedCollectionTitle(collection as any, params.locale)
   const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
+    title: `${title} | Medusa Store`,
+    description: `${title} collection`,
   } as Metadata
 
   return metadata

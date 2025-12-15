@@ -11,6 +11,37 @@ type MobileMenuProps = {
   locale: string
 }
 
+const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }) => {
+  const imageUrl = category.metadata?.image_url as string | undefined
+  const iconUrl = category.metadata?.icon_url as string | undefined
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt=""
+        className="w-5 h-5 object-cover rounded bg-gray-50 border border-gray-200"
+      />
+    )
+  }
+  if (iconUrl) {
+    return (
+      <img
+        src={iconUrl}
+        alt=""
+        className="w-5 h-5 object-contain rounded bg-gray-50 border border-gray-200 p-0.5"
+      />
+    )
+  }
+
+  return (
+    <span className="w-5 h-5 flex items-center justify-center text-gray-400">
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+  )
+}
+
 export default function MobileMenu({ categories, locale }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
@@ -155,11 +186,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                   className="flex items-center gap-3 px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  <span className="w-5 h-5 flex items-center justify-center text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
+                  <CategoryIcon category={category} />
                   {getLocalizedCategoryName(category, locale)}
                 </LocalizedClientLink>
               ))}

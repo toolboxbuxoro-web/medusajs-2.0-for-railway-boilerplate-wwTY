@@ -62,6 +62,9 @@ importers:
       awilix:
         specifier: ^8.0.1
         version: 8.0.1
+      ioredis:
+        specifier: 5.7.0
+        version: 5.7.0
       medusajs-launch-utils:
         specifier: 0.0.18
         version: 0.0.18

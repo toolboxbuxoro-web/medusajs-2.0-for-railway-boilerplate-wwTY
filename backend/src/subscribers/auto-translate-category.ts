@@ -14,19 +14,41 @@ export default async function autoTranslateCategory({
   let needsUpdate = false;
   const metadata = category.metadata || {};
 
-  if (category.name && !metadata.name_uz) {
-    const translatedName = await translateText(category.name, 'uz');
-    if (translatedName) {
-      metadata.name_uz = translatedName;
-      needsUpdate = true;
+  const nameManual = metadata.name_uz_manual === true
+  const descManual = metadata.description_uz_manual === true
+
+  if (category.name && !nameManual) {
+    const nameSrc = metadata.name_uz_src as string | undefined
+    const shouldTranslateName = !metadata.name_uz || nameSrc !== category.name
+
+    if (shouldTranslateName) {
+      const translatedName = await translateText(category.name, "uz")
+      if (translatedName) {
+        metadata.name_uz = translatedName
+        metadata.name_uz_src = category.name
+        needsUpdate = true
+      }
     }
   }
 
-  if (category.description && !metadata.description_uz) {
-    const translatedDescription = await translateText(category.description, 'uz');
-    if (translatedDescription) {
-      metadata.description_uz = translatedDescription;
-      needsUpdate = true;
+  // If RU description was removed, clear auto translation (unless manual)
+  if (!category.description && !descManual && (metadata.description_uz || metadata.description_uz_src)) {
+    metadata.description_uz = null
+    metadata.description_uz_src = null
+    needsUpdate = true
+  }
+
+  if (category.description && !descManual) {
+    const descSrc = metadata.description_uz_src as string | undefined
+    const shouldTranslateDesc = !metadata.description_uz || descSrc !== category.description
+
+    if (shouldTranslateDesc) {
+      const translatedDescription = await translateText(category.description, "uz")
+      if (translatedDescription) {
+        metadata.description_uz = translatedDescription
+        metadata.description_uz_src = category.description
+        needsUpdate = true
+      }
     }
   }
 

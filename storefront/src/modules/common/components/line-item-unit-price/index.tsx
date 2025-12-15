@@ -2,6 +2,12 @@ import { getPricesForVariant } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 
+// Форматирует цену: убирает .00 и заменяет запятые на пробелы
+function formatPrice(priceString: string | undefined): string {
+  if (!priceString) return ""
+  return priceString.replace(/\.00$/, "").replace(/,/g, " ")
+}
+
 type LineItemUnitPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   style?: "default" | "tight"
@@ -32,7 +38,7 @@ const LineItemUnitPrice = ({
               className="line-through"
               data-testid="product-unit-original-price"
             >
-              {original_price}
+              {formatPrice(original_price)}
             </span>
           </p>
           {style === "default" && (
@@ -46,7 +52,7 @@ const LineItemUnitPrice = ({
         })}
         data-testid="product-unit-price"
       >
-        {calculated_price}
+        {formatPrice(calculated_price)}
       </span>
     </div>
   )

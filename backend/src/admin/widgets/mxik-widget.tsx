@@ -107,8 +107,8 @@ const MxikWidget = ({ data }: WidgetProps) => {
             {message.text}
           </p>
         )}
-        <p style={{ margin: "12px 0 0", fontSize: "11px", color: "#9ca3af" }}>
-          Если не указан — используется MXIK категории
+        <p style={{ margin: "12px 0 0", fontSize: "11px", color: "#f59e0b" }}>
+          ⚠️ Обязательно для фискализации
         </p>
       </div>
     </div>

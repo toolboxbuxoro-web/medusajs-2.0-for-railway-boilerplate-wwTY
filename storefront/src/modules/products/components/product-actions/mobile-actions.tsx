@@ -11,6 +11,11 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import { HttpTypes } from "@medusajs/types"
 
+// Форматирует цену: убирает .00 и заменяет запятые на пробелы
+function formatPrice(priceString: string): string {
+  return priceString.replace(/\.00$/, "").replace(/,/g, " ")
+}
+
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
@@ -78,7 +83,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <div className="flex flex-col items-start">
                     {selectedPrice.price_type === "sale" && (
                       <span className="line-through text-gray-500 text-xs">
-                        {selectedPrice.original_price}
+                        {formatPrice(selectedPrice.original_price)}
                       </span>
                     )}
                     <span
@@ -87,7 +92,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                         "text-gray-900": selectedPrice.price_type !== "sale",
                       })}
                     >
-                      {selectedPrice.calculated_price}
+                      {formatPrice(selectedPrice.calculated_price)}
                     </span>
                   </div>
                 ) : (

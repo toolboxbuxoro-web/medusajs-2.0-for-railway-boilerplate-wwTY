@@ -1,3 +1,5 @@
+"use client"
+
 import { Text } from "@medusajs/ui"
 import { getProductPrice } from "@lib/util/get-product-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -5,6 +7,8 @@ import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import ProductPreviewOverlay from "./overlay"
 import { HttpTypes } from "@medusajs/types"
+import { useParams } from "next/navigation"
+import { getLocalizedProductTitle } from "@lib/util/get-localized-product"
 
 export default function ProductPreviewContent({
   product,
@@ -13,6 +17,8 @@ export default function ProductPreviewContent({
   product: HttpTypes.StoreProduct
   isFeatured?: boolean
 }) {
+  const { locale } = useParams()
+  const localeStr = String(locale || "ru")
   const { cheapestPrice } = getProductPrice({
     product: product,
   })
@@ -57,7 +63,7 @@ export default function ProductPreviewContent({
               className="text-gray-900 text-sm sm:text-base font-semibold line-clamp-2 mb-2 group-hover:text-red-600 transition-colors min-h-[2.5rem] sm:min-h-[3rem]" 
               data-testid="product-title"
             >
-              {product.title}
+              {getLocalizedProductTitle(product, localeStr)}
             </Text>
           </LocalizedClientLink>
           

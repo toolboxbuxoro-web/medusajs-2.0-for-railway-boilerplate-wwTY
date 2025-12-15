@@ -14,13 +14,68 @@ type MyInformationProps = {
 
 import { useTranslations } from 'next-intl'
 
-const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
+const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
   const t = useTranslations('account')
 
-  // TODO: Add support for password updates
-  const [state, formAction] = useFormState((() => {}) as any, {
-    customer,
+  const changePassword = async (_currentState: Record<string, any>, formData: FormData) => {
+    const phone = (formData.get("phone") as string) || ""
+    const code = (formData.get("otp_code") as string) || ""
+    const oldPassword = (formData.get("old_password") as string) || ""
+    const newPassword = (formData.get("new_password") as string) || ""
+    const confirm = (formData.get("confirm_password") as string) || ""
+
+    if (!phone) {
+      return { success: false, error: "Укажите номер телефона в профиле" }
+    }
+
+    if (!oldPassword || !newPassword || !confirm) {
+      return { success: false, error: "Заполните поля пароля" }
+    }
+
+    if (newPassword !== confirm) {
+      return { success: false, error: "Пароли не совпадают" }
+    }
+
+    const backend = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+
+    // Step 1: send OTP if not provided
+    if (!code) {
+      const r = await fetch(`${backend}/store/otp/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, purpose: "change_password" }),
+        cache: "no-store",
+      })
+
+      if (!r.ok) {
+        return { success: false, error: "Не удалось отправить код" }
+      }
+
+      return { success: false, error: "Код отправлен по SMS. Введите код и нажмите «Сохранить» ещё раз." }
+    }
+
+    // Step 2: change password
+    const resp = await fetch(`${backend}/store/otp/change-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone,
+        code,
+        old_password: oldPassword,
+        new_password: newPassword,
+      }),
+      cache: "no-store",
+    })
+
+    if (!resp.ok) {
+      return { success: false, error: "Не удалось изменить пароль" }
+    }
+
+    return { success: true, error: null }
+  }
+
+  const [state, formAction] = useFormState(changePassword, {
     success: false,
     error: null,
   })
@@ -46,6 +101,7 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
         clearState={clearState}
         data-testid="account-password-editor"
       >
+        <input type="hidden" name="phone" value={customer.phone ?? ""} />
         <div className="grid grid-cols-2 gap-4">
           <Input
             label={t('old_password')}
@@ -68,10 +124,16 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
             required
             data-testid="confirm-password-input"
           />
+          <Input
+            label={t('sms_code') || "Код из SMS"}
+            type="text"
+            name="otp_code"
+            data-testid="otp-code-input"
+          />
         </div>
       </AccountInfo>
     </form>
   )
 }
 
-export default ProfileName
+export default ProfilePassword

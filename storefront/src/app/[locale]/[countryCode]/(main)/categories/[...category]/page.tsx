@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
-import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedCategoryDescription, getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
 import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
@@ -53,8 +53,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .map((category: StoreProductCategory) => getLocalizedCategoryName(category, params.locale))
       .join(" | ")
 
+    const lastCategory = product_categories[product_categories.length - 1]
     const description =
-      product_categories[product_categories.length - 1].description ??
+      getLocalizedCategoryDescription(lastCategory, params.locale) ??
       `${title} category.`
 
     return {

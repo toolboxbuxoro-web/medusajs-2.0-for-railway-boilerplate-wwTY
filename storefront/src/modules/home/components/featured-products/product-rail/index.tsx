@@ -3,13 +3,16 @@ import { Text } from "@medusajs/ui"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ProductPreview from "@modules/products/components/product-preview"
+import { getLocalizedCollectionTitle } from "@lib/util/get-localized-product"
 
 export default function ProductRail({
   collection,
   region,
+  locale,
 }: {
   collection: HttpTypes.StoreCollection
   region: HttpTypes.StoreRegion
+  locale: string
 }) {
   const { products } = collection
 
@@ -21,7 +24,7 @@ export default function ProductRail({
     <div className="mb-12 sm:mb-16">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="heading-2">{collection.title}</h2>
+        <h2 className="heading-2">{getLocalizedCollectionTitle(collection, locale)}</h2>
         <LocalizedClientLink 
           href={`/collections/${collection.handle}`}
           className="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1"

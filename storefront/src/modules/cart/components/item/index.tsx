@@ -13,6 +13,8 @@ import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
+import { useParams } from "next/navigation"
 import { useState } from "react"
 
 type ItemProps = {
@@ -23,6 +25,8 @@ type ItemProps = {
 const Item = ({ item, type = "full" }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { locale } = useParams()
+  const localeStr = String(locale || "ru")
 
   const { handle } = item.variant?.product ?? {}
 
@@ -69,7 +73,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
-          {item.product_title}
+          {getLocalizedLineItemTitle(item, localeStr)}
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>

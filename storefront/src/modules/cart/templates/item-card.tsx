@@ -11,6 +11,8 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import { convertToLocale } from "@lib/util/money"
 import { useTranslations } from "next-intl"
 import Marquee from "@modules/common/components/marquee"
+import { useParams } from "next/navigation"
+import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
 
 type ItemCardProps = {
   item: HttpTypes.StoreCartLineItem
@@ -21,6 +23,8 @@ type ItemCardProps = {
 const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
   const t = useTranslations("cart")
   const tProduct = useTranslations("product")
+  const { locale } = useParams()
+  const localeStr = String(locale || "ru")
   const [quantity, setQuantity] = useState(item.quantity)
   const [updating, setUpdating] = useState(false)
 
@@ -80,7 +84,7 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
             {/* Title */}
             <LocalizedClientLink href={`/products/${handle}`} className="block w-full overflow-hidden">
               <Marquee className="font-semibold text-sm sm:text-base mb-1 text-gray-900 hover:text-red-600 transition-colors">
-                {item.product_title}
+                {getLocalizedLineItemTitle(item, localeStr)}
               </Marquee>
             </LocalizedClientLink>
 
@@ -150,7 +154,7 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
                 )}
                 <LocalizedClientLink href={`/products/${handle}`} className="block w-full overflow-hidden">
                   <Marquee className="font-semibold text-lg mb-1 text-gray-900 hover:text-red-600 transition-colors">
-                    {item.product_title}
+                    {getLocalizedLineItemTitle(item, localeStr)}
                   </Marquee>
                 </LocalizedClientLink>
                 <p className="text-sm text-gray-600 mb-1">
