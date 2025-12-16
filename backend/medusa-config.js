@@ -36,15 +36,6 @@ import {
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
-// --- DIAGNOSTIC CONFIG ---
-const mask = (str) => str ? str.replace(/:([^:@]+)@/, ':****@') : 'NOT_SET';
-console.log('\n--- DIAGNOSTIC CONFIG ---');
-console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`WORKER_MODE: ${WORKER_MODE}`);
-console.log(`REDIS_URL: ${mask(REDIS_URL)}`);
-console.log(`DATABASE_URL: ${mask(DATABASE_URL)}`);
-console.log('-------------------------\n');
-
 
 const medusaConfig = {
   projectConfig: {
