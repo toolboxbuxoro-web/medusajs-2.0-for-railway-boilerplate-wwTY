@@ -4,36 +4,45 @@ import { useEffect, useMemo, useState } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useParams } from "next/navigation"
 
-import { bannerSlides } from "../../../../data/banner-slides"
 import type { Banner } from "@lib/data/banners"
 
 const AUTOPLAY_INTERVAL = 6000
 
-type Slide = (typeof bannerSlides)[number] & Partial<Banner>
+type Slide = {
+  id: string
+  title: string
+  subtitle: string
+  description: string
+  cta: string
+  href: string
+  image_url?: string
+  background: string
+}
 
 export default function BannerSlider({ slides: serverSlides }: { slides?: Banner[] }) {
   const [current, setCurrent] = useState(0)
   const { locale } = useParams()
 
-  const slides = useMemo(() => {
-    if (serverSlides?.length) {
-      // normalize to the shape used by component
-      return serverSlides.map((b) => ({
-        id: b.id,
-        title: (locale === "uz" && b.title_uz) ? b.title_uz : (b.title || ""),
-        subtitle: (locale === "uz" && b.subtitle_uz) ? b.subtitle_uz : (b.subtitle || ""),
-        description: (locale === "uz" && b.description_uz) ? b.description_uz : (b.description || ""),
-        cta: (locale === "uz" && b.cta_uz) ? b.cta_uz : (b.cta || ""),
-        href: b.href || "/",
-        image_url: b.image_url,
-        // fallback background if image missing
-        background: "linear-gradient(135deg, #111827 0%, #374151 60%, #111827 100%)",
-      }))
-    }
-    return bannerSlides
+  const slides: Slide[] = useMemo(() => {
+    if (!serverSlides?.length) return []
+    
+    return serverSlides.map((b) => ({
+      id: b.id,
+      title: (locale === "uz" && b.title_uz) ? b.title_uz : (b.title || ""),
+      subtitle: (locale === "uz" && b.subtitle_uz) ? b.subtitle_uz : (b.subtitle || ""),
+      description: (locale === "uz" && b.description_uz) ? b.description_uz : (b.description || ""),
+      cta: (locale === "uz" && b.cta_uz) ? b.cta_uz : (b.cta || ""),
+      href: b.href || "/",
+      image_url: b.image_url,
+      background: "linear-gradient(135deg, #111827 0%, #374151 60%, #111827 100%)",
+    }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverSlides, locale])
+  
   const total = slides.length
+  
+  // Don't render if no banners
+  if (total === 0) return null
 
   useEffect(() => {
     const id = setInterval(() => {
