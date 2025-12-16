@@ -200,7 +200,8 @@ export class PaymeMerchantService {
           title: title.substring(0, 128), // Payme limit: 128 chars
           price: Math.round(Number(row.unit_price)), // Price per unit in tiyin
           count: Number(row.quantity),
-          vat_percent: 12 // Standard VAT in Uzbekistan
+          vat_percent: 12, // Standard VAT in Uzbekistan
+          package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
         }
 
         // Add MXIK code if available
