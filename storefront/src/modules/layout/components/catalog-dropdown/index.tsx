@@ -121,7 +121,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center gap-2 px-4 h-9 sm:h-10 lg:h-11 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap select-none relative z-[101] ${
+        className={`group flex items-center justify-center gap-2 px-4 h-9 sm:h-10 lg:h-11 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap select-none relative z-[101] ${
           isOpen 
             ? "bg-gray-900 text-white shadow-inner" 
             : "bg-red-600 text-white hover:bg-red-700 hover:shadow-md hover:scale-[1.02] active:scale-95"
@@ -318,7 +318,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
         {!isMobile && (
           <button
              onClick={handleClose}
-             className="absolute top-20 right-8 p-3 bg-white rounded-full shadow-lg border border-gray-100 text-gray-500 hover:text-red-600 hover:rotate-90 transition-all z-50"
+             className="absolute top-20 right-8 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg border border-gray-100 text-gray-500 hover:text-red-600 hover:rotate-90 transition-all z-50"
              title="Закрыть меню"
           >
              <XMark className="w-6 h-6" />
