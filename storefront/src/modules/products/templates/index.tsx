@@ -37,7 +37,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   return (
     <>
       <div className="bg-white">
-        <div className="content-container py-4 sm:py-6">
+        <div className="content-container py-4 sm:py-6 relative" data-testid="product-container">
           {/* Breadcrumbs */}
           <nav className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 overflow-x-auto no-scrollbar whitespace-nowrap">
             <LocalizedClientLink href="/" className="hover:text-red-600">Home</LocalizedClientLink>
@@ -53,60 +53,27 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <span className="text-gray-900">{productTitle}</span>
           </nav>
 
-          {/* Mobile Layout */}
-          <div className="lg:hidden">
-            <div className="space-y-4 sm:space-y-6">
-              {/* Image Gallery */}
+          {/* 
+            Main Product Layout 
+            Desktop: Grid (Left: Gallery, Right: Sticky Sidebar)
+            Mobile: Stacked
+          */}
+          <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12">
+            
+            {/* Gallery Column */}
+            <div className="lg:col-span-7 w-full overflow-hidden">
               <ImageGallery images={product?.images || []} />
-              
-              {/* Product Info */}
-              <ProductInfo product={product} />
-              
-              {/* Purchase Actions */}
-              <div className="bg-gray-50 rounded-xl p-4">
-                <ProductOnboardingCta />
-                <Suspense
-                  fallback={
-                    <ProductActions
-                      disabled={true}
-                      product={product}
-                      region={region}
-                    />
-                  }
-                >
-                  <ProductActionsWrapper id={product.id} region={region} />
-                </Suspense>
-              </div>
-
-              {/* Product Tabs */}
-              <ProductTabs product={product} />
-            </div>
-          </div>
-
-          {/* Desktop Layout */}
-          <div
-            className="hidden lg:grid lg:grid-cols-12 gap-6 xl:gap-8"
-            data-testid="product-container"
-          >
-            {/* Left: Image Gallery */}
-            <div className="lg:col-span-5 xl:col-span-5">
-              <div className="sticky top-24">
-                <ImageGallery images={product?.images || []} />
-              </div>
             </div>
 
-            {/* Center: Product Info */}
-            <div className="lg:col-span-4 xl:col-span-4">
-              <ProductInfo product={product} />
-              <div className="mt-6">
-                <ProductTabs product={product} />
-              </div>
-            </div>
+            {/* Product Info & Actions Column (Sticky on Desktop) */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              <div className="sticky top-24 flex flex-col gap-6">
+                
+                {/* Product Header & Info */}
+                <ProductInfo product={product} />
 
-            {/* Right: Purchase Section */}
-            <div className="lg:col-span-3 xl:col-span-3">
-              <div className="sticky top-24">
-                <div className="bg-gray-50 rounded-xl p-4 xl:p-6">
+                {/* Purchase Card */}
+                <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-100 shadow-sm">
                   <ProductOnboardingCta />
                   <Suspense
                     fallback={
@@ -120,6 +87,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                     <ProductActionsWrapper id={product.id} region={region} />
                   </Suspense>
                 </div>
+
+                {/* Accordions / Tabs */}
+                <div className="pt-2">
+                  <ProductTabs product={product} />
+                </div>
               </div>
             </div>
           </div>
@@ -127,7 +99,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       </div>
 
       {/* Related Products */}
-      <div className="content-container py-8 sm:py-12 lg:py-16" data-testid="related-products-container">
+      <div className="content-container py-8 sm:py-12 lg:py-16 bg-gray-50 border-t border-gray-100" data-testid="related-products-container">
         <Suspense fallback={<SkeletonRelatedProducts />}>
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
