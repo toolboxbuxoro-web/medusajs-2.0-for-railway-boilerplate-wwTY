@@ -49,9 +49,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Cart exists but not completed - check payment session status
-      const paymentSession = cart?.payment_collection?.payment_sessions?.find(
-        (s: any) => s.provider_id?.includes('payme')
-      )
+      const paymentSession = cart?.payment_collection?.payment_sessions?.[0]
       
       if (!paymentSession) {
         return NextResponse.json({
@@ -62,22 +60,38 @@ export async function GET(request: NextRequest) {
       
       const sessionData = paymentSession.data as any
       
-      // Check Payme-specific states
-      if (sessionData?.payme_state === 2) {
-        // Payment was performed but cart wasn't completed yet
-        // This means PerformTransaction was called but maybe failed to complete cart
-        return NextResponse.json({
-          status: 'authorized',
-          message: 'Payment authorized, completing order...'
-        })
+      // Payme-specific states
+      if (paymentSession.provider_id?.includes('payme')) {
+        if (sessionData?.payme_state === 2) {
+          return NextResponse.json({
+            status: 'authorized',
+            message: 'Payment authorized, completing order...'
+          })
+        }
+
+        if (sessionData?.payme_state === -1 || sessionData?.payme_state === -2) {
+          return NextResponse.json({
+            status: 'cancelled',
+            message: 'Payment was cancelled'
+          })
+        }
       }
-      
-      if (sessionData?.payme_state === -1 || sessionData?.payme_state === -2) {
-        // Payment was cancelled
-        return NextResponse.json({
-          status: 'cancelled',
-          message: 'Payment was cancelled'
-        })
+
+      // Click-specific states
+      if (paymentSession.provider_id?.includes('click')) {
+        if (sessionData?.click_state === 'completed' || sessionData?.click_error === 0) {
+          return NextResponse.json({
+            status: 'authorized',
+            message: 'Payment authorized, completing order...'
+          })
+        }
+
+        if (sessionData?.click_state === 'cancelled' || (typeof sessionData?.click_error === 'number' && sessionData.click_error < 0)) {
+          return NextResponse.json({
+            status: 'cancelled',
+            message: 'Payment was cancelled'
+          })
+        }
       }
       
       if (paymentSession.status === 'authorized') {

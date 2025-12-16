@@ -34,6 +34,14 @@ export const paymentInfoMap: Record<
     title: "Payme",
     icon: <CreditCard />,
   },
+  pp_click_click: {
+    title: "Click",
+    icon: <CreditCard />,
+  },
+  pp_click_pay_by_card_click_pay_by_card: {
+    title: "Click (Pay by Card)",
+    icon: <CreditCard />,
+  },
   // Add more payment providers here
 }
 
@@ -49,6 +57,14 @@ export const isManual = (providerId?: string) => {
 }
 export const isPayme = (providerId?: string) => {
   return providerId?.startsWith("pp_payme")
+}
+
+export const isClick = (providerId?: string) => {
+  return providerId?.startsWith("pp_click_click")
+}
+
+export const isClickPayByCard = (providerId?: string) => {
+  return providerId?.startsWith("pp_click_pay_by_card")
 }
 
 // Add currencies that don't need to be divided by 100

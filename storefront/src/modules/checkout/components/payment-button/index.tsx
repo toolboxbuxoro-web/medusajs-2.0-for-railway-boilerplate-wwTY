@@ -9,9 +9,11 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPayme, isPaypal, isStripe } from "@lib/constants"
+import { isClick, isClickPayByCard, isManual, isPayme, isPaypal, isStripe } from "@lib/constants"
 import { useTranslations } from "next-intl"
 import { PaymePaymentButton } from "./payme-payment-button"
+import { ClickPaymentButton } from "./click-payment-button"
+import { ClickPayByCardPaymentButton } from "./click-pay-by-card-payment-button"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -58,6 +60,22 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isPayme(paymentSession?.provider_id):
       return (
         <PaymePaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isClick(paymentSession?.provider_id):
+      return (
+        <ClickPaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isClickPayByCard(paymentSession?.provider_id):
+      return (
+        <ClickPayByCardPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}

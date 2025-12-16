@@ -103,6 +103,16 @@ export const PAYME_KEY = process.env.PAYME_KEY;
 export const PAYME_URL = process.env.PAYME_URL || 'https://checkout.paycom.uz';
 
 /**
+ * (optional) Click configuration
+ */
+export const CLICK_MERCHANT_ID = process.env.CLICK_MERCHANT_ID
+export const CLICK_SERVICE_ID = process.env.CLICK_SERVICE_ID
+export const CLICK_SECRET_KEY = process.env.CLICK_SECRET_KEY
+export const CLICK_PAY_URL = process.env.CLICK_PAY_URL || 'https://my.click.uz/services/pay'
+export const CLICK_MERCHANT_USER_ID = process.env.CLICK_MERCHANT_USER_ID
+export const CLICK_CARD_TYPE = process.env.CLICK_CARD_TYPE as 'uzcard' | 'humo' | undefined
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =
