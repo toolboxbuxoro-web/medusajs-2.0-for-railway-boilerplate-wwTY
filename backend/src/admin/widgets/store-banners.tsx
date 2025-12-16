@@ -97,6 +97,39 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
     }
   }
 
+  // Convert image file to WebP format using Canvas API
+  const convertToWebP = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          reject(new Error("Canvas context not available"))
+          return
+        }
+        ctx.drawImage(img, 0, 0)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to convert to WebP"))
+              return
+            }
+            const baseName = file.name.replace(/\.[^.]+$/, "")
+            const webpFile = new File([blob], `${baseName}.webp`, { type: "image/webp" })
+            resolve(webpFile)
+          },
+          "image/webp",
+          0.85 // quality 85%
+        )
+      }
+      img.onerror = () => reject(new Error("Failed to load image"))
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   const addBanner = async () => {
     if (!file) {
       setMessage({ type: "error", text: "Выберите файл баннера" })
@@ -107,9 +140,13 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
     setMessage(null)
 
     try {
-      // 1) upload to Medusa file service (MinIO if configured)
+      // Convert to WebP first
+      setMessage({ type: "success", text: "Конвертация в WebP..." })
+      const webpFile = await convertToWebP(file)
+      
+      // Upload to Medusa file service (MinIO if configured)
       const form = new FormData()
-      form.append("files", file)
+      form.append("files", webpFile)
       const uploadRes = await fetch("/admin/uploads", {
         method: "POST",
         credentials: "include",

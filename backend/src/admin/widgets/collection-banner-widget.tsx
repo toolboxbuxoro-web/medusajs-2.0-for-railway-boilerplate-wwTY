@@ -66,13 +66,49 @@ const CollectionBannerWidget = ({ data }: WidgetProps) => {
     setCurrentBanner(prev => ({ ...prev, [field]: value }))
   }
 
+  // Convert image file to WebP format using Canvas API
+  const convertToWebP = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          reject(new Error("Canvas context not available"))
+          return
+        }
+        ctx.drawImage(img, 0, 0)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to convert to WebP"))
+              return
+            }
+            const baseName = file.name.replace(/\.[^.]+$/, "")
+            const webpFile = new File([blob], `${baseName}.webp`, { type: "image/webp" })
+            resolve(webpFile)
+          },
+          "image/webp",
+          0.85 // quality 85%
+        )
+      }
+      img.onerror = () => reject(new Error("Failed to load image"))
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   const uploadFile = async (): Promise<{ url: string; file_id?: string } | null> => {
     if (!currentFile) return null
 
     setIsUploading(true)
     try {
+      // Convert to WebP first
+      const webpFile = await convertToWebP(currentFile)
+      
       const form = new FormData()
-      form.append("files", currentFile)
+      form.append("files", webpFile)
 
       const uploadRes = await fetch("/admin/uploads", {
         method: "POST",
