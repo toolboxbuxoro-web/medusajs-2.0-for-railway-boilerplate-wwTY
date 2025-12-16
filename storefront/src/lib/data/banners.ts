@@ -22,18 +22,37 @@ export type Banner = {
 }
 
 export const listBanners = cache(async function () {
-  const res = await fetch(`${MEDUSA_BACKEND_URL}/store/banners`, {
-    headers: {
-      "x-publishable-api-key": PUBLISHABLE_API_KEY,
-    },
-    next: { tags: ["banners"], revalidate: 60 },
-  })
+  const url = `${MEDUSA_BACKEND_URL}/store/banners`
+  
+  console.log("[Banners] Fetching from:", url)
+  console.log("[Banners] Using API key:", PUBLISHABLE_API_KEY ? `${PUBLISHABLE_API_KEY.slice(0, 10)}...` : "(empty)")
+  
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "x-publishable-api-key": PUBLISHABLE_API_KEY,
+      },
+      next: { tags: ["banners"], revalidate: 60 },
+    })
 
-  if (!res.ok) {
-    console.error("Failed to fetch banners:", res.status, res.statusText)
+    console.log("[Banners] Response status:", res.status, res.statusText)
+
+    if (!res.ok) {
+      console.error("[Banners] Failed to fetch:", res.status, res.statusText)
+      return [] as Banner[]
+    }
+
+    const json = (await res.json()) as { banners?: Banner[] }
+    const banners = Array.isArray(json.banners) ? json.banners : []
+    
+    console.log("[Banners] Received banners count:", banners.length)
+    if (banners.length > 0) {
+      console.log("[Banners] First banner:", JSON.stringify(banners[0]).slice(0, 200))
+    }
+    
+    return banners
+  } catch (error) {
+    console.error("[Banners] Fetch error:", error)
     return [] as Banner[]
   }
-
-  const json = (await res.json()) as { banners?: Banner[] }
-  return Array.isArray(json.banners) ? json.banners : []
 })
