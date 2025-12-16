@@ -143,21 +143,22 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Trigger Button */}
+      {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 h-10 md:h-12 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm md:text-base whitespace-nowrap"
+        className="group flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 lg:h-11 bg-red-600 text-white rounded-lg hover:bg-red-700 hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap select-none"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         {isOpen ? (
-          <XMark className="w-5 h-5" />
+          <XMark className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300" />
         ) : (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         )}
         <span className="hidden md:inline">{t('catalog')}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform duration-200 hidden md:block ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-300 ease-out hidden md:block ${isOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'}`} />
       </button>
 
       {/* Overlay */}
@@ -204,7 +205,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                   <LocalizedClientLink
                     href={`/categories/${category.handle}`}
                     className="flex items-center gap-3 flex-1"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       if (category.category_children?.length) {
                         e.preventDefault()
                       } else {
