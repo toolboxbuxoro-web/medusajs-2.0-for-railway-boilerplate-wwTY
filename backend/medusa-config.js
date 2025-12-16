@@ -25,10 +25,26 @@ import {
   MEILISEARCH_ADMIN_KEY,
   PAYME_ID,
   PAYME_KEY,
-  PAYME_URL
+  PAYME_URL,
+  CLICK_MERCHANT_ID,
+  CLICK_SERVICE_ID,
+  CLICK_SECRET_KEY,
+  CLICK_PAY_URL,
+  CLICK_MERCHANT_USER_ID,
+  CLICK_CARD_TYPE
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
+
+// --- DIAGNOSTIC CONFIG ---
+const mask = (str) => str ? str.replace(/:([^:@]+)@/, ':****@') : 'NOT_SET';
+console.log('\n--- DIAGNOSTIC CONFIG ---');
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`WORKER_MODE: ${WORKER_MODE}`);
+console.log(`REDIS_URL: ${mask(REDIS_URL)}`);
+console.log(`DATABASE_URL: ${mask(DATABASE_URL)}`);
+console.log('-------------------------\n');
+
 
 const medusaConfig = {
   projectConfig: {
@@ -147,6 +163,32 @@ const medusaConfig = {
               payme_url: PAYME_URL,
             },
           }, console.log("✅ Payme provider added to config") && undefined].filter(Boolean) : [console.log("❌ Payme provider NOT added: Missing ID or KEY") && undefined].filter(Boolean)),
+          ...(CLICK_MERCHANT_ID && CLICK_SERVICE_ID && CLICK_SECRET_KEY ? [
+            {
+              resolve: './src/modules/payment-click',
+              id: 'click',
+              options: {
+                merchant_id: CLICK_MERCHANT_ID,
+                service_id: CLICK_SERVICE_ID,
+                secret_key: CLICK_SECRET_KEY,
+                pay_url: CLICK_PAY_URL,
+                merchant_user_id: CLICK_MERCHANT_USER_ID,
+              },
+            },
+            {
+              resolve: './src/modules/payment-click',
+              id: 'click_pay_by_card',
+              options: {
+                merchant_id: CLICK_MERCHANT_ID,
+                service_id: CLICK_SERVICE_ID,
+                secret_key: CLICK_SECRET_KEY,
+                pay_url: CLICK_PAY_URL,
+                merchant_user_id: CLICK_MERCHANT_USER_ID,
+                card_type: CLICK_CARD_TYPE,
+              },
+            },
+            console.log("✅ Click providers added to config") && undefined,
+          ].filter(Boolean) : [console.log("❌ Click providers NOT added: Missing CLICK_MERCHANT_ID/CLICK_SERVICE_ID/CLICK_SECRET_KEY") && undefined].filter(Boolean)),
         ],
       },
     }
