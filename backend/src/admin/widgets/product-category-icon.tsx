@@ -239,3 +239,4 @@ export const config = defineWidgetConfig({
 export default ProductCategoryIconWidget
 
 
+

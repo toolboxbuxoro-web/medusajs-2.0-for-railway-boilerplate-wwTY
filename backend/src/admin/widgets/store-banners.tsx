@@ -422,3 +422,4 @@ export const config = defineWidgetConfig({
 export default StoreBannersWidget
 
 
+

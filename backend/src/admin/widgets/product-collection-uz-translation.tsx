@@ -187,3 +187,4 @@ export const config = defineWidgetConfig({
 export default ProductCollectionUzTranslationWidget
 
 
+

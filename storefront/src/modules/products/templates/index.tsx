@@ -36,44 +36,72 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
-      <div className="bg-white">
-        <div className="content-container py-4 sm:py-6 relative" data-testid="product-container">
+      <div className="bg-white min-h-screen">
+        <div className="content-container py-4 sm:py-6" data-testid="product-container">
           {/* Breadcrumbs */}
-          <nav className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 overflow-x-auto no-scrollbar whitespace-nowrap">
-            <LocalizedClientLink href="/" className="hover:text-red-600">Home</LocalizedClientLink>
-            <span className="mx-1 sm:mx-2">/</span>
+          <nav className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 overflow-x-auto no-scrollbar whitespace-nowrap">
+            <LocalizedClientLink href="/" className="hover:text-red-600 transition-colors">Главная</LocalizedClientLink>
+            <span className="mx-1.5">/</span>
             {product.collection && (
               <>
-                <LocalizedClientLink href={`/collections/${product.collection.handle}`} className="hover:text-red-600">
+                <LocalizedClientLink href={`/collections/${product.collection.handle}`} className="hover:text-red-600 transition-colors">
                   {collectionTitle}
                 </LocalizedClientLink>
-                <span className="mx-1 sm:mx-2">/</span>
+                <span className="mx-1.5">/</span>
               </>
             )}
             <span className="text-gray-900">{productTitle}</span>
           </nav>
 
-          {/* 
-            Main Product Layout 
-            Desktop: Grid (Left: Gallery, Right: Sticky Sidebar)
-            Mobile: Stacked
-          */}
-          <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Mobile Layout */}
+          <div className="lg:hidden space-y-6">
+            {/* Image Gallery */}
+            <ImageGallery images={product?.images || []} />
             
-            {/* Gallery Column */}
-            <div className="lg:col-span-7 w-full overflow-hidden">
+            {/* Product Info */}
+            <ProductInfo product={product} />
+            
+            {/* Purchase Actions */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <ProductOnboardingCta />
+              <Suspense
+                fallback={
+                  <ProductActions
+                    disabled={true}
+                    product={product}
+                    region={region}
+                  />
+                }
+              >
+                <ProductActionsWrapper id={product.id} region={region} />
+              </Suspense>
+            </div>
+
+            {/* Product Tabs */}
+            <ProductTabs product={product} />
+          </div>
+
+          {/* Desktop Layout: 3-Column Grid */}
+          <div className="hidden lg:grid lg:grid-cols-12 gap-6 xl:gap-8">
+            {/* Column 1: Image Gallery (5 cols) */}
+            <div className="lg:col-span-5">
               <ImageGallery images={product?.images || []} />
             </div>
 
-            {/* Product Info & Actions Column (Sticky on Desktop) */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              <div className="sticky top-24 flex flex-col gap-6">
-                
-                {/* Product Header & Info */}
-                <ProductInfo product={product} />
+            {/* Column 2: Product Info & Specs (4 cols) */}
+            <div className="lg:col-span-4">
+              <ProductInfo product={product} />
+              
+              {/* Tabs below specs on desktop */}
+              <div className="mt-6">
+                <ProductTabs product={product} />
+              </div>
+            </div>
 
-                {/* Purchase Card */}
-                <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+            {/* Column 3: Purchase Card (3 cols) - Sticky */}
+            <div className="lg:col-span-3">
+              <div className="sticky top-24">
+                <div className="bg-gray-50 rounded-xl p-4 xl:p-5 border border-gray-100 shadow-sm">
                   <ProductOnboardingCta />
                   <Suspense
                     fallback={
@@ -87,11 +115,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                     <ProductActionsWrapper id={product.id} region={region} />
                   </Suspense>
                 </div>
-
-                {/* Accordions / Tabs */}
-                <div className="pt-2">
-                  <ProductTabs product={product} />
-                </div>
               </div>
             </div>
           </div>
@@ -99,10 +122,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       </div>
 
       {/* Related Products */}
-      <div className="content-container py-8 sm:py-12 lg:py-16 bg-gray-50 border-t border-gray-100" data-testid="related-products-container">
-        <Suspense fallback={<SkeletonRelatedProducts />}>
-          <RelatedProducts product={product} countryCode={countryCode} />
-        </Suspense>
+      <div className="bg-gray-50 border-t border-gray-100">
+        <div className="content-container py-8 sm:py-12 lg:py-16" data-testid="related-products-container">
+          <Suspense fallback={<SkeletonRelatedProducts />}>
+            <RelatedProducts product={product} countryCode={countryCode} />
+          </Suspense>
+        </div>
       </div>
     </>
   )

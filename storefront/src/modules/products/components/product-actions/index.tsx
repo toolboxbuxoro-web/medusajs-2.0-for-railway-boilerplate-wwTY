@@ -151,10 +151,16 @@ export default function ProductActions({
         </div>
 
         {isOnSale && (
-          <div className="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg mb-6">
-            <div className="text-lg font-bold">
-              {t('promotions')} -{selectedPrice?.percentage_diff}%
-            </div>
+          <div className="bg-gradient-to-r from-red-600 to-red-500 text-white p-3 rounded-lg mb-4">
+            <div className="text-sm font-medium mb-1">Скидка до {selectedPrice?.percentage_diff}%</div>
+            {selectedPrice?.original_price && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs line-through opacity-75">{selectedPrice.original_price}</span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded">
+                  Выгода {convertToLocale({ amount: (selectedPrice.original_price_number || 0) - (selectedPrice.calculated_price_number || 0), currency_code: selectedPrice.currency_code })}
+                </span>
+              </div>
+            )}
           </div>
         )}
 

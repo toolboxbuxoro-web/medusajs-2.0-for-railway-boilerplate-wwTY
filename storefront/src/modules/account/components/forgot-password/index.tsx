@@ -94,3 +94,4 @@ const ForgotPassword = ({ setCurrentView }: Props) => {
 export default ForgotPassword
 
 
+
