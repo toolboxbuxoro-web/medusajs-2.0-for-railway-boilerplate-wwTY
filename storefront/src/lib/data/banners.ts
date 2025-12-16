@@ -32,7 +32,7 @@ export const listBanners = cache(async function () {
       headers: {
         "x-publishable-api-key": PUBLISHABLE_API_KEY,
       },
-      next: { tags: ["banners"], revalidate: 60 },
+      cache: "no-store", // Always fetch fresh data for banners
     })
 
     console.log("[Banners] Response status:", res.status, res.statusText)
