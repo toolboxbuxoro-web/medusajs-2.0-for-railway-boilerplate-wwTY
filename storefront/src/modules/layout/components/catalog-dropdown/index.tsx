@@ -128,14 +128,16 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
         }`}
         aria-expanded={isOpen}
       >
-        <span className={`transition-transform duration-300 ${isOpen ? "rotate-90 scale-0 opacity-0 absolute" : "scale-100 opacity-100"}`}>
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </span>
-        <span className={`transition-transform duration-300 ${isOpen ? "scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0 absolute"}`}>
-          <XMark className="w-5 h-5" />
-        </span>
+        <div className="relative w-5 h-5 flex items-center justify-center">
+          <span className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isOpen ? "rotate-90 scale-0 opacity-0" : "scale-100 opacity-100 rotate-0"}`}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </span>
+          <span className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isOpen ? "scale-100 opacity-100 rotate-0" : "-rotate-90 scale-0 opacity-0"}`}>
+            <XMark className="w-5 h-5" />
+          </span>
+        </div>
         
         <span className="hidden md:inline">{t('catalog')}</span>
         <ChevronDown 
@@ -143,13 +145,13 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
         />
       </button>
 
-      {/* Backdrop Overlay */}
+      {/* Backdrop Overlay - Starts BELOW header to keep header clickable/visible */}
       <div 
         className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] transition-opacity duration-300 ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
         onClick={handleClose}
-        style={{ top: '0px' }} // Full screen overly
+        style={{ top: 'var(--header-height, 0px)' }}
       />
 
       {/* Mega Menu Container - Positioned below header */}
@@ -159,11 +161,11 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
             ? "translate-y-0 opacity-100 visible" 
             : "-translate-y-4 opacity-0 invisible pointer-events-none"
         }`}
-        // Dynamic top position matching header height: 56px (mobile) -> 64px (sm) -> 72px (lg)
+        // Dynamic top position matching header height
         style={{ top: 'var(--header-height, 0px)' }}
       >
-        {/* CSS Variable for JS-less styling mostly, but utilizing tailwind classes for height below */}
-        <div className="absolute inset-x-0 top-14 sm:top-16 lg:top-[72px] bottom-0 bg-white">
+        {/* Inner Content - Full height relative to container */}
+        <div className="absolute inset-0 bg-white">
           
           {/* Main Layout Grid */}
           <div className="h-full flex flex-col lg:flex-row max-w-[1920px] mx-auto">

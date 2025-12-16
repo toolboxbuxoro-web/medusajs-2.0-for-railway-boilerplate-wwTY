@@ -19,6 +19,20 @@ export default function ScrollAwareNav({ children }: ScrollAwareNavProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.querySelector('header')
+      if (header) {
+        const height = header.offsetHeight
+        document.documentElement.style.setProperty('--header-height', `${height}px`)
+      }
+    }
+
+    updateHeaderHeight()
+    window.addEventListener('resize', updateHeaderHeight)
+    return () => window.removeEventListener('resize', updateHeaderHeight)
+  }, [])
+
   return (
     <div className={isScrolled ? 'navbar-scrolled' : ''}>
       {children}
