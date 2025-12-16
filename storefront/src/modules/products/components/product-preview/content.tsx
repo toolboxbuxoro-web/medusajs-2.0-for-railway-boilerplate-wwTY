@@ -30,14 +30,15 @@ export default function ProductPreviewContent({
         className="bg-white border border-gray-200 rounded-xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:border-gray-300 relative"
       >
         {/* Image Container */}
-        <div className="relative overflow-hidden bg-gray-50">
+        <div className="relative overflow-hidden bg-white">
           <LocalizedClientLink href={`/products/${product.handle}`} className="block w-full h-full">
             <Thumbnail
               thumbnail={product.thumbnail}
               images={product.images}
               size="full"
               aspectRatio="3/4"
-              fit="cover"
+              fit="contain"
+              className="bg-white"
             />
           </LocalizedClientLink>
           
