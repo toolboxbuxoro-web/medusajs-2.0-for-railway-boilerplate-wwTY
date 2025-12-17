@@ -17,6 +17,35 @@ export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY
 /**
  * Database URL for Postgres instance used by the backend
  */
+// #region agent log
+;(() => {
+  const data = {
+    nodeEnv: process.env.NODE_ENV,
+    port: process.env.PORT,
+    host: process.env.HOST,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    hasCookieSecret: !!process.env.COOKIE_SECRET,
+    hasRedisUrl: !!process.env.REDIS_URL,
+  }
+  const payload = {
+    sessionId: "debug-session",
+    runId: "railway",
+    hypothesisId: "H1_backend_crashes_due_to_missing_required_env",
+    location: "backend/src/lib/constants.ts:pre-assert",
+    message: "Backend env presence check (before assertValue)",
+    data,
+    timestamp: Date.now(),
+  }
+  console.log("[agent-debug]", JSON.stringify(payload))
+  fetch("http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {})
+})()
+// #endregion agent log
+
 export const DATABASE_URL = assertValue(
   process.env.DATABASE_URL,
   'Environment variable for DATABASE_URL is not set',

@@ -4,8 +4,12 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 
 // Форматирует цену: убирает .00 и заменяет запятые на пробелы
+// Форматирует цену: убирает .00 и ,00 и заменяет запятые на пробелы
 function formatPrice(priceString: string): string {
-  return priceString.replace(/\.00$/, "").replace(/,/g, " ")
+  // Сначала убираем ,00 или .00 в конце
+  const smoothPrice = priceString.replace(/[.,]00$/, "")
+  // Затем заменяем разделяющие запятые на пробелы (если они остались в середине числа)
+  return smoothPrice.replace(/,/g, " ")
 }
 
 export default function ProductPrice({

@@ -23,6 +23,14 @@ type ProductActionsProps = {
   disabled?: boolean
 }
 
+// Форматирует цену: убирает .00 и ,00 и заменяет запятые на пробелы
+function formatPrice(priceString: string): string {
+  // Сначала убираем ,00 или .00 в конце
+  const smoothPrice = priceString.replace(/[.,]00$/, "")
+  // Затем заменяем разделяющие запятые на пробелы (если они остались в середине числа)
+  return smoothPrice.replace(/,/g, " ")
+}
+
 const optionsAsKeymap = (variantOptions: any) => {
   return variantOptions?.reduce((acc: Record<string, string | undefined>, varopt: any) => {
     if (varopt.option && varopt.value !== null && varopt.value !== undefined) {
@@ -154,10 +162,10 @@ export default function ProductActions({
           <div className="bg-gradient-to-r from-red-600 to-red-500 text-white p-3 rounded-lg mb-4">
             <div className="text-sm font-medium mb-1">Скидка до {selectedPrice?.percentage_diff}%</div>
             {selectedPrice?.original_price && (
-              <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                 <span className="text-xs line-through opacity-75">{selectedPrice.original_price}</span>
                 <span className="text-xs bg-white/20 px-2 py-0.5 rounded">
-                  Выгода {convertToLocale({ amount: (selectedPrice.original_price_number || 0) - (selectedPrice.calculated_price_number || 0), currency_code: selectedPrice.currency_code })}
+                  Выгода {formatPrice(convertToLocale({ amount: (selectedPrice.original_price_number || 0) - (selectedPrice.calculated_price_number || 0), currency_code: selectedPrice.currency_code }))}
                 </span>
               </div>
             )}
