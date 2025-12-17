@@ -194,25 +194,24 @@ export class PaymeMerchantService {
           ? JSON.parse(row.product_metadata) 
           : (row.product_metadata || {})
         
-        const mxikCode = productMetadata.mxik_code || null
+        // Fallback to a default MXIK code if missing (Required by Payme)
+        // Using a generic code temporarily or the one from widget placeholder
+        const DEFAULT_MXIK_CODE = "06201001001000000" 
+        const mxikCode = productMetadata.mxik_code || DEFAULT_MXIK_CODE
 
         const item: any = {
           title: title.substring(0, 128), // Payme limit: 128 chars
-          price: Math.round(Number(row.unit_price)), // Price per unit in tiyin
+          price: Math.round(Number(row.unit_price) * 100), // Price per unit in tiyin
           count: Number(row.quantity),
+          code: mxikCode, // Mandatory field
           vat_percent: 12, // Standard VAT in Uzbekistan
           package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
-        }
-
-        // Add MXIK code if available
-        if (mxikCode) {
-          item.code = mxikCode
         }
 
         return item
       })
 
-      this.logger_.info(`[PaymeMerchant] Found ${items.length} items for fiscalization, cart_id=${cartId}`)
+      this.logger_.info(`[PaymeMerchant] Prepared items for fiscalization: ${JSON.stringify(items)}`)
       return items
     } catch (error) {
       this.logger_.error(`[PaymeMerchant] Error fetching cart items: ${error}`)
@@ -258,8 +257,8 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.ORDER_ALREADY_PAID, "Order already paid")
     }
 
-    // Amount validation - use session.amount as source of truth
-    const expectedAmount = Math.round(Number(session.amount))
+    // Amount validation - use session.amount as source of truth (convert to tiyins)
+    const expectedAmount = Math.round(Number(session.amount) * 100)
     
     if (expectedAmount <= 0) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Invalid amount")
@@ -327,8 +326,8 @@ export class PaymeMerchantService {
       throw new PaymeError(-31051, "Another transaction is in progress for this order")
     }
 
-    // Amount validation using session.amount
-    const expectedAmount = Math.round(Number(session.amount))
+    // Amount validation using session.amount (convert to tiyins)
+    const expectedAmount = Math.round(Number(session.amount) * 100)
     
     if (expectedAmount !== amount) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
@@ -589,7 +588,7 @@ export class PaymeMerchantService {
         return {
           id: data.payme_transaction_id, // Payme's ID
           time: Number(data.payme_create_time),
-          amount: Number(row.amount), // Amount in tiyin/smallest unit
+          amount: Number(row.amount) * 100, // Amount in tiyin/smallest unit
           account: {
             order_id: data.cart_id || data.order_id // Provide what we have
           },

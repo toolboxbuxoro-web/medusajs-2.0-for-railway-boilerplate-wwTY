@@ -66,7 +66,7 @@ export default async function testPaymeLocal({ container }: ExecArgs) {
 
   try {
     const checkResult = await paymeMerchant.handleRequest("CheckPerformTransaction", {
-      amount: Number(testCart.amount),
+      amount: Number(testCart.amount) * 100,
       account: {
         order_id: testCart.cart_id
       }
@@ -109,7 +109,7 @@ export default async function testPaymeLocal({ container }: ExecArgs) {
     const createResult = await paymeMerchant.handleRequest("CreateTransaction", {
       id: testPaymeId,
       time: testTime,
-      amount: Number(testCart.amount),
+      amount: Number(testCart.amount) * 100,
       account: {
         order_id: testCart.cart_id
       }

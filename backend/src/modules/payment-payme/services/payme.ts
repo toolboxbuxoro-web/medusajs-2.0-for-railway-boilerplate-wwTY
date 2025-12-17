@@ -75,8 +75,8 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
    * @param currencyCode - Currency code (default UZS).
    */
   private generatePaymentUrl(orderId: string, amount: number, currencyCode: string = "UZS"): string {
-    // Medusa 2.0 already stores amounts in minor units (tiyin for UZS)
-    const amountForPayme = Math.round(amount)
+    // Medusa 2.0 stores amounts in standard units (Soms), but Payme expects tiyins (1/100 Som)
+    const amountForPayme = Math.round(amount * 100)
 
     // Get Store URL for redirect after payment
     // Use STORE_URL (storefront) for redirect, not MEDUSA_BACKEND_URL
