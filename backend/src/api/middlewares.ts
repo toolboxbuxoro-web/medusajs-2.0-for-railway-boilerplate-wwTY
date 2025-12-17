@@ -3,6 +3,12 @@ import { defineMiddlewares } from "@medusajs/medusa"
 export default defineMiddlewares({
   routes: [
     {
+      matcher: "/health",
+      method: "GET",
+      middlewares: [],
+      authenticate: false,
+    },
+    {
       matcher: "/payme",
       method: "POST",
       middlewares: [],

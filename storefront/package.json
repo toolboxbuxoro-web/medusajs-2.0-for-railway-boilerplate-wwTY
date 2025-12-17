@@ -12,7 +12,7 @@
     "launcher": "launch-storefront",
     "dev": "npm run wait && npm run launcher dev",
     "build": "npm run wait && npm run launcher build",
-    "start": "npm run launcher start",
+    "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "build:next": "next build",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
