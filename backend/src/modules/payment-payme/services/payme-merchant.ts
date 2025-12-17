@@ -157,15 +157,17 @@ export class PaymeMerchantService {
   /**
    * Fetch cart items for fiscalization (detail object).
    * Returns items with title, price, count, MXIK code for Payme receipt.
+   * INCLUDES shipping costs to ensure sum matches transaction total.
    * MXIK is taken from product.metadata.mxik_code only.
    * @param cartId - Cart ID to fetch items for.
+   * @param expectedTotal - Expected total in tiyins to validate sum matches.
    */
-  private async getCartItemsForFiscalization(cartId: string) {
+  private async getCartItemsForFiscalization(cartId: string, expectedTotal?: number) {
     try {
       const pgConnection = this.container_.resolve("__pg_connection__")
       
       // Query cart line items with product metadata for MXIK code
-      const result = await pgConnection.raw(`
+      const lineItemsResult = await pgConnection.raw(`
         SELECT 
           cli.id,
           cli.title,
@@ -180,10 +182,10 @@ export class PaymeMerchantService {
         WHERE cli.cart_id = ?
       `, [cartId])
 
-      const rows = result?.rows || result || []
+      const rows = lineItemsResult?.rows || lineItemsResult || []
 
       // Build items array for fiscalization
-      const items = rows.map((row: any) => {
+      const items: any[] = rows.map((row: any) => {
         // Use product_title + variant_title if available, fallback to title
         const title = row.product_title 
           ? (row.variant_title ? `${row.product_title} - ${row.variant_title}` : row.product_title)
@@ -195,17 +197,14 @@ export class PaymeMerchantService {
           : (row.product_metadata || {})
         
         // Fallback to a default MXIK code if missing (Required by Payme)
-        // Using a generic code temporarily or the one from widget placeholder
+        // Using a generic code for tools/services category
         const DEFAULT_MXIK_CODE = "06201001001000000" 
         const mxikCode = productMetadata.mxik_code || DEFAULT_MXIK_CODE
 
-        const rawUnitPrice = Number(row.unit_price)
-        const qty = Number(row.quantity)
-
         const item: any = {
           title: title.substring(0, 128), // Payme limit: 128 chars
-          price: Math.round(rawUnitPrice * 100), // Price per unit in tiyin (see debug logs below)
-          count: qty,
+          price: Math.round(Number(row.unit_price) * 100), // Price per unit in tiyin
+          count: Number(row.quantity),
           code: mxikCode, // Mandatory field
           vat_percent: 12, // Standard VAT in Uzbekistan
           package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
@@ -214,36 +213,45 @@ export class PaymeMerchantService {
         return item
       })
 
-      // #region agent log
-      ;(() => {
-        const rawUnitPrices = rows.map((r: any) => Number(r.unit_price)).filter((n: any) => Number.isFinite(n))
-        const min = rawUnitPrices.length ? Math.min(...rawUnitPrices) : null
-        const max = rawUnitPrices.length ? Math.max(...rawUnitPrices) : null
-        const payload = {
-          sessionId: "debug-session",
-          runId: "payme-fiscal",
-          hypothesisId: "H1_units_or_sum_mismatch",
-          location: "backend/src/modules/payment-payme/services/payme-merchant.ts:getCartItemsForFiscalization",
-          message: "Prepared fiscal items (sanitized)",
-          data: {
-            cartId,
-            itemsCount: items.length,
-            unitPriceMin: min,
-            unitPriceMax: max,
-            sample: items.slice(0, 2).map((it: any) => ({
-              price: it.price,
-              count: it.count,
-              codeLen: typeof it.code === "string" ? it.code.length : null,
-              vat_percent: it.vat_percent,
-              package_code: it.package_code,
-            })),
-          },
-          timestamp: Date.now(),
-        }
-        console.log("[agent-debug]", JSON.stringify(payload))
-      })()
-      // #endregion agent log
+      // Query shipping costs from cart
+      const shippingResult = await pgConnection.raw(`
+        SELECT 
+          csm.amount as shipping_amount,
+          so.name as shipping_name
+        FROM cart_shipping_method csm
+        LEFT JOIN shipping_option so ON so.id = csm.shipping_option_id
+        WHERE csm.cart_id = ?
+      `, [cartId])
 
+      const shippingRows = shippingResult?.rows || shippingResult || []
+      
+      // Add shipping as a separate item if present
+      // MXIK for delivery/logistics services: "10105001001000000"
+      const SHIPPING_MXIK_CODE = "10105001001000000"
+      
+      for (const shipping of shippingRows) {
+        const shippingAmount = Number(shipping.shipping_amount)
+        if (shippingAmount > 0) {
+          items.push({
+            title: (shipping.shipping_name || "Доставка").substring(0, 128),
+            price: Math.round(shippingAmount * 100), // Convert to tiyin
+            count: 1,
+            code: SHIPPING_MXIK_CODE,
+            vat_percent: 12,
+            package_code: "2009" // Service
+          })
+        }
+      }
+
+      // Calculate sum of all items
+      const itemsSum = items.reduce((sum, item) => sum + (item.price * item.count), 0)
+      
+      // If there's a mismatch between items sum and expected total, log it
+      if (expectedTotal && Math.abs(itemsSum - expectedTotal) > 1) {
+        this.logger_.warn(`[PaymeMerchant] Fiscalization sum mismatch: items=${itemsSum}, expected=${expectedTotal}, diff=${expectedTotal - itemsSum}`)
+      }
+
+      this.logger_.info(`[PaymeMerchant] Prepared ${items.length} items for fiscalization, sum=${itemsSum} tiyin`)
       return items
     } catch (error) {
       this.logger_.error(`[PaymeMerchant] Error fetching cart items: ${error}`)
@@ -300,37 +308,8 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
-    // Fetch cart items for fiscalization
-    const items = await this.getCartItemsForFiscalization(session.cart_id)
-
-    // #region agent log
-    ;(() => {
-      const itemsSum = (items || []).reduce((acc: number, it: any) => {
-        const p = Number(it?.price)
-        const c = Number(it?.count)
-        if (!Number.isFinite(p) || !Number.isFinite(c)) return acc
-        return acc + p * c
-      }, 0)
-      const payload = {
-        sessionId: "debug-session",
-        runId: "payme-fiscal",
-        hypothesisId: "H1_units_or_sum_mismatch",
-        location: "backend/src/modules/payment-payme/services/payme-merchant.ts:checkPerformTransaction",
-        message: "Payme fiscal validation snapshot",
-        data: {
-          orderId,
-          cartId: session.cart_id,
-          amountParam: amount,
-          expectedAmount,
-          itemsCount: items?.length || 0,
-          itemsSum,
-          diff: (Number.isFinite(amount) ? amount : 0) - itemsSum,
-        },
-        timestamp: Date.now(),
-      }
-      console.log("[agent-debug]", JSON.stringify(payload))
-    })()
-    // #endregion agent log
+    // Fetch cart items for fiscalization (pass expected amount for validation)
+    const items = await this.getCartItemsForFiscalization(session.cart_id, expectedAmount)
 
     this.logger_.info(`[PaymeMerchant] CheckPerformTransaction SUCCESS for order_id=${orderId}, items=${items.length}`)
     
