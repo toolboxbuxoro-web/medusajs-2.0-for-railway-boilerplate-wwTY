@@ -199,10 +199,13 @@ export class PaymeMerchantService {
         const DEFAULT_MXIK_CODE = "06201001001000000" 
         const mxikCode = productMetadata.mxik_code || DEFAULT_MXIK_CODE
 
+        const rawUnitPrice = Number(row.unit_price)
+        const qty = Number(row.quantity)
+
         const item: any = {
           title: title.substring(0, 128), // Payme limit: 128 chars
-          price: Math.round(Number(row.unit_price) * 100), // Price per unit in tiyin
-          count: Number(row.quantity),
+          price: Math.round(rawUnitPrice * 100), // Price per unit in tiyin (see debug logs below)
+          count: qty,
           code: mxikCode, // Mandatory field
           vat_percent: 12, // Standard VAT in Uzbekistan
           package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
@@ -211,7 +214,36 @@ export class PaymeMerchantService {
         return item
       })
 
-      this.logger_.info(`[PaymeMerchant] Prepared items for fiscalization: ${JSON.stringify(items)}`)
+      // #region agent log
+      ;(() => {
+        const rawUnitPrices = rows.map((r: any) => Number(r.unit_price)).filter((n: any) => Number.isFinite(n))
+        const min = rawUnitPrices.length ? Math.min(...rawUnitPrices) : null
+        const max = rawUnitPrices.length ? Math.max(...rawUnitPrices) : null
+        const payload = {
+          sessionId: "debug-session",
+          runId: "payme-fiscal",
+          hypothesisId: "H1_units_or_sum_mismatch",
+          location: "backend/src/modules/payment-payme/services/payme-merchant.ts:getCartItemsForFiscalization",
+          message: "Prepared fiscal items (sanitized)",
+          data: {
+            cartId,
+            itemsCount: items.length,
+            unitPriceMin: min,
+            unitPriceMax: max,
+            sample: items.slice(0, 2).map((it: any) => ({
+              price: it.price,
+              count: it.count,
+              codeLen: typeof it.code === "string" ? it.code.length : null,
+              vat_percent: it.vat_percent,
+              package_code: it.package_code,
+            })),
+          },
+          timestamp: Date.now(),
+        }
+        console.log("[agent-debug]", JSON.stringify(payload))
+      })()
+      // #endregion agent log
+
       return items
     } catch (error) {
       this.logger_.error(`[PaymeMerchant] Error fetching cart items: ${error}`)
@@ -270,6 +302,35 @@ export class PaymeMerchantService {
 
     // Fetch cart items for fiscalization
     const items = await this.getCartItemsForFiscalization(session.cart_id)
+
+    // #region agent log
+    ;(() => {
+      const itemsSum = (items || []).reduce((acc: number, it: any) => {
+        const p = Number(it?.price)
+        const c = Number(it?.count)
+        if (!Number.isFinite(p) || !Number.isFinite(c)) return acc
+        return acc + p * c
+      }, 0)
+      const payload = {
+        sessionId: "debug-session",
+        runId: "payme-fiscal",
+        hypothesisId: "H1_units_or_sum_mismatch",
+        location: "backend/src/modules/payment-payme/services/payme-merchant.ts:checkPerformTransaction",
+        message: "Payme fiscal validation snapshot",
+        data: {
+          orderId,
+          cartId: session.cart_id,
+          amountParam: amount,
+          expectedAmount,
+          itemsCount: items?.length || 0,
+          itemsSum,
+          diff: (Number.isFinite(amount) ? amount : 0) - itemsSum,
+        },
+        timestamp: Date.now(),
+      }
+      console.log("[agent-debug]", JSON.stringify(payload))
+    })()
+    // #endregion agent log
 
     this.logger_.info(`[PaymeMerchant] CheckPerformTransaction SUCCESS for order_id=${orderId}, items=${items.length}`)
     
