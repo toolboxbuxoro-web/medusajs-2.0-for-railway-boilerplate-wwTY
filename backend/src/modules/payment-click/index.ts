@@ -1,5 +1,5 @@
 import { ClickPaymentProviderService, ClickPayByCardProviderService } from "./services/click"
-import { ModuleProviderExports } from "@medusajs/framework/types"
+import type { ModuleProviderExports } from "@medusajs/framework/types"
 
 const services = [ClickPaymentProviderService, ClickPayByCardProviderService]
 
@@ -7,4 +7,5 @@ const providerExport: ModuleProviderExports = {
   services,
 }
 
-export default providerExport
+// See payment-payme/index.ts for why we use `export =` here (CommonJS interop with Medusa loader).
+export = providerExport

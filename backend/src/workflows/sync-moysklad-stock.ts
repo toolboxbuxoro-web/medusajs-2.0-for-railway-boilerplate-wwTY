@@ -1,6 +1,6 @@
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { Modules } from "@medusajs/framework/utils"
-import { MOYSKLAD_MODULE } from "../modules/moysklad"
+import { MOYSKLAD_MODULE } from "../modules/moysklad/constants"
 import MoySkladService from "../modules/moysklad/service"
 
 type WorkflowInput = {

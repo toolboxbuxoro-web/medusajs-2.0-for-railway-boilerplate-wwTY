@@ -1,6 +1,6 @@
 import { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { MOYSKLAD_MODULE } from "../modules/moysklad"
+import { MOYSKLAD_MODULE } from "../modules/moysklad/constants"
 import MoySkladService from "../modules/moysklad/service"
 
 /**

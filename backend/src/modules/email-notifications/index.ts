@@ -1,4 +1,4 @@
-import { ModuleProviderExports } from '@medusajs/framework/types'
+import type { ModuleProviderExports } from '@medusajs/framework/types'
 import { ResendNotificationService } from './services/resend'
 
 const services = [ResendNotificationService]
@@ -7,4 +7,5 @@ const providerExport: ModuleProviderExports = {
   services,
 }
 
-export default providerExport
+// CommonJS interop for Medusa provider loader (see payment-payme/index.ts).
+export = providerExport
