@@ -47,6 +47,30 @@ export class PaymeMerchantService {
     this.container_ = container
   }
 
+  private async hasColumn(
+    pgConnection: any,
+    tableName: string,
+    columnName: string
+  ): Promise<boolean> {
+    try {
+      const res = await pgConnection.raw(
+        `
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = ?
+          AND column_name = ?
+        LIMIT 1
+      `,
+        [tableName, columnName]
+      )
+      const rows = res?.rows || res || []
+      return !!rows?.length
+    } catch {
+      return false
+    }
+  }
+
   /**
    * Route incoming JSON-RPC method calls to the appropriate handler.
    */
@@ -165,14 +189,20 @@ export class PaymeMerchantService {
   private async getCartItemsForFiscalization(cartId: string, expectedTotal?: number) {
     try {
       const pgConnection = this.container_.resolve("__pg_connection__")
+      const hasDeletedAt = await this.hasColumn(pgConnection, "cart_line_item", "deleted_at")
+      const hasTotal = await this.hasColumn(pgConnection, "cart_line_item", "total")
       
       // Query cart line items with product metadata for MXIK code
+      const whereDeleted = hasDeletedAt ? "AND cli.deleted_at IS NULL" : ""
+      const totalSelect = hasTotal ? ", cli.total as line_total" : ""
+
       const lineItemsResult = await pgConnection.raw(`
         SELECT 
           cli.id,
           cli.title,
           cli.quantity,
           cli.unit_price,
+          ${hasTotal ? "cli.total as line_total," : ""}
           cli.product_title,
           cli.variant_title,
           cli.product_id,
@@ -180,6 +210,7 @@ export class PaymeMerchantService {
         FROM cart_line_item cli
         LEFT JOIN product p ON p.id = cli.product_id
         WHERE cli.cart_id = ?
+          ${whereDeleted}
       `, [cartId])
 
       const rows = lineItemsResult?.rows || lineItemsResult || []
@@ -201,10 +232,25 @@ export class PaymeMerchantService {
         const DEFAULT_MXIK_CODE = "06201001001000000" 
         const mxikCode = productMetadata.mxik_code || DEFAULT_MXIK_CODE
 
+        const qty = Math.max(1, Number(row.quantity) || 1)
+
+        // Prefer line_total (if available) because it reflects discounts/promotions.
+        // Fallback to unit_price * qty.
+        const lineTotalSums = hasTotal
+          ? Number(row.line_total)
+          : Number(row.unit_price) * qty
+
+        // Convert sums -> tiyins.
+        const lineTotalTiyins = Math.round(lineTotalSums * 100)
+
+        // Payme expects per-unit price + count. Split totals across qty and keep remainder on the first unit.
+        const unit = Math.floor(lineTotalTiyins / qty)
+        const remainder = lineTotalTiyins - unit * qty
+
         const item: any = {
           title: title.substring(0, 128), // Payme limit: 128 chars
-          price: Math.round(Number(row.unit_price) * 100), // Price per unit in tiyin
-          count: Number(row.quantity),
+          price: unit + remainder, // Price per unit in tiyin, adjusted to preserve exact line total
+          count: qty,
           code: mxikCode, // Mandatory field
           vat_percent: 12, // Standard VAT in Uzbekistan
           package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
@@ -290,6 +336,20 @@ export class PaymeMerchantService {
        * expected total if we detect a mismatch.
        */
       if (expectedTotal && Math.abs(itemsSum - expectedTotal) > 1) {
+        // If mismatch is small, adjust the last item price to make sums match (keeps itemization).
+        const diff = expectedTotal - itemsSum
+        if (items.length > 0 && Math.abs(diff) <= Math.max(100, Math.floor(expectedTotal * 0.02))) {
+          const last = items[items.length - 1]
+          const newPrice = Number(last.price) + diff // count is 1 for remainder-bearing items? count may be >1.
+          if (Number.isFinite(newPrice) && newPrice > 0) {
+            last.price = newPrice
+            this.logger_.warn(
+              `[PaymeMerchant] Adjusted last fiscal item by diff=${diff} to match expected total`
+            )
+            return items
+          }
+        }
+
         const FALLBACK_MXIK_CODE = "06201001001000000"
         const fallbackCode =
           items.find((it) => typeof it?.code === "string" && it.code.length > 0)?.code ||

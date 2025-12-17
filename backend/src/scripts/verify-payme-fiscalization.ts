@@ -15,6 +15,26 @@ export default async function verifyPaymeFiscalization({ container }: ExecArgs) 
   const logger = container.resolve("logger") as any
   const pgConnection = container.resolve("__pg_connection__") as any
 
+  async function hasColumn(tableName: string, columnName: string): Promise<boolean> {
+    try {
+      const res = await pgConnection.raw(
+        `
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = ?
+          AND column_name = ?
+        LIMIT 1
+      `,
+        [tableName, columnName]
+      )
+      const rows = res?.rows || res || []
+      return !!rows?.length
+    } catch {
+      return false
+    }
+  }
+
   const orderIdFromEnv = process.env.PAYME_ORDER_ID
 
   const sessionRow =
@@ -74,6 +94,9 @@ export default async function verifyPaymeFiscalization({ container }: ExecArgs) 
   const sessionAmountSums = Number(sessionRow.session_amount)
   const expectedTiyins = Math.round(sessionAmountSums * 100)
 
+  const hasDeletedAt = await hasColumn("cart_line_item", "deleted_at")
+  const hasTotal = await hasColumn("cart_line_item", "total")
+
   // Pull line items (same fields used by PaymeMerchantService)
   const lineItems = (
     await pgConnection.raw(
@@ -83,10 +106,12 @@ export default async function verifyPaymeFiscalization({ container }: ExecArgs) 
         cli.title,
         cli.quantity,
         cli.unit_price,
+        ${hasTotal ? "cli.total as line_total," : ""}
         cli.product_title,
         cli.variant_title
       FROM cart_line_item cli
       WHERE cli.cart_id = ?
+        ${hasDeletedAt ? "AND cli.deleted_at IS NULL" : ""}
     `,
       [sessionRow.cart_id]
     )
@@ -118,11 +143,13 @@ export default async function verifyPaymeFiscalization({ container }: ExecArgs) 
   )
 
   // Compute "fiscal" items sum the same way as PaymeMerchantService currently does
-  const lineItemsSumTiyins = lineItems.reduce(
-    (acc: number, li: any) =>
-      acc + Math.round(Number(li.unit_price) * 100) * Number(li.quantity),
-    0
-  )
+  const lineItemsSumTiyins = lineItems.reduce((acc: number, li: any) => {
+    const qty = Math.max(1, Number(li.quantity) || 1)
+    const lineTotalSums = hasTotal
+      ? Number(li.line_total)
+      : Number(li.unit_price) * qty
+    return acc + Math.round(lineTotalSums * 100)
+  }, 0)
   const shippingSumTiyins = shippingRows.reduce((acc: number, r: any) => {
     const a = Number(r.shipping_amount)
     if (!Number.isFinite(a) || a <= 0) return acc
