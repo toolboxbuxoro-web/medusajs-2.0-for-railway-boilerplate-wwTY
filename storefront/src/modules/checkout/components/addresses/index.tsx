@@ -45,16 +45,9 @@ const Addresses = ({
 
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
-        >
-          {t('shipping_address')}
-          {!isOpen && <CheckCircleSolid />}
-        </Heading>
+      <div className="flex flex-row items-center justify-between mb-4">
         {!isOpen && cart?.shipping_address && (
-          <Text>
+          <Text className="ml-auto">
             <button
               onClick={handleEdit}
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
@@ -67,7 +60,7 @@ const Addresses = ({
       </div>
       {isOpen ? (
         <form action={formAction}>
-          <div className="pb-8">
+          <div className="pb-4">
             <ShippingAddress
               customer={customer}
               checked={sameAsBilling}
@@ -180,7 +173,6 @@ const Addresses = ({
           </div>
         </div>
       )}
-      <Divider className="mt-8" />
     </div>
   )
 }

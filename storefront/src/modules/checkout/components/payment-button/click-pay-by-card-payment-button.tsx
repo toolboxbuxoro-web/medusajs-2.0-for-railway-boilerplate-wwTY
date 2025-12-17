@@ -5,7 +5,7 @@ import Script from "next/script"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslations } from "next-intl"
 import { useRouter, useSearchParams } from "next/navigation"
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, initiatePaymentSession } from "@lib/data/cart"
 import { isClickPayByCard } from "@lib/constants"
 
 type PaymentStatus = "idle" | "checking" | "placing_order" | "error" | "cancelled"
@@ -67,15 +67,19 @@ export const ClickPayByCardPaymentButton = ({
 
   // Refresh payment session once so we have up-to-date amount/public config for checkout.js
   useEffect(() => {
+    let isMounted = true
+
     const run = async () => {
       if (!cart?.id || notReady || isCartEmpty) return
       if (!session?.provider_id) return
 
       try {
-        const { initiatePaymentSession } = await import("@lib/data/cart")
         const resp = await initiatePaymentSession(cart, {
           provider_id: session.provider_id,
         })
+        
+        if (!isMounted) return
+        
         const paymentCollection = resp.payment_collection
         const newSession = paymentCollection?.payment_sessions?.find((s: any) =>
           isClickPayByCard(s.provider_id)
@@ -99,12 +103,17 @@ export const ClickPayByCardPaymentButton = ({
           }
         }
       } catch (e: any) {
+        if (!isMounted) return
         setErrorMessage(e.message || "Ошибка инициализации Click Pay by Card")
         setStatus("error")
       }
     }
 
     run()
+    
+    return () => {
+      isMounted = false
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart.id])
 
@@ -164,7 +173,9 @@ export const ClickPayByCardPaymentButton = ({
       session?.status === "authorized" ||
       (session?.data as any)?.click_state === "completed"
     ) {
-      completeOrder()
+      completeOrder().catch((err) => {
+        console.error("[ClickPayByCardButton] Error completing order:", err)
+      })
     }
   }, [searchParams, session, checkPaymentStatus, completeOrder, router, cart.region?.countries])
 

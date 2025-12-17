@@ -41,7 +41,7 @@ export default async function Home({
             <h2 className="heading-2">Популярные товары</h2>
             <LocalizedClientLink 
               href="/store"
-              className="text-sm sm:text-base font-semibold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+              className="text-sm sm:text-base font-semibold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1.5 whitespace-nowrap relative left-3 top-6"
             >
               <span>{t('all_products') || 'Все товары'}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

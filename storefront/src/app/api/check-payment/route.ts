@@ -62,14 +62,14 @@ export async function GET(request: NextRequest) {
       
       // Payme-specific states
       if (paymentSession.provider_id?.includes('payme')) {
-        if (sessionData?.payme_state === 2) {
-          return NextResponse.json({
-            status: 'authorized',
-            message: 'Payment authorized, completing order...'
-          })
-        }
-
-        if (sessionData?.payme_state === -1 || sessionData?.payme_state === -2) {
+      if (sessionData?.payme_state === 2) {
+        return NextResponse.json({
+          status: 'authorized',
+          message: 'Payment authorized, completing order...'
+        })
+      }
+      
+      if (sessionData?.payme_state === -1 || sessionData?.payme_state === -2) {
           return NextResponse.json({
             status: 'cancelled',
             message: 'Payment was cancelled'
@@ -87,10 +87,10 @@ export async function GET(request: NextRequest) {
         }
 
         if (sessionData?.click_state === 'cancelled' || (typeof sessionData?.click_error === 'number' && sessionData.click_error < 0)) {
-          return NextResponse.json({
-            status: 'cancelled',
-            message: 'Payment was cancelled'
-          })
+        return NextResponse.json({
+          status: 'cancelled',
+          message: 'Payment was cancelled'
+        })
         }
       }
       

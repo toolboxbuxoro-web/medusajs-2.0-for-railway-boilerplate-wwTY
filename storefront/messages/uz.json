@@ -207,7 +207,20 @@
     "method": "Usul",
     "saved_address_prompt": "Salom, {name}, saqlangan manzillaringizdan birini ishlatmoqchimisiz?",
     "courier_delivery": "Kuryer orqali yetkazib berish",
-    "standard_delivery": "Standart yetkazib berish"
+    "standard_delivery": "Standart yetkazib berish",
+    "bts_delivery": "BTS Express — Tarqatish punktiga yetkazib berish",
+    "bts_payment_on_delivery": "Qabul qilishda to'lash",
+    "bts_select_region": "Yetkazib berish viloyatini tanlang",
+    "bts_select_point": "Tarqatish punktini tanlang",
+    "bts_region_placeholder": "Viloyatni tanlang",
+    "bts_point_placeholder": "Punktni tanlang",
+    "bts_estimated_cost": "Yetkazib berish narxi",
+    "bts_weight": "Og'irlik",
+    "bts_tariff_info": "BTS Express tariflari",
+    "bts_payment_note": "Bu summa buyurtmani qabul qilishda alohida to'lanadi",
+    "bts_office_to_office": "Ofis — Ofis",
+    "bts_delivery_info": "BTS yetkazib berish",
+    "bts_cod_notice": "Yetkazib berish xaridor tomonidan qabul qilishda to'lanadi"
   },
   "product": {
     "product_info": "Mahsulot haqida ma'lumot",

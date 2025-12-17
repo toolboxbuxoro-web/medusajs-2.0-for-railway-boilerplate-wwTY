@@ -140,22 +140,9 @@ const Payment = ({
 
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className={clx(
-            "flex flex-row text-2xl sm:text-3xl-regular gap-x-2 items-baseline",
-            {
-              "opacity-50 pointer-events-none select-none":
-                !isOpen && !paymentReady,
-            }
-          )}
-        >
-          {t("payment")}
-          {!isOpen && paymentReady && <CheckCircleSolid />}
-        </Heading>
+      <div className="flex flex-row items-center justify-between mb-4">
         {!isOpen && paymentReady && (
-          <Text>
+          <Text className="ml-auto">
             <button
               onClick={handleEdit}
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
@@ -298,7 +285,7 @@ const Payment = ({
           ) : null}
         </div>
       </div>
-      <Divider className="mt-8" />
+
     </div>
   )
 }

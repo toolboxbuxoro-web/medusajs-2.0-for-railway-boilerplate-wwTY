@@ -5,7 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 import React, { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter, useSearchParams } from "next/navigation"
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, initiatePaymentSession } from "@lib/data/cart"
 import { isClick } from "@lib/constants"
 
 type PaymentStatus = "idle" | "checking" | "placing_order" | "error" | "cancelled"
@@ -112,7 +112,9 @@ export const ClickPaymentButton = ({
     }
 
     if (session?.status === "authorized" || (session?.data as any)?.click_state === "completed") {
-      completeOrder()
+      completeOrder().catch((err) => {
+        console.error("[ClickButton] Error completing order:", err)
+      })
     }
   }, [searchParams, session, checkPaymentStatus, completeOrder, router, cart.region?.countries])
 
@@ -131,8 +133,6 @@ export const ClickPaymentButton = ({
     }
 
     try {
-      const { initiatePaymentSession } = await import("@lib/data/cart")
-
       const resp = await initiatePaymentSession(cart, {
         provider_id: session?.provider_id || "pp_click_click",
       })

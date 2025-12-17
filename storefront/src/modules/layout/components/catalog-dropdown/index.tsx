@@ -128,13 +128,13 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
         }`}
         aria-expanded={isOpen}
       >
-        <div className="relative w-5 h-5 flex items-center justify-center">
-          <span className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isOpen ? "rotate-90 scale-0 opacity-0" : "scale-100 opacity-100 rotate-0"}`}>
+        <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
+          <span className={`absolute inset-0 m-auto w-5 h-5 flex items-center justify-center transition-all duration-300 ${isOpen ? "rotate-90 scale-0 opacity-0" : "scale-100 opacity-100 rotate-0"}`}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </span>
-          <span className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isOpen ? "scale-100 opacity-100 rotate-0" : "-rotate-90 scale-0 opacity-0"}`}>
+          <span className={`absolute inset-0 m-auto w-5 h-5 flex items-center justify-center transition-all duration-300 ${isOpen ? "scale-100 opacity-100 rotate-0" : "-rotate-90 scale-0 opacity-0"}`}>
             <XMark className="w-5 h-5" />
           </span>
         </div>
@@ -318,10 +318,10 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
         {!isMobile && (
           <button
              onClick={handleClose}
-             className="absolute top-20 right-8 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg border border-gray-100 text-gray-500 hover:text-red-600 hover:rotate-90 transition-all z-50"
+             className="absolute top-20 right-8 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg border border-gray-100 text-gray-500 hover:text-red-600 hover:border-red-200 hover:shadow-xl hover:rotate-90 transition-all duration-300 z-50 group"
              title="Закрыть меню"
           >
-             <XMark className="w-6 h-6" />
+             <XMark className="w-6 h-6 m-auto" />
           </button>
         )}
       </div>

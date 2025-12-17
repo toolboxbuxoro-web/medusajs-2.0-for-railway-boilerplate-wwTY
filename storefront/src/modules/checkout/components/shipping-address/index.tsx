@@ -88,7 +88,7 @@ const ShippingAddress = ({
       {customer && (addressesInRegion?.length || 0) > 0 && (
         <Container className="mb-6 flex flex-col gap-y-4 p-5">
           <p className="text-small-regular">
-            {t('saved_address_prompt', { name: customer.first_name })}
+            {t('saved_address_prompt', { name: customer.first_name || "" })}
           </p>
           <AddressSelect
             addresses={customer.addresses}
@@ -101,7 +101,7 @@ const ShippingAddress = ({
           />
         </Container>
       )}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input
           label={t('first_name')}
           name="shipping_address.first_name"
@@ -183,7 +183,7 @@ const ShippingAddress = ({
           data-testid="billing-address-checkbox"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <Input
           label={t('email')}
           name="email"
