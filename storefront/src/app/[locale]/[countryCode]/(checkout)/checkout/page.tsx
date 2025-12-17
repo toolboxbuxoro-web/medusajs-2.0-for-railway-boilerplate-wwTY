@@ -27,6 +27,10 @@ const fetchCart = async () => {
 
   // #region agent log
   ;(() => {
+    const total = (cart as any)?.total
+    const shipping_total = (cart as any)?.shipping_total
+    const tax_total = (cart as any)?.tax_total
+    const subtotal = (cart as any)?.subtotal
     const payload = {
       sessionId: "debug-session",
       runId: "bts-checkout",
@@ -35,15 +39,26 @@ const fetchCart = async () => {
       message: "Checkout server fetched cart snapshot (sanitized)",
       data: {
         currency_code: (cart as any)?.currency_code,
-        total: (cart as any)?.total,
-        shipping_total: (cart as any)?.shipping_total,
-        tax_total: (cart as any)?.tax_total,
-        subtotal: (cart as any)?.subtotal,
+        total,
+        totalStr: String(total),
+        totalIsFinite: typeof total === "number" && Number.isFinite(total),
+        shipping_total,
+        shippingTotalStr: String(shipping_total),
+        shippingTotalIsFinite:
+          typeof shipping_total === "number" && Number.isFinite(shipping_total),
+        tax_total,
+        taxTotalStr: String(tax_total),
+        taxTotalIsFinite: typeof tax_total === "number" && Number.isFinite(tax_total),
+        subtotal,
+        subtotalStr: String(subtotal),
+        subtotalIsFinite: typeof subtotal === "number" && Number.isFinite(subtotal),
         itemsCount: (cart as any)?.items?.length ?? 0,
         shippingMethods: ((cart as any)?.shipping_methods || []).map((sm: any) => ({
           id: sm?.id,
           shipping_option_id: sm?.shipping_option_id,
           amount: sm?.amount,
+          amountStr: String(sm?.amount),
+          amountIsFinite: typeof sm?.amount === "number" && Number.isFinite(sm?.amount),
           amountType: typeof sm?.amount,
         })),
       },

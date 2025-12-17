@@ -89,6 +89,7 @@ const Shipping: React.FC<ShippingProps> = ({
               id: selectedShippingMethod.id,
               name: selectedShippingMethod.name,
               amount: (selectedShippingMethod as any).amount,
+              amountStr: String((selectedShippingMethod as any).amount),
               amountType: typeof (selectedShippingMethod as any).amount,
             }
           : null,
@@ -96,6 +97,7 @@ const Shipping: React.FC<ShippingProps> = ({
           id: m.id,
           name: m.name,
           amount: (m as any).amount,
+          amountStr: String((m as any).amount),
           amountType: typeof (m as any).amount,
         })),
       },

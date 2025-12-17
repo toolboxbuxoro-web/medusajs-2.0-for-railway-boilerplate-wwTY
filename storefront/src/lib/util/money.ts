@@ -25,6 +25,8 @@ export const convertToLocale = ({
       message: "convertToLocale received non-finite amount",
       data: {
         amount,
+        amountStr: String(amount),
+        amountIsFinite: typeof amount === "number" && Number.isFinite(amount),
         amountType: typeof amount,
         currency_code,
         locale,
