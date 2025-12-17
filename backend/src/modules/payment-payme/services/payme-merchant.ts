@@ -578,6 +578,26 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, "Transaction timeout: cannot perform after 12 hours")
     }
 
+    // Perform transaction - update state BEFORE cart completion
+    const performTime = Date.now()
+
+    const newData = {
+      ...currentData,
+      payme_state: 2,
+      payme_perform_time: performTime,
+      transaction_id: currentData.payme_transaction_id // For Medusa tracking
+    }
+
+    // Update session data FIRST so authorizePayment check passes
+    await paymentModule.updatePaymentSession({
+      id: session.id,
+      amount: session.amount || currentData.amount || 0,
+      currency_code: session.currency_code || "uzs",
+      data: newData
+    })
+
+    this.logger_.info(`[PaymeMerchant] Updated session ${session.id} with payme_state=2`)
+
     // Attempt to complete the cart in Medusa
     const cartId = currentData.cart_id
     if (cartId) {
@@ -588,33 +608,13 @@ export class PaymeMerchantService {
           }
         })
         this.logger_.info(`[PaymeMerchant] Successfully completed cart ${cartId} for transaction ${id}`)
-      } catch (e) {
-        this.logger_.error(`[PaymeMerchant] Failed to complete cart ${cartId}: ${e}`)
+      } catch (e: any) {
+        this.logger_.error(`[PaymeMerchant] Failed to complete cart ${cartId}: ${e?.message || e}`)
         // We still proceed to confirm the transaction to Payme to avoid desync
       }
-    } else {
-        this.logger_.warn(`[PaymeMerchant] No cart_id found for transaction ${id}, skipping cart completion`)
     }
 
-    // Perform transaction
-    const performTime = Date.now()
-
-    const newData = {
-      ...currentData,
-      payme_state: 2,
-      payme_perform_time: performTime,
-      transaction_id: currentData.payme_transaction_id // For Medusa tracking
-    }
-
-    await paymentModule.updatePaymentSession({
-      id: session.id,
-      amount: session.amount || currentData.amount || 0,
-      currency_code: session.currency_code || "uzs",
-      data: newData
-    })
-
-    // Статус будет обновлен автоматически через authorizePayment провайдера
-    // когда frontend проверит статус сессии
+    // Session already updated above with payme_state=2
 
     return {
       transaction: session.id,
