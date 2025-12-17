@@ -245,6 +245,31 @@ export class PaymeMerchantService {
 
       // Calculate sum of all items
       const itemsSum = items.reduce((sum, item) => sum + (item.price * item.count), 0)
+
+      // #region payme debug
+      try {
+        const rawUnitPrices = rows
+          .map((r: any) => Number(r.unit_price))
+          .filter((n: any) => Number.isFinite(n))
+        const rawMin = rawUnitPrices.length ? Math.min(...rawUnitPrices) : null
+        const rawMax = rawUnitPrices.length ? Math.max(...rawUnitPrices) : null
+        const shippingAmounts = shippingRows
+          .map((s: any) => Number(s.shipping_amount))
+          .filter((n: any) => Number.isFinite(n) && n > 0)
+
+        const sample = items.slice(0, 3).map((it: any) => ({
+          price: it?.price,
+          count: it?.count,
+          vat_percent: it?.vat_percent,
+          package_code: it?.package_code,
+          codeLen: typeof it?.code === "string" ? it.code.length : null,
+        }))
+
+        this.logger_.info(
+          `[PaymeMerchant][FiscalDebug] cart=${cartId} expected=${expectedTotal ?? null} items=${items.length} itemsSum=${itemsSum} rawUnitPrice[min,max]=${rawMin},${rawMax} shippingAmounts=${shippingAmounts.join(",") || "none"} sample=${JSON.stringify(sample)}`
+        )
+      } catch (_e) {}
+      // #endregion payme debug
       
       // If there's a mismatch between items sum and expected total, log it
       if (expectedTotal && Math.abs(itemsSum - expectedTotal) > 1) {
@@ -310,6 +335,21 @@ export class PaymeMerchantService {
 
     // Fetch cart items for fiscalization (pass expected amount for validation)
     const items = await this.getCartItemsForFiscalization(session.cart_id, expectedAmount)
+
+    // #region payme debug
+    try {
+      const payload = {
+        orderId,
+        cartId: session.cart_id,
+        sessionAmountRaw: session.amount,
+        sessionCurrency: session.currency_code,
+        amountParam: amount,
+        expectedAmount,
+        itemsCount: items?.length || 0,
+      }
+      this.logger_.info(`[PaymeMerchant][FiscalDebug] CheckPerform snapshot ${JSON.stringify(payload)}`)
+    } catch (_e) {}
+    // #endregion payme debug
 
     this.logger_.info(`[PaymeMerchant] CheckPerformTransaction SUCCESS for order_id=${orderId}, items=${items.length}`)
     
