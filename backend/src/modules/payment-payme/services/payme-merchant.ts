@@ -228,8 +228,8 @@ export class PaymeMerchantService {
           : (row.product_metadata || {})
         
         // Fallback to a default MXIK code if missing (Required by Payme)
-        // Using a generic code for tools/services category
-        const DEFAULT_MXIK_CODE = "06201001001000000" 
+        // Using Payme's documented example MXIK code: 00702001001000001
+        const DEFAULT_MXIK_CODE = "00702001001000001" 
         const mxikCode = productMetadata.mxik_code || DEFAULT_MXIK_CODE
 
         const qty = Math.max(1, Number(row.quantity) || 1)
@@ -350,7 +350,7 @@ export class PaymeMerchantService {
           }
         }
 
-        const FALLBACK_MXIK_CODE = "06201001001000000"
+        const FALLBACK_MXIK_CODE = "00702001001000001"
         const fallbackCode =
           items.find((it) => typeof it?.code === "string" && it.code.length > 0)?.code ||
           FALLBACK_MXIK_CODE
