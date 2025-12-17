@@ -12,7 +12,7 @@
     "launcher": "launch-storefront",
     "dev": "npm run wait && npm run launcher dev",
     "build": "npm run wait && npm run launcher build",
-    "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
+    "start": "node -e \"const p={tag:'agent-debug',where:'storefront:start',nodeEnv:process.env.NODE_ENV,port:process.env.PORT,host:process.env.HOST,pid:process.pid,ts:Date.now()}; console.log('[agent-debug]', JSON.stringify(p)); (globalThis.fetch?fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'railway',hypothesisId:'H2_storefront_start_executed',location:'storefront/package.json:scripts.start',message:'storefront start invoked',data:p,timestamp:Date.now()})}).catch(()=>{}):null);\" && next start -H 0.0.0.0 -p ${PORT:-3000}",
     "build:next": "next build",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
