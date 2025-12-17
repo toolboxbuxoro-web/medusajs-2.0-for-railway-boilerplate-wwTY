@@ -18,6 +18,7 @@
     "seed:tools": "medusa exec ./src/scripts/seed-tools.ts",
     "create:admin": "medusa exec ./src/scripts/create-admin.ts",
     "check:admin": "medusa exec ./src/scripts/check-admin.ts",
+    "verify:payme:fiscal": "medusa exec ./src/scripts/verify-payme-fiscalization.ts",
     "create:admin:cli": "medusa user -e ${MEDUSA_ADMIN_EMAIL:-admin@toolbox.com} -p ${MEDUSA_ADMIN_PASSWORD:-admin123456}",
     "ib": "init-backend",
     "start": "init-backend && cd .medusa/server && medusa start --verbose",
