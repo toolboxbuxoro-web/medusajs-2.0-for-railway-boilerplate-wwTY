@@ -72,6 +72,44 @@ const Shipping: React.FC<ShippingProps> = ({
     }
   }, [isBtsSelected, selectedRegionId, cartWeight])
 
+  // #region agent log
+  useEffect(() => {
+    if (!isOpen) return
+    const payload = {
+      sessionId: "debug-session",
+      runId: "bts-checkout",
+      hypothesisId: "H2_bts_shipping_option_amount_missing",
+      location: "storefront/src/modules/checkout/components/shipping/index.tsx:useEffect",
+      message: "Shipping options snapshot",
+      data: {
+        currency_code: cart?.currency_code,
+        cartWeight,
+        selectedShippingMethod: selectedShippingMethod
+          ? {
+              id: selectedShippingMethod.id,
+              name: selectedShippingMethod.name,
+              amount: (selectedShippingMethod as any).amount,
+              amountType: typeof (selectedShippingMethod as any).amount,
+            }
+          : null,
+        available: (availableShippingMethods || []).map((m) => ({
+          id: m.id,
+          name: m.name,
+          amount: (m as any).amount,
+          amountType: typeof (m as any).amount,
+        })),
+      },
+      timestamp: Date.now(),
+    }
+    console.log("[agent-debug]", JSON.stringify(payload))
+    fetch("http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => {})
+  }, [isOpen, availableShippingMethods, selectedShippingMethod, cartWeight, cart?.currency_code])
+  // #endregion agent log
+
   const handleEdit = () => {
     router.push(pathname + "?step=delivery", { scroll: false })
   }
