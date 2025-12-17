@@ -216,21 +216,26 @@ export class PaymeMerchantService {
       const rows = lineItemsResult?.rows || lineItemsResult || []
 
       // Build items array for fiscalization
-      const items: any[] = rows.map((row: any) => {
+      const items: any[] = []
+      const itemsWithoutMxik: string[] = []
+
+      for (const row of rows) {
         // Use product_title + variant_title if available, fallback to title
         const title = row.product_title 
           ? (row.variant_title ? `${row.product_title} - ${row.variant_title}` : row.product_title)
           : (row.title || "Товар")
 
-        // Get MXIK code from product metadata only
+        // Get MXIK code from product metadata only - NO DEFAULT!
         const productMetadata = typeof row.product_metadata === 'string' 
           ? JSON.parse(row.product_metadata) 
           : (row.product_metadata || {})
         
-        // Fallback to a default MXIK code if missing (Required by Payme)
-        // Using Payme's documented example MXIK code: 00702001001000001
-        const DEFAULT_MXIK_CODE = "00702001001000001" 
-        const mxikCode = productMetadata.mxik_code || DEFAULT_MXIK_CODE
+        const mxikCode = productMetadata.mxik_code
+        
+        // If product doesn't have MXIK code, track it for error
+        if (!mxikCode) {
+          itemsWithoutMxik.push(title)
+        }
 
         const qty = Math.max(1, Number(row.quantity) || 1)
 
@@ -251,13 +256,20 @@ export class PaymeMerchantService {
           title: title.substring(0, 128), // Payme limit: 128 chars
           price: unit + remainder, // Price per unit in tiyin, adjusted to preserve exact line total
           count: qty,
-          code: mxikCode, // Mandatory field
+          code: mxikCode || "MISSING", // Will cause error if missing
           vat_percent: 12, // Standard VAT in Uzbekistan
           package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
         }
 
-        return item
-      })
+        items.push(item)
+      }
+
+      // If any items are missing MXIK code, throw error - they cannot be sold!
+      if (itemsWithoutMxik.length > 0) {
+        const errorMsg = `Товары без MXIK кода не могут быть проданы: ${itemsWithoutMxik.join(', ')}`
+        this.logger_.error(`[PaymeMerchant] ${errorMsg}`)
+        throw new PaymeError(PaymeErrorCodes.COULD_NOT_PERFORM, errorMsg)
+      }
 
       // Query shipping costs from cart
       const shippingResult = await pgConnection.raw(`
@@ -350,25 +362,10 @@ export class PaymeMerchantService {
           }
         }
 
-        const FALLBACK_MXIK_CODE = "00702001001000001"
-        const fallbackCode =
-          items.find((it) => typeof it?.code === "string" && it.code.length > 0)?.code ||
-          FALLBACK_MXIK_CODE
-
-        const fallbackItem = {
-          title: "Оплата заказа",
-          price: expectedTotal,
-          count: 1,
-          code: fallbackCode,
-          vat_percent: 12,
-          package_code: "2009",
-        }
-
-        this.logger_.warn(
-          `[PaymeMerchant] Using fallback fiscal item to match amount: expected=${expectedTotal}`
-        )
-
-        return [fallbackItem]
+        // If significant mismatch, throw error - cannot proceed without proper fiscal items
+        const errorMsg = `Сумма товаров (${itemsSum}) не совпадает с суммой заказа (${expectedTotal}). Разница: ${Math.abs(diff)} тийин`
+        this.logger_.error(`[PaymeMerchant] ${errorMsg}`)
+        throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, errorMsg)
       }
 
       this.logger_.info(`[PaymeMerchant] Prepared ${items.length} items for fiscalization, sum=${itemsSum} tiyin`)
