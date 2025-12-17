@@ -212,15 +212,4 @@ const medusaConfig = {
   ]
 };
 
-// Avoid logging full config (it may contain secrets).
-console.log("[medusa-config] loaded", {
-  workerMode: WORKER_MODE,
-  disableAdmin: SHOULD_DISABLE_ADMIN,
-  hasRedisUrl: !!REDIS_URL,
-  hasDatabaseUrl: !!DATABASE_URL,
-  hasMeilisearch: !!MEILISEARCH_HOST,
-  hasMinio: !!MINIO_ENDPOINT,
-  hasPayme: !!PAYME_ID,
-  hasClick: !!CLICK_MERCHANT_ID,
-});
 export default defineConfig(medusaConfig);
