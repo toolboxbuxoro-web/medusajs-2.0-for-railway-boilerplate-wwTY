@@ -276,6 +276,39 @@ export class PaymeMerchantService {
         this.logger_.warn(`[PaymeMerchant] Fiscalization sum mismatch: items=${itemsSum}, expected=${expectedTotal}, diff=${expectedTotal - itemsSum}`)
       }
 
+      /**
+       * IMPORTANT:
+       * Payme validates fiscalization data. If `detail.items` sum doesn't match `amount`,
+       * Payme shows "Неправильные фискальные данные" and blocks the payment UI.
+       *
+       * Cart line items can diverge from the payment amount due to promotions, rounding,
+       * or because `unit_price` isn't the final payable amount.
+       *
+       * To ensure payment can proceed, fall back to a single fiscal item equal to the
+       * expected total if we detect a mismatch.
+       */
+      if (expectedTotal && Math.abs(itemsSum - expectedTotal) > 1) {
+        const FALLBACK_MXIK_CODE = "06201001001000000"
+        const fallbackCode =
+          items.find((it) => typeof it?.code === "string" && it.code.length > 0)?.code ||
+          FALLBACK_MXIK_CODE
+
+        const fallbackItem = {
+          title: "Оплата заказа",
+          price: expectedTotal,
+          count: 1,
+          code: fallbackCode,
+          vat_percent: 12,
+          package_code: "2009",
+        }
+
+        this.logger_.warn(
+          `[PaymeMerchant] Using fallback fiscal item to match amount: expected=${expectedTotal}`
+        )
+
+        return [fallbackItem]
+      }
+
       this.logger_.info(`[PaymeMerchant] Prepared ${items.length} items for fiscalization, sum=${itemsSum} tiyin`)
       return items
     } catch (error) {
