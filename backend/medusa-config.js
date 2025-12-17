@@ -48,7 +48,9 @@ const medusaConfig = {
       authCors: AUTH_CORS,
       storeCors: STORE_CORS,
       jwtSecret: JWT_SECRET,
-      cookieSecret: COOKIE_SECRET
+      cookieSecret: COOKIE_SECRET,
+      port: process.env.PORT ? parseInt(process.env.PORT) : 9000,
+      host: process.env.HOST || '0.0.0.0'
     },
     build: {
       rollupOptions: {
