@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
 
   const cookieStore = await cookies()
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "ru"
-  const countryCode = "uz"
+  // Try to get country code from cookie, fallback to 'uz'
+  const countryCode = cookieStore.get("NEXT_COUNTRY")?.value || "uz"
 
   if (status === "cancelled" || status === "failed" || status === "error") {
     const redirectUrl = `/${locale}/${countryCode}/checkout?step=review&payment_error=cancelled`
@@ -34,7 +35,8 @@ export async function POST(request: NextRequest) {
 
   const cookieStore = await cookies()
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "ru"
-  const countryCode = "uz"
+  // Try to get country code from cookie, fallback to 'uz'
+  const countryCode = cookieStore.get("NEXT_COUNTRY")?.value || "uz"
 
   if (status && status !== "success" && status !== "0") {
     const redirectUrl = `/${locale}/${countryCode}/checkout?step=review&payment_error=cancelled`

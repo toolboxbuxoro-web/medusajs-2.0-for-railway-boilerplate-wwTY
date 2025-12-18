@@ -4,6 +4,8 @@ import { CreditCard } from "@medusajs/icons"
 import Ideal from "@modules/common/icons/ideal"
 import Bancontact from "@modules/common/icons/bancontact"
 import PayPal from "@modules/common/icons/paypal"
+import Payme from "@modules/common/icons/payme"
+import Click from "@modules/common/icons/click"
 
 /* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
 export const paymentInfoMap: Record<
@@ -32,15 +34,15 @@ export const paymentInfoMap: Record<
   },
   pp_payme_payme: {
     title: "Payme",
-    icon: <CreditCard />,
+    icon: <Payme />,
   },
   pp_click_click: {
     title: "Click",
-    icon: <CreditCard />,
+    icon: <Click />,
   },
   pp_click_pay_by_card_click_pay_by_card: {
     title: "Click (Pay by Card)",
-    icon: <CreditCard />,
+    icon: <Click />,
   },
   // Add more payment providers here
 }
