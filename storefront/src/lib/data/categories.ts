@@ -4,7 +4,7 @@ import { cache } from "react"
 export const listCategories = cache(async function () {
   return sdk.store.category
     .list(
-      { fields: "+category_children" },
+      { fields: "+category_children,+is_internal" },
       { next: { tags: ["categories"], revalidate: 60 } }
     )
     .then(({ product_categories }) => product_categories)

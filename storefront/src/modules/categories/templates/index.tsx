@@ -114,10 +114,10 @@ export default function CategoryTemplate({
         </div>
 
         {/* Subcategories */}
-        {category.category_children && category.category_children.length > 0 && (
+        {category.category_children && category.category_children.filter((c: any) => !c.is_internal).length > 0 && (
           <div className="mb-6 sm:mb-8">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-              {category.category_children.map((c) => (
+              {category.category_children.filter((c: any) => !c.is_internal).map((c) => (
                 <LocalizedClientLink
                   key={c.id}
                   href={`/categories/${c.handle}`}

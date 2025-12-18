@@ -189,7 +189,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                     <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-red-600" />
                   </LocalizedClientLink>
 
-                  {categories.map((category) => (
+                  {categories.filter((c: any) => !c.is_internal).map((category) => (
                     <div
                       key={category.id}
                       className={`
@@ -260,9 +260,9 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                     )}
 
                     {/* Subcategories Grid */}
-                    {activeCategory.category_children && activeCategory.category_children.length > 0 ? (
+                    {activeCategory.category_children && activeCategory.category_children.filter((c: any) => !c.is_internal).length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-8">
-                        {activeCategory.category_children.map((child) => (
+                        {activeCategory.category_children.filter((c: any) => !c.is_internal).map((child) => (
                            <LocalizedClientLink
                               key={child.id}
                               href={`/categories/${child.handle}`}

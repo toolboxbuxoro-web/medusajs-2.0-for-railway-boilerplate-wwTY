@@ -15,6 +15,9 @@ export const convertToLocale = ({
   maximumFractionDigits,
   locale = "ru-RU",
 }: ConvertToLocaleParams) => {
+  // Handle NaN, null, or undefined amounts
+  const safeAmount = (amount === null || amount === undefined || isNaN(amount)) ? 0 : amount
+  
   if (currency_code && !isEmpty(currency_code)) {
     const formatter = new Intl.NumberFormat(locale, {
       style: "currency",
@@ -29,7 +32,7 @@ export const convertToLocale = ({
     // Special case for UZS to treat as 0 decimals since we store main units
     const fractionDigits = currency_code.toUpperCase() === 'UZS' ? 0 : defaultFractionDigits
 
-    const value = amount / Math.pow(10, fractionDigits || 0)
+    const value = safeAmount / Math.pow(10, fractionDigits || 0)
 
     return new Intl.NumberFormat(locale, {
       style: "currency",
@@ -39,5 +42,5 @@ export const convertToLocale = ({
     }).format(value)
   }
 
-  return amount.toString()
+  return safeAmount.toString()
 }

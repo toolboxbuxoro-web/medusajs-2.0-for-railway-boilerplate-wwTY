@@ -1,0 +1,49 @@
+{
+   "count" : 2,
+   "limit" : 200,
+   "offset" : 0,
+   "product_categories" : [
+      {
+         "category_children" : [
+            {
+               "created_at" : "2025-12-06T03:36:16.962Z",
+               "deleted_at" : null,
+               "description" : "",
+               "handle" : "setevie",
+               "id" : "pcat_01KBRVPMT2F602FBDFB28JNTA8",
+               "is_active" : true,
+               "is_internal" : true,
+               "metadata" : null,
+               "mpath" : ".pcat_01KBRVPMT2F602FBDFB28JNTA8",
+               "name" : "setevie",
+               "parent_category_id" : "pcat_01KBRV0CEEYN42350P3TN07KGK",
+               "rank" : 0,
+               "updated_at" : "2025-12-06T03:36:16.962Z"
+            }
+         ],
+         "created_at" : "2025-12-06T03:24:07.503Z",
+         "description" : "",
+         "handle" : "shurupoverti",
+         "id" : "pcat_01KBRV0CEEYN42350P3TN07KGK",
+         "metadata" : null,
+         "name" : "Шуруповёрты",
+         "parent_category" : null,
+         "parent_category_id" : null,
+         "rank" : 2,
+         "updated_at" : "2025-12-06T03:33:23.000Z"
+      },
+      {
+         "category_children" : [],
+         "created_at" : "2025-12-06T03:25:40.113Z",
+         "description" : "",
+         "handle" : "seteviye",
+         "id" : "pcat_01KBRV36WH24PMYTRKKYPB3PY7",
+         "metadata" : null,
+         "name" : "Сетевые шуруповёрты",
+         "parent_category" : null,
+         "parent_category_id" : null,
+         "rank" : 0,
+         "updated_at" : "2025-12-06T03:33:23.396Z"
+      }
+   ]
+}
