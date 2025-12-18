@@ -152,10 +152,10 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
                     {tProduct("black_friday")}
                   </span>
                 )}
-                <LocalizedClientLink href={`/products/${handle}`} className="block w-full overflow-hidden">
-                  <Marquee className="font-semibold text-lg mb-1 text-gray-900 hover:text-red-600 transition-colors">
+                <LocalizedClientLink href={`/products/${handle}`} className="block max-w-full overflow-hidden">
+                  <h3 className="font-semibold text-lg mb-1 text-gray-900 hover:text-red-600 transition-colors line-clamp-2" title={getLocalizedLineItemTitle(item, localeStr)}>
                     {getLocalizedLineItemTitle(item, localeStr)}
-                  </Marquee>
+                  </h3>
                 </LocalizedClientLink>
                 <p className="text-sm text-gray-600 mb-1">
                   {tProduct("code")}: {item.variant?.product?.metadata?.code || item.variant?.sku || "N/A"}

@@ -14,6 +14,8 @@ type ThumbnailProps = {
   className?: string
   "data-testid"?: string
   fit?: "cover" | "contain"
+  /** Set to true for above-the-fold images (hero, first products) */
+  priority?: boolean
 }
 
 const Thumbnail: React.FC<ThumbnailProps> = ({
@@ -25,6 +27,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   className,
   "data-testid": dataTestid,
   fit = "cover",
+  priority = false,
 }) => {
   const initialImage = thumbnail || images?.[0]?.url
 
@@ -49,7 +52,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
       )}
       data-testid={dataTestid}
     >
-      <ImageOrPlaceholder image={initialImage} size={size} fit={fit} />
+      <ImageOrPlaceholder image={initialImage} size={size} fit={fit} priority={priority} />
     </Container>
   )
 }
@@ -58,7 +61,8 @@ const ImageOrPlaceholder = ({
   image,
   size,
   fit = "cover",
-}: Pick<ThumbnailProps, "size"> & { image?: string; fit?: "cover" | "contain" }) => {
+  priority = false,
+}: Pick<ThumbnailProps, "size"> & { image?: string; fit?: "cover" | "contain"; priority?: boolean }) => {
   return image ? (
     <Image
       src={image}
@@ -71,6 +75,8 @@ const ImageOrPlaceholder = ({
       quality={50}
       sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
       fill
+      loading={priority ? "eager" : "lazy"}
+      priority={priority}
       data-testid="thumbnail-image"
     />
   ) : (
@@ -81,3 +87,4 @@ const ImageOrPlaceholder = ({
 }
 
 export default Thumbnail
+

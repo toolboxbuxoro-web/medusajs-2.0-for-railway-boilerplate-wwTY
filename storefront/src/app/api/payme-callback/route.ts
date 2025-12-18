@@ -58,13 +58,13 @@ async function handleCallback(request: NextRequest) {
   
   // If payment was explicitly cancelled
   if (status === 'cancelled' || status === 'failed') {
-    const redirectUrl = `${baseUrl}/${locale}/${countryCode}/checkout?step=review&payment_error=cancelled`
+    const redirectUrl = `${baseUrl}/${locale}/${countryCode}/cart?payment_error=cancelled`
     return NextResponse.redirect(redirectUrl)
   }
   
-  // For successful or pending payments, redirect to review step with payment=success
-  // The PaymePaymentButton will check the actual payment status
-  const redirectUrl = `${baseUrl}/${locale}/${countryCode}/checkout?step=review&payment_status=checking`
+  // For successful payments, redirect to home page with success message
+  // Guest users can see the success message, logged-in users can go to their orders
+  const redirectUrl = `${baseUrl}/${locale}/${countryCode}?payment_success=true`
   
   return NextResponse.redirect(redirectUrl)
 }

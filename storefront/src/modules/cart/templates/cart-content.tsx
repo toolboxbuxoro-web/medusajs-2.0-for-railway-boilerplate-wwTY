@@ -141,8 +141,8 @@ const CartContent = ({
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden lg:grid lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-6 lg:gap-8">
-        <div className="flex flex-col gap-y-6">
+      <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_420px] gap-6 lg:gap-8">
+        <div className="flex flex-col gap-y-6 min-w-0 overflow-hidden">
           {!customer && <SignInPrompt />}
           <ItemsTemplate
             items={cart.items}
