@@ -17,12 +17,32 @@ export async function retrieveCart() {
     return null
   }
 
-  return await sdk.store.cart
-    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...getAuthHeaders() })
-    .then(({ cart }) => cart)
-    .catch(() => {
+  try {
+    const { cart } = await sdk.store.cart
+      .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...getAuthHeaders() })
+    
+    // If cart is completed (order was placed), remove the stale cart ID and return null
+    // This will trigger creation of a new cart
+    if ((cart as any)?.completed_at) {
+      console.log('[Cart] Cart is completed, removing stale cart ID:', cartId)
+      removeCartId()
       return null
-    })
+    }
+    
+    return cart
+  } catch (error: any) {
+    // If error mentions "already completed" or cart not found, remove stale cart ID
+    const errorMessage = error?.message || error?.toString() || ''
+    if (
+      errorMessage.includes('already completed') || 
+      errorMessage.includes('not found') ||
+      errorMessage.includes('does not exist')
+    ) {
+      console.log('[Cart] Cart error, removing stale cart ID:', cartId, errorMessage)
+      removeCartId()
+    }
+    return null
+  }
 }
 
 export async function getOrSetCart(countryCode: string) {
