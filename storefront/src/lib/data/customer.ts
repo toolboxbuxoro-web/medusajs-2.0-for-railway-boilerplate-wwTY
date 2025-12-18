@@ -199,8 +199,15 @@ export async function changePasswordWithOtp(_currentState: any, formData: FormDa
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
-  const email = formData.get("email") as string
+  const phone = formData.get("phone") as string
   const password = formData.get("password") as string
+
+  // Normalize phone and convert to email format
+  const normalized = normalizeUzPhone(phone)
+  if (!normalized) {
+    return "Введите корректный номер телефона (+998...)"
+  }
+  const email = `${normalized}@phone.local`
 
   try {
     await sdk.auth
@@ -210,7 +217,7 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag("customer")
       })
   } catch (error: any) {
-    return error.toString()
+    return "Неверный номер телефона или пароль"
   }
 }
 

@@ -114,6 +114,13 @@ export const CLICK_CARD_TYPE = process.env.CLICK_CARD_TYPE as 'uzcard' | 'humo' 
 export const CLICK_USER_ID = process.env.CLICK_USER_ID // For fiscalization Auth header
 
 /**
+ * (optional) Eskiz.uz configuration
+ */
+export const ESKIZ_EMAIL = process.env.ESKIZ_EMAIL
+export const ESKIZ_PASSWORD = process.env.ESKIZ_PASSWORD
+export const ESKIZ_FROM = process.env.ESKIZ_FROM || '4546'
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =

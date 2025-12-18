@@ -12,6 +12,7 @@ import OptionSelect from "@modules/products/components/product-actions/option-se
 
 import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
+import QuickOrderModal from "../quick-order-modal"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
@@ -48,6 +49,7 @@ export default function ProductActions({
   const t = useTranslations('product')
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false)
   const countryCode = useParams().countryCode as string
 
   // If there is only 1 variant, preselect the options
@@ -217,9 +219,17 @@ export default function ProductActions({
         <Button
           variant="secondary"
           className="w-full h-10 bg-gray-100 hover:bg-gray-200 text-gray-800"
+          onClick={() => setIsQuickOrderOpen(true)}
+          disabled={!selectedVariant || !inStock}
         >
           {t('quick_order')}
         </Button>
+        <QuickOrderModal
+          product={product}
+          variant={selectedVariant}
+          isOpen={isQuickOrderOpen}
+          onClose={() => setIsQuickOrderOpen(false)}
+        />
         {formattedInstallmentPrice && (
           <div className="text-sm text-gray-600 mt-4">
             <span className="font-semibold">{formattedInstallmentPrice}</span> × 4 {t('installments')}

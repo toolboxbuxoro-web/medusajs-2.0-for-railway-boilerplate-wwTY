@@ -31,7 +31,10 @@ import {
   CLICK_SECRET_KEY,
   CLICK_PAY_URL,
   CLICK_MERCHANT_USER_ID,
-  CLICK_CARD_TYPE
+  CLICK_CARD_TYPE,
+  ESKIZ_EMAIL,
+  ESKIZ_PASSWORD,
+  ESKIZ_FROM
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -129,6 +132,16 @@ const medusaConfig = {
               channels: ['email'],
               api_key: RESEND_API_KEY,
               from: RESEND_FROM_EMAIL,
+            },
+          }] : []),
+          ...(ESKIZ_EMAIL && ESKIZ_PASSWORD ? [{
+            resolve: './src/modules/eskiz-sms',
+            id: 'eskiz',
+            options: {
+              channels: ['sms'],
+              email: ESKIZ_EMAIL,
+              password: ESKIZ_PASSWORD,
+              from: ESKIZ_FROM,
             },
           }] : []),
         ]

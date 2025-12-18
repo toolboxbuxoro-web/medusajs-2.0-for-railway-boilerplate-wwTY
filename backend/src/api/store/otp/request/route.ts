@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import { normalizeUzPhone } from "../../../../lib/phone"
 import { generateOtpCode, otpRateLimitCheck, otpStoreSet, OtpPurpose } from "../../../../lib/otp-store"
-import { sendSms } from "../../../../lib/eskiz-sms"
 
 type Body = {
   phone: string
@@ -30,11 +30,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   await otpStoreSet(purpose, normalized, code)
 
   const ttl = Number(process.env.OTP_TTL_SECONDS || 300)
-  const message =
-    process.env.OTP_MESSAGE_TEMPLATE?.replace("{code}", code).replace("{ttl}", String(ttl)) ||
-    `Toolbox: tasdiqlash kodi ${code}. ${Math.ceil(ttl / 60)} daqiqa amal qiladi.`
+  const siteName = "toolbox-tools.uz"
+  let message = `${siteName}: ${code}`
 
-  await sendSms(logger, normalized, message)
+  // Allow override from env if needed
+  if (process.env.OTP_MESSAGE_TEMPLATE) {
+    message = process.env.OTP_MESSAGE_TEMPLATE.replace("{code}", code).replace("{ttl}", String(ttl))
+  }
+
+  const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
+
+  await notificationModule.createNotifications({
+    to: normalized,
+    channel: "sms",
+    template: "otp",
+    data: {
+      message
+    }
+  })
 
   return res.json({ success: true })
 }
