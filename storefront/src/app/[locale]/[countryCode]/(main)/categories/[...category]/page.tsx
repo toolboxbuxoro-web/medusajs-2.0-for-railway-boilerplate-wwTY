@@ -8,6 +8,9 @@ import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
+// Force dynamic rendering to avoid DYNAMIC_SERVER_USAGE errors
+export const dynamic = "force-dynamic"
+
 type Props = {
   params: { category: string[]; countryCode: string; locale: string }
   searchParams: {

@@ -11,6 +11,9 @@ import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getLocalizedCollectionTitle } from "@lib/util/get-localized-product"
 
+// Force dynamic rendering to avoid DYNAMIC_SERVER_USAGE errors
+export const dynamic = "force-dynamic"
+
 type Props = {
   params: { handle: string; countryCode: string; locale: string }
   searchParams: {
