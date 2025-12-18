@@ -111,6 +111,7 @@ export const CLICK_SECRET_KEY = process.env.CLICK_SECRET_KEY
 export const CLICK_PAY_URL = process.env.CLICK_PAY_URL || 'https://my.click.uz/services/pay'
 export const CLICK_MERCHANT_USER_ID = process.env.CLICK_MERCHANT_USER_ID
 export const CLICK_CARD_TYPE = process.env.CLICK_CARD_TYPE as 'uzcard' | 'humo' | undefined
+export const CLICK_USER_ID = process.env.CLICK_USER_ID // For fiscalization Auth header
 
 /**
  * Worker mode

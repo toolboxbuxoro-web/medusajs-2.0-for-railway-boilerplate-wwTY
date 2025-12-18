@@ -9,6 +9,7 @@
 CLICK_MERCHANT_ID=your_merchant_id      # ID мерчанта из личного кабинета Click
 CLICK_SERVICE_ID=your_service_id        # ID сервиса из личного кабинета Click  
 CLICK_SECRET_KEY=your_secret_key        # Секретный ключ для подписи
+CLICK_USER_ID=your_user_id              # User ID для Auth header (требуется для фискализации)
 
 # Click (опциональные)
 CLICK_PAY_URL=https://my.click.uz/services/pay  # URL для оплаты (default)
@@ -112,3 +113,25 @@ STORE_URL=https://your-store.vercel.app
 ### Callback не приходит
 - Убедитесь что Prepare/Complete URL правильно настроены в кабинете Click
 - Проверьте что backend доступен извне (не localhost)
+
+---
+
+## Фискализация
+
+Фискализация чеков обязательна при использовании более 1 ИКПУ.
+
+### Как работает:
+1. После успешного `Complete` автоматически вызывается `submitFiscalizationData()`
+2. Данные отправляются в `api.click.uz/v2/merchant/payment/ofd_data/submit_items`
+3. Товары берутся из корзины с MXIK кодами из `product.metadata.mxik_code`
+
+### Требования:
+- `CLICK_USER_ID` должен быть установлен в ENV
+- Все товары должны иметь MXIK коды (устанавливаются в Admin → Products → Metadata)
+
+### Логи при успешной фискализации:
+```
+[ClickMerchant] Prepared 3 items for fiscalization, sum=150000 tiyin
+[ClickMerchant] Submitting fiscalization for payment_id=123456
+[ClickMerchant] Fiscalization submitted successfully for payment_id=123456
+```

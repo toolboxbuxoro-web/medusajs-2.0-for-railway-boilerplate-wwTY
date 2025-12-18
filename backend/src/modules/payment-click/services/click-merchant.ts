@@ -60,6 +60,216 @@ export class ClickMerchantService {
     return normalizeString(process.env.CLICK_SERVICE_ID)
   }
 
+  private getUserId(): string {
+    return normalizeString(process.env.CLICK_USER_ID)
+  }
+
+  /**
+   * Generate Auth header for Click Fiscalization API
+   * Format: {user_id}:{sha1(timestamp + secret_key)}:{timestamp}
+   */
+  private generateAuthHeader(): string {
+    const userId = this.getUserId()
+    const secretKey = this.getSecretKey()
+    const timestamp = Math.floor(Date.now() / 1000)
+    
+    const crypto = require("crypto")
+    const digest = crypto
+      .createHash("sha1")
+      .update(`${timestamp}${secretKey}`)
+      .digest("hex")
+    
+    return `${userId}:${digest}:${timestamp}`
+  }
+
+  /**
+   * Fetch cart items for fiscalization
+   * Returns items with MXIK codes, prices, quantities for Click OFD API
+   */
+  private async getCartItemsForFiscalization(cartId: string, expectedTotalTiyin?: number) {
+    try {
+      const pgConnection = this.container_.resolve("__pg_connection__")
+      
+      // Check if columns exist
+      const hasDeletedAt = await this.hasColumn(pgConnection, "cart_line_item", "deleted_at")
+      const hasTotal = await this.hasColumn(pgConnection, "cart_line_item", "total")
+      
+      const whereDeleted = hasDeletedAt ? "AND cli.deleted_at IS NULL" : ""
+      
+      const lineItemsResult = await pgConnection.raw(`
+        SELECT 
+          cli.id,
+          cli.title,
+          cli.quantity,
+          cli.unit_price,
+          ${hasTotal ? "cli.total as line_total," : ""}
+          cli.product_title,
+          cli.variant_title,
+          cli.product_id,
+          p.metadata as product_metadata
+        FROM cart_line_item cli
+        LEFT JOIN product p ON p.id = cli.product_id
+        WHERE cli.cart_id = ?
+          ${whereDeleted}
+      `, [cartId])
+
+      const rows = lineItemsResult?.rows || lineItemsResult || []
+      const items: any[] = []
+      const itemsWithoutMxik: string[] = []
+
+      for (const row of rows) {
+        const title = row.product_title 
+          ? (row.variant_title ? `${row.product_title} - ${row.variant_title}` : row.product_title)
+          : (row.title || "Товар")
+
+        const productMetadata = typeof row.product_metadata === 'string' 
+          ? JSON.parse(row.product_metadata) 
+          : (row.product_metadata || {})
+        
+        const mxikCode = productMetadata.mxik_code
+        
+        if (!mxikCode) {
+          itemsWithoutMxik.push(title)
+        }
+
+        const qty = Math.max(1, Number(row.quantity) || 1)
+        const lineTotalSums = hasTotal
+          ? Number(row.line_total)
+          : Number(row.unit_price) * qty
+        const lineTotalTiyins = Math.round(lineTotalSums * 100)
+        const unit = Math.floor(lineTotalTiyins / qty)
+        const remainder = lineTotalTiyins - unit * qty
+
+        items.push({
+          name: title.substring(0, 128),
+          price: unit + remainder,
+          count: qty,
+          code: mxikCode || "MISSING",
+          vat_percent: 12,
+          package_code: productMetadata.package_code || "2009"
+        })
+      }
+
+      // Add shipping if present
+      const shippingResult = await pgConnection.raw(`
+        SELECT 
+          csm.amount as shipping_amount,
+          so.name as shipping_name
+        FROM cart_shipping_method csm
+        LEFT JOIN shipping_option so ON so.id = csm.shipping_option_id
+        WHERE csm.cart_id = ?
+      `, [cartId])
+
+      const shippingRows = shippingResult?.rows || shippingResult || []
+      const SHIPPING_MXIK_CODE = "10105001001000000"
+      
+      for (const shipping of shippingRows) {
+        const shippingAmount = Number(shipping.shipping_amount)
+        if (shippingAmount > 0) {
+          items.push({
+            name: (shipping.shipping_name || "Доставка").substring(0, 128),
+            price: Math.round(shippingAmount * 100),
+            count: 1,
+            code: SHIPPING_MXIK_CODE,
+            vat_percent: 12,
+            package_code: "2009"
+          })
+        }
+      }
+
+      if (itemsWithoutMxik.length > 0) {
+        this.logger_.warn(`[ClickMerchant] Items without MXIK code: ${itemsWithoutMxik.join(', ')}`)
+      }
+
+      const itemsSum = items.reduce((sum, item) => sum + (item.price * item.count), 0)
+      this.logger_.info(`[ClickMerchant] Prepared ${items.length} items for fiscalization, sum=${itemsSum} tiyin`)
+
+      return items
+    } catch (error) {
+      this.logger_.error(`[ClickMerchant] Error fetching cart items: ${error}`)
+      return []
+    }
+  }
+
+  private async hasColumn(pgConnection: any, tableName: string, columnName: string): Promise<boolean> {
+    try {
+      const res = await pgConnection.raw(`
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = ?
+          AND column_name = ?
+        LIMIT 1
+      `, [tableName, columnName])
+      const rows = res?.rows || res || []
+      return !!rows?.length
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Submit fiscalization data to Click OFD API
+   * Called after successful payment completion
+   */
+  private async submitFiscalizationData(params: {
+    paymentId: string
+    cartId: string
+    amountTiyin: number
+  }): Promise<boolean> {
+    const { paymentId, cartId, amountTiyin } = params
+
+    if (!this.getUserId()) {
+      this.logger_.warn("[ClickMerchant] CLICK_USER_ID not set - skipping fiscalization")
+      return false
+    }
+
+    try {
+      const items = await this.getCartItemsForFiscalization(cartId, amountTiyin)
+      
+      if (items.length === 0) {
+        this.logger_.warn("[ClickMerchant] No items for fiscalization")
+        return false
+      }
+
+      const payload = {
+        service_id: parseInt(this.getServiceId(), 10),
+        payment_id: parseInt(paymentId, 10),
+        items: items,
+        received_card: amountTiyin, // Payment by card
+        received_cash: 0,
+        received_ecash: 0
+      }
+
+      const authHeader = this.generateAuthHeader()
+
+      this.logger_.info(`[ClickMerchant] Submitting fiscalization for payment_id=${paymentId}`)
+
+      const response = await fetch("https://api.click.uz/v2/merchant/payment/ofd_data/submit_items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Auth": authHeader
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.error_code === 0) {
+        this.logger_.info(`[ClickMerchant] Fiscalization submitted successfully for payment_id=${paymentId}`)
+        return true
+      } else {
+        this.logger_.error(`[ClickMerchant] Fiscalization failed: ${JSON.stringify(result)}`)
+        return false
+      }
+    } catch (error) {
+      this.logger_.error(`[ClickMerchant] Error submitting fiscalization: ${error}`)
+      return false
+    }
+  }
+
   /**
    * Find Click payment session by merchant_trans_id (we use cart_id).
    * Uses raw SQL to query by JSON field since remoteQuery filters can be unreliable.
@@ -466,6 +676,17 @@ export class ClickMerchantService {
           this.logger_.info(
             `[ClickMerchant] Completed cart ${cartId} for click_trans_id=${click_trans_id}`
           )
+
+          // Submit fiscalization data after successful payment
+          const paymentId = click_paydoc_id || click_trans_id
+          const amountTiyin = parseUzsAmountToTiyin(amount)
+          if (paymentId && amountTiyin) {
+            await this.submitFiscalizationData({
+              paymentId,
+              cartId,
+              amountTiyin: Number(amountTiyin)
+            })
+          }
         } catch (e) {
           this.logger_.error(
             `[ClickMerchant] Failed to complete cart ${cartId}: ${e}`
