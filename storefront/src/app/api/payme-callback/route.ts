@@ -15,10 +15,6 @@ async function handleCallback(request: NextRequest) {
   const orderId = searchParams.get('order_id')
   const status = searchParams.get('status')
   
-  console.log('[payme-callback] Full URL:', request.url)
-  console.log('[payme-callback] Method:', request.method)
-  console.log('[payme-callback] All search params:', Object.fromEntries(searchParams.entries()))
-  
   const cookieStore = await cookies()
   const headersList = await headers()
   
@@ -55,13 +51,6 @@ async function handleCallback(request: NextRequest) {
   locale = locale || 'ru'
   const countryCode = 'uz'
   
-  console.log('[payme-callback] Received callback:', { 
-    orderId, 
-    status, 
-    locale,
-    cookies: cookieStore.getAll().map(c => c.name)
-  })
-  
   // Construct the base URL from the request origin
   const host = headersList.get('host') || 'toolbox-tools.uz'
   const protocol = host.includes('localhost') ? 'http' : 'https'
@@ -70,7 +59,6 @@ async function handleCallback(request: NextRequest) {
   // If payment was explicitly cancelled
   if (status === 'cancelled' || status === 'failed') {
     const redirectUrl = `${baseUrl}/${locale}/${countryCode}/checkout?step=review&payment_error=cancelled`
-    console.log('[payme-callback] Redirecting to (cancelled):', redirectUrl)
     return NextResponse.redirect(redirectUrl)
   }
   
@@ -78,7 +66,6 @@ async function handleCallback(request: NextRequest) {
   // The PaymePaymentButton will check the actual payment status
   const redirectUrl = `${baseUrl}/${locale}/${countryCode}/checkout?step=review&payment_status=checking`
   
-  console.log('[payme-callback] Redirecting to:', redirectUrl)
   return NextResponse.redirect(redirectUrl)
 }
 

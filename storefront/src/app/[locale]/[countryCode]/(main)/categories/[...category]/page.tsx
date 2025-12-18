@@ -76,26 +76,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { sortBy, page } = searchParams
 
-  console.log('[CategoryPage] Rendering with params:', {
-    category: params.category,
-    countryCode: params.countryCode,
-    locale: params.locale,
-    sortBy,
-    page
-  })
-
   const { product_categories } = await getCategoryByHandle(
     params.category
   )
 
-  console.log('[CategoryPage] getCategoryByHandle returned:', {
-    categoryParam: params.category,
-    foundCategories: product_categories?.length || 0,
-    categoryNames: product_categories?.map((c: any) => c.name)
-  })
-
   if (!product_categories || product_categories.length === 0) {
-    console.log('[CategoryPage] No categories found, calling notFound()')
     notFound()
   }
 
