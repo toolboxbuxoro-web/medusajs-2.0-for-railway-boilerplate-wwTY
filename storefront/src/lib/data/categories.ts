@@ -24,15 +24,28 @@ export const getCategoriesList = cache(async function (
 export const getCategoryByHandle = cache(async function (
   categoryHandle: string[]
 ) {
+  console.log('[Categories] getCategoryByHandle called with:', categoryHandle)
+  
   try {
-    return await sdk.store.category.list(
+    const result = await sdk.store.category.list(
       // TODO: Look into fixing the type
       // @ts-ignore
       { handle: categoryHandle, fields: "+category_children" },
       { next: { tags: ["categories"], revalidate: 60 } }
     )
-  } catch (error) {
-    console.error("Error fetching category by handle:", categoryHandle, error)
+    
+    console.log('[Categories] getCategoryByHandle result:', {
+      handle: categoryHandle,
+      foundCount: result?.product_categories?.length || 0,
+      categories: result?.product_categories?.map((c: any) => ({ id: c.id, handle: c.handle, name: c.name }))
+    })
+    
+    return result
+  } catch (error: any) {
+    console.error("[Categories] Error fetching category by handle:", {
+      handle: categoryHandle,
+      error: error?.message || error
+    })
     return { product_categories: [] }
   }
 })
