@@ -52,11 +52,15 @@ const Shipping: React.FC<ShippingProps> = ({
       // 1. item.variant?.weight - variant level
       // 2. item.product?.weight - product level (Medusa 2.0)
       // 3. item.variant?.product?.weight - nested product
-      const weight = 
+      const weightRaw = 
         item.variant?.weight || 
         (item as any).product?.weight || 
         (item.variant as any)?.product?.weight || 
         0
+      
+      const weightNum = typeof weightRaw === 'string' ? parseFloat(weightRaw) : Number(weightRaw)
+      const weight = isNaN(weightNum) ? 0 : weightNum
+      
       return acc + (weight * item.quantity)
     }, 0) || 0
   }, [cart.items])
@@ -64,7 +68,9 @@ const Shipping: React.FC<ShippingProps> = ({
   useEffect(() => {
     if (isBtsSelected && selectedRegionId) {
       // Medusa weight is typically in grams, convert to kg
-      const weightInKg = cartWeight / 1000 
+      // If cartWeight is 0, use a fallback of 1000g (1kg) for a more realistic estimate
+      const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
+      const weightInKg = effectiveWeight / 1000 
       const cost = calculateBtsCost(weightInKg, selectedRegionId)
       setEstimatedBtsCost(cost)
     } else {
@@ -250,8 +256,8 @@ const Shipping: React.FC<ShippingProps> = ({
                       </div>
                   )}
 
-                  {/* Estimated Cost Display */}
-                  {selectedPointId && estimatedBtsCost !== null && (
+                  {/* Estimated Cost Display - Show as soon as region is selected */}
+                  {selectedRegionId && estimatedBtsCost !== null && (
                       <div className="p-3 md:p-4 bg-ui-bg-subtle-hover rounded-lg border border-ui-border-base">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                               <div>
@@ -269,7 +275,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           </div>
                           <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-ui-border-base">
                               <div className="flex flex-wrap items-center gap-2 md:gap-4 text-ui-fg-muted text-xs md:text-sm">
-                                  <span>{t("bts_weight")}: {(cartWeight / 1000).toFixed(1)} kg</span>
+                                  <span>{t("bts_weight")}: {cartWeight > 0 ? (cartWeight / 1000).toFixed(1) : "1.0 (estimate)"} kg</span>
                                   <span className="hidden sm:inline">•</span>
                                   <span>{t("bts_tariff_info")}</span>
                               </div>

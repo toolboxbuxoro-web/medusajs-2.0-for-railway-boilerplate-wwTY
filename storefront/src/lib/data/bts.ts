@@ -273,7 +273,7 @@ export const BTS_REGIONS: BtsRegion[] = [
     id: "jizzakh",
     name: "Jizzax viloyati",
     nameRu: "Джизакская область",
-    zone: 3,
+    zone: 1, // Changed from 3 (Jizzakh is near Samarkand/Bukhara)
     points: [
       { id: "jizzakh-city-1", name: "Jizzax #1", address: "Jizzax shaxar" },
       { id: "zomin-1", name: "Zomin #1", address: "Zomin tumani" },
@@ -288,7 +288,7 @@ export const BTS_REGIONS: BtsRegion[] = [
     id: "syrdarya",
     name: "Sirdaryo viloyati",
     nameRu: "Сырдарьинская область",
-    zone: 3,
+    zone: 2, // Changed from 3 (Syrdarya is between Samarkand and Tashkent)
     points: [
       { id: "guliston-1", name: "Guliston #1", address: "Guliston shahri" },
       { id: "yangiyer-1", name: "Yangiyer #1", address: "Yangiyer tumani" },
@@ -355,11 +355,10 @@ export const calculateBtsCost = (weightKg: number, regionId: string): number => 
   if (roundedWeight <= BTS_PRICING.expressMaxWeight) {
     // Express Mail: Use fixed rates table
     // Find the closest weight tier (1, 2, 3, 5, 10, 15, 20)
+    // We should pick the smallest tier that is >= roundedWeight
     const tiers = Object.keys(BTS_PRICING.expressRates).map(Number).sort((a, b) => a - b)
-    let tier = tiers[0]
-    for (const t of tiers) {
-      if (roundedWeight >= t) tier = t
-    }
+    const tier = tiers.find(t => t >= roundedWeight) || tiers[tiers.length - 1]
+    
     cost = BTS_PRICING.expressRates[tier][region.zone]
   } else {
     // LTL Cargo: Zone-based per-kg pricing
