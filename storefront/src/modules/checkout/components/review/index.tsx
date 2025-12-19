@@ -17,9 +17,9 @@ const Review = ({ cart }: { cart: any }) => {
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
   const previousStepsCompleted =
-    cart.shipping_address &&
-    cart.shipping_methods?.length > 0 &&
-    (cart.payment_collection || (cart as any).payment_collection_id || (cart as any).payment_collections?.length > 0 || paidByGiftcard)
+    !!cart.shipping_address &&
+    (cart.shipping_methods?.length ?? 0) > 0 &&
+    (!!cart.payment_collection || !!(cart as any).payment_collection_id || !!(cart as any).payment_collections?.length || paidByGiftcard)
 
   useEffect(() => {
     if (isOpen) {

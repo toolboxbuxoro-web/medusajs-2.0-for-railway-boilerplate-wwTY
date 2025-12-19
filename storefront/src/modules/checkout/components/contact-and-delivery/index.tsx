@@ -91,8 +91,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
   const isCompleted =
     !!cart?.shipping_address?.address_1 &&
-    (cart?.shipping_methods?.length ?? 0) > 0 &&
-    !!cart.metadata?.bts_delivery
+    (cart?.shipping_methods?.length ?? 0) > 0
 
   const isOpen = 
     ["address", "delivery", "shipping"].includes(searchParams.get("step") || "") || 
@@ -328,7 +327,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
           level="h2"
           className="text-xl font-bold text-gray-900 flex items-center gap-2"
         >
-          {!isOpen && isCompleted && <CheckCircleSolid className="text-green-500" />}
           {t("shipping_information") as string}
         </Heading>
         {!isOpen && isCompleted && (

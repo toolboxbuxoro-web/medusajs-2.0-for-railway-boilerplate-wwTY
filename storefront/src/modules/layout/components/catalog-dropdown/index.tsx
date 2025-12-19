@@ -290,7 +290,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                               key={child.id}
                               href={`/categories/${child.handle}`}
                               onClick={handleClose}
-                              className="group flex flex-col p-4 rounded-xl border border-gray-100 bg-white hover:border-red-100 hover:shadow-md transition-all duration-300"
+                              className="group flex flex-col p-4 rounded-xl border border-gray-100 bg-[#e8e8e8] hover:border-red-100 hover:shadow-md transition-all duration-300"
                            >
                               <div className="flex items-start justify-between mb-3">
                                  <div className="relative w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors overflow-hidden shrink-0">
