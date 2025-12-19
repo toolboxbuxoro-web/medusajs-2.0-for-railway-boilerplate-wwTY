@@ -89,7 +89,12 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const router = useRouter()
   const pathname = usePathname()
 
-  const isOpen = searchParams.get("step") === "address"
+  const isCompleted =
+    !!cart?.shipping_address?.address_1 &&
+    (cart?.shipping_methods?.length ?? 0) > 0 &&
+    !!cart.metadata?.bts_delivery
+
+  const isOpen = searchParams.get("step") === "address" || (!searchParams.get("step") && !isCompleted)
 
   // Form state
   const [phone, setPhone] = useState("")
@@ -312,10 +317,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     }
   }
 
-  const isCompleted =
-    cart?.shipping_address &&
-    (cart?.shipping_methods?.length ?? 0) > 0 &&
-    cart.metadata?.bts_delivery
+
 
   return (
     <div className="bg-white">
@@ -390,7 +392,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
             {/* Delivery Type Info */}
             <div className="flex flex-col gap-3">
               <Label className="text-gray-500 text-xs uppercase tracking-wider font-bold">
-                {t("delivery_type")}
+                {t("delivery_type") as string}
               </Label>
               <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-600 border border-blue-50">
@@ -409,8 +411,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">{t("bts_pickup")}</div>
-                  <div className="text-xs text-gray-500">{t("bts_delivery_info")}</div>
+                  <div className="font-bold text-gray-900">{t("bts_pickup") as string}</div>
+                  <div className="text-xs text-gray-500">{t("bts_delivery_info") as string}</div>
                 </div>
               </div>
             </div>
@@ -419,7 +421,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
             <div className="bg-white rounded-xl border border-blue-100 overflow-hidden shadow-sm">
               <div className="p-4 sm:p-6 bg-blue-50/50 border-b border-blue-100">
                 <Label className="text-blue-500 text-xs uppercase tracking-wider font-semibold mb-1">
-                  {t("bts_select_region")}
+                  {t("bts_select_region") as string}
                 </Label>
                 <Select
                   onValueChange={(val) => {
@@ -517,7 +519,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                {t("processing")}
+                {t("processing") as string}
               </span>
             ) : (
               t("continue")
@@ -531,7 +533,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
               <div className="space-y-4">
                 <div data-testid="shipping-address-summary">
                   <Text className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">
-                    {t("recipient")}
+                    {t("recipient") as string}
                   </Text>
                   <Text className="text-base font-semibold text-gray-900 leading-tight">
                     {cart.shipping_address?.first_name} {cart.shipping_address?.last_name}
@@ -546,7 +548,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 {cart.metadata?.bts_delivery && (
                   <div>
                     <Text className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">
-                      {t("bts_delivery_point")}
+                      {t("bts_delivery_point") as string}
                     </Text>
                     <div className="bg-white rounded-xl border border-blue-100 p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-1">
