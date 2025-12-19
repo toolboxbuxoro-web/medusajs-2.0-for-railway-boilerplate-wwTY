@@ -48,12 +48,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // Send SMS via Eskiz
     const notificationService = req.scope.resolve("notification") as any
     
+    // Format message according to Eskiz requirements:
+    // Must include: 1) resource name (site), 2) purpose of code
     await notificationService.createNotifications({
       to: normalizedPhone,
       channel: "sms",
       template: "otp-verification",
       data: {
-        message: `Toolbox: Ваш код подтверждения: ${otpCode}`
+        message: `Kod podtverzhdeniya dlya registracii na sajte toolbox-tools.uz: ${otpCode}`
       }
     })
 

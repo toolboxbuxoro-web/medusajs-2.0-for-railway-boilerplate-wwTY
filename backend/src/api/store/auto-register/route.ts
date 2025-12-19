@@ -84,8 +84,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     })
 
     // Send SMS with login credentials
+    // Format according to Eskiz requirements: resource name + purpose
     const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
-    const smsMessage = `toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
+    const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
     
     await notificationModule.createNotifications({
       to: normalized,
