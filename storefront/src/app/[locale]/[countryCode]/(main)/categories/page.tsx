@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import Image from "next/image"
 
 import { getCategoriesList } from "@lib/data/categories"
 import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
@@ -46,18 +47,24 @@ const CategoryCard = ({
         ) : null}
       </div>
 
-      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
+      <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
         {iconUrl ? (
-          <img
-            src={iconUrl}
-            alt=""
-            className="w-10 h-10 object-contain"
-          />
+          <div className="relative w-10 h-10">
+            <Image
+              src={iconUrl}
+              alt=""
+              fill
+              sizes="40px"
+              className="object-contain"
+            />
+          </div>
         ) : imageUrl ? (
-          <img
+          <Image
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            fill
+            sizes="64px"
+            className="object-cover"
           />
         ) : (
           <span className="text-gray-400 font-bold text-lg">

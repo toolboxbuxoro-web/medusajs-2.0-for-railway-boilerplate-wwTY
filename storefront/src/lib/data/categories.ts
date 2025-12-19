@@ -4,7 +4,7 @@ import { cache } from "react"
 export const listCategories = cache(async function () {
   return sdk.store.category
     .list(
-      { fields: "+category_children,+is_internal" },
+      { fields: "+category_children,+is_internal,+metadata" },
       { next: { tags: ["categories"], revalidate: 60 } }
     )
     .then(({ product_categories }) => product_categories)
@@ -16,7 +16,7 @@ export const getCategoriesList = cache(async function (
 ) {
   return sdk.store.category.list(
     // @ts-ignore
-    { limit, offset, fields: "+category_children" },
+    { limit, offset, fields: "+category_children,+metadata" },
     { next: { tags: ["categories"], revalidate: 60 } }
   )
 })
@@ -28,7 +28,7 @@ export const getCategoryByHandle = cache(async function (
     return await sdk.store.category.list(
       // TODO: Look into fixing the type
       // @ts-ignore
-      { handle: categoryHandle, fields: "+category_children" },
+      { handle: categoryHandle, fields: "+category_children,+metadata" },
       { next: { tags: ["categories"], revalidate: 60 } }
     )
   } catch (error: any) {

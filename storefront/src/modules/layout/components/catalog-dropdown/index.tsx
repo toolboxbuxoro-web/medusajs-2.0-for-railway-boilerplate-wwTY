@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useMemo } from "react"
+import Image from "next/image"
 import { useTranslations } from 'next-intl'
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
@@ -34,25 +35,33 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   
   if (iconUrl) {
     return (
-      <img
-        src={iconUrl}
-        alt=""
-        className="w-10 h-10 object-contain rounded-lg bg-gray-50 border border-gray-100 p-1.5 shadow-sm group-hover:shadow transition-all"
-      />
+      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
+        <Image
+          src={iconUrl}
+          alt=""
+          fill
+          sizes="40px"
+          className="object-contain p-1.5"
+        />
+      </div>
     )
   }
   if (imageUrl) {
     return (
-      <img
-        src={imageUrl}
-        alt=""
-        className="w-10 h-10 object-cover rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all"
-      />
+      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
+        <Image
+          src={imageUrl}
+          alt=""
+          fill
+          sizes="40px"
+          className="object-cover"
+        />
+      </div>
     )
   }
 
   return (
-    <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 text-lg shadow-sm group-hover:shadow transition-all">
+    <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 text-lg shadow-sm group-hover:shadow transition-all shrink-0">
       {getCategoryIcon(category.handle || "")}
     </div>
   )
@@ -238,11 +247,23 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                     {!isMobile && (
                       <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
                         <div className="flex items-center gap-6">
-                           <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shadow-sm">
+                           <div className="relative w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shadow-sm overflow-hidden shrink-0">
                               {activeCategory.metadata?.icon_url ? (
-                                <img src={activeCategory.metadata.icon_url as string} className="w-full h-full object-contain" alt="" />
+                                <Image 
+                                  src={activeCategory.metadata.icon_url as string} 
+                                  alt="" 
+                                  fill 
+                                  sizes="64px"
+                                  className="object-contain p-2" 
+                                />
                               ) : activeCategory.metadata?.image_url ? (
-                                <img src={activeCategory.metadata.image_url as string} className="w-full h-full object-cover" alt="" />
+                                <Image 
+                                  src={activeCategory.metadata.image_url as string} 
+                                  alt="" 
+                                  fill 
+                                  sizes="64px"
+                                  className="object-cover" 
+                                />
                               ) : (
                                 <span className="text-3xl">{getCategoryIcon(activeCategory.handle || "")}</span>
                               )}
@@ -272,9 +293,15 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                               className="group flex flex-col p-4 rounded-xl border border-gray-100 bg-white hover:border-red-100 hover:shadow-md transition-all duration-300"
                            >
                               <div className="flex items-start justify-between mb-3">
-                                 <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                                 <div className="relative w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors overflow-hidden shrink-0">
                                     {child.metadata?.icon_url ? (
-                                      <img src={child.metadata.icon_url as string} className="w-6 h-6 object-contain" alt="" />
+                                      <Image 
+                                        src={child.metadata.icon_url as string} 
+                                        alt="" 
+                                        fill 
+                                        sizes="40px"
+                                        className="object-contain p-1.5" 
+                                      />
                                     ) : (
                                       getCategoryIcon(child.handle || "")
                                     )}

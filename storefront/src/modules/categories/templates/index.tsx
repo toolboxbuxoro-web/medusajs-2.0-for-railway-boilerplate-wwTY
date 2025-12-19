@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
+import Image from "next/image"
 
 import InteractiveLink from "@modules/common/components/interactive-link"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
@@ -37,20 +38,28 @@ export default function CategoryTemplate({
 
     if (iconUrl) {
       return (
-        <img
-          src={iconUrl}
-          alt=""
-          className="w-10 h-10 object-contain"
-        />
+        <div className="relative w-10 h-10 shrink-0">
+          <Image
+            src={iconUrl}
+            alt=""
+            fill
+            sizes="40px"
+            className="object-contain"
+          />
+        </div>
       )
     }
     if (imageUrl) {
       return (
-        <img
-          src={imageUrl}
-          alt={getLocalizedCategoryName(c, locale)}
-          className="w-full h-full object-cover"
-        />
+        <div className="relative w-full h-full shrink-0">
+          <Image
+            src={imageUrl}
+            alt={getLocalizedCategoryName(c, locale)}
+            fill
+            sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 120px"
+            className="object-cover"
+          />
+        </div>
       )
     }
 
@@ -90,26 +99,32 @@ export default function CategoryTemplate({
         </nav>
 
         {/* Header */}
-        <div className="mb-4 sm:mb-6 lg:mb-8">
-          <div className="flex items-center gap-3 sm:gap-4">
-            {category.metadata?.image_url && (
-              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden border border-gray-200 bg-white flex-shrink-0">
-                <img
+        <div className="mb-8 lg:mb-12">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 lg:gap-10">
+            {typeof category.metadata?.image_url === "string" && (
+              <div className="relative w-full md:w-72 lg:w-96 h-48 md:h-52 lg:h-64 rounded-[2rem] overflow-hidden border border-gray-200 bg-white shadow-md flex-shrink-0 group">
+                <Image
                   src={category.metadata.image_url as string}
                   alt={getLocalizedCategoryName(category, locale)}
-                  className="w-full h-full object-cover"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 288px, 384px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
             )}
-            <h1 className="heading-2" data-testid="category-page-title">
-              {getLocalizedCategoryName(category, locale)}
-            </h1>
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight" data-testid="category-page-title">
+                {getLocalizedCategoryName(category, locale)}
+              </h1>
+              {getLocalizedCategoryDescription(category, locale) && (
+                <p className="text-gray-600 text-base sm:text-lg max-w-3xl leading-relaxed font-normal">
+                  {getLocalizedCategoryDescription(category, locale) as string}
+                </p>
+              )}
+            </div>
           </div>
-          {getLocalizedCategoryDescription(category, locale) && (
-            <p className="text-gray-600 text-sm sm:text-base mt-2 max-w-2xl">
-              {getLocalizedCategoryDescription(category, locale)}
-            </p>
-          )}
         </div>
 
         {/* Subcategories */}
@@ -128,7 +143,7 @@ export default function CategoryTemplate({
                     </div>
                   </div>
 
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
                     <CategoryMedia c={c} />
                   </div>
                 </LocalizedClientLink>

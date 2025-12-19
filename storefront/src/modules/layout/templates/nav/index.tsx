@@ -24,7 +24,7 @@ type NavProps = {
 
 export default async function Nav({ locale }: NavProps) {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
-  const { product_categories } = await getCategoriesList(0, 20)
+  const { product_categories } = await getCategoriesList(0, 100)
   const mainCategories = product_categories?.filter(cat => !cat.parent_category) || []
   
   const t = await getTranslations({locale, namespace: 'nav'})
@@ -171,13 +171,31 @@ export default async function Nav({ locale }: NavProps) {
               <span>{t('all_products') || 'Все товары'}</span>
             </LocalizedClientLink>
 
-            {mainCategories.slice(0, 8).map((category) => (
+            {mainCategories.slice(0, 10).map((category) => (
               <LocalizedClientLink
                 key={category.id}
                 href={`/categories/${category.handle}`}
-                className="px-1.5 lg:px-2.5 h-full flex items-center hover:text-red-600 transition-colors whitespace-nowrap text-xs lg:text-sm"
+                className="group px-1.5 lg:px-3 h-full flex items-center gap-1.5 lg:gap-2 hover:text-red-600 transition-colors whitespace-nowrap text-[11px] lg:text-sm font-medium"
               >
-                {getLocalizedCategoryName(category, locale)}
+                {category.metadata?.icon_url ? (
+                  <div className="relative w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110">
+                    <Image
+                      src={category.metadata.icon_url as string}
+                      alt=""
+                      fill
+                      sizes="20px"
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <span className="text-sm lg:text-base group-hover:scale-110 transition-transform">
+                    {category.handle === "instrumenty" ? "🔧" : 
+                     category.handle === "elektrika" ? "⚡" : 
+                     category.handle === "santehnika" ? "🚿" : 
+                     category.handle === "stroymaterialy" ? "🧱" : "📦"}
+                  </span>
+                )}
+                <span>{getLocalizedCategoryName(category, locale)}</span>
               </LocalizedClientLink>
             ))}
           </div>
