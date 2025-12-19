@@ -434,7 +434,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           msg.toLowerCase().includes("does not have a price")
         ) {
           const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
-          await fetch(`${backendUrl}/store/bts/shipping-method`, {
+          const resp = await fetch(`${backendUrl}/store/bts/shipping-method`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -444,6 +444,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
             }),
             cache: "no-store",
           })
+          
+          if (!resp.ok) {
+            const errorData = await resp.json().catch(() => ({}))
+            throw new Error(errorData.message || "Failed to set BTS shipping method")
+          }
+          
+          // Invalidate cart cache so Payment component sees the shipping method
+          revalidateTag("cart")
         } else {
           throw e
         }
