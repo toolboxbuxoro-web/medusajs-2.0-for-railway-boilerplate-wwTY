@@ -1,6 +1,5 @@
 import { Logger } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 
 type InjectedDependencies = {
   logger: Logger
@@ -602,12 +601,32 @@ export class PaymeMerchantService {
     const cartId = currentData.cart_id
     if (cartId) {
       try {
-        await completeCartWorkflow(this.container_).run({
-          input: {
-            id: cartId
+        const cartModule = this.container_.resolve(Modules.CART) as any
+        const result = await cartModule.completeCart(cartId)
+
+        const orderId = result?.order?.id
+        if (orderId) {
+          // Persist the created order id so storefront can redirect to /order/confirmed/:id
+          const dataWithOrder = {
+            ...newData,
+            medusa_order_id: orderId,
           }
-        })
-        this.logger_.info(`[PaymeMerchant] Successfully completed cart ${cartId} for transaction ${id}`)
+
+          await paymentModule.updatePaymentSession({
+            id: session.id,
+            amount: session.amount || currentData.amount || 0,
+            currency_code: session.currency_code || "uzs",
+            data: dataWithOrder,
+          })
+
+          this.logger_.info(
+            `[PaymeMerchant] Completed cart ${cartId} -> order ${orderId} (saved to session ${session.id})`
+          )
+        } else {
+          this.logger_.info(
+            `[PaymeMerchant] Completed cart ${cartId} for transaction ${id} (order id not returned)`
+          )
+        }
       } catch (e: any) {
         this.logger_.error(`[PaymeMerchant] Failed to complete cart ${cartId}: ${e?.message || e}`)
         // We still proceed to confirm the transaction to Payme to avoid desync

@@ -49,7 +49,21 @@ async function handleCallback(request: NextRequest) {
   
   // Default fallback
   locale = locale || 'ru'
-  const countryCode = 'uz'
+
+  // Try to infer countryCode from referer path: /:locale/:countryCode/...
+  let countryCode = 'uz'
+  const referer = headersList.get('referer')
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer)
+      const pathParts = refererUrl.pathname.split('/').filter(Boolean)
+      if (pathParts[0] && ['ru', 'uz', 'en'].includes(pathParts[0]) && pathParts[1]) {
+        countryCode = pathParts[1].toLowerCase()
+      }
+    } catch {
+      // ignore
+    }
+  }
   
   // Construct the base URL from the request origin
   const host = headersList.get('host') || 'toolbox-tools.uz'
@@ -61,11 +75,44 @@ async function handleCallback(request: NextRequest) {
     const redirectUrl = `${baseUrl}/${locale}/${countryCode}/cart?payment_error=cancelled`
     return NextResponse.redirect(redirectUrl)
   }
-  
-  // For successful payments, redirect to home page with success message
-  // Guest users can see the success message, logged-in users can go to their orders
-  const redirectUrl = `${baseUrl}/${locale}/${countryCode}?payment_success=true`
-  
+
+  if (!orderId) {
+    const redirectUrl = `${baseUrl}/${locale}/${countryCode}/cart?payment_error=missing_order_id`
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // For successful payments, redirect to order confirmed page.
+  // We resolve Medusa order id via backend lookup endpoint which reads payment_session.data.medusa_order_id.
+  const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+  const lookupUrl = `${backendUrl}/store/payme/order?cart_id=${encodeURIComponent(orderId)}`
+
+  let resolvedOrderId: string | null = null
+
+  // Short polling window to handle race between Payme return redirect and order persistence.
+  for (let i = 0; i < 12; i++) {
+    try {
+      const resp = await fetch(lookupUrl, { cache: "no-store" })
+      if (resp.ok) {
+        const data = await resp.json()
+        if (data?.order_id) {
+          resolvedOrderId = data.order_id
+          break
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    await new Promise((r) => setTimeout(r, 500))
+  }
+
+  if (resolvedOrderId) {
+    const redirectUrl = `${baseUrl}/${locale}/${countryCode}/order/confirmed/${resolvedOrderId}`
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // Fallback: send user to cart with a "checking" status.
+  const redirectUrl = `${baseUrl}/${locale}/${countryCode}/cart?payment_status=checking&cart_id=${encodeURIComponent(orderId)}`
   return NextResponse.redirect(redirectUrl)
 }
 

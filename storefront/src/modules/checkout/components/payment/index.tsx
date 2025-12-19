@@ -50,6 +50,8 @@ const Payment = ({
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
+  const hasShippingMethod = (cart?.shipping_methods?.length ?? 0) > 0
+
   const paymentReady =
     (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
 
@@ -93,19 +95,28 @@ const Payment = ({
       setError("Please select a payment method")
       return
     }
+
+    // Most providers (incl. Payme) require shipping methods to calculate totals.
+    if (!paidByGiftcard && !hasShippingMethod) {
+      setError("Сначала выберите способ доставки")
+      return
+    }
     
     setIsLoading(true)
     setError(null)
     try {
       const shouldInputCard =
-        isStripeFunc(providerIdToUse) && !activeSession
+        isStripeFunc(providerIdToUse) &&
+        (!activeSession || activeSession.provider_id !== providerIdToUse)
 
-      if (!activeSession) {
+      const shouldInitiate =
+        !activeSession || activeSession.provider_id !== providerIdToUse
+
+      if (shouldInitiate) {
         await initiatePaymentSession(cart, {
           provider_id: providerIdToUse,
         })
         router.refresh()
-        await new Promise(resolve => setTimeout(resolve, 500))
       }
 
       if (!shouldInputCard) {
@@ -115,6 +126,7 @@ const Payment = ({
             scroll: false,
           }
         )
+        router.refresh()
       }
     } catch (err: any) {
       console.error("[Payment handleSubmit] Error:", err)
@@ -127,6 +139,13 @@ const Payment = ({
   useEffect(() => {
     setError(null)
   }, [isOpen])
+
+  // Keep local selection in sync with the actual active payment session after refresh.
+  useEffect(() => {
+    if (activeSession?.provider_id) {
+      setSelectedPaymentMethod(activeSession.provider_id)
+    }
+  }, [activeSession?.provider_id])
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
@@ -168,14 +187,13 @@ const Payment = ({
                         <div
                             key={paymentMethod.id}
                             onClick={async () => {
-                                setSelectedPaymentMethod(paymentMethod.id)
-                                // If not stripe, auto-advance to next step
-                                if (!isStripeFunc(paymentMethod.id)) {
-                                    // Small delay to let selection state update visually
-                                    setTimeout(() => {
-                                        handleSubmit(paymentMethod.id)
-                                    }, 300)
-                                }
+                              setSelectedPaymentMethod(paymentMethod.id)
+
+                              // For non-stripe providers we can immediately initialize the session
+                              // and advance to review.
+                              if (!isStripeFunc(paymentMethod.id)) {
+                                await handleSubmit(paymentMethod.id)
+                              }
                             }}
                             className={clx(
                                 "cursor-pointer rounded-xl border p-4 transition-all duration-200 flex flex-col justify-between h-32 hover:border-blue-500 hover:shadow-md",
@@ -246,14 +264,14 @@ const Payment = ({
           {cart && paymentReady && activeSession ? (
             <div className="flex items-center gap-3">
                <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-                    {paymentInfoMap[selectedPaymentMethod]?.icon || <CreditCard />}
+                    {paymentInfoMap[activeSession?.provider_id]?.icon || paymentInfoMap[selectedPaymentMethod]?.icon || <CreditCard />}
                </div>
                <div className="flex flex-col">
                    <Text className="text-sm text-gray-500 font-medium">
                         {t("payment_method")}
                    </Text>
                    <Text className="font-semibold text-gray-900">
-                        {paymentInfoMap[selectedPaymentMethod]?.title || selectedPaymentMethod}
+                        {paymentInfoMap[activeSession?.provider_id]?.title || activeSession?.provider_id}
                    </Text>
                </div>
             </div>

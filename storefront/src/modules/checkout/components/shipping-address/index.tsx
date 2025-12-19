@@ -23,16 +23,13 @@ const ShippingAddress = ({
   availableShippingMethods?: HttpTypes.StoreCartShippingOption[]
 }) => {
   const t = useTranslations('checkout')
-  
-  // Try to determine initial mode from cart
-  const initialMode = cart?.metadata?.bts_delivery ? "bts" : "courier"
-  const [deliveryMode, setDeliveryMode] = useState<"bts" | "courier">(initialMode)
-  
+
   const [formData, setFormData] = useState<Record<string, any>>({
     "shipping_address.country_code": "uz",
     "shipping_address.postal_code": "100000",
     "shipping_address.province": "Uzbekistan",
     "shipping_address.city": "Tashkent",
+    "shipping_address.address_1": "",
   })
 
   // BTS State
@@ -46,11 +43,25 @@ const ShippingAddress = ({
   )
 
   useEffect(() => {
-    if (deliveryMode === "bts") {
-        const btsMethod = availableShippingMethods?.find(m => m.name.toLowerCase().includes("bts"))
-        if (btsMethod) setSelectedMethodId(btsMethod.id)
+    if (!availableShippingMethods?.length) {
+      return
     }
-  }, [deliveryMode, availableShippingMethods])
+
+    // If current selection exists in available methods, keep it.
+    if (selectedMethodId && availableShippingMethods.some((m) => m.id === selectedMethodId)) {
+      return
+    }
+
+    // Prefer BTS method; fallback to the first available option.
+    const btsMethod = availableShippingMethods.find((m) =>
+      (m.name || "").toLowerCase().includes("bts")
+    )
+    const methodToUse = btsMethod || availableShippingMethods[0]
+
+    if (methodToUse?.id) {
+      setSelectedMethodId(methodToUse.id)
+    }
+  }, [availableShippingMethods, selectedMethodId])
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -141,7 +152,9 @@ const ShippingAddress = ({
       const btsData = (cart.metadata?.bts_delivery as any)
       if (btsData?.region_id) {
         setSelectedRegionId(btsData.region_id)
-        setDeliveryMode("bts")
+        if (btsData?.point_id) {
+          setSelectedPointId(btsData.point_id)
+        }
       }
     }
   }, [cart])
@@ -182,19 +195,53 @@ const ShippingAddress = ({
       <input type="hidden" name="shipping_address.city" value={formData["shipping_address.city"]} />
       <input type="hidden" name="shipping_address.province" value={formData["shipping_address.province"]} />
       <input type="hidden" name="email" value={formData.email || ""} />
-      
-      {/* Hidden input for address_1 when in BTS mode (since visible input is hidden) */}
-      {deliveryMode === 'bts' && (
-        <input type="hidden" name="shipping_address.address_1" value={formData["shipping_address.address_1"]} />
-      )}
-      
-      {/* BTS Selection Metadata */}
-      <input type="hidden" name="bts_region_id" value={deliveryMode === 'bts' ? selectedRegionId : ''} />
-      <input type="hidden" name="bts_point_id" value={deliveryMode === 'bts' ? selectedPointId : ''} />
-      <input type="hidden" name="bts_estimated_cost" value={deliveryMode === 'bts' ? (estimatedBtsCost || "") : ""} />
-      
-      {/* Unified Shipping Method ID */}
-      <input type="hidden" name="shipping_method_id" value={selectedMethodId} />
+
+      {/**
+       * BTS is the only supported delivery mode in this storefront UI.
+       * We keep the actual values as inputs so server action (`setAddresses`) can
+       * set cart metadata + shipping method. We use sr-only required inputs so
+       * the user can't submit without picking a region/point and having a method id.
+       */}
+      <input
+        name="bts_region_id"
+        value={selectedRegionId}
+        readOnly
+        required
+        className="sr-only"
+        tabIndex={-1}
+      />
+      <input
+        name="bts_point_id"
+        value={selectedPointId}
+        readOnly
+        required
+        className="sr-only"
+        tabIndex={-1}
+      />
+      <input
+        type="hidden"
+        name="bts_estimated_cost"
+        value={estimatedBtsCost || ""}
+      />
+
+      <input
+        name="shipping_method_id"
+        value={selectedMethodId}
+        readOnly
+        required
+        className="sr-only"
+        tabIndex={-1}
+      />
+
+      {/* Required address_1 surrogate for BTS mode (it's set from selected BTS point) */}
+      <input
+        name="shipping_address.address_1"
+        value={formData["shipping_address.address_1"] || ""}
+        readOnly
+        required
+        className="sr-only"
+        tabIndex={-1}
+      />
 
       <div className="flex flex-col gap-y-6">
         <div className="grid grid-cols-1 gap-4">
@@ -249,7 +296,17 @@ const ShippingAddress = ({
             <div className="p-4 sm:p-6 bg-blue-50/50 border-b border-blue-100 flex items-center justify-between">
                 <div>
                     <Label className="text-blue-500 text-xs uppercase tracking-wider font-semibold mb-1">{t("bts_select_region")}</Label>
-                    <Select onValueChange={(val) => { setSelectedRegionId(val); setSelectedPointId(""); }} value={selectedRegionId}>
+                    <Select
+                      onValueChange={(val) => {
+                        setSelectedRegionId(val)
+                        setSelectedPointId("")
+                        setFormData((prev) => ({
+                          ...prev,
+                          "shipping_address.address_1": "",
+                        }))
+                      }}
+                      value={selectedRegionId}
+                    >
                         <Select.Trigger className="w-full min-w-[200px] border-none bg-transparent shadow-none p-0 h-auto text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors focus:ring-0">
                             <Select.Value placeholder={t("bts_region_placeholder")} />
                         </Select.Trigger>

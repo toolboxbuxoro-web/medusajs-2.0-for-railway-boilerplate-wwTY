@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import { omit } from "lodash"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { cookies as nextCookies, headers } from "next/headers"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
@@ -21,7 +22,9 @@ export async function retrieveCart() {
     const { cart } = await sdk.store.cart
       .retrieve(
         cartId, 
-        { fields: "+region,+payment_collection,+payment_collection.payment_sessions" }, 
+        { 
+          fields: "*,region.*,items.*,items.variant.*,items.variant.product.*,shipping_address.*,billing_address.*,shipping_methods.*,payment_collection.*,payment_collection.payment_sessions.*" 
+        }, 
         { next: { tags: ["cart"] }, ...getAuthHeaders() }
       )
     
@@ -410,8 +413,31 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
        await setShippingMethod({ cartId, shippingMethodId })
     }
     
-    // Redirect straight to payment as address and delivery are now unified in Step 1
-    redirect(`/${data.shipping_address.country_code}/checkout?step=payment`)
+    // Redirect straight to payment as address and delivery are now unified in Step 1.
+    // Preserve locale + countryCode segments from the current checkout URL.
+    const hdrs = await headers()
+    const referer = hdrs.get("referer")
+
+    if (referer) {
+      try {
+        const refUrl = new URL(referer)
+
+        // Only trust referer when it points to checkout page; otherwise fallback.
+        if (refUrl.pathname.includes("/checkout")) {
+          refUrl.searchParams.set("step", "payment")
+          redirect(`${refUrl.pathname}?${refUrl.searchParams.toString()}`)
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    const cookieStore = await nextCookies()
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || "ru"
+    const countryCode =
+      (data.shipping_address.country_code as string | undefined)?.toLowerCase() || "uz"
+
+    redirect(`/${locale}/${countryCode}/checkout?step=payment`)
     
   } catch (e: any) {
     if (e.message.includes("NEXT_REDIRECT")) {
