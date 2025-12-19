@@ -61,7 +61,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       id: await hasColumn(pg, "cart_shipping_method", "id"),
       cart_id: await hasColumn(pg, "cart_shipping_method", "cart_id"),
       shipping_option_id: await hasColumn(pg, "cart_shipping_method", "shipping_option_id"),
+      name: await hasColumn(pg, "cart_shipping_method", "name"),
       amount: await hasColumn(pg, "cart_shipping_method", "amount"),
+      raw_amount: await hasColumn(pg, "cart_shipping_method", "raw_amount"),
       currency_code: await hasColumn(pg, "cart_shipping_method", "currency_code"),
       data: await hasColumn(pg, "cart_shipping_method", "data"),
       created_at: await hasColumn(pg, "cart_shipping_method", "created_at"),
@@ -77,6 +79,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         currencyCode = rows?.[0]?.currency_code || null
       } catch {
         currencyCode = null
+      }
+    }
+
+    // Get shipping option name if needed
+    let shippingOptionName = "BTS Delivery"
+    if (cols.name && shipping_option_id) {
+      try {
+        const optionResult = await pg.raw(`SELECT name FROM shipping_option WHERE id = ? LIMIT 1`, [shipping_option_id])
+        const optionRows = optionResult?.rows || optionResult || []
+        if (optionRows.length > 0 && optionRows[0]?.name) {
+          shippingOptionName = optionRows[0].name
+        }
+      } catch {
+        // Use default name
       }
     }
 
@@ -97,6 +113,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       placeholders.push("?")
       values.push(cart_id)
     }
+    if (cols.name) {
+      insertCols.push("name")
+      placeholders.push("?")
+      values.push(shippingOptionName)
+    }
     if (cols.shipping_option_id) {
       insertCols.push("shipping_option_id")
       placeholders.push("?")
@@ -106,6 +127,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       insertCols.push("amount")
       placeholders.push("?")
       values.push(amount)
+    }
+    if (cols.raw_amount) {
+      insertCols.push("raw_amount")
+      placeholders.push("?")
+      // raw_amount is JSONB with currency_code as key and amount as value
+      const finalCurrencyCode = (currencyCode || "uzs").toLowerCase()
+      values.push(JSON.stringify({
+        [finalCurrencyCode]: amount
+      }))
     }
     if (cols.currency_code) {
       insertCols.push("currency_code")
