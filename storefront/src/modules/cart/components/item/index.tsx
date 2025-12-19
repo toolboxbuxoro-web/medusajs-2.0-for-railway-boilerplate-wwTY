@@ -20,9 +20,10 @@ import { useState } from "react"
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem
   type?: "full" | "preview"
+  currencyCode?: string
 }
 
-const Item = ({ item, type = "full" }: ItemProps) => {
+const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { locale } = useParams()
@@ -112,7 +113,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
 
       {type === "full" && (
         <Table.Cell className="hidden small:table-cell">
-          <LineItemUnitPrice item={item} style="tight" />
+          <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
         </Table.Cell>
       )}
 
@@ -125,10 +126,10 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           {type === "preview" && (
             <span className="flex gap-x-1 ">
               <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice item={item} style="tight" />
+              <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
             </span>
           )}
-          <LineItemPrice item={item} style="tight" />
+          <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
         </span>
       </Table.Cell>
     </Table.Row>

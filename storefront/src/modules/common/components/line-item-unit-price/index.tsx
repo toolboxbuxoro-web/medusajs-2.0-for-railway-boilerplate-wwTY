@@ -11,19 +11,30 @@ function formatPrice(priceString: string | undefined): string {
 type LineItemUnitPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   style?: "default" | "tight"
+  currencyCode?: string
 }
 
 const LineItemUnitPrice = ({
   item,
   style = "default",
+  currencyCode: customCurrencyCode
 }: LineItemUnitPriceProps) => {
+  const prices = getPricesForVariant(item.variant) ?? {
+    original_price: "",
+    calculated_price: "",
+    original_price_number: 0,
+    calculated_price_number: 0,
+    percentage_diff: 0,
+    currency_code: customCurrencyCode || "UZS"
+  }
+  
   const {
     original_price,
     calculated_price,
     original_price_number,
     calculated_price_number,
     percentage_diff,
-  } = getPricesForVariant(item.variant) ?? {}
+  } = prices
   const hasReducedPrice = calculated_price_number < original_price_number
 
   return (

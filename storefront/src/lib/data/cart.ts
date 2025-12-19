@@ -237,13 +237,21 @@ export async function initiatePaymentSession(
     context?: Record<string, unknown>
   }
 ) {
-  return sdk.store.payment
-    .initiatePaymentSession(cart, data, {}, getAuthHeaders())
-    .then((resp) => {
-      revalidateTag("cart")
-      return resp
-    })
-    .catch(medusaError)
+  try {
+    const resp = await sdk.store.payment
+      .initiatePaymentSession(cart, data, {}, getAuthHeaders())
+    revalidateTag("cart")
+    return resp
+  } catch (error: any) {
+    console.error("[initiatePaymentSession] Error:", error)
+    
+    // Extract meaningful error message
+    const message = error?.response?.data?.message 
+      || error?.message 
+      || "Failed to initiate payment session"
+    
+    throw new Error(message)
+  }
 }
 
 export async function applyPromotions(codes: string[]) {

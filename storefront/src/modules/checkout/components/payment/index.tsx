@@ -86,16 +86,23 @@ const Payment = ({
     })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (overrideProviderId?: string) => {
+    const providerIdToUse = overrideProviderId || selectedPaymentMethod
+    
+    if (!providerIdToUse) {
+      setError("Please select a payment method")
+      return
+    }
+    
     setIsLoading(true)
     setError(null)
     try {
       const shouldInputCard =
-        isStripeFunc(selectedPaymentMethod) && !activeSession
+        isStripeFunc(providerIdToUse) && !activeSession
 
       if (!activeSession) {
         await initiatePaymentSession(cart, {
-          provider_id: selectedPaymentMethod,
+          provider_id: providerIdToUse,
         })
         router.refresh()
         await new Promise(resolve => setTimeout(resolve, 500))
@@ -110,7 +117,8 @@ const Payment = ({
         )
       }
     } catch (err: any) {
-      setError(err.message)
+      console.error("[Payment handleSubmit] Error:", err)
+      setError(err?.message || "An error occurred while processing payment")
     } finally {
       setIsLoading(false)
     }
@@ -165,7 +173,7 @@ const Payment = ({
                                 if (!isStripeFunc(paymentMethod.id)) {
                                     // Small delay to let selection state update visually
                                     setTimeout(() => {
-                                        handleSubmit()
+                                        handleSubmit(paymentMethod.id)
                                     }, 300)
                                 }
                             }}
@@ -220,7 +228,7 @@ const Payment = ({
           <Button
             size="large"
             className="w-full mt-6 h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-transform active:scale-[0.99]"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             isLoading={isLoading}
             disabled={
               (isStripe && !cardComplete) ||

@@ -13,11 +13,17 @@ function formatPrice(priceString: string): string {
 type LineItemPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   style?: "default" | "tight"
+  currencyCode?: string
 }
 
-const LineItemPrice = ({ item, style = "default" }: LineItemPriceProps) => {
-  const { currency_code, calculated_price_number, original_price_number } =
-    getPricesForVariant(item.variant) ?? {}
+const LineItemPrice = ({ item, style = "default", currencyCode: customCurrencyCode }: LineItemPriceProps) => {
+  const prices = getPricesForVariant(item.variant) ?? {
+    currency_code: customCurrencyCode || "UZS",
+    calculated_price_number: 0,
+    original_price_number: 0
+  }
+  const currency_code = customCurrencyCode || prices.currency_code
+  const { calculated_price_number, original_price_number } = prices
 
   const adjustmentsSum = (item.adjustments || []).reduce(
     (acc, adjustment) => adjustment.amount + acc,

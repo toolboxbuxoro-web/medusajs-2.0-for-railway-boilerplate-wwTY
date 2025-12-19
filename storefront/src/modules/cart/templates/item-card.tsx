@@ -18,9 +18,10 @@ type ItemCardProps = {
   item: HttpTypes.StoreCartLineItem
   selected: boolean
   onSelect: () => void
+  currencyCode?: string
 }
 
-const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
+const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => {
   const t = useTranslations("cart")
   const tProduct = useTranslations("product")
   const { locale } = useParams()
@@ -40,9 +41,11 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
   }
 
   const { handle } = item.variant?.product ?? {}
-  const originalPrice = item.variant?.calculated_price?.calculated_amount || 0
-  const discount = item.variant?.product?.metadata?.discount_percent 
-    ? Math.round((originalPrice * Number(item.variant.product.metadata.discount_percent)) / 100)
+  const variant = item.variant as any
+  const originalPrice = variant?.calculated_price?.calculated_amount || 0
+  const productMetadata = variant?.product?.metadata as any
+  const discount = productMetadata?.discount_percent 
+    ? Math.round((originalPrice * Number(productMetadata.discount_percent)) / 100)
     : 0
   const finalPrice = originalPrice - discount
 
@@ -74,7 +77,7 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
           {/* Mobile Layout */}
           <div className="lg:hidden">
             {/* Black Friday Badge */}
-            {item.variant?.product?.metadata?.black_friday && (
+            {((item.variant?.product?.metadata as any)?.black_friday) && (
               <span className="inline-block bg-black text-white text-[10px] px-1.5 py-0.5 rounded mb-1">
                 {tProduct("black_friday")}
               </span>
@@ -121,14 +124,14 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
                   <div className="text-xs text-gray-400 line-through">
                     {convertToLocale({
                       amount: originalPrice * quantity,
-                      currency_code: item.cart?.currency_code || "USD",
+                      currency_code: currencyCode || item.cart?.currency_code || "UZS",
                     })}
                   </div>
                 )}
                 <div className="text-base sm:text-lg font-bold text-red-600">
                   {convertToLocale({
                     amount: finalPrice * quantity,
-                    currency_code: item.cart?.currency_code || "USD",
+                    currency_code: currencyCode || item.cart?.currency_code || "UZS",
                   })}
                 </div>
               </div>
@@ -147,7 +150,7 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
             <div className="flex justify-between gap-4">
               {/* Left Side */}
               <div className="flex-1 min-w-0">
-                {item.variant?.product?.metadata?.black_friday && (
+                {((item.variant?.product?.metadata as any)?.black_friday) && (
                   <span className="inline-block bg-black text-white text-xs px-2 py-1 rounded mb-2">
                     {tProduct("black_friday")}
                   </span>
@@ -158,7 +161,7 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
                   </h3>
                 </LocalizedClientLink>
                 <p className="text-sm text-gray-600 mb-1">
-                  {tProduct("code")}: {item.variant?.product?.metadata?.code || item.variant?.sku || "N/A"}
+                  {tProduct("code")}: {(item.variant?.product?.metadata as any)?.code || item.variant?.sku || "N/A"}
                 </p>
                 <p className="text-sm text-green-600 mb-3">{t("can_be_picked_up_today")}</p>
 
@@ -194,14 +197,14 @@ const ItemCard = ({ item, selected, onSelect }: ItemCardProps) => {
                   <div className="text-sm text-gray-500 line-through mb-1">
                     {convertToLocale({
                       amount: originalPrice * quantity,
-                      currency_code: item.cart?.currency_code || "USD",
+                      currency_code: currencyCode || item.cart?.currency_code || "UZS",
                     })}
                   </div>
                 )}
                 <div className="text-xl font-bold text-red-600">
                   {convertToLocale({
                     amount: finalPrice * quantity,
-                    currency_code: item.cart?.currency_code || "USD",
+                    currency_code: currencyCode || item.cart?.currency_code || "UZS",
                   })}
                 </div>
                 {discount > 0 && (

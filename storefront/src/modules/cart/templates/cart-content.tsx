@@ -127,6 +127,7 @@ const CartContent = ({
             toggleAll={toggleAll}
             handleDeleteSelected={handleDeleteSelected}
             isProcessing={isProcessing}
+            currencyCode={cart.currency_code}
           />
           {cart.region && (
             <Summary
@@ -151,6 +152,7 @@ const CartContent = ({
             toggleAll={toggleAll}
             handleDeleteSelected={handleDeleteSelected}
             isProcessing={isProcessing}
+            currencyCode={cart.currency_code}
           />
           {recommendedProducts}
         </div>

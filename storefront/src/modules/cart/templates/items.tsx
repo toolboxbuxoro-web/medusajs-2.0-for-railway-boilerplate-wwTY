@@ -16,6 +16,7 @@ type ItemsTemplateProps = {
   toggleAll: () => void
   handleDeleteSelected: () => void
   isProcessing: boolean
+  currencyCode?: string
 }
 
 const ItemsTemplate = ({ 
@@ -24,7 +25,8 @@ const ItemsTemplate = ({
   toggleItem, 
   toggleAll, 
   handleDeleteSelected,
-  isProcessing
+  isProcessing,
+  currencyCode
 }: ItemsTemplateProps) => {
   const t = useTranslations("cart")
   const cartId = Math.random().toString(36).substr(2, 9).toUpperCase()
@@ -94,6 +96,7 @@ const ItemsTemplate = ({
                     item={item} 
                     selected={selectedItemIds.includes(item.id)}
                     onSelect={() => toggleItem(item.id)}
+                    currencyCode={currencyCode}
                   />
                 )
               })
