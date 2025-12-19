@@ -48,8 +48,12 @@ const medusaConfig = {
     workerMode: WORKER_MODE,
     http: {
       adminCors: ADMIN_CORS,
-      authCors: AUTH_CORS,
-      storeCors: STORE_CORS.includes('toolbox-tools.uz') ? STORE_CORS : `${STORE_CORS},https://www.toolbox-tools.uz,https://toolbox-tools.uz`,
+      authCors: AUTH_CORS.includes('toolbox-tools.uz') && !AUTH_CORS.includes('www.toolbox-tools.uz')
+        ? `${AUTH_CORS},https://www.toolbox-tools.uz`
+        : AUTH_CORS,
+      storeCors: STORE_CORS.includes('toolbox-tools.uz') && !STORE_CORS.includes('www.toolbox-tools.uz')
+        ? `${STORE_CORS},https://www.toolbox-tools.uz`
+        : STORE_CORS,
       jwtSecret: JWT_SECRET,
       cookieSecret: COOKIE_SECRET,
       port: process.env.PORT ? parseInt(process.env.PORT) : 9000,
