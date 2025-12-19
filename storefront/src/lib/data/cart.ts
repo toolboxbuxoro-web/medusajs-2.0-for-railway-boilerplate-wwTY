@@ -434,9 +434,13 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           msg.toLowerCase().includes("does not have a price")
         ) {
           const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+          const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
           const resp = await fetch(`${backendUrl}/store/bts/shipping-method`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "x-publishable-api-key": publishableKey,
+            },
             body: JSON.stringify({
               cart_id: cartId,
               shipping_option_id: shippingMethodId,
