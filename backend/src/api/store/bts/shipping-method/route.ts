@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import crypto from "crypto"
 
 type Body = {
@@ -33,6 +34,9 @@ async function hasColumn(pg: any, tableName: string, columnName: string): Promis
  *
  * This endpoint force-attaches a shipping method row to the cart with a concrete amount
  * (taken from storefront-calculated BTS estimate), bypassing shipping option price validation.
+ * 
+ * Uses direct SQL INSERT to bypass Medusa's validation, then triggers cart recalculation
+ * via Cart Module to ensure totals are updated correctly.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
@@ -48,6 +52,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   try {
     const pg = req.scope.resolve("__pg_connection__")
+    const cartModule = req.scope.resolve(Modules.CART) as any
 
     // Remove any existing shipping methods for this cart (single-method model).
     await pg.raw(`DELETE FROM cart_shipping_method WHERE cart_id = ?`, [cart_id])
@@ -127,10 +132,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(500).json({ error: "cart_shipping_method schema not detected" })
     }
 
+    // Insert shipping method directly (bypassing Medusa validation)
     await pg.raw(
       `INSERT INTO cart_shipping_method (${insertCols.join(", ")}) VALUES (${placeholders.join(", ")})`,
       values
     )
+
+    // Trigger cart recalculation via Cart Module to update totals
+    // This ensures cart.subtotal, cart.total, etc. are updated correctly
+    try {
+      await cartModule.updateCarts(cart_id, {})
+      logger?.info?.(`[store/bts/shipping-method] Cart ${cart_id} recalculated after shipping method insert`)
+    } catch (recalcError: any) {
+      // Log but don't fail - the shipping method is already inserted
+      logger?.warn?.(`[store/bts/shipping-method] Cart recalculation warning: ${recalcError?.message || recalcError}`)
+    }
 
     return res.json({ success: true })
   } catch (e: any) {
