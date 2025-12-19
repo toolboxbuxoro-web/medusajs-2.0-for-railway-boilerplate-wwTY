@@ -9,7 +9,7 @@ import { redirect } from "next/navigation"
 import { cookies as nextCookies, headers } from "next/headers"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
-import { getRegion } from "./regions"
+import { getRegion, listRegions } from "./regions"
 
 export async function retrieveCart() {
   const cartId = getCartId()
@@ -52,7 +52,15 @@ export async function retrieveCart() {
 
 export async function getOrSetCart(countryCode: string) {
   let cart = await retrieveCart()
-  const region = await getRegion(countryCode)
+  const cc = (countryCode || "").toLowerCase()
+  let region = await getRegion(cc)
+
+  if (!region) {
+    // Fallback: pick the first available region so cart operations don't hard-fail
+    // when URL params are missing/mis-parsed.
+    const regions = await listRegions().catch(() => null)
+    region = regions?.[0] || null
+  }
 
   if (!region) {
     throw new Error(`Region not found for country code: ${countryCode}`)

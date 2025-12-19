@@ -49,6 +49,7 @@ export default function ProductActions({
   const t = useTranslations('product')
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false)
   const countryCode = useParams().countryCode as string
 
@@ -112,14 +113,20 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+    setAddError(null)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
-
-    setIsAdding(false)
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode: (countryCode || "uz").toLowerCase(),
+      })
+    } catch (e: any) {
+      console.error("[ProductActions] addToCart failed:", e)
+      setAddError(e?.message || "Не удалось добавить товар в корзину")
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   const { variantPrice, cheapestPrice } = getProductPrice({
@@ -216,6 +223,11 @@ export default function ProductActions({
             ? t('out_of_stock')
             : t('add_to_cart')}
         </Button>
+        {addError && (
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+            {addError}
+          </div>
+        )}
         <Button
           variant="secondary"
           className="w-full h-10 bg-gray-100 hover:bg-gray-200 text-gray-800"

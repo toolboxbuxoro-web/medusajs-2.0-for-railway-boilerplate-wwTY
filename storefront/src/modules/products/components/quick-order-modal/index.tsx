@@ -21,7 +21,7 @@ export default function QuickOrderModal({
 }: QuickOrderModalProps) {
   const t = useTranslations("product")
   const router = useRouter()
-  const { countryCode } = useParams() as { countryCode: string }
+  const { locale, countryCode } = useParams() as { locale: string; countryCode: string }
   
   const [phone, setPhone] = useState("")
   const [name, setName] = useState("")
@@ -76,9 +76,9 @@ export default function QuickOrderModal({
       
       // Redirect to order confirmation
       if (data.order_id) {
-        router.push(`/${countryCode}/order/confirmed/${data.order_id}`)
+        router.push(`/${locale}/${countryCode}/order/confirmed/${data.order_id}`)
       } else {
-        router.push(`/${countryCode}/account/orders`)
+        router.push(`/${locale}/${countryCode}/account/orders`)
       }
       
       onClose()

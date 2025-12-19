@@ -19,7 +19,8 @@ export default function ProductPreviewOverlay({
   const [isAdding, setIsAdding] = useState(false)
   const { toggleFavorite, isFavorite } = useFavorites()
   const params = useParams()
-  const countryCode = params.countryCode as string
+  const locale = (params.locale as string) || "ru"
+  const countryCode = (params.countryCode as string) || "uz"
   const router = useRouter()
   const t = useTranslations("product")
 
@@ -41,7 +42,7 @@ export default function ProductPreviewOverlay({
         setIsAdding(false)
       }
     } else {
-        router.push(`/${countryCode}/products/${product.handle}`)
+        router.push(`/${locale}/${countryCode}/products/${product.handle}`)
     }
   }
 
