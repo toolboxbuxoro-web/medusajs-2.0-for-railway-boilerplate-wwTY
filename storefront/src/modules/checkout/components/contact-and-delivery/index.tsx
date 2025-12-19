@@ -297,7 +297,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         await setShippingMethod({
           cartId: cart!.id,
           shippingMethodId: btsMethodId,
-          amount: estimatedCost || 0,
+          amount: 0, // Delivery is paid strictly on arrival, so 0 in the Medusa check
         })
       }
 
