@@ -325,26 +325,58 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
+    const phone = formData.get("shipping_address.phone") as string
+    let email = formData.get("email") as string
+    
+    // Auto-generate email from phone if missing (Uzum Style)
+    if (!email && phone) {
+      const cleanPhone = phone.replace(/\D/g, "")
+      email = `${cleanPhone}@phone.local`
+    }
+
+    // Prepare BTS metadata if available
+    const btsRegionId = formData.get("bts_region_id") as string
+    const btsPointId = formData.get("bts_point_id") as string
+    const btsEstimatedCost = formData.get("bts_estimated_cost") as string
+
     const data = {
       shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
+        first_name: formData.get("shipping_address.first_name") || "Покупатель",
+        last_name: formData.get("shipping_address.last_name") || "Toolbox",
         address_1: formData.get("shipping_address.address_1"),
         address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
+        company: formData.get("shipping_address.company") || "",
+        postal_code: formData.get("shipping_address.postal_code") || "100000",
+        city: formData.get("shipping_address.city") || "Tashkent",
+        country_code: formData.get("shipping_address.country_code") || "uz",
+        province: formData.get("shipping_address.province") || "Uzbekistan",
+        phone: phone,
       },
-      email: formData.get("email"),
+      email: email,
     } as any
 
-    const sameAsBilling = formData.get("same_as_billing")
-    if (sameAsBilling === "on") data.billing_address = data.shipping_address
+    const shippingMethodId = formData.get("shipping_method_id") as string
 
-    if (sameAsBilling !== "on")
+    if (btsRegionId && btsPointId) {
+      const { BTS_REGIONS } = await import("./bts")
+      const region = BTS_REGIONS.find(r => r.id === btsRegionId)
+      const point = region?.points.find(p => p.id === btsPointId)
+      
+      data.metadata = {
+        bts_delivery: {
+          region: region?.nameRu,
+          region_id: btsRegionId,
+          point: point?.name,
+          point_address: point?.address,
+          estimated_cost: parseInt(btsEstimatedCost) || 0
+        }
+      }
+    }
+
+    const sameAsBilling = formData.get("same_as_billing")
+    if (sameAsBilling === "on" || !formData.get("billing_address.first_name")) {
+      data.billing_address = data.shipping_address
+    } else {
       data.billing_address = {
         first_name: formData.get("billing_address.first_name"),
         last_name: formData.get("billing_address.last_name"),
@@ -357,14 +389,24 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         province: formData.get("billing_address.province"),
         phone: formData.get("billing_address.phone"),
       }
+    }
+
     await updateCart(data)
+    
+    // Set shipping method if provided
+    if (shippingMethodId) {
+       await setShippingMethod({ cartId, shippingMethodId })
+    }
+    
+    // Redirect straight to payment as address and delivery are now unified in Step 1
+    redirect(`/${data.shipping_address.country_code}/checkout?step=payment`)
+    
   } catch (e: any) {
+    if (e.message.includes("NEXT_REDIRECT")) {
+        throw e
+    }
     return e.message
   }
-
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
 }
 
 export async function placeOrder() {

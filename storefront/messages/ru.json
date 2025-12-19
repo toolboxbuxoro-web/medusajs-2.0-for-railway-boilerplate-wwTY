@@ -207,6 +207,7 @@
     "method": "Способ",
     "saved_address_prompt": "Привет, {name}, хотите использовать один из сохраненных адресов?",
     "courier_delivery": "Курьерская доставка",
+    "bts_pickup": "Пункты выдачи",
     "standard_delivery": "Стандартная доставка",
     "bts_delivery": "BTS Express — Доставка в пункт выдачи",
     "bts_payment_on_delivery": "Оплата при получении",
@@ -220,7 +221,13 @@
     "bts_payment_note": "Эта сумма оплачивается отдельно при получении заказа",
     "bts_office_to_office": "Офис — Офис",
     "bts_delivery_info": "Доставка BTS",
-    "bts_cod_notice": "Доставка оплачивается покупателем при получении"
+    "bts_cod_notice": "Доставка оплачивается покупателем при получении",
+    "information_and_delivery": "Информация и доставка",
+    "delivery_type": "Тип доставки",
+    "recipient": "Получатель",
+    "contact_email": "Электронная почта",
+    "bts_delivery_point": "Пункт выдачи BTS",
+    "select_shipping_method": "Выберите способ доставки"
   },
   "product": {
     "product_info": "Информация о товаре",

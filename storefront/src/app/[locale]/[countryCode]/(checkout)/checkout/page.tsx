@@ -38,35 +38,52 @@ export default async function Checkout({
   const t = await getTranslations({ locale, namespace: "checkout" })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Modern Header with Back Button */}
-      <div className="content-container py-6 sm:py-8 animate-fade-in">
-        <Link 
-          href="/cart" 
-          className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 font-semibold transition-colors group"
-        >
-          <svg 
-            className="w-5 h-5 transition-transform group-hover:-translate-x-1" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {t('back_to_cart')}
-        </Link>
-        
-        <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">
-          {t('checkout')}
-        </h1>
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Uzum-style Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="content-container py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <Link 
+                href="/cart" 
+                className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors group text-sm font-medium"
+                >
+                <svg 
+                    className="w-5 h-5 transition-transform group-hover:-translate-x-1" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                {t('back_to_cart')}
+                </Link>
+                <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                {t('checkout')}
+                </h1>
+            </div>
+            {/* Secure Checkout Badge */}
+            <div className="hidden sm:flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span className="text-xs font-semibold uppercase tracking-wide">Secure Checkout</span>
+            </div>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] content-container gap-6 lg:gap-10 pb-12 animate-scale-in">
-        <Wrapper cart={cart}>
-          <CheckoutForm cart={cart} customer={customer} locale={locale} />
-        </Wrapper>
-        <CheckoutSummary cart={cart} locale={locale} />
+      {/* Main Content Grid */}
+      <div className="content-container py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-6 lg:gap-8 items-start">
+          <div className="animate-fade-in-up">
+            <Wrapper cart={cart}>
+              <CheckoutForm cart={cart} customer={customer} locale={locale} />
+            </Wrapper>
+          </div>
+          <div className="lg:sticky lg:top-8 animate-fade-in-up animation-delay-150">
+            <CheckoutSummary cart={cart} locale={locale} />
+          </div>
+        </div>
       </div>
     </div>
   )

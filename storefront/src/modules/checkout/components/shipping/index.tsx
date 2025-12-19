@@ -2,18 +2,17 @@
 
 import { RadioGroup } from "@headlessui/react"
 import { CheckCircleSolid } from "@medusajs/icons"
-import { Button, Heading, Text, clx, Select, Label } from "@medusajs/ui"
+import { Button, Heading, Text, clx } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
 import Radio from "@modules/common/components/radio"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { useEffect, useState, useMemo } from "react"
-import { setShippingMethod, updateCart } from "@lib/data/cart"
+import { useEffect, useState } from "react"
+import { setShippingMethod } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslations } from "next-intl"
-import { BTS_REGIONS, calculateBtsCost, getBtsPointsByRegion } from "@lib/data/bts"
 
 type ShippingProps = {
   cart: HttpTypes.StoreCart
@@ -27,11 +26,6 @@ const Shipping: React.FC<ShippingProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // BTS State
-  const [selectedRegionId, setSelectedRegionId] = useState<string>("")
-  const [selectedPointId, setSelectedPointId] = useState<string>("")
-  const [estimatedBtsCost, setEstimatedBtsCost] = useState<number | null>(null)
-
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -43,40 +37,17 @@ const Shipping: React.FC<ShippingProps> = ({
     (method) => method.id === cart.shipping_methods?.at(-1)?.shipping_option_id
   )
   
-  const isBtsSelected = selectedShippingMethod?.name?.toLowerCase().includes("bts") || false
-
-  // Calculate cart weight (check multiple possible locations)
-  const cartWeight = useMemo(() => {
-    return cart.items?.reduce((acc, item) => {
-      // Weight can be in different places depending on Medusa version:
-      // 1. item.variant?.weight - variant level
-      // 2. item.product?.weight - product level (Medusa 2.0)
-      // 3. item.variant?.product?.weight - nested product
-      const weightRaw = 
-        item.variant?.weight || 
-        (item as any).product?.weight || 
-        (item.variant as any)?.product?.weight || 
-        0
-      
-      const weightNum = typeof weightRaw === 'string' ? parseFloat(weightRaw) : Number(weightRaw)
-      const weight = isNaN(weightNum) ? 0 : weightNum
-      
-      return acc + (weight * item.quantity)
-    }, 0) || 0
-  }, [cart.items])
+  const btsMetadata = cart.metadata?.bts_delivery as any
+  const isBtsSelected = selectedShippingMethod?.name?.toLowerCase().includes("bts") || !!btsMetadata
 
   useEffect(() => {
-    if (isBtsSelected && selectedRegionId) {
-      // Medusa weight is typically in grams, convert to kg
-      // If cartWeight is 0, use a fallback of 1000g (1kg) for a more realistic estimate
-      const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
-      const weightInKg = effectiveWeight / 1000 
-      const cost = calculateBtsCost(weightInKg, selectedRegionId)
-      setEstimatedBtsCost(cost)
-    } else {
-      setEstimatedBtsCost(null)
+    if (btsMetadata && availableShippingMethods && !selectedShippingMethod) {
+      const btsMethod = availableShippingMethods.find(m => m.name.toLowerCase().includes("bts"))
+      if (btsMethod) {
+        set(btsMethod.id)
+      }
     }
-  }, [isBtsSelected, selectedRegionId, cartWeight])
+  }, [btsMetadata, availableShippingMethods, selectedShippingMethod])
 
   const handleEdit = () => {
     router.push(pathname + "?step=delivery", { scroll: false })
@@ -86,31 +57,6 @@ const Shipping: React.FC<ShippingProps> = ({
     setIsLoading(true)
     setError(null)
     try {
-        if (isBtsSelected) {
-            if (!selectedRegionId || !selectedPointId) {
-                setError("Пожалуйста, выберите регион и пункт выдачи")
-                setIsLoading(false)
-                return
-            }
-             // Save BTS details to cart metadata
-             const region = BTS_REGIONS.find(r => r.id === selectedRegionId)
-             const point = region?.points.find(p => p.id === selectedPointId)
-             
-             await updateCart({ 
-                 metadata: {
-                     ...cart.metadata,
-                     bts_delivery: {
-                         region: region?.nameRu,
-                         region_id: region?.id,
-                         point: point?.name,
-                         point_address: point?.address,
-                         estimated_cost: estimatedBtsCost,
-                         weight_kg: cartWeight / 1000
-                     }
-                 }
-             })
-        }
-        
         router.push(pathname + "?step=payment", { scroll: false })
     } catch (err: any) {
         setError(err.message)
@@ -135,12 +81,12 @@ const Shipping: React.FC<ShippingProps> = ({
   }, [isOpen])
 
   return (
-    <div className="bg-white">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
       <div className="flex flex-row items-center justify-between mb-6">
         <Heading
           level="h2"
           className={clx(
-            "flex flex-row text-3xl-regular gap-x-2 items-baseline",
+            "flex flex-row text-xl font-bold text-gray-900 gap-x-2 items-center",
             {
               "opacity-50 pointer-events-none select-none":
                 !isOpen && cart.shipping_methods?.length === 0,
@@ -149,7 +95,7 @@ const Shipping: React.FC<ShippingProps> = ({
         >
           {t("delivery_method")}
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
-            <CheckCircleSolid />
+            <CheckCircleSolid className="text-green-500" />
           )}
         </Heading>
         {!isOpen &&
@@ -159,7 +105,7 @@ const Shipping: React.FC<ShippingProps> = ({
             <Text>
               <button
                 onClick={handleEdit}
-                className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
                 data-testid="edit-delivery-button"
               >
                 {t("edit")}
@@ -169,124 +115,71 @@ const Shipping: React.FC<ShippingProps> = ({
       </div>
       {isOpen ? (
         <div data-testid="delivery-options-container">
-          <div className="pb-8">
-            <RadioGroup value={selectedShippingMethod?.id} onChange={set}>
-              {availableShippingMethods?.map((option) => {
-                return (
-                  <RadioGroup.Option
-                    key={option.id}
-                    value={option.id}
-                    data-testid="delivery-option-radio"
-                    className={clx(
-                      "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
-                      {
-                        "border-ui-border-interactive":
-                          option.id === selectedShippingMethod?.id,
-                      }
-                    )}
-                  >
-                    <div className="flex items-center gap-x-4">
-                      <Radio
-                        checked={option.id === selectedShippingMethod?.id}
-                      />
-                      <span className="text-base-regular">{option.name}</span>
+          <div className="pb-8 space-y-4">
+             {/* If BTS is selected in previous step, show it as the confirmed operational method */}
+             {isBtsSelected && btsMetadata?.region ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                         <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+                         </svg>
                     </div>
-                    <span className="justify-self-end text-ui-fg-base">
-                      {convertToLocale({
-                        amount: option.amount!,
-                        currency_code: cart?.currency_code,
-                      })}
-                    </span>
-                  </RadioGroup.Option>
-                )
-              })}
-            </RadioGroup>
+                    <div className="relative z-10 flex items-start gap-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 text-blue-600">
+                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                             </svg>
+                        </div>
+                        <div>
+                            <Text className="text-lg font-bold text-gray-900 mb-1">
+                                {t("bts_delivery_method_title")}
+                            </Text>
+                            <Text className="text-gray-600 text-sm mb-3">
+                                {t("bts_auto_selected_desc")}
+                            </Text>
+                            <div className="flex items-center gap-2">
+                                <span className="text-blue-700 font-semibold bg-blue-100 px-3 py-1 rounded-md text-sm">
+                                    BTS Express
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             ) : (
+                <RadioGroup value={selectedShippingMethod?.id} onChange={set}>
+                {availableShippingMethods?.map((option) => {
+                    return (
+                    <RadioGroup.Option
+                        key={option.id}
+                        value={option.id}
+                        data-testid="delivery-option-radio"
+                        className={clx(
+                        "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-xl px-6 mb-2 hover:border-blue-500 hover:shadow-md transition-all",
+                        {
+                            "border-blue-600 ring-1 ring-blue-600 bg-blue-50/10":
+                            option.id === selectedShippingMethod?.id,
+                            "border-gray-200 bg-white": option.id !== selectedShippingMethod?.id,
+                        }
+                        )}
+                    >
+                        <div className="flex items-center gap-x-4">
+                        <Radio
+                            checked={option.id === selectedShippingMethod?.id}
+                        />
+                        <span className="text-base font-medium text-gray-900">{option.name}</span>
+                        </div>
+                        <span className="justify-self-end text-gray-700 font-semibold">
+                        {convertToLocale({
+                            amount: option.amount!,
+                            currency_code: cart?.currency_code,
+                        })}
+                        </span>
+                    </RadioGroup.Option>
+                    )
+                })}
+                </RadioGroup>
+             )}
           </div>
-          
-          {isBtsSelected && (
-              <div className="mb-6 md:mb-8 space-y-3 md:space-y-4">
-                  {/* BTS Info Header */}
-                  <div className="p-3 md:p-4 bg-ui-bg-subtle rounded-lg border border-ui-border-base">
-                      <div className="flex items-center gap-2 md:gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-ui-bg-base rounded-lg border border-ui-border-base flex items-center justify-center">
-                              <svg className="w-4 h-4 md:w-5 md:h-5 text-ui-fg-base" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 1 0 104 0m-4 0a2 1 0 114 0m6 0a2 1 0 104 0m-4 0a2 1 0 114 0" />
-                              </svg>
-                          </div>
-                          <div>
-                              <Text className="text-sm md:text-base font-medium text-ui-fg-base">{t("bts_delivery_info")}</Text>
-                              <Text className="text-xs md:text-sm text-ui-fg-subtle">{t("bts_payment_on_delivery")}</Text>
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Region Selection */}
-                  <div className="space-y-1.5 md:space-y-2">
-                      <Label className="text-sm md:text-base font-medium text-ui-fg-base">{t("bts_select_region")}</Label>
-                      <Select onValueChange={(val) => { setSelectedRegionId(val); setSelectedPointId(""); }} value={selectedRegionId}>
-                          <Select.Trigger className="w-full text-sm md:text-base">
-                              <Select.Value placeholder={t("bts_region_placeholder")} />
-                          </Select.Trigger>
-                          <Select.Content>
-                              {BTS_REGIONS.map((region) => (
-                                  <Select.Item key={region.id} value={region.id}>
-                                      {region.nameRu}
-                                  </Select.Item>
-                              ))}
-                          </Select.Content>
-                      </Select>
-                  </div>
-                      
-                  {/* Pickup Point Selection */}
-                  {selectedRegionId && (
-                      <div className="space-y-1.5 md:space-y-2">
-                          <Label className="text-sm md:text-base font-medium text-ui-fg-base">{t("bts_select_point")}</Label>
-                          <Select onValueChange={setSelectedPointId} value={selectedPointId}>
-                              <Select.Trigger className="w-full text-sm md:text-base">
-                                  <Select.Value placeholder={t("bts_point_placeholder")} />
-                              </Select.Trigger>
-                              <Select.Content>
-                                  {getBtsPointsByRegion(selectedRegionId).map((point) => (
-                                      <Select.Item key={point.id} value={point.id}>
-                                          {point.name} — {point.address}
-                                      </Select.Item>
-                                  ))}
-                              </Select.Content>
-                          </Select>
-                      </div>
-                  )}
-
-                  {/* Estimated Cost Display - Show as soon as region is selected */}
-                  {selectedRegionId && estimatedBtsCost !== null && (
-                      <div className="p-3 md:p-4 bg-ui-bg-subtle-hover rounded-lg border border-ui-border-base">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                              <div>
-                                  <Text className="text-xs md:text-sm text-ui-fg-subtle">{t("bts_estimated_cost")}</Text>
-                                  <Text className="text-lg md:text-xl lg:text-2xl font-semibold text-ui-fg-base">
-                                      {convertToLocale({
-                                          amount: estimatedBtsCost,
-                                          currency_code: cart.currency_code
-                                      })}
-                                  </Text>
-                              </div>
-                              <div className="px-2 py-1 md:px-3 bg-ui-bg-base rounded-full border border-ui-border-base self-start sm:self-auto">
-                                  <Text className="text-xs md:text-sm text-ui-fg-muted whitespace-nowrap">{t("bts_payment_on_delivery")}</Text>
-                              </div>
-                          </div>
-                          <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-ui-border-base">
-                              <div className="flex flex-wrap items-center gap-2 md:gap-4 text-ui-fg-muted text-xs md:text-sm">
-                                  <span>{t("bts_weight")}: {cartWeight > 0 ? (cartWeight / 1000).toFixed(1) : "1.0 (estimate)"} kg</span>
-                                  <span className="hidden sm:inline">•</span>
-                                  <span>{t("bts_tariff_info")}</span>
-                              </div>
-                          </div>
-                          <Text className="mt-2 md:mt-3 text-xs md:text-sm text-ui-fg-muted">
-                              {t("bts_payment_note")}
-                          </Text>
-                      </div>
-                  )}
-              </div>
-          )}
 
           <ErrorMessage
             error={error}
@@ -295,10 +188,10 @@ const Shipping: React.FC<ShippingProps> = ({
 
           <Button
             size="large"
-            className="mt-6"
+            className="w-full mt-2 h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-transform active:scale-[0.99]"
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!cart.shipping_methods?.[0] || (isBtsSelected && (!selectedRegionId || !selectedPointId))}
+            disabled={!cart.shipping_methods?.[0]}
             data-testid="submit-delivery-option-button"
           >
             {t("continue_to_payment")}
@@ -306,37 +199,51 @@ const Shipping: React.FC<ShippingProps> = ({
         </div>
       ) : (
         <div>
-          <div className="text-small-regular">
+          <div className="text-sm">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
-              <div className="flex flex-col w-full sm:w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  {t("method")}
+              <div className="flex flex-col w-full">
+                <Text className="text-base font-medium text-gray-900 mb-1">
+                  {selectedShippingMethod?.name}
                 </Text>
-                <Text className="txt-medium text-ui-fg-subtle">
-                  {selectedShippingMethod?.name}{" "}
-                  {convertToLocale({
-                    amount: selectedShippingMethod?.amount!,
-                    currency_code: cart?.currency_code,
-                  })}
-                </Text>
+                
                  {/* Display BTS info if available in metadata */}
-                {(cart.metadata?.bts_delivery as any)?.region && (selectedShippingMethod?.name?.toLowerCase().includes("bts")) && (
-                    <div className="mt-3 p-3 bg-ui-bg-subtle rounded-lg border border-ui-border-base">
-                        <Text className="txt-small text-ui-fg-subtle mb-1">{t("bts_delivery_info")}</Text>
-                        <Text className="txt-compact-medium text-ui-fg-base">
-                            {(cart.metadata?.bts_delivery as any).region} → {(cart.metadata?.bts_delivery as any).point}
-                        </Text>
-                        <div className="flex items-center gap-2 mt-2">
-                            <Text className="txt-medium-plus text-ui-fg-base">
-                                {convertToLocale({
-                                    amount: (cart.metadata?.bts_delivery as any).estimated_cost,
-                                    currency_code: cart.currency_code
-                                })}
-                            </Text>
-                            <Text className="txt-compact-small text-ui-fg-muted">{t("bts_payment_on_delivery")}</Text>
+                {btsMetadata?.region && isBtsSelected && (
+                    <div className="mt-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <Text className="text-xs text-gray-500 uppercase tracking-wide font-semibold">{t("bts_delivery_point")}</Text>
+                                <Text className="font-medium text-gray-900">
+                                    {btsMetadata.region}
+                                </Text>
+                            </div>
                         </div>
-                        <div className="mt-2 pt-2 border-t border-ui-border-base">
-                            <Text className="txt-compact-small text-ui-fg-warning">{t("bts_cod_notice")}</Text>
+                        
+                        <div className="pl-11">
+                             <Text className="text-gray-600 text-sm mb-3">
+                                {btsMetadata.point}
+                            </Text>
+
+                            <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-200">
+                                 <div className="flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                      <span className="text-sm font-medium text-gray-900">
+                                         {convertToLocale({
+                                            amount: btsMetadata.estimated_cost,
+                                            currency_code: cart.currency_code
+                                         })}
+                                      </span>
+                                 </div>
+                                 <span className="text-sm text-gray-400">|</span>
+                                 <span className="text-xs font-medium text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-100">
+                                     {t("bts_payment_on_delivery")}
+                                 </span>
+                            </div>
                         </div>
                     </div>
                 )}

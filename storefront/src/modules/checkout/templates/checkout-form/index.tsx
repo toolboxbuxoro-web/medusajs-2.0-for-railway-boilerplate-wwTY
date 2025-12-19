@@ -31,37 +31,28 @@ export default async function CheckoutForm({
   return (
     <div className="w-full">
       <div className="w-full grid grid-cols-1 gap-y-6 lg:gap-y-8">
-        {/* Step 1: Shipping Address */}
+        {/* Step 1: Delivery & Contact */}
         <div className="checkout-card group hover:scale-[1.01] transition-transform">
           <div className="flex items-center gap-3 mb-6">
             <div className="step-indicator">1</div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{t('shipping_information')}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{t('information_and_delivery')}</h2>
           </div>
-          <Addresses cart={cart} customer={customer} />
+          <Addresses cart={cart} customer={customer} shippingMethods={shippingMethods} />
         </div>
 
-        {/* Step 2: Delivery Method */}
+        {/* Step 2: Payment */}
         <div className="checkout-card group hover:scale-[1.01] transition-transform">
           <div className="flex items-center gap-3 mb-6">
             <div className="step-indicator">2</div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{t('delivery_method')}</h2>
-          </div>
-          <Shipping cart={cart} availableShippingMethods={shippingMethods} />
-        </div>
-
-        {/* Step 3: Payment */}
-        <div className="checkout-card group hover:scale-[1.01] transition-transform">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="step-indicator">3</div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{t('payment')}</h2>
           </div>
           <Payment cart={cart} availablePaymentMethods={paymentMethods} />
         </div>
 
-        {/* Step 4: Review & Place Order */}
+        {/* Step 3: Review & Place Order */}
         <div className="checkout-card group hover:scale-[1.01] transition-transform">
           <div className="flex items-center gap-3 mb-6">
-            <div className="step-indicator">4</div>
+            <div className="step-indicator">3</div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{t('review_and_place_order')}</h2>
           </div>
           <Review cart={cart} />

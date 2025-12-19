@@ -113,7 +113,7 @@ export default async function Nav({ locale }: NavProps) {
               </div>
               
               {/* Favorites - Hidden on mobile */}
-              <div className="hidden md:block">
+              <div className="hidden md:flex items-center justify-center">
                 <FavoritesButton />
               </div>
 
@@ -148,7 +148,7 @@ export default async function Nav({ locale }: NavProps) {
               {/* Account */}
               <LocalizedClientLink
                 href="/account"
-                className="p-1.5 sm:p-2 hover:text-red-600 transition-colors"
+                className="p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center"
                 title={t('account')}
               >
                 <User size="20" className="sm:w-[22px] sm:h-[22px]" />

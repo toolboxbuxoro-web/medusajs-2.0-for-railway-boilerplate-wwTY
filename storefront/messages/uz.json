@@ -207,6 +207,7 @@
     "method": "Usul",
     "saved_address_prompt": "Salom, {name}, saqlangan manzillaringizdan birini ishlatmoqchimisiz?",
     "courier_delivery": "Kuryer orqali yetkazib berish",
+    "bts_pickup": "Tarqatish punktlari",
     "standard_delivery": "Standart yetkazib berish",
     "bts_delivery": "BTS Express — Tarqatish punktiga yetkazib berish",
     "bts_payment_on_delivery": "Qabul qilishda to'lash",
@@ -220,7 +221,13 @@
     "bts_payment_note": "Bu summa buyurtmani qabul qilishda alohida to'lanadi",
     "bts_office_to_office": "Ofis — Ofis",
     "bts_delivery_info": "BTS yetkazib berish",
-    "bts_cod_notice": "Yetkazib berish xaridor tomonidan qabul qilishda to'lanadi"
+    "bts_cod_notice": "Yetkazib berish xaridor tomonidan qabul qilishda to'lanadi",
+    "information_and_delivery": "Ma'lumot va yetkazib berish",
+    "delivery_type": "Yetkazib berish turi",
+    "recipient": "Qabul qiluvchi",
+    "contact_email": "Elektron pochta",
+    "bts_delivery_point": "BTS tarqatish punkti",
+    "select_shipping_method": "Yetkazib berish usulini tanlang"
   },
   "product": {
     "product_info": "Mahsulot haqida ma'lumot",

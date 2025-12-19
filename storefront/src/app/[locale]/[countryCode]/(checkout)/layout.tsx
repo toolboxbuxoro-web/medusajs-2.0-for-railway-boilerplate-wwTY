@@ -12,38 +12,34 @@ export default async function CheckoutLayout({
   params: { locale: string }
 }) {
   const t = await getTranslations({ locale, namespace: "checkout" })
-  const tNav = await getTranslations({ locale, namespace: "nav" })
   
   return (
-    <div className="w-full bg-white relative small:min-h-screen">
-      <div className="h-16 bg-white border-b border-gray-200">
-        <nav className="flex h-full items-center content-container justify-between">
-          <LocalizedClientLink
-            href="/cart"
-            className="text-small-semi text-gray-700 flex items-center gap-x-2 uppercase flex-1 basis-0 hover:text-gray-900 transition-colors"
-            data-testid="back-to-cart-link"
-          >
-            <ChevronDown className="rotate-90" size={16} />
-            <span className="mt-px hidden small:block txt-compact-plus">
-              {t('back_to_cart')}
-            </span>
-            <span className="mt-px block small:hidden txt-compact-plus">
-              {t('back')}
-            </span>
-          </LocalizedClientLink>
+    <div className="w-full bg-gray-50/50 min-h-screen">
+      <header className="h-20 bg-white border-b border-gray-100 flex items-center sticky top-0 z-50">
+        <div className="content-container flex items-center justify-between w-full">
           <LocalizedClientLink
             href="/"
-            className="txt-compact-xlarge-plus text-gray-900 hover:text-red-600 uppercase font-bold tracking-wide transition-colors"
-            data-testid="store-link"
+            className="text-2xl font-bold text-gray-900 tracking-tighter hover:opacity-80 transition-opacity flex items-center gap-2"
           >
-            {tNav('logo')}
+             <span className="bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">Toolbox</span>
           </LocalizedClientLink>
-          <div className="flex-1 basis-0 flex justify-end">
+          
+          <div className="flex items-center gap-4">
             <LanguageSwitcher />
+            <LocalizedClientLink
+                href="/cart"
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+            >
+                {t('back_to_cart')}
+            </LocalizedClientLink>
           </div>
-        </nav>
-      </div>
-      <div className="relative" data-testid="checkout-container">{children}</div>
+        </div>
+      </header>
+      <main className="relative" data-testid="checkout-container">
+        <div className="content-container py-12">
+            {children}
+        </div>
+      </main>
     </div>
   )
 }
