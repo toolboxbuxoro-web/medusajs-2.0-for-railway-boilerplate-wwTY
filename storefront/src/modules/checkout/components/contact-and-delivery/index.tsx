@@ -119,6 +119,17 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // OTP verification state (for guests)
+  const [otpCode, setOtpCode] = useState("")
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpVerified, setOtpVerified] = useState(false)
+  const [otpLoading, setOtpLoading] = useState(false)
+  const [otpError, setOtpError] = useState<string | null>(null)
+  const [resendTimer, setResendTimer] = useState(0)
+
+  // Check if user is logged in
+  const isLoggedIn = !!customer?.id
+
   // Get BTS shipping method ID
   const btsMethodId = useMemo(() => {
     const btsMethod = availableShippingMethods?.find((m) =>
@@ -248,6 +259,15 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     router.push(pathname + "?step=address")
   }
 
+  // Resend timer countdown
+  useEffect(() => {
+    if (resendTimer <= 0) return
+    const interval = setInterval(() => {
+      setResendTimer((prev) => prev - 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [resendTimer])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -256,6 +276,13 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       setError(t("fill_required_fields"))
       return
     }
+    
+    // Guests must verify phone before proceeding
+    if (!isLoggedIn && !otpVerified) {
+      setError("Пожалуйста, подтвердите номер телефона")
+      return
+    }
+    
     if (!selectedRegionId || !selectedPointId) {
       setError(t("select_delivery_point"))
       return
@@ -316,6 +343,30 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         })
       }
 
+      // Auto-register guest user (if phone was verified)
+      if (!isLoggedIn && otpVerified) {
+        try {
+          const resp = await fetch(`${backendUrl}/store/auto-register`, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "x-publishable-api-key": publishableKey 
+            },
+            body: JSON.stringify({ 
+              phone, 
+              first_name: firstName, 
+              last_name: lastName 
+            })
+          })
+          if (resp.ok) {
+            console.log("[Checkout] Auto-registered guest user")
+          }
+        } catch (e) {
+          console.error("[Checkout] Auto-register failed:", e)
+          // Continue anyway - they can still checkout as guest
+        }
+      }
+
       // Navigate to payment step
       router.push(pathname + "?step=payment", { scroll: false })
       router.refresh()
@@ -372,10 +423,129 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 name="phone"
                 autoComplete="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(e.target.value)
+                  // Reset OTP state when phone changes
+                  if (otpSent) {
+                    setOtpSent(false)
+                    setOtpVerified(false)
+                    setOtpCode("")
+                  }
+                }}
                 required
+                disabled={otpVerified}
                 data-testid="shipping-phone-input"
               />
+
+              {/* OTP Verification for guests */}
+              {!isLoggedIn && phone.length >= 9 && (
+                <div className="space-y-3">
+                  {!otpVerified ? (
+                    <>
+                      {!otpSent ? (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setOtpLoading(true)
+                            setOtpError(null)
+                            try {
+                              const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+                              const resp = await fetch(`${backendUrl}/store/otp/send`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ phone })
+                              })
+                              const data = await resp.json()
+                              if (resp.ok) {
+                                setOtpSent(true)
+                                setResendTimer(60)
+                              } else {
+                                setOtpError(data.error || "Failed to send code")
+                              }
+                            } catch (e) {
+                              setOtpError("Network error")
+                            }
+                            setOtpLoading(false)
+                          }}
+                          disabled={otpLoading}
+                          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                        >
+                          {otpLoading ? "Отправка..." : "Получить код подтверждения"}
+                        </button>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={4}
+                              placeholder="Введите 4-значный код"
+                              value={otpCode}
+                              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-center text-xl tracking-widest font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                setOtpLoading(true)
+                                setOtpError(null)
+                                try {
+                                  const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+                                  const resp = await fetch(`${backendUrl}/store/otp/verify`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ phone, code: otpCode })
+                                  })
+                                  const data = await resp.json()
+                                  if (resp.ok && data.verified) {
+                                    setOtpVerified(true)
+                                  } else {
+                                    setOtpError(data.error || "Invalid code")
+                                  }
+                                } catch (e) {
+                                  setOtpError("Network error")
+                                }
+                                setOtpLoading(false)
+                              }}
+                              disabled={otpLoading || otpCode.length < 4}
+                              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                            >
+                              {otpLoading ? "..." : "✓"}
+                            </button>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">Код отправлен на {phone}</span>
+                            {resendTimer > 0 ? (
+                              <span className="text-gray-400">Повторить через {resendTimer}с</span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOtpSent(false)
+                                  setOtpCode("")
+                                }}
+                                className="text-blue-600 hover:underline"
+                              >
+                                Отправить снова
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {otpError && (
+                        <p className="text-red-500 text-sm">{otpError}</p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-xl">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Номер подтверждён</span>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label={t("first_name")}

@@ -31,6 +31,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const password = generatePassword()
 
   try {
+    // Check if phone was verified via OTP
+    const redis = req.scope.resolve("redis") as any
+    const verifiedKey = `verified_phone:+${normalized}`
+    const isVerified = await redis.get(verifiedKey)
+    
+    if (!isVerified) {
+      return res.status(400).json({ 
+        error: "phone_not_verified",
+        message: "Номер не подтверждён. Пожалуйста, подтвердите номер.",
+        needs_verification: true
+      })
+    }
+
     // Check if customer already exists
     const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
     const existingCustomers = await customerModule.listCustomers({ email })
