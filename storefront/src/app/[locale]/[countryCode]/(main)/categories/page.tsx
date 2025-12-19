@@ -47,17 +47,17 @@ const CategoryCard = ({
       </div>
 
       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
-        ) : iconUrl ? (
+        {iconUrl ? (
           <img
             src={iconUrl}
             alt=""
             className="w-10 h-10 object-contain"
+          />
+        ) : imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover"
           />
         ) : (
           <span className="text-gray-400 font-bold text-lg">
@@ -99,6 +99,7 @@ export default async function CategoriesPage({ params }: Props) {
     </div>
   )
 }
+
 
 
 

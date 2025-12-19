@@ -39,9 +39,17 @@ export default async function CategoryCarousel() {
               className="card-interactive p-4 lg:p-6 text-center group"
             >
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-red-50 transition-colors">
-                <span className="text-xl sm:text-2xl lg:text-3xl">
-                  {categoryIcons[category.handle || ''] || categoryIcons.default}
-                </span>
+                {category.metadata?.icon_url ? (
+                  <img
+                    src={category.metadata.icon_url as string}
+                    alt=""
+                    className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 object-contain"
+                  />
+                ) : (
+                  <span className="text-xl sm:text-2xl lg:text-3xl">
+                    {categoryIcons[category.handle || ''] || categoryIcons.default}
+                  </span>
+                )}
               </div>
               <h3 className="font-semibold text-xs sm:text-sm lg:text-base line-clamp-2">{category.name}</h3>
             </LocalizedClientLink>
@@ -58,9 +66,17 @@ export default async function CategoryCarousel() {
                 className="flex-shrink-0 w-24 card-interactive p-3 text-center group"
               >
                 <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-red-50 transition-colors">
-                  <span className="text-xl">
-                    {categoryIcons[category.handle || ''] || categoryIcons.default}
-                  </span>
+                  {category.metadata?.icon_url ? (
+                    <img
+                      src={category.metadata.icon_url as string}
+                      alt=""
+                      className="w-8 h-8 object-contain"
+                    />
+                  ) : (
+                    <span className="text-xl">
+                      {categoryIcons[category.handle || ''] || categoryIcons.default}
+                    </span>
+                  )}
                 </div>
                 <h3 className="font-semibold text-xs line-clamp-2">{category.name}</h3>
               </LocalizedClientLink>

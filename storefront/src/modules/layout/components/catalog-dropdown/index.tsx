@@ -32,21 +32,21 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   const imageUrl = category.metadata?.image_url as string | undefined
   const iconUrl = category.metadata?.icon_url as string | undefined
   
-  if (imageUrl) {
-    return (
-      <img
-        src={imageUrl}
-        alt=""
-        className="w-10 h-10 object-cover rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all"
-      />
-    )
-  }
   if (iconUrl) {
     return (
       <img
         src={iconUrl}
         alt=""
         className="w-10 h-10 object-contain rounded-lg bg-gray-50 border border-gray-100 p-1.5 shadow-sm group-hover:shadow transition-all"
+      />
+    )
+  }
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt=""
+        className="w-10 h-10 object-cover rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all"
       />
     )
   }
@@ -239,8 +239,10 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                       <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
                         <div className="flex items-center gap-6">
                            <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shadow-sm">
-                              {activeCategory.metadata?.image_url ? (
-                                <img src={activeCategory.metadata.image_url as string} className="w-full h-full object-contain" alt="" />
+                              {activeCategory.metadata?.icon_url ? (
+                                <img src={activeCategory.metadata.icon_url as string} className="w-full h-full object-contain" alt="" />
+                              ) : activeCategory.metadata?.image_url ? (
+                                <img src={activeCategory.metadata.image_url as string} className="w-full h-full object-cover" alt="" />
                               ) : (
                                 <span className="text-3xl">{getCategoryIcon(activeCategory.handle || "")}</span>
                               )}

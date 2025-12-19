@@ -35,22 +35,21 @@ export default function CategoryTemplate({
     const imageUrl = c.metadata?.image_url as string | undefined
     const iconUrl = c.metadata?.icon_url as string | undefined
 
-    if (imageUrl) {
-      return (
-        <img
-          src={imageUrl}
-          alt={getLocalizedCategoryName(c, locale)}
-          className="w-full h-full object-cover"
-        />
-      )
-    }
-
     if (iconUrl) {
       return (
         <img
           src={iconUrl}
           alt=""
           className="w-10 h-10 object-contain"
+        />
+      )
+    }
+    if (imageUrl) {
+      return (
+        <img
+          src={imageUrl}
+          alt={getLocalizedCategoryName(c, locale)}
+          className="w-full h-full object-cover"
         />
       )
     }

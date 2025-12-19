@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { Heading, Text, clx } from "@medusajs/ui"
 
 import PaymentButton from "../payment-button"
@@ -17,8 +18,21 @@ const Review = ({ cart }: { cart: any }) => {
 
   const previousStepsCompleted =
     cart.shipping_address &&
-    cart.shipping_methods.length > 0 &&
-    (cart.payment_collection || paidByGiftcard)
+    cart.shipping_methods?.length > 0 &&
+    (cart.payment_collection || (cart as any).payment_collection_id || (cart as any).payment_collections?.length > 0 || paidByGiftcard)
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log("[Review] cart:", {
+        id: cart.id,
+        shipping_address: !!cart.shipping_address,
+        shipping_methods: cart.shipping_methods?.length,
+        payment_collection: !!cart.payment_collection,
+        paidByGiftcard,
+        previousStepsCompleted
+      })
+    }
+  }, [isOpen, cart, paidByGiftcard, previousStepsCompleted])
 
   return (
     <div className="bg-white">
