@@ -49,7 +49,7 @@ const medusaConfig = {
     http: {
       adminCors: ADMIN_CORS,
       authCors: AUTH_CORS,
-      storeCors: STORE_CORS,
+      storeCors: STORE_CORS.includes('toolbox-tools.uz') ? STORE_CORS : `${STORE_CORS},https://www.toolbox-tools.uz,https://toolbox-tools.uz`,
       jwtSecret: JWT_SECRET,
       cookieSecret: COOKIE_SECRET,
       port: process.env.PORT ? parseInt(process.env.PORT) : 9000,

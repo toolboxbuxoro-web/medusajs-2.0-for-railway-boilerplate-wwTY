@@ -131,10 +131,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     if (cols.raw_amount) {
       insertCols.push("raw_amount")
       placeholders.push("?")
-      // raw_amount is JSONB with currency_code as key and amount as value
-      const finalCurrencyCode = (currencyCode || "uzs").toLowerCase()
+      // Medusa 2.0 BigNumber in DB expects { "value": "..." }
       values.push(JSON.stringify({
-        [finalCurrencyCode]: amount
+        value: amount.toString()
       }))
     }
     if (cols.currency_code) {
