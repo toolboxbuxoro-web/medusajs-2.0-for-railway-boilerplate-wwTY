@@ -33,19 +33,6 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   const imageUrl = category.metadata?.image_url as string | undefined
   const iconUrl = category.metadata?.icon_url as string | undefined
   
-  if (iconUrl) {
-    return (
-      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
-        <Image
-          src={iconUrl}
-          alt=""
-          fill
-          sizes="40px"
-          className="object-contain p-1.5"
-        />
-      </div>
-    )
-  }
   if (imageUrl) {
     return (
       <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
@@ -55,6 +42,19 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
           fill
           sizes="40px"
           className="object-cover"
+        />
+      </div>
+    )
+  }
+  if (iconUrl) {
+    return (
+      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
+        <Image
+          src={iconUrl}
+          alt=""
+          fill
+          sizes="40px"
+          className="object-contain p-1.5"
         />
       </div>
     )
@@ -248,21 +248,21 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                       <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
                         <div className="flex items-center gap-6">
                            <div className="relative w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shadow-sm overflow-hidden shrink-0">
-                              {activeCategory.metadata?.icon_url ? (
-                                <Image 
-                                  src={activeCategory.metadata.icon_url as string} 
-                                  alt="" 
-                                  fill 
-                                  sizes="64px"
-                                  className="object-contain p-2" 
-                                />
-                              ) : activeCategory.metadata?.image_url ? (
+                              {activeCategory.metadata?.image_url ? (
                                 <Image 
                                   src={activeCategory.metadata.image_url as string} 
                                   alt="" 
                                   fill 
                                   sizes="64px"
                                   className="object-cover" 
+                                />
+                              ) : activeCategory.metadata?.icon_url ? (
+                                <Image 
+                                  src={activeCategory.metadata.icon_url as string} 
+                                  alt="" 
+                                  fill 
+                                  sizes="64px"
+                                  className="object-contain p-2" 
                                 />
                               ) : (
                                 <span className="text-3xl">{getCategoryIcon(activeCategory.handle || "")}</span>
@@ -294,7 +294,15 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                            >
                               <div className="flex items-start justify-between mb-3">
                                  <div className="relative w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors overflow-hidden shrink-0">
-                                    {child.metadata?.icon_url ? (
+                                    {child.metadata?.image_url ? (
+                                      <Image 
+                                        src={child.metadata.image_url as string} 
+                                        alt="" 
+                                        fill 
+                                        sizes="40px"
+                                        className="object-cover" 
+                                      />
+                                    ) : child.metadata?.icon_url ? (
                                       <Image 
                                         src={child.metadata.icon_url as string} 
                                         alt="" 

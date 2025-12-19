@@ -36,19 +36,6 @@ export default function CategoryTemplate({
     const imageUrl = c.metadata?.image_url as string | undefined
     const iconUrl = c.metadata?.icon_url as string | undefined
 
-    if (iconUrl) {
-      return (
-        <div className="relative w-10 h-10 shrink-0">
-          <Image
-            src={iconUrl}
-            alt=""
-            fill
-            sizes="40px"
-            className="object-contain"
-          />
-        </div>
-      )
-    }
     if (imageUrl) {
       return (
         <div className="relative w-full h-full shrink-0">
@@ -58,6 +45,19 @@ export default function CategoryTemplate({
             fill
             sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 120px"
             className="object-cover"
+          />
+        </div>
+      )
+    }
+    if (iconUrl) {
+      return (
+        <div className="relative w-10 h-10 shrink-0">
+          <Image
+            src={iconUrl}
+            alt=""
+            fill
+            sizes="40px"
+            className="object-contain"
           />
         </div>
       )

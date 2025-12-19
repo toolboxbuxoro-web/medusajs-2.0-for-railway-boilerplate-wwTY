@@ -48,7 +48,15 @@ const CategoryCard = ({
       </div>
 
       <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
-        {iconUrl ? (
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            sizes="64px"
+            className="object-cover"
+          />
+        ) : iconUrl ? (
           <div className="relative w-10 h-10">
             <Image
               src={iconUrl}
@@ -58,14 +66,6 @@ const CategoryCard = ({
               className="object-contain"
             />
           </div>
-        ) : imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={name}
-            fill
-            sizes="64px"
-            className="object-cover"
-          />
         ) : (
           <span className="text-gray-400 font-bold text-lg">
             {(name || "?").slice(0, 1).toUpperCase()}
