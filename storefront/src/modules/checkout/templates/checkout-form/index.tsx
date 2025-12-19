@@ -1,10 +1,9 @@
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { listCartPaymentMethods } from "@lib/data/payment"
 import { HttpTypes } from "@medusajs/types"
-import Addresses from "@modules/checkout/components/addresses"
+import ContactAndDelivery from "@modules/checkout/components/contact-and-delivery"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
-import Shipping from "@modules/checkout/components/shipping"
 import { getTranslations } from 'next-intl/server'
 
 export default async function CheckoutForm({
@@ -36,13 +35,17 @@ export default async function CheckoutForm({
   return (
     <div className="w-full">
       <div className="w-full grid grid-cols-1 gap-y-6 lg:gap-y-8">
-        {/* Step 1: Delivery & Contact */}
+        {/* Step 1: Contact Info + BTS Delivery */}
         <div className="checkout-card group hover:scale-[1.01] transition-transform">
           <div className="flex items-center gap-3 mb-6">
             <div className="step-indicator">1</div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{t('information_and_delivery')}</h2>
           </div>
-          <Addresses cart={cart} customer={customer} shippingMethods={shippingMethods} />
+          <ContactAndDelivery 
+            cart={cart} 
+            customer={customer} 
+            availableShippingMethods={shippingMethods} 
+          />
         </div>
 
         {/* Step 2: Payment */}
@@ -66,3 +69,4 @@ export default async function CheckoutForm({
     </div>
   )
 }
+

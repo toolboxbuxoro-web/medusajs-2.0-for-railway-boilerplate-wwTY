@@ -14,18 +14,11 @@ import { getRegion, listRegions } from "./regions"
 export async function retrieveCart() {
   const cartId = getCartId()
 
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'storefront/src/lib/data/cart.ts:retrieveCart',message:'entry',data:{cartIdPresent:!!cartId,cartIdSuffix:cartId?String(cartId).slice(-6):null},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
-
   if (!cartId) {
     return null
   }
 
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'storefront/src/lib/data/cart.ts:retrieveCart',message:'calling sdk.store.cart.retrieve',data:{cartIdSuffix:String(cartId).slice(-6)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const { cart } = await sdk.store.cart
       .retrieve(
         cartId, 
@@ -54,13 +47,7 @@ export async function retrieveCart() {
       errorMessage.includes('already completed') || 
       errorMessage.includes('not found') ||
       errorMessage.includes('does not exist')
-
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H3',location:'storefront/src/lib/data/cart.ts:retrieveCart',message:'error',data:{cartIdSuffix:cartId?String(cartId).slice(-6):null,errorMessage,removedCartId},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    if (
-      removedCartId
-    ) {
+    if (removedCartId) {
       removeCartId()
     }
     return null
@@ -398,10 +385,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
     const shippingMethodId = formData.get("shipping_method_id") as string
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H2',location:'storefront/src/lib/data/cart.ts:setAddresses',message:'entry',data:{cartIdSuffix:String(cartId).slice(-6),shippingMethodIdPresent:!!shippingMethodId,btsRegionIdPresent:!!btsRegionId,btsPointIdPresent:!!btsPointId,btsEstimatedCostNum:Number.isFinite(btsEstimatedCostNum)?btsEstimatedCostNum:null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
     if (btsRegionId && btsPointId) {
       const { BTS_REGIONS } = await import("./bts")
       const region = BTS_REGIONS.find(r => r.id === btsRegionId)
@@ -491,9 +474,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         // Only trust referer when it points to checkout page; otherwise fallback.
         if (refUrl.pathname.includes("/checkout")) {
           refUrl.searchParams.set("step", "payment")
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'storefront/src/lib/data/cart.ts:setAddresses',message:'redirect via referer',data:{cartIdSuffix:String(cartId).slice(-6),refererHost:refUrl.host,refererPath:refUrl.pathname,redirectPath:`${refUrl.pathname}?${refUrl.searchParams.toString()}`},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           redirect(`${refUrl.pathname}?${refUrl.searchParams.toString()}`)
         }
       } catch {
@@ -506,9 +486,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     const countryCode =
       (data.shipping_address.country_code as string | undefined)?.toLowerCase() || "uz"
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'storefront/src/lib/data/cart.ts:setAddresses',message:'redirect fallback',data:{cartIdSuffix:String(cartId).slice(-6),locale,countryCode,redirectPath:`/${locale}/${countryCode}/checkout?step=payment`},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     redirect(`/${locale}/${countryCode}/checkout?step=payment`)
     
   } catch (e: any) {
