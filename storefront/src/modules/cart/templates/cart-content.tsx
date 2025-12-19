@@ -85,11 +85,8 @@ const CartContent = ({
         
         // Determine step
         let step = "address"
-        if (cart.shipping_address?.address_1 && cart.email) {
-            step = "delivery"
-            if ((cart.shipping_methods?.length ?? 0) > 0) {
-                step = "payment"
-            }
+        if (cart.shipping_address?.address_1 && cart.email && (cart.shipping_methods?.length ?? 0) > 0) {
+          step = "payment"
         }
         
         router.push(`/checkout?step=${step}`)
@@ -100,11 +97,8 @@ const CartContent = ({
     } else {
       // All selected, just proceed
       let step = "address"
-      if (cart.shipping_address?.address_1 && cart.email) {
-          step = "delivery"
-          if ((cart.shipping_methods?.length ?? 0) > 0) {
-              step = "payment"
-          }
+      if (cart.shipping_address?.address_1 && cart.email && (cart.shipping_methods?.length ?? 0) > 0) {
+        step = "payment"
       }
       router.push(`/checkout?step=${step}`)
     }

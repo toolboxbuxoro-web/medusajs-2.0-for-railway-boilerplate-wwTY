@@ -94,7 +94,9 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     (cart?.shipping_methods?.length ?? 0) > 0 &&
     !!cart.metadata?.bts_delivery
 
-  const isOpen = searchParams.get("step") === "address" || (!searchParams.get("step") && !isCompleted)
+  const isOpen = 
+    ["address", "delivery", "shipping"].includes(searchParams.get("step") || "") || 
+    (!searchParams.get("step") && !isCompleted)
 
   // Form state
   const [phone, setPhone] = useState("")
