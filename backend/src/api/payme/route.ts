@@ -55,7 +55,7 @@ export async function POST(
       res.json({
         error: {
           code: -32400,
-          message: "System error",
+          message: "System error: " + error.message,
           data: error.message
         },
         result: null,

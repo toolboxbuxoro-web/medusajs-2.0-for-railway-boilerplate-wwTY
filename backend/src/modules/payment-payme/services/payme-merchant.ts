@@ -420,7 +420,8 @@ export class PaymeMerchantService {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, "Invalid amount")
     }
 
-    if (expectedAmount !== amount) {
+    // Allow small difference (e.g. 100 tiyin = 1 som) for float rounding issues
+    if (Math.abs(expectedAmount - amount) > 100) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
@@ -502,7 +503,7 @@ export class PaymeMerchantService {
     // Amount validation using session.amount (convert to tiyins)
     const expectedAmount = Math.round(Number(session.amount) * 100)
     
-    if (expectedAmount !== amount) {
+    if (Math.abs(expectedAmount - amount) > 100) {
       throw new PaymeError(PaymeErrorCodes.INVALID_AMOUNT, `Amount mismatch: expected ${expectedAmount}, got ${amount}`)
     }
 
