@@ -18,12 +18,6 @@ export const metadata: Metadata = {
 const fetchCart = async (locale: string, countryCode: string) => {
   const cart = await retrieveCart()
   if (!cart) {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H5',location:'storefront/src/app/[locale]/[countryCode]/(checkout)/checkout/page.tsx:fetchCart',message:'cart is null -> notFound()',data:{},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'post-fix',hypothesisId:'H1',location:'storefront/src/app/[locale]/[countryCode]/(checkout)/checkout/page.tsx:fetchCart',message:'cart missing -> redirect to cart',data:{locale,countryCode},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     redirect(`/${locale}/${countryCode}/cart?checkout_error=no_cart`)
   }
 
@@ -40,9 +34,6 @@ export default async function Checkout({
 }: {
   params: { locale: string; countryCode: string }
 }) {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/0a4ffe82-b28a-4833-a3aa-579b3fd64808',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H5',location:'storefront/src/app/[locale]/[countryCode]/(checkout)/checkout/page.tsx:Checkout',message:'page entry',data:{locale,countryCode},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   const cart = await fetchCart(locale, countryCode)
   const customer = await getCustomer()
   const t = await getTranslations({ locale, namespace: "checkout" })
