@@ -23,7 +23,11 @@ export async function retrieveCart() {
       .retrieve(
         cartId, 
         { 
-          fields: "*,region.*,items.*,items.variant.*,items.variant.product.*,shipping_address.*,billing_address.*,shipping_methods.*,payment_collection.*,payment_collection.payment_sessions.*" 
+          // Medusa v2 fields syntax: request relations with `*relation` tokens.
+          // Avoid standalone `*` or `relation.*` which can break parsing and lead to:
+          // "Entity 'Cart' does not have property ''"
+          fields:
+            "*region,*items,*items.variant,*items.variant.product,*shipping_address,*billing_address,*shipping_methods,*payment_collection,*payment_collection.payment_sessions",
         }, 
         { next: { tags: ["cart"] }, ...getAuthHeaders() }
       )
