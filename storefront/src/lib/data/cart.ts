@@ -365,6 +365,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     const btsRegionId = formData.get("bts_region_id") as string
     const btsPointId = formData.get("bts_point_id") as string
     const btsEstimatedCost = formData.get("bts_estimated_cost") as string
+    const btsEstimatedCostNum = parseInt(btsEstimatedCost) || 0
 
     const data = {
       shipping_address: {
@@ -395,7 +396,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           region_id: btsRegionId,
           point: point?.name,
           point_address: point?.address,
-          estimated_cost: parseInt(btsEstimatedCost) || 0
+          estimated_cost: btsEstimatedCostNum
         }
       }
     }
@@ -422,7 +423,31 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     
     // Set shipping method if provided
     if (shippingMethodId) {
-       await setShippingMethod({ cartId, shippingMethodId })
+      try {
+        await setShippingMethod({ cartId, shippingMethodId })
+      } catch (e: any) {
+        const msg = e?.message || ""
+        // If the selected shipping option has no price configured in Medusa,
+        // attach it via a custom backend endpoint using the BTS estimated cost.
+        if (
+          msg.toLowerCase().includes("do not have a price") ||
+          msg.toLowerCase().includes("does not have a price")
+        ) {
+          const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+          await fetch(`${backendUrl}/store/bts/shipping-method`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              cart_id: cartId,
+              shipping_option_id: shippingMethodId,
+              amount: btsEstimatedCostNum,
+            }),
+            cache: "no-store",
+          })
+        } else {
+          throw e
+        }
+      }
     }
     
     // Redirect straight to payment as address and delivery are now unified in Step 1.
