@@ -19,7 +19,11 @@ export async function retrieveCart() {
 
   try {
     const { cart } = await sdk.store.cart
-      .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...getAuthHeaders() })
+      .retrieve(
+        cartId, 
+        { fields: "+region,+payment_collection,+payment_collection.payment_sessions" }, 
+        { next: { tags: ["cart"] }, ...getAuthHeaders() }
+      )
     
     // If cart is completed (order was placed), remove the stale cart ID and return null
     // This will trigger creation of a new cart

@@ -26,7 +26,7 @@ const Payment = ({
   availablePaymentMethods: any[]
 }) => {
   const activeSession = cart.payment_collection?.payment_sessions?.find(
-    (paymentSession: any) => paymentSession.status === "pending"
+    (paymentSession: any) => paymentSession.status === "pending" || paymentSession.status === "authorized"
   )
 
   const [isLoading, setIsLoading] = useState(false)
@@ -158,7 +158,7 @@ const Payment = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                {availablePaymentMethods
                   .sort((a, b) => {
-                    return a.provider_id > b.provider_id ? 1 : -1
+                    return (a.id || "") > (b.id || "") ? 1 : -1
                   })
                   .map((paymentMethod) => {
                     const isSelected = selectedPaymentMethod === paymentMethod.id

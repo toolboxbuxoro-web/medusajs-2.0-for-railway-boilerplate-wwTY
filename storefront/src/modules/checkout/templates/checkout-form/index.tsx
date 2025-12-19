@@ -21,7 +21,12 @@ export default async function CheckoutForm({
   }
 
   const shippingMethods = await listCartShippingMethods(cart.id)
-  const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
+  const regionId = cart.region_id || cart.region?.id || ""
+  const paymentMethods = await listCartPaymentMethods(regionId)
+  
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[CheckoutForm] regionId: ${regionId}, paymentMethods: ${paymentMethods?.length}`)
+  }
   const t = await getTranslations({ locale, namespace: "checkout" })
 
   if (!shippingMethods || !paymentMethods) {
