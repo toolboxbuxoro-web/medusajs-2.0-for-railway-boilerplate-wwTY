@@ -232,21 +232,58 @@ export async function enrichLineItems(
 export async function setShippingMethod({
   cartId,
   shippingMethodId,
+  amount,
 }: {
   cartId: string
   shippingMethodId: string
+  amount?: number
 }) {
-  return sdk.store.cart
-    .addShippingMethod(
+  try {
+    await sdk.store.cart.addShippingMethod(
       cartId,
       { option_id: shippingMethodId },
       {},
       getAuthHeaders()
     )
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+    revalidateTag("cart")
+    return { success: true }
+  } catch (error: any) {
+    // If it fails and we have an amount, try the BTS custom endpoint
+    if (amount !== undefined && amount !== null) {
+      const message = error.message?.toLowerCase() || ""
+      if (
+        message.includes("do not have a price") ||
+        message.includes("does not have a price") ||
+        message.includes("setting up the request") // common prefix from medusaError
+      ) {
+        const backendUrl = (
+          process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+        ).replace(/\/$/, "")
+        const publishableKey =
+          process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
+        const resp = await fetch(`${backendUrl}/store/bts/shipping-method`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-publishable-api-key": publishableKey,
+          },
+          body: JSON.stringify({
+            cart_id: cartId,
+            shipping_option_id: shippingMethodId,
+            amount: amount,
+          }),
+        })
+
+        if (resp.ok) {
+          revalidateTag("cart")
+          return { success: true }
+        }
+      }
+    }
+    
+    return medusaError(error)
+  }
 }
 
 export async function initiatePaymentSession(

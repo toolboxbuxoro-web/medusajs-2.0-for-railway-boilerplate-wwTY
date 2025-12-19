@@ -132,9 +132,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       insertCols.push("raw_amount")
       placeholders.push("?")
       // Medusa 2.0 BigNumber in DB expects { "value": "..." }
-      values.push(JSON.stringify({
+      // Knex/PG will automatically stringify the object for JSONB column
+      values.push({
         value: amount.toString()
-      }))
+      })
     }
     if (cols.currency_code) {
       insertCols.push("currency_code")

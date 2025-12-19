@@ -293,38 +293,12 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
       // Set shipping method
       if (btsMethodId) {
-        try {
-          const { setShippingMethod } = await import("@lib/data/cart")
-          await setShippingMethod({
-            cartId: cart!.id,
-            shippingMethodId: btsMethodId,
-          })
-        } catch (shippingErr: any) {
-          // If standard method fails, use BTS custom endpoint
-          if (
-            shippingErr.message?.toLowerCase().includes("do not have a price") ||
-            shippingErr.message?.toLowerCase().includes("does not have a price")
-          ) {
-            const resp = await fetch(`${backendUrl}/store/bts/shipping-method`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-publishable-api-key": publishableKey,
-              },
-              body: JSON.stringify({
-                cart_id: cart!.id,
-                shipping_option_id: btsMethodId,
-                amount: estimatedCost || 0,
-              }),
-            })
-
-            if (!resp.ok) {
-              throw new Error("Failed to set BTS shipping method")
-            }
-          } else {
-            throw shippingErr
-          }
-        }
+        const { setShippingMethod } = await import("@lib/data/cart")
+        await setShippingMethod({
+          cartId: cart!.id,
+          shippingMethodId: btsMethodId,
+          amount: estimatedCost || 0,
+        })
       }
 
       // Navigate to payment step
