@@ -84,7 +84,8 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     const cleanStoreUrl = storeUrl.replace(/\/$/, "")
     
     // Use API callback route that handles locale redirect
-    const returnUrl = `${cleanStoreUrl}/api/payme-callback`
+    // Include order_id so callback can identify which order was paid
+    const returnUrl = `${cleanStoreUrl}/api/payme-callback?order_id=${encodeURIComponent(orderId)}`
 
     // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
     const paramString = `m=${this.options_.payme_id};ac.order_id=${orderId};a=${amountForPayme};c=${returnUrl}`

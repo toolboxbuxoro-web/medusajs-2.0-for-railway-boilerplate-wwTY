@@ -33,19 +33,6 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   const imageUrl = category.metadata?.image_url as string | undefined
   const iconUrl = category.metadata?.icon_url as string | undefined
   
-  if (imageUrl) {
-    return (
-      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
-        <Image
-          src={imageUrl}
-          alt=""
-          fill
-          sizes="40px"
-          className="object-cover"
-        />
-      </div>
-    )
-  }
   if (iconUrl) {
     return (
       <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
@@ -55,6 +42,19 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
           fill
           sizes="40px"
           className="object-contain p-1.5"
+        />
+      </div>
+    )
+  }
+  if (imageUrl) {
+    return (
+      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
+        <Image
+          src={imageUrl}
+          alt=""
+          fill
+          sizes="40px"
+          className="object-cover"
         />
       </div>
     )

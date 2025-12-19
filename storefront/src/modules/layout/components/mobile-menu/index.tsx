@@ -14,21 +14,21 @@ type MobileMenuProps = {
 const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }) => {
   const imageUrl = category.metadata?.image_url as string | undefined
   const iconUrl = category.metadata?.icon_url as string | undefined
-  if (imageUrl) {
-    return (
-      <img
-        src={imageUrl}
-        alt=""
-        className="w-5 h-5 object-cover rounded bg-gray-50 border border-gray-200"
-      />
-    )
-  }
   if (iconUrl) {
     return (
       <img
         src={iconUrl}
         alt=""
         className="w-5 h-5 object-contain rounded bg-gray-50 border border-gray-200 p-0.5"
+      />
+    )
+  }
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt=""
+        className="w-5 h-5 object-cover rounded bg-gray-50 border border-gray-200"
       />
     )
   }
