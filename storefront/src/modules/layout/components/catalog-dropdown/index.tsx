@@ -293,13 +293,13 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                               className="group flex flex-col p-4 rounded-xl border border-gray-100 bg-[#e8e8e8] hover:border-red-100 hover:shadow-md transition-all duration-300"
                            >
                               <div className="flex items-start justify-between mb-3">
-                                 <div className="relative w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors overflow-hidden shrink-0">
+                                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors overflow-hidden shrink-0 shadow-sm">
                                     {child.metadata?.image_url ? (
                                       <Image 
                                         src={child.metadata.image_url as string} 
                                         alt="" 
                                         fill 
-                                        sizes="40px"
+                                        sizes="(max-width: 640px) 64px, 80px"
                                         className="object-cover" 
                                       />
                                     ) : child.metadata?.icon_url ? (
@@ -307,11 +307,11 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                                         src={child.metadata.icon_url as string} 
                                         alt="" 
                                         fill 
-                                        sizes="40px"
-                                        className="object-contain p-1.5" 
+                                        sizes="(max-width: 640px) 64px, 80px"
+                                        className="object-contain p-2" 
                                       />
                                     ) : (
-                                      getCategoryIcon(child.handle || "")
+                                      <span className="text-2xl sm:text-3xl">{getCategoryIcon(child.handle || "")}</span>
                                     )}
                                  </div>
                                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />

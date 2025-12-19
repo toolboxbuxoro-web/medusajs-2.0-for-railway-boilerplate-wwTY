@@ -23,11 +23,12 @@ const Review = ({ cart }: { cart: any }) => {
 
   useEffect(() => {
     if (isOpen) {
-      console.log("[Review] cart:", {
+      console.log("[Review] Debug Status:", {
         id: cart.id,
-        shipping_address: !!cart.shipping_address,
-        shipping_methods: cart.shipping_methods?.length,
-        payment_collection: !!cart.payment_collection,
+        "1_address": !!cart.shipping_address,
+        "2_shipping_methods": cart.shipping_methods?.length,
+        "3_payment_collection": !!cart.payment_collection,
+        "3_payment_sessions": (cart as any).payment_collections?.length || (cart as any).payment_collection_id,
         paidByGiftcard,
         previousStepsCompleted
       })

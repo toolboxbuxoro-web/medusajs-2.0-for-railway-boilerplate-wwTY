@@ -93,6 +93,15 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     !!cart?.shipping_address?.address_1 &&
     (cart?.shipping_methods?.length ?? 0) > 0
 
+  useEffect(() => {
+    console.log("[ContactAndDelivery] Status:", {
+      address_1: cart?.shipping_address?.address_1,
+      methods: cart?.shipping_methods?.length,
+      isCompleted,
+      step: searchParams.get("step")
+    })
+  }, [cart, isCompleted, searchParams])
+
   const isOpen = 
     ["address", "delivery", "shipping"].includes(searchParams.get("step") || "") || 
     (!searchParams.get("step") && !isCompleted)
@@ -554,11 +563,11 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                         <Text className="text-sm font-bold text-gray-900">
-                          {(cart.metadata.bts_delivery as any).region}
+                          {String((cart.metadata.bts_delivery as any).region)}
                         </Text>
                       </div>
                       <Text className="text-xs text-gray-500 font-medium line-clamp-2">
-                        {(cart.metadata.bts_delivery as any).point}
+                        {String((cart.metadata.bts_delivery as any).point)}
                       </Text>
                     </div>
                   </div>
@@ -566,23 +575,16 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center py-8">
-              <svg className="animate-spin h-8 w-8 text-gray-400" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
+            <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 flex items-center justify-between">
+              <Text className="text-orange-600 font-medium">
+                {t("incomplete_information") || "Incomplete information"}
+              </Text>
+              <button 
+                onClick={() => router.push(pathname + "?step=address")}
+                className="text-orange-700 font-bold hover:underline"
+              >
+                {t("edit") || "Edit"}
+              </button>
             </div>
           )}
         </div>
