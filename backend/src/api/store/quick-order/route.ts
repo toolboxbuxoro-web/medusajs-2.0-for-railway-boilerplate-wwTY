@@ -34,9 +34,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   try {
     const customerModule = req.scope.resolve(Modules.CUSTOMER)
-    const authModule = req.scope.resolve(Modules.AUTH)
+    const authModule = req.scope.resolve(Modules.AUTH) as any
     const cartModule = req.scope.resolve(Modules.CART)
-    const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK)
 
     // Check if customer exists by email (phone-based synthetic email)
     const existingCustomers = await customerModule.listCustomers({ email })
@@ -70,20 +69,32 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
       logger.info(`[quick-order] Created customer: ${customer.id}`)
 
-      // 3. CRITICAL: Link Auth Identity to Customer
+      // 3. CRITICAL: Link Auth Identity to Customer via app_metadata
+      // In Medusa v2, the link is done by setting actor_id in auth_identity's app_metadata
       if (authIdentityId && customer?.id) {
         try {
-          await remoteLink.create({
-            [Modules.AUTH]: {
-              auth_identity_id: authIdentityId,
-            },
-            [Modules.CUSTOMER]: {
+          await authModule.updateAuthIdentities([{
+            id: authIdentityId,
+            app_metadata: {
               customer_id: customer.id,
             },
-          })
-          logger.info(`[quick-order] Linked auth ${authIdentityId} -> customer ${customer.id}`)
+          }])
+          logger.info(`[quick-order] Linked auth ${authIdentityId} -> customer ${customer.id} via app_metadata`)
         } catch (linkError: any) {
-          logger.error(`[quick-order] Failed to link auth to customer: ${linkError.message}`)
+          logger.error(`[quick-order] Failed to update auth identity app_metadata: ${linkError.message}`)
+          
+          // Fallback: Try direct SQL update
+          try {
+            const pgConnection = req.scope.resolve("__pg_connection__")
+            await pgConnection.raw(`
+              UPDATE auth_identity 
+              SET app_metadata = jsonb_set(COALESCE(app_metadata, '{}'), '{customer_id}', $1::jsonb)
+              WHERE id = $2
+            `, [JSON.stringify(customer.id), authIdentityId])
+            logger.info(`[quick-order] Linked via SQL fallback`)
+          } catch (sqlError: any) {
+            logger.error(`[quick-order] SQL fallback also failed: ${sqlError.message}`)
+          }
         }
       }
     }
@@ -138,8 +149,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const metadataUpdate = {
         ...cart.metadata,
         is_quick_order: true,
-        is_new_customer: isNewCustomer, // Track if this was a new registration
-        // TEMP: Always include password for testing - will send SMS to existing users too
+        is_new_customer: isNewCustomer,
+        // TEMP: Always include password for testing
         tmp_generated_password: password,
     } as any
 
@@ -168,7 +179,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       metadata: metadataUpdate
     })
 
-    logger.info(`[quick-order] Initialized cart ${cartId} for customer ${customer.id}`)
+    logger.info(`[quick-order] Initialized cart ${cartId} for customer ${customer.id}, metadata includes tmp_generated_password=${!!password}`)
 
     return res.json({
       success: true,
