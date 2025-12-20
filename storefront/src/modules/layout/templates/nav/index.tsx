@@ -178,27 +178,27 @@ export default async function Nav({ locale }: NavProps) {
                 className="group px-1.5 lg:px-3 h-full flex items-center gap-1.5 lg:gap-2 hover:text-red-600 transition-colors whitespace-nowrap text-[11px] lg:text-sm font-medium"
               >
                 {category.metadata?.icon_url ? (
-                  <div className="relative w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110">
+                  <div className="relative w-5 h-5 lg:w-6 lg:h-6 shrink-0">
                     <Image
                       src={category.metadata.icon_url as string}
                       alt=""
                       fill
-                      sizes="20px"
+                      sizes="24px"
                       className="object-contain"
                     />
                   </div>
                 ) : category.metadata?.image_url ? (
-                  <div className="relative w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110 rounded overflow-hidden">
+                  <div className="relative w-5 h-5 lg:w-6 lg:h-6 shrink-0 rounded overflow-hidden">
                     <Image
                       src={category.metadata.image_url as string}
                       alt=""
                       fill
-                      sizes="20px"
+                      sizes="24px"
                       className="object-cover"
                     />
                   </div>
                 ) : (
-                  <span className="text-sm lg:text-base group-hover:scale-110 transition-transform">
+                  <span className="text-base lg:text-lg xl:text-xl">
                     {category.handle === "instrumenty" ? "🔧" : 
                      category.handle === "elektrika" ? "⚡" : 
                      category.handle === "santehnika" ? "🚿" : 

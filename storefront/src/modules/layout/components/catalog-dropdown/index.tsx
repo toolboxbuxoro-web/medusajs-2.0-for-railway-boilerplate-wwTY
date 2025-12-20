@@ -35,25 +35,25 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   
   if (iconUrl) {
     return (
-      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
+      <div className="relative w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-gray-50 border border-gray-100 shadow-sm overflow-hidden shrink-0">
         <Image
           src={iconUrl}
           alt=""
           fill
-          sizes="40px"
-          className="object-contain p-0"
+          sizes="48px"
+          className="object-contain"
         />
       </div>
     )
   }
   if (imageUrl) {
     return (
-      <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow transition-all overflow-hidden shrink-0">
+      <div className="relative w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-gray-50 border border-gray-100 shadow-sm overflow-hidden shrink-0">
         <Image
           src={imageUrl}
           alt=""
           fill
-          sizes="40px"
+          sizes="48px"
           className="object-cover"
         />
       </div>
@@ -61,7 +61,7 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   }
 
   return (
-    <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 text-2xl shadow-sm group-hover:shadow transition-all shrink-0">
+    <div className="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 text-xl lg:text-2xl shadow-sm shrink-0">
       {getCategoryIcon(category.handle || "")}
     </div>
   )
