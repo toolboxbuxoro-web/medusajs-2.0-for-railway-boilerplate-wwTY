@@ -9,6 +9,7 @@ import ProductPreviewOverlay from "./overlay"
 import { HttpTypes } from "@medusajs/types"
 import { useParams } from "next/navigation"
 import { getLocalizedProductTitle } from "@lib/util/get-localized-product"
+import { useMemo } from "react"
 
 export default function ProductPreviewContent({
   product,
@@ -23,14 +24,31 @@ export default function ProductPreviewContent({
     product: product,
   })
 
+  // Check if product is in stock
+  const isInStock = useMemo(() => {
+    if (!product.variants || product.variants.length === 0) {
+      return true // No variants = assume in stock
+    }
+    
+    // Check if any variant has stock available
+    return product.variants.some((variant: any) => {
+      // If manage_inventory is false, assume in stock
+      if (!variant.manage_inventory) return true
+      // If allow_backorder is true, assume in stock
+      if (variant.allow_backorder) return true
+      // Otherwise check inventory quantity
+      return (variant.inventory_quantity || 0) > 0
+    })
+  }, [product.variants])
+
   return (
     <div className="group block h-full">
       <div 
         data-testid="product-wrapper"
-        className="bg-white border border-gray-200 rounded-xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:border-gray-300 relative"
+        className={`bg-white border border-gray-200 rounded-xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:border-gray-300 relative ${!isInStock ? 'opacity-80' : ''}`}
       >
         {/* Image Container */}
-        <div className="relative overflow-hidden bg-white">
+        <div className={`relative overflow-hidden bg-white ${!isInStock ? 'grayscale-[30%]' : ''}`}>
           <LocalizedClientLink href={`/products/${product.handle}`} className="block w-full h-full">
             <Thumbnail
               thumbnail={product.thumbnail}
@@ -42,8 +60,12 @@ export default function ProductPreviewContent({
             />
           </LocalizedClientLink>
           
-          {/* Badge - if on sale */}
-          {cheapestPrice?.price_type === "sale" && (
+          {/* Badge - Out of Stock (priority over sale) */}
+          {!isInStock ? (
+            <div className="absolute top-2 left-2 bg-gray-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg pointer-events-none">
+              Нет в наличии
+            </div>
+          ) : cheapestPrice?.price_type === "sale" && (
             <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg pointer-events-none">
               SALE
             </div>
@@ -52,8 +74,8 @@ export default function ProductPreviewContent({
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           
-          {/* Action Overlay */}
-          <ProductPreviewOverlay product={product} />
+          {/* Action Overlay - only show if in stock */}
+          {isInStock && <ProductPreviewOverlay product={product} />}
         </div>
 
         {/* Product Info */}
@@ -71,9 +93,13 @@ export default function ProductPreviewContent({
           {/* Spacer */}
           <div className="flex-1" />
           
-          {/* Price */}
+          {/* Price or Out of Stock text */}
           <div className="mt-2">
-            {cheapestPrice && (
+            {!isInStock ? (
+              <div className="text-gray-500 text-sm font-medium">
+                Ожидается поступление
+              </div>
+            ) : cheapestPrice && (
               <div className="flex items-baseline gap-2">
                 <PreviewPrice price={cheapestPrice} />
               </div>
@@ -84,3 +110,4 @@ export default function ProductPreviewContent({
     </div>
   )
 }
+
