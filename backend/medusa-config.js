@@ -117,7 +117,7 @@ const medusaConfig = {
         }
       }
     }] : []),
-    ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL || RESEND_API_KEY && RESEND_FROM_EMAIL ? [{
+    ...((SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) || (RESEND_API_KEY && RESEND_FROM_EMAIL) || (ESKIZ_EMAIL && ESKIZ_PASSWORD) ? [{
       key: Modules.NOTIFICATION,
       resolve: '@medusajs/notification',
       options: {
