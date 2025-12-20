@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { normalizeUzPhone } from "../../../lib/phone"
 
 type Body = {
@@ -36,6 +36,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const customerModule = req.scope.resolve(Modules.CUSTOMER)
     const authModule = req.scope.resolve(Modules.AUTH)
     const cartModule = req.scope.resolve(Modules.CART)
+    const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK)
 
     // Check if customer exists by email (phone-based synthetic email)
     const existingCustomers = await customerModule.listCustomers({ email })
@@ -46,17 +47,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       isNewCustomer = true
 
       // 1. Create Auth Identity
+      let authIdentityId: string | null = null
       try {
-        await authModule.register("emailpass", {
+        const authResult = await authModule.register("emailpass", {
           body: { email, password },
         })
+        authIdentityId = authResult?.authIdentity?.id || null
+        logger.info(`[quick-order] Created auth identity: ${authIdentityId}`)
       } catch (e: any) {
         if (!e.message?.includes("already exists")) {
           logger.warn(`[quick-order] Auth register warning: ${e.message}`)
         }
       }
 
-      // 2. Create Customer (has_account: true marks as registered)
+      // 2. Create Customer
       customer = await customerModule.createCustomers({
         email,
         first_name: first_name || "Покупатель",
@@ -64,6 +68,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         phone: `+${normalized}`,
         has_account: true,
       })
+      logger.info(`[quick-order] Created customer: ${customer.id}`)
+
+      // 3. CRITICAL: Link Auth Identity to Customer
+      if (authIdentityId && customer?.id) {
+        try {
+          await remoteLink.create({
+            [Modules.AUTH]: {
+              auth_identity_id: authIdentityId,
+            },
+            [Modules.CUSTOMER]: {
+              customer_id: customer.id,
+            },
+          })
+          logger.info(`[quick-order] Linked auth ${authIdentityId} -> customer ${customer.id}`)
+        } catch (linkError: any) {
+          logger.error(`[quick-order] Failed to link auth to customer: ${linkError.message}`)
+        }
+      }
     }
 
     // Get existing cart using remoteQuery
@@ -115,7 +137,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // Prepare metadata update
     const metadataUpdate = {
         ...cart.metadata,
-        is_quick_order: true
+        is_quick_order: true,
+        is_new_customer: isNewCustomer, // Track if this was a new registration
     } as any
 
     if (isNewCustomer) {

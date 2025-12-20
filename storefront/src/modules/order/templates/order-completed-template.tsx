@@ -40,8 +40,8 @@ export default async function OrderCompletedTemplate({
             <span>Ваш заказ успешно оформлен.</span>
           </Heading>
 
-          {/* Guest Account Instructions */}
-          {isGuest && order.shipping_address?.phone && (
+          {/* Guest Account Instructions - only show for NEW quick order customers */}
+          {(isGuest || Boolean(order.metadata?.is_new_customer)) && Boolean(order.metadata?.is_quick_order) && order.shipping_address?.phone && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-4">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">

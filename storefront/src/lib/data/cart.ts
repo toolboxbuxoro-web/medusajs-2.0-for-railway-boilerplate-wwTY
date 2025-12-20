@@ -659,10 +659,10 @@ export async function submitQuickOrder({
 
     const data = await resp.json()
 
-    // Clear cart after successful order
+    // DON'T remove cart here! User still needs to complete checkout.
+    // Cart is cleared in placeOrder() after successful payment.
     if (data.success) {
-      removeCartId()
-      revalidateTag("cart")
+      revalidateTag("cart") // Just revalidate to reflect updated cart state
     }
 
     return {
