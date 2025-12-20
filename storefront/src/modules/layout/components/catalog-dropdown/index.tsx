@@ -41,7 +41,7 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
           alt=""
           fill
           sizes="40px"
-          className="object-contain p-1.5"
+          className="object-contain p-0"
         />
       </div>
     )
@@ -61,7 +61,7 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   }
 
   return (
-    <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 text-lg shadow-sm group-hover:shadow transition-all shrink-0">
+    <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 text-2xl shadow-sm group-hover:shadow transition-all shrink-0">
       {getCategoryIcon(category.handle || "")}
     </div>
   )
@@ -262,10 +262,10 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                                   alt="" 
                                   fill 
                                   sizes="64px"
-                                  className="object-contain p-2" 
+                                  className="object-contain p-0" 
                                 />
                               ) : (
-                                <span className="text-3xl">{getCategoryIcon(activeCategory.handle || "")}</span>
+                                <span className="text-5xl">{getCategoryIcon(activeCategory.handle || "")}</span>
                               )}
                            </div>
                            <div>
@@ -308,10 +308,10 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                                         alt="" 
                                         fill 
                                         sizes="(max-width: 640px) 64px, 80px"
-                                        className="object-contain p-2" 
+                                        className="object-contain p-0" 
                                       />
                                     ) : (
-                                      <span className="text-2xl sm:text-3xl">{getCategoryIcon(child.handle || "")}</span>
+                                      <span className="text-4xl sm:text-5xl">{getCategoryIcon(child.handle || "")}</span>
                                     )}
                                  </div>
                                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />

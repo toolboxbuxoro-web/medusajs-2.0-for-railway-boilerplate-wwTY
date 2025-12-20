@@ -38,33 +38,33 @@ export default function CategoryTemplate({
 
     if (imageUrl) {
       return (
-        <div className="relative w-full h-full shrink-0">
+        <div className="relative w-full aspect-square shrink-0">
           <Image
             src={imageUrl}
             alt={getLocalizedCategoryName(c, locale)}
             fill
-            sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 120px"
-            className="object-cover"
+            sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 250px"
+            className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
           />
         </div>
       )
     }
     if (iconUrl) {
       return (
-        <div className="relative w-10 h-10 shrink-0">
+        <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0">
           <Image
             src={iconUrl}
             alt=""
             fill
-            sizes="40px"
-            className="object-contain"
+            sizes="64px"
+            className="object-contain transition-transform duration-500 group-hover:scale-110"
           />
         </div>
       )
     }
 
     return (
-      <span className="text-gray-400 font-bold text-lg">
+      <span className="text-gray-300 font-black text-4xl select-none">
         {getLocalizedCategoryName(c, locale).slice(0, 1).toUpperCase()}
       </span>
     )
@@ -98,9 +98,9 @@ export default function CategoryTemplate({
           <span className="text-gray-900 font-medium">{getLocalizedCategoryName(category, locale)}</span>
         </nav>
 
-        {/* Modern Ambient Banner Header */}
-        <div className="mb-10 lg:mb-14">
-          <div className="relative w-full min-h-[280px] sm:min-h-[320px] lg:h-[400px] rounded-[2.5rem] overflow-hidden bg-white shadow-2xl border border-gray-100 group">
+        {/* Compact Category Header */}
+        <div className="mb-6 lg:mb-10">
+          <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-lg border border-gray-100 group">
             {typeof category.metadata?.image_url === "string" ? (
               <>
                 {/* Ambient Background (Blurred Image) */}
@@ -109,49 +109,50 @@ export default function CategoryTemplate({
                     src={category.metadata.image_url as string}
                     alt=""
                     fill
-                    className="object-cover blur-3xl scale-125 opacity-20"
+                    className="object-cover blur-3xl scale-125 opacity-15"
                     aria-hidden="true"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-gray-50/50" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/30 to-gray-50/40" />
                 </div>
 
-                <div className="relative z-10 flex flex-col md:flex-row items-center h-full w-full gap-8 p-8 sm:p-12 lg:px-20">
-                  {/* Text Content */}
-                  <div className="flex-1 text-center md:text-left order-2 md:order-1">
-                    <h1 
-                      className="text-4xl sm:text-5xl lg:text-7xl font-black text-gray-900 mb-6 tracking-tight leading-tight" 
-                      data-testid="category-page-title"
-                    >
-                      {getLocalizedCategoryName(category, locale)}
-                    </h1>
-                    {getLocalizedCategoryDescription(category, locale) && (
-                      <p className="text-gray-600 text-base sm:text-xl max-w-2xl leading-relaxed font-medium line-clamp-3 sm:line-clamp-none">
-                        {getLocalizedCategoryDescription(category, locale) as string}
-                      </p>
-                    )}
-                  </div>
-
+                <div className="relative z-10 flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-6 p-4 sm:p-6 lg:p-8">
                   {/* Square Image Container */}
-                  <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 shrink-0 order-1 md:order-2">
-                    <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl ring-8 ring-white/50 group-hover:ring-white transition-all duration-500">
+                  <div className="relative w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 shrink-0">
+                    <div className="relative w-full h-full rounded-xl sm:rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/60 group-hover:ring-white transition-all duration-300">
                       <Image
                         src={category.metadata.image_url as string}
                         alt={getLocalizedCategoryName(category, locale)}
                         fill
                         priority
-                        sizes="(max-width: 640px) 192px, (max-width: 1024px) 256px, 320px"
-                        className="object-contain bg-white p-4 transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 640px) 80px, (max-width: 1024px) 112px, 144px"
+                        className="object-contain bg-white p-2 transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
-                    {/* Decorative element */}
-                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-red-600/10 rounded-full blur-2xl -z-10 group-hover:bg-red-600/20 transition-colors duration-500" />
+                  </div>
+
+                  {/* Text Content */}
+                  <div className="flex-1 text-center sm:text-left">
+                    <h1 
+                      className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 tracking-tight" 
+                      data-testid="category-page-title"
+                    >
+                      {getLocalizedCategoryName(category, locale)}
+                    </h1>
+                    {getLocalizedCategoryDescription(category, locale) && (
+                      <p className="text-gray-500 text-sm sm:text-base max-w-xl leading-relaxed line-clamp-2">
+                        {getLocalizedCategoryDescription(category, locale) as string}
+                      </p>
+                    )}
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex flex-col justify-center h-full p-12 lg:px-20 bg-gradient-to-br from-gray-50 to-white">
+              <div className="flex items-center gap-4 p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-gray-50 to-white">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                  <span className="text-2xl sm:text-3xl">📦</span>
+                </div>
                 <h1 
-                  className="text-4xl sm:text-6xl lg:text-7xl font-black text-gray-900 mb-6 tracking-tight" 
+                  className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight" 
                   data-testid="category-page-title"
                 >
                   {getLocalizedCategoryName(category, locale)}
@@ -163,22 +164,22 @@ export default function CategoryTemplate({
 
         {/* Subcategories */}
         {category.category_children && category.category_children.filter((c: any) => !c.is_internal).length > 0 && (
-          <div className="mb-6 sm:mb-8">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="mb-8 sm:mb-10">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
               {category.category_children.filter((c: any) => !c.is_internal).map((c) => (
                 <LocalizedClientLink
                   key={c.id}
                   href={`/categories/${c.handle}`}
-                  className="group bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-gray-300 hover:shadow-sm transition-all"
+                  className="group bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 flex flex-col gap-2 sm:gap-3 hover:border-gray-300 hover:shadow-lg transition-all duration-200"
                 >
-                  <div className="min-w-0">
-                    <div className="font-semibold text-gray-900 text-sm sm:text-base leading-snug line-clamp-2">
+                  <div className="relative w-full aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+                    <CategoryMedia c={c} />
+                  </div>
+                  
+                  <div className="px-0.5">
+                    <div className="font-semibold text-gray-800 text-xs sm:text-sm leading-tight line-clamp-2 group-hover:text-red-600 transition-colors">
                       {getLocalizedCategoryName(c, locale)}
                     </div>
-                  </div>
-
-                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
-                    <CategoryMedia c={c} />
                   </div>
                 </LocalizedClientLink>
               ))}
