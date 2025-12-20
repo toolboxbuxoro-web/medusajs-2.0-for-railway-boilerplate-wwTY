@@ -41,7 +41,7 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
           alt=""
           fill
           sizes="48px"
-          className="object-contain"
+          className="object-cover"
         />
       </div>
     )

@@ -184,7 +184,7 @@ export default async function Nav({ locale }: NavProps) {
                       alt=""
                       fill
                       sizes="24px"
-                      className="object-contain"
+                      className="object-cover"
                     />
                   </div>
                 ) : category.metadata?.image_url ? (
