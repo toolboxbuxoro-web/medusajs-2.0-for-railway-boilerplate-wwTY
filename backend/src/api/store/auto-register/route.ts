@@ -85,11 +85,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     // Send SMS with login credentials
     // Format according to Eskiz requirements: resource name + purpose
+    logger.info(`[auto-register] Sending credentials SMS to +${normalized}`)
     const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
     const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
     
     await notificationModule.createNotifications({
-      to: normalized,
+      to: `+${normalized}`,  // Include + prefix
       channel: "sms",
       template: "auto-register",
       data: {
@@ -97,7 +98,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     })
 
-    logger.info(`[auto-register] Customer created: ${email}, SMS sent to ${normalized}`)
+    logger.info(`[auto-register] Customer created: ${email}, SMS sent to +${normalized}`)
 
     // Authenticate and get token
     const loginResult = await authModule.authenticate("emailpass", {
