@@ -17,49 +17,76 @@ export default async function orderSmsHandler({
       relations: ["summary"]
     })
 
-    // Check if this was a quick order (we stored metadata in the Cart, which should propagate to Order)
-    // NOTE: In Medusa, cart metadata usually propagates to order metadata.
-    const isQuickOrder = order.metadata?.is_quick_order
-    const tmpPassword = order.metadata?.tmp_generated_password as string
+    logger.info(`[order-sms-handler] Processing order ${orderId}, metadata: ${JSON.stringify(order.metadata)}`)
 
-    // 1. Send Order Confirmation SMS (To everyone or just quick order? Plan implied everyone or quick order)
-    // Let's send to everyone if we have a phone number, but definitely for quick order.
-    // Normalized phone is required.
-    
-    // We expect the phone in shipping_address or customer phone.
-    // Quick order sets phone in customer and shipping address.
-    
-    // For quick order specifically:
-    if (isQuickOrder && tmpPassword) {
-      // Send Credentials SMS
-      const phone = order.shipping_address?.phone || ""
-      const normalized = phone.replace(/\D/g, "") // basic normalization (assuming it was +998...)
-      
-      if (normalized) {
-         try {
-           const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${tmpPassword}`
-           
-           await notificationModule.createNotifications({
-             to: normalized,
-             channel: "sms",
-             template: "quick-order-credentials",
-             data: { message: smsMessage }
-           })
-           logger.info(`[order-sms-handler] Sent credentials SMS to ${normalized}`)
-         } catch (e: any) {
-           logger.warn(`[order-sms-handler] Failed to send credentials SMS: ${e.message}`)
-         }
+    // Check if this was a quick order
+    // In Medusa v2, cart metadata may or may not propagate to order.
+    // We check order.metadata first, then fallback to fetching cart.
+    let isQuickOrder = order.metadata?.is_quick_order
+    let tmpPassword = order.metadata?.tmp_generated_password as string
+
+    // If not in order.metadata, try to fetch from cart via DB query
+    if (!isQuickOrder || !tmpPassword) {
+      try {
+        const pgConnection = container.resolve("__pg_connection__")
+        
+        // Find cart by order (Medusa v2 may store cart_id in order or we find via payment)
+        // Try multiple approaches
+        const queries = [
+          `SELECT c.metadata FROM cart c WHERE c.id = (SELECT cart_id FROM "order" WHERE id = $1 LIMIT 1)`,
+          `SELECT c.metadata FROM cart c 
+           JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
+           JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
+           WHERE pc.id = (SELECT payment_collection_id FROM "order" WHERE id = $1 LIMIT 1)`
+        ]
+
+        for (const q of queries) {
+          try {
+            const result = await pgConnection.raw(q, [orderId])
+            const rows = result?.rows || result || []
+            const cartMetadata = rows?.[0]?.metadata
+            
+            if (cartMetadata) {
+              const meta = typeof cartMetadata === 'string' ? JSON.parse(cartMetadata) : cartMetadata
+              if (meta?.is_quick_order) {
+                isQuickOrder = true
+                tmpPassword = meta.tmp_generated_password
+                logger.info(`[order-sms-handler] Found quick order metadata from cart: password=${tmpPassword ? 'YES' : 'NO'}`)
+                break
+              }
+            }
+          } catch (e: any) {
+            // Continue to next query
+          }
+        }
+      } catch (e: any) {
+        logger.warn(`[order-sms-handler] Could not fetch cart metadata: ${e.message}`)
       }
     }
 
-    // 2. Send Order Confirmation SMS (General logic)
-    // If you want this for ALL orders, we can do it here. Or just quick order?
-    // User request: "после его перенаправляет на страницу подтвержедния ... дальше смс ... Vash zakaz #..."
-    // Let's send to any order with a valid phone number, as it's good practice.
-    
     const phone = order.shipping_address?.phone || ""
     const normalized = phone.replace(/\D/g, "")
 
+    // 1. Send Credentials SMS for quick order
+    if (isQuickOrder && tmpPassword && normalized) {
+      try {
+        const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${tmpPassword}`
+        
+        await notificationModule.createNotifications({
+          to: normalized,
+          channel: "sms",
+          template: "quick-order-credentials",
+          data: { message: smsMessage }
+        })
+        logger.info(`[order-sms-handler] Sent credentials SMS to ${normalized}`)
+      } catch (e: any) {
+        logger.warn(`[order-sms-handler] Failed to send credentials SMS: ${e.message}`)
+      }
+    } else if (isQuickOrder && !tmpPassword) {
+      logger.warn(`[order-sms-handler] Quick order but no password found in metadata`)
+    }
+
+    // 2. Send Order Confirmation SMS
     if (normalized) {
       try {
         const totalFormatted = new Intl.NumberFormat("ru-RU").format(Number(order.total) || 0)
@@ -76,11 +103,6 @@ export default async function orderSmsHandler({
         logger.warn(`[order-sms-handler] Failed to send confirmation SMS: ${e.message}`)
       }
     }
-
-    // Optional: Clean up sensitive metadata?
-    // We can't easily update order metadata here without using a workflow/service that allows updating order.
-    // Leaving it is a minor security risk (hashed password is better, but this is auto-generated one-time use).
-    // Given the constraints, we leave it.
 
   } catch (error: any) {
     logger.error(`[order-sms-handler] Error processing order ${orderId}: ${error.message}`)
