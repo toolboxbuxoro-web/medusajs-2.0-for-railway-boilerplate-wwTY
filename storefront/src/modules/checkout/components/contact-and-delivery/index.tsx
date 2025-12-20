@@ -450,9 +450,13 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                             setOtpError(null)
                             try {
                               const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+                              const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
                               const resp = await fetch(`${backendUrl}/store/otp/send`, {
                                 method: "POST",
-                                headers: { "Content-Type": "application/json" },
+                                headers: { 
+                                  "Content-Type": "application/json",
+                                  "x-publishable-api-key": publishableKey
+                                },
                                 body: JSON.stringify({ phone })
                               })
                               const data = await resp.json()
@@ -491,9 +495,13 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                 setOtpError(null)
                                 try {
                                   const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+                                  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
                                   const resp = await fetch(`${backendUrl}/store/otp/verify`, {
                                     method: "POST",
-                                    headers: { "Content-Type": "application/json" },
+                                    headers: { 
+                                      "Content-Type": "application/json",
+                                      "x-publishable-api-key": publishableKey
+                                    },
                                     body: JSON.stringify({ phone, code: otpCode })
                                   })
                                   const data = await resp.json()
