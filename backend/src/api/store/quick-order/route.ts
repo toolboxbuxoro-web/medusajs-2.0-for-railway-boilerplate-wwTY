@@ -1,7 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-// import { Link } from "@medusajs/framework/modules-link" // Not using Link directly, workflow handles it
-import { createCustomerAccountWorkflow } from "@medusajs/medusa/core-flows"
 import { normalizeUzPhone } from "../../../lib/phone"
 
 type Body = {
@@ -39,61 +37,33 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const authModule = req.scope.resolve(Modules.AUTH)
     const cartModule = req.scope.resolve(Modules.CART)
 
-    // Check if customer exists
+    // Check if customer exists by email (phone-based synthetic email)
     const existingCustomers = await customerModule.listCustomers({ email })
     let customer = existingCustomers?.[0]
     let isNewCustomer = false
 
     if (!customer) {
       isNewCustomer = true
-      let authIdentityId = ""
 
       // 1. Create Auth Identity
       try {
-        const authData = await authModule.register("emailpass", {
+        await authModule.register("emailpass", {
           body: { email, password },
         })
-        authIdentityId = authData?.auth_identity?.id
       } catch (e: any) {
         if (!e.message?.includes("already exists")) {
-            logger.warn(`[quick-order] Auth register warning: ${e.message}`)
-        }
-        // If auth exists but customer doesn't? We might miss the ID.
-        // We could try to list auth identities if filtering allows, but usually emailpass is strict.
-      }
-
-      // 2. Create Customer (and link) via Workflow
-      if (authIdentityId) {
-        try {
-           const { result } = await createCustomerAccountWorkflow(req.scope).run({
-               input: {
-                   auth_identity_id: authIdentityId,
-                   customer: {
-                       email,
-                       first_name: first_name || "Покупатель",
-                       last_name: "",
-                       phone: `+${normalized}`,
-                       has_account: true
-                   }
-               }
-           })
-           customer = result
-           // Note: workflow returns customer object typically.
-        } catch(e: any) {
-            logger.error(`[quick-order] Workflow failed: ${e.message}, falling back to manual`)
+          logger.warn(`[quick-order] Auth register warning: ${e.message}`)
         }
       }
 
-      // 3. Fallback: Manual creation (Unlinked)
-      if (!customer) {
-        customer = await customerModule.createCustomers({
-            email,
-            first_name: first_name || "Покупатель",
-            last_name: "",
-            phone: `+${normalized}`,
-            has_account: true,
-        })
-      }
+      // 2. Create Customer (has_account: true marks as registered)
+      customer = await customerModule.createCustomers({
+        email,
+        first_name: first_name || "Покупатель",
+        last_name: "",
+        phone: `+${normalized}`,
+        has_account: true,
+      })
     }
 
     // Get existing cart using remoteQuery
