@@ -70,12 +70,8 @@ export default function QuickOrderModal({
         throw new Error(result.error || "Ошибка оформления заказа")
       }
       
-      // Redirect to order confirmation
-      if (result.order_id) {
-        router.push(`/${locale}/${countryCode}/order/confirmed/${result.order_id}`)
-      } else {
-        router.push(`/${locale}/${countryCode}/account/orders`)
-      }
+      // Redirect to checkout to complete payment
+      router.push(`/${locale}/${countryCode}/checkout`)
       
       onClose()
     } catch (err: any) {

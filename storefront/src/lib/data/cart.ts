@@ -667,7 +667,7 @@ export async function submitQuickOrder({
 
     return {
       success: true,
-      order_id: data.order_id,
+      // order_id is no longer returned, we redirect to checkout
     }
   } catch (err: any) {
     console.error("[submitQuickOrder] Error:", err)
