@@ -39,6 +39,8 @@ import {
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
+// Debug: Log Eskiz configuration status
+console.log(`[Config] Eskiz SMS: ${ESKIZ_EMAIL && ESKIZ_PASSWORD ? 'ENABLED (' + ESKIZ_EMAIL + ')' : 'DISABLED (missing ESKIZ_EMAIL or ESKIZ_PASSWORD)'}`);
 
 const medusaConfig = {
   projectConfig: {
