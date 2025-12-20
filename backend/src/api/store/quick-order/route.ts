@@ -72,23 +72,29 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     let cart: any
     try {
       const remoteQuery = req.scope.resolve("remoteQuery")
-      const query = {
-        cart: {
-          fields: ["id", "currency_code", "region_id", "total", "payment_collection_id"],
-          items: {
-            fields: ["id", "variant_id", "quantity", "unit_price", "total", "title"]
-          },
-          region: {
-            fields: ["id", "name", "currency_code"]
-          },
-          shipping_methods: {
-            fields: ["id", "shipping_option_id", "amount"]
-          }
-        },
-      }
       
-      const carts = await remoteQuery(query, {
-        cart: { id: cartId }
+      const carts = await remoteQuery({
+        entryPoint: "cart",
+        fields: [
+          "id", 
+          "currency_code", 
+          "region_id", 
+          "total", 
+          "payment_collection_id",
+          "items.id",
+          "items.variant_id",
+          "items.quantity",
+          "items.unit_price",
+          "items.total",
+          "items.title",
+          "region.id",
+          "region.name",
+          "region.currency_code",
+          "shipping_methods.id",
+          "shipping_methods.shipping_option_id",
+          "shipping_methods.amount"
+        ],
+        variables: { id: cartId }
       })
       
       cart = carts?.[0]
