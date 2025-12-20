@@ -91,7 +91,12 @@ async function handleCallback(request: NextRequest) {
   // Short polling window to handle race between Payme return redirect and order persistence.
   for (let i = 0; i < 12; i++) {
     try {
-      const resp = await fetch(lookupUrl, { cache: "no-store" })
+      const resp = await fetch(lookupUrl, { 
+        cache: "no-store",
+        headers: {
+          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+        }
+      })
       if (resp.ok) {
         const data = await resp.json()
         if (data?.order_id) {
