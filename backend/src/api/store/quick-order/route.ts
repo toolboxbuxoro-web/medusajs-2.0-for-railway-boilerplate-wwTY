@@ -152,9 +152,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       if (!cart.shipping_methods?.length) {
         // Try to find any available shipping option
         const shippingOptionModule = req.scope.resolve(Modules.FULFILLMENT) as any
-        const options = await shippingOptionModule.listShippingOptions({
-          is_return: false,
-        })
+        const options = await shippingOptionModule.listShippingOptions({})
         
         if (options?.[0]) {
           try {
@@ -164,6 +162,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           } catch (e: any) {
             logger.warn(`[quick-order] Could not add shipping method: ${e.message}`)
           }
+        } else {
+          logger.warn(`[quick-order] No shipping options found for cart ${cartId}`)
         }
       }
 
@@ -252,6 +252,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     }
 
+    if (!orderId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Не удалось создать заказ автоматически. Наш менеджер свяжется с вами для оформления." 
+      })
+    }
+
     logger.info(`[quick-order] Success: order=${orderId}, customer=${customer.id}, isNew=${isNewCustomer}`)
 
     return res.json({
@@ -263,7 +270,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   } catch (error: any) {
     logger.error(`[quick-order] Error: ${error?.message || error}`)
-    return res.status(500).json({ error: error?.message || "Ошибка оформления заказа" })
+    return res.status(500).json({ 
+      success: false,
+      error: error?.message || "Ошибка оформления заказа" 
+    })
   }
 }
 
