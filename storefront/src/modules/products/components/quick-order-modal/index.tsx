@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { addToCart } from "@lib/data/cart"
+import { addToCart, submitQuickOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 
 type QuickOrderModalProps = {
@@ -54,29 +54,20 @@ export default function QuickOrderModal({
         countryCode,
       })
 
-      // 2. Call quick order endpoint
-      const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
-      
-      const resp = await fetch(`${backendUrl}/store/quick-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone,
-          first_name: name || "Покупатель",
-        }),
-        cache: "no-store",
+      // 2. Submit quick order via server action
+      const result = await submitQuickOrder({
+        phone,
+        firstName: name || "Покупатель",
+        countryCode,
       })
 
-      if (!resp.ok) {
-        const data = await resp.json().catch(() => ({}))
-        throw new Error(data.error || "Ошибка оформления заказа")
+      if (!result.success) {
+        throw new Error(result.error || "Ошибка оформления заказа")
       }
-
-      const data = await resp.json()
       
       // Redirect to order confirmation
-      if (data.order_id) {
-        router.push(`/${locale}/${countryCode}/order/confirmed/${data.order_id}`)
+      if (result.order_id) {
+        router.push(`/${locale}/${countryCode}/order/confirmed/${result.order_id}`)
       } else {
         router.push(`/${locale}/${countryCode}/account/orders`)
       }

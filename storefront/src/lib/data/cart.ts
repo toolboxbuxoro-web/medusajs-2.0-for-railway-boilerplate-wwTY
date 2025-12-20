@@ -612,6 +612,65 @@ export async function placeOrder() {
 }
 
 /**
+ * Quick Order - simplified checkout flow for phone-based orders.
+ * Creates customer if needed, updates cart with contact info, and completes order.
+ */
+export async function submitQuickOrder({
+  phone,
+  firstName,
+  countryCode,
+}: {
+  phone: string
+  firstName?: string
+  countryCode: string
+}): Promise<{ success: boolean; order_id?: string; error?: string }> {
+  const cartId = getCartId()
+  if (!cartId) {
+    return { success: false, error: "Корзина пуста" }
+  }
+
+  const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
+  try {
+    const resp = await fetch(`${backendUrl}/store/quick-order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": publishableKey,
+        "x-cart-id": cartId,
+      },
+      body: JSON.stringify({
+        phone,
+        first_name: firstName || "Покупатель",
+      }),
+      cache: "no-store",
+    })
+
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}))
+      return { success: false, error: data.error || "Ошибка оформления заказа" }
+    }
+
+    const data = await resp.json()
+
+    // Clear cart after successful order
+    if (data.success) {
+      removeCartId()
+      revalidateTag("cart")
+    }
+
+    return {
+      success: true,
+      order_id: data.order_id,
+    }
+  } catch (err: any) {
+    console.error("[submitQuickOrder] Error:", err)
+    return { success: false, error: err.message || "Ошибка оформления заказа" }
+  }
+}
+
+/**
  * Updates the countrycode param and revalidates the regions cache
  * @param regionId
  * @param countryCode

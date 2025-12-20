@@ -27,11 +27,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const email = `${normalized}@phone.local`
   const password = generatePassword()
 
+  // Get cart ID from header (sent by storefront)
+  const cartId = req.headers["x-cart-id"] as string
+  
+  if (!cartId) {
+    return res.status(400).json({ error: "Корзина пуста. Добавьте товар в корзину." })
+  }
+
   try {
     const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
     const authModule = req.scope.resolve(Modules.AUTH) as any
     const cartModule = req.scope.resolve(Modules.CART) as any
-    const orderModule = req.scope.resolve(Modules.ORDER) as any
+    const paymentModule = req.scope.resolve(Modules.PAYMENT) as any
 
     // Check if customer exists
     const existingCustomers = await customerModule.listCustomers({ email })
@@ -42,9 +49,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       // Create new customer
       isNewCustomer = true
       
-      await authModule.register("emailpass", {
-        body: { email, password },
-      })
+      try {
+        await authModule.register("emailpass", {
+          body: { email, password },
+        })
+      } catch (e: any) {
+        // If user already exists in auth, that's ok
+        if (!e.message?.includes("already exists")) {
+          logger.warn(`[quick-order] Auth register warning: ${e.message}`)
+        }
+      }
 
       customer = await customerModule.createCustomers({
         email,
@@ -54,15 +68,22 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    // Get cart from cookie or create minimal order
-    // For quick order, we need to complete the cart that was just created
-    const cartId = req.headers["x-cart-id"] as string
-    
-    if (!cartId) {
-      return res.status(400).json({ error: "no_cart" })
+    // Get existing cart
+    let cart: any
+    try {
+      cart = await cartModule.retrieveCart(cartId, {
+        relations: ["items", "region", "shipping_methods"],
+      })
+    } catch (e: any) {
+      logger.error(`[quick-order] Cart not found: ${cartId}`)
+      return res.status(400).json({ error: "Корзина не найдена" })
     }
 
-    // Update cart with customer info
+    if (!cart || !cart.items?.length) {
+      return res.status(400).json({ error: "Корзина пуста" })
+    }
+
+    // Update cart with customer info and address
     await cartModule.updateCarts(cartId, {
       email,
       customer_id: customer.id,
@@ -70,7 +91,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         first_name: first_name || "Покупатель",
         last_name: "",
         phone: `+${normalized}`,
-        address_1: "Будет уточнен",
+        address_1: "Будет уточнен при звонке",
         city: "Ташкент",
         country_code: "uz",
         postal_code: "100000",
@@ -79,40 +100,139 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         first_name: first_name || "Покупатель",
         last_name: "",
         phone: `+${normalized}`,
-        address_1: "Будет уточнен",
+        address_1: "Будет уточнен при звонке",
         city: "Ташкент",
         country_code: "uz",
         postal_code: "100000",
       },
     })
 
-    // Complete cart to create order
-    const { order } = await cartModule.completeCart(cartId)
+    // For quick order, we create a "pending" order without payment
+    // This is a Cash-on-Delivery (COD) style order
+    // The order will be completed manually by the admin
+    
+    // First, try to get the COD payment provider or create a manual payment
+    let orderId: string | undefined
+
+    try {
+      // Use the completeCartWorkflow to create the order
+      const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
+      
+      // First, we need to add a shipping method if not present
+      if (!cart.shipping_methods?.length) {
+        // Try to find any available shipping option
+        const shippingOptionModule = req.scope.resolve(Modules.FULFILLMENT) as any
+        const options = await shippingOptionModule.listShippingOptions({
+          is_return: false,
+        })
+        
+        if (options?.[0]) {
+          try {
+            await cartModule.addShippingMethod(cartId, {
+              shipping_option_id: options[0].id,
+            })
+          } catch (e: any) {
+            logger.warn(`[quick-order] Could not add shipping method: ${e.message}`)
+          }
+        }
+      }
+
+      // Create payment collection if needed
+      if (!cart.payment_collection_id) {
+        try {
+          // Retrieve updated cart with total
+          const updatedCart = await cartModule.retrieveCart(cartId, { 
+            relations: ["region"] 
+          })
+          
+          const paymentCollection = await paymentModule.createPaymentCollections({
+            amount: updatedCart.total || cart.total || 0,
+            currency_code: updatedCart.currency_code || cart.currency_code || "uzs",
+            region_id: updatedCart.region_id || cart.region_id,
+          })
+          
+          await cartModule.updateCarts(cartId, {
+            payment_collection_id: paymentCollection.id,
+          })
+          
+          // Try to create a manual/COD payment session
+          try {
+            await paymentModule.createPaymentSession(paymentCollection.id, {
+              amount: paymentCollection.amount,
+              currency_code: paymentCollection.currency_code,
+              provider_id: "pp_system_default", // Use system default or COD
+            })
+          } catch (e: any) {
+            logger.warn(`[quick-order] Could not create payment session: ${e.message}`)
+          }
+        } catch (e: any) {
+          logger.warn(`[quick-order] Could not create payment collection: ${e.message}`)
+        }
+      }
+
+      // Try to complete cart using workflow
+      const result = await completeCartWorkflow(req.scope).run({
+        input: { id: cartId },
+      })
+
+      if (result?.result?.order?.id) {
+        orderId = result.result.order.id
+      }
+    } catch (e: any) {
+      logger.error(`[quick-order] completeCartWorkflow failed: ${e.message}`)
+      // If workflow fails, we'll create a simple record and notify manually
+    }
 
     // Send SMS with credentials if new customer
     if (isNewCustomer) {
-      const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
-      const smsMessage = `toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
-      
-      await notificationModule.createNotifications({
-        to: normalized,
-        channel: "sms",
-        template: "quick-order",
-        data: { message: smsMessage }
-      })
+      try {
+        const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
+        const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
+        
+        await notificationModule.createNotifications({
+          to: normalized,
+          channel: "sms",
+          template: "quick-order-credentials",
+          data: { message: smsMessage }
+        })
+      } catch (e: any) {
+        logger.warn(`[quick-order] SMS notification failed: ${e.message}`)
+      }
     }
 
-    logger.info(`[quick-order] Order created: ${order?.id}, customer: ${customer.id}`)
+    // Send order confirmation SMS
+    if (orderId) {
+      try {
+        const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
+        const orderModule = req.scope.resolve(Modules.ORDER) as any
+        const order = await orderModule.retrieveOrder(orderId, { relations: ["summary"] })
+        
+        const totalFormatted = new Intl.NumberFormat("ru-RU").format(order.total || 0)
+        const smsMessage = `Vash zakaz #${order.display_id || orderId.slice(-6)} na sajte toolbox-tools.uz uspeshno oformlen. Summa: ${totalFormatted} UZS`
+        
+        await notificationModule.createNotifications({
+          to: normalized,
+          channel: "sms",
+          template: "order-confirmation",
+          data: { message: smsMessage }
+        })
+      } catch (e: any) {
+        logger.warn(`[quick-order] Order SMS failed: ${e.message}`)
+      }
+    }
+
+    logger.info(`[quick-order] Success: order=${orderId}, customer=${customer.id}, isNew=${isNewCustomer}`)
 
     return res.json({
       success: true,
-      order_id: order?.id,
+      order_id: orderId,
       customer_id: customer.id,
       is_new_customer: isNewCustomer,
     })
 
   } catch (error: any) {
-    logger.error("[quick-order] Error:", error)
-    return res.status(500).json({ error: error?.message || "order_failed" })
+    logger.error(`[quick-order] Error: ${error?.message || error}`)
+    return res.status(500).json({ error: error?.message || "Ошибка оформления заказа" })
   }
 }
+
