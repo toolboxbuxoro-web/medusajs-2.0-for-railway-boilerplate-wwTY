@@ -44,20 +44,20 @@ export default function CategoryTemplate({
             alt={getLocalizedCategoryName(c, locale)}
             fill
             sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 250px"
-            className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
+            className="object-cover"
           />
         </div>
       )
     }
     if (iconUrl) {
       return (
-        <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0">
+        <div className="relative w-full h-full shrink-0">
           <Image
             src={iconUrl}
             alt=""
             fill
             sizes="64px"
-            className="object-contain transition-transform duration-500 group-hover:scale-110"
+            className="object-contain"
           />
         </div>
       )
