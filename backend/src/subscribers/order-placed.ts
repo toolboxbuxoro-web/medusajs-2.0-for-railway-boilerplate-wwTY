@@ -37,17 +37,19 @@ export default async function orderPlacedHandler({
   const phone = shippingAddress?.phone || order.shipping_address?.phone
   if (phone) {
     try {
-      // Format order total
+      // Format order total (in UZS)
       const total = Number(order.summary?.current_order_total || order.total || 0)
       const formattedTotal = new Intl.NumberFormat('uz-UZ').format(total)
       
-      // Build SMS message
-      const message = `Toolbox: Ваш заказ #${order.display_id || order.id.slice(-8)} на сумму ${formattedTotal} UZS успешно оформлен! Мы свяжемся с вами для подтверждения доставки.`
+      // IMPORTANT: SMS message MUST match the approved Eskiz template exactly!
+      // Approved format: "Vash zakaz #12345 na sajte toolbox-tools.uz uspeshno oformlen. Summa: 150,000 UZS"
+      const orderId = order.display_id || order.id.slice(-8)
+      const message = `Vash zakaz #${orderId} na sajte toolbox-tools.uz uspeshno oformlen. Summa: ${formattedTotal} UZS`
       
       await notificationModuleService.createNotifications({
         to: phone,
         channel: 'sms',
-        template: 'order-confirmation', // Template name (not used by Eskiz, but required)
+        template: 'order-confirmation',
         data: {
           message,
           order_id: order.id,
