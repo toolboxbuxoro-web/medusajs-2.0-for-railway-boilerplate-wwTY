@@ -3,10 +3,8 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 /**
  * Lookup Medusa order id for a Payme-paid cart.
  *
- * Storefront Payme return_url only has cart_id (sent as order_id to Payme).
- * After Payme PerformTransaction we persist `medusa_order_id` into the Payme
- * payment session data, and this endpoint exposes it for redirecting to
- * `/order/confirmed/:id`.
+ * Storefront Payme return_url uses order_id param (stored as data->>'order_id' in payment_session).
+ * This endpoint looks up the payment session and returns the medusa_order_id after completion.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const cartId = (req.query?.cart_id as string) || ""
@@ -20,13 +18,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
     const pgConnection = req.scope.resolve("__pg_connection__")
 
-    const result = await pgConnection.raw(
+    // First try: Look by data->>'order_id' (the UUID sent to Payme as order_id)
+    // This is how payme-callback sends the ID back from Payme
+    let result = await pgConnection.raw(
       `
       SELECT ps.data
       FROM payment_session ps
-      JOIN cart_payment_collection cpc
-        ON cpc.payment_collection_id = ps.payment_collection_id
-      WHERE cpc.cart_id = ?
+      WHERE ps.data->>'order_id' = ?
         AND ps.provider_id LIKE '%payme%'
       ORDER BY ps.created_at DESC
       LIMIT 1
@@ -34,19 +32,58 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       [cartId]
     )
 
-    const rows = result?.rows || result || []
-    const row = rows?.[0]
+    let rows = result?.rows || result || []
+    let row = rows?.[0]
 
-    const sessionData =
-      typeof row?.data === "string" ? JSON.parse(row.data) : row?.data || {}
+    // Second try: Look by cart_id via cart_payment_collection join (legacy/fallback)
+    if (!row) {
+      result = await pgConnection.raw(
+        `
+        SELECT ps.data
+        FROM payment_session ps
+        JOIN cart_payment_collection cpc
+          ON cpc.payment_collection_id = ps.payment_collection_id
+        WHERE cpc.cart_id = ?
+          AND ps.provider_id LIKE '%payme%'
+        ORDER BY ps.created_at DESC
+        LIMIT 1
+      `,
+        [cartId]
+      )
 
-    const orderId = sessionData?.medusa_order_id
-    if (orderId) {
-      return res.json({ order_id: orderId })
+      rows = result?.rows || result || []
+      row = rows?.[0]
     }
 
-    // Fallback: try to find order by cart_id directly (table name differs across versions).
-    // We keep this best-effort and ignore errors.
+    // Third try: Look by data->>'cart_id' (stored by CreateTransaction)
+    if (!row) {
+      result = await pgConnection.raw(
+        `
+        SELECT ps.data
+        FROM payment_session ps
+        WHERE ps.data->>'cart_id' = ?
+          AND ps.provider_id LIKE '%payme%'
+        ORDER BY ps.created_at DESC
+        LIMIT 1
+      `,
+        [cartId]
+      )
+
+      rows = result?.rows || result || []
+      row = rows?.[0]
+    }
+
+    if (row) {
+      const sessionData =
+        typeof row?.data === "string" ? JSON.parse(row.data) : row?.data || {}
+
+      const orderId = sessionData?.medusa_order_id
+      if (orderId) {
+        return res.json({ order_id: orderId })
+      }
+    }
+
+    // Final fallback: try to find order by cart_id directly in order table
     const tryQueries = [
       `SELECT id FROM "order" WHERE cart_id = ? LIMIT 1`,
       `SELECT id FROM orders WHERE cart_id = ? LIMIT 1`,
@@ -71,5 +108,3 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     return res.status(500).json({ error: e?.message || "internal_error" })
   }
 }
-
-
