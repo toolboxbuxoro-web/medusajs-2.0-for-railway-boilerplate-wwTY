@@ -47,19 +47,23 @@ export default function QuickOrderModal({
     setIsSubmitting(true)
 
     try {
-      // 1. Add to cart and get the cart ID
-      const cartId = await addToCart({
+      // 1. Add to cart and get the result
+      const addResult = await addToCart({
         variantId: variant.id,
         quantity: 1,
         countryCode,
       })
+
+      if (!addResult.success) {
+        throw new Error(addResult.error || "Ошибка добавления товара")
+      }
 
       // 2. Submit quick order via server action with cart ID
       const result = await submitQuickOrder({
         phone,
         firstName: name || "Покупатель",
         countryCode,
-        cartId, // Pass cart ID directly to avoid stale cookie issues
+        cartId: addResult.cartId, // Pass cart ID directly from the result
       })
 
       if (!result.success) {

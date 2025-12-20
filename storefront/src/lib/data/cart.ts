@@ -113,17 +113,17 @@ export async function addToCart({
   variantId: string
   quantity: number
   countryCode: string
-}): Promise<string> {
+}): Promise<{ success: boolean; cartId?: string; error?: string }> {
   if (!variantId) {
-    throw new Error("Missing variant ID when adding to cart")
-  }
-
-  const cart = await getOrSetCart(countryCode)
-  if (!cart) {
-    throw new Error("Error retrieving or creating cart")
+    return { success: false, error: "Missing variant ID when adding to cart" }
   }
 
   try {
+    const cart = await getOrSetCart(countryCode)
+    if (!cart) {
+      return { success: false, error: "Error retrieving or creating cart" }
+    }
+
     await sdk.store.cart.createLineItem(
       cart.id,
       {
@@ -134,21 +134,23 @@ export async function addToCart({
       getAuthHeaders()
     )
     revalidateTag("cart")
-    return cart.id // Return cart ID for use in quick order
+    return { success: true, cartId: cart.id }
   } catch (error: any) {
     // Parse the error message for user-friendly display
     const errorMessage = error?.message || error?.toString() || ""
     
+    let userError = "Ошибка добавления в корзину"
+    
     if (errorMessage.includes("required inventory") || errorMessage.includes("inventory")) {
-      throw new Error("Товар временно недоступен. Попробуйте позже или свяжитесь с нами.")
+      userError = "Товар временно недоступен (недостаточно на складе)"
+    } else if (errorMessage.includes("out of stock") || errorMessage.includes("insufficient stock")) {
+      userError = "Товар закончился на складе"
+    } else {
+      console.error("[addToCart] Error:", error)
+      userError = errorMessage || userError
     }
     
-    if (errorMessage.includes("out of stock") || errorMessage.includes("insufficient stock")) {
-      throw new Error("Товар закончился на складе")
-    }
-    
-    // Re-throw with medusa error handling for other errors
-    throw medusaError(error)
+    return { success: false, error: userError }
   }
 }
 

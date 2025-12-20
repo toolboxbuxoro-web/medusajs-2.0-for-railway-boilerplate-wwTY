@@ -68,18 +68,42 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    // Get existing cart
+    // Get existing cart using remoteQuery (more robust in Medusa 2.0)
     let cart: any
     try {
-      cart = await cartModule.retrieveCart(cartId, {
-        relations: ["items", "region", "shipping_methods"],
+      const remoteQuery = req.scope.resolve("remoteQuery")
+      const query = {
+        cart: {
+          fields: ["id", "currency_code", "region_id", "total", "payment_collection_id"],
+          items: {
+            fields: ["id", "variant_id", "quantity", "unit_price", "total", "title"]
+          },
+          region: {
+            fields: ["id", "name", "currency_code"]
+          },
+          shipping_methods: {
+            fields: ["id", "shipping_option_id", "amount"]
+          }
+        },
+      }
+      
+      const carts = await remoteQuery(query, {
+        cart: { id: cartId }
       })
+      
+      cart = carts?.[0]
+      
+      if (!cart) {
+        logger.error(`[quick-order] Cart not found with remoteQuery: ${cartId}`)
+        return res.status(400).json({ error: "Корзина не найдена. Пожалуйста, попробуйте добавить товар еще раз." })
+      }
     } catch (e: any) {
-      logger.error(`[quick-order] Cart not found: ${cartId}`)
-      return res.status(400).json({ error: "Корзина не найдена" })
+      logger.error(`[quick-order] Error retrieving cart ${cartId}: ${e.message}`)
+      return res.status(400).json({ error: "Ошибка при чтении корзины" })
     }
 
-    if (!cart || !cart.items?.length) {
+    if (!cart.items?.length) {
+      logger.warn(`[quick-order] Cart ${cartId} has no items`)
       return res.status(400).json({ error: "Корзина пуста" })
     }
 
