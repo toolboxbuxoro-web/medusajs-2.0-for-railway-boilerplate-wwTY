@@ -17,50 +17,68 @@ export default async function orderSmsHandler({
       relations: ["summary"]
     })
 
-    logger.info(`[order-sms-handler] Processing order ${orderId}, metadata: ${JSON.stringify(order.metadata)}`)
+    logger.info(`[order-sms-handler] Processing order ${orderId}, order.metadata: ${JSON.stringify(order.metadata || {})}`)
 
     // Check if this was a quick order
-    // In Medusa v2, cart metadata may or may not propagate to order.
-    // We check order.metadata first, then fallback to fetching cart.
     let isQuickOrder = order.metadata?.is_quick_order
     let tmpPassword = order.metadata?.tmp_generated_password as string
 
     // If not in order.metadata, try to fetch from cart via DB query
-    if (!isQuickOrder || !tmpPassword) {
+    if (!tmpPassword) {
       try {
         const pgConnection = container.resolve("__pg_connection__")
         
-        // Find cart by order (Medusa v2 may store cart_id in order or we find via payment)
-        // Try multiple approaches
+        // Medusa v2: Order may have cart_id column, or we find via payment_collection
+        // Try multiple approaches with detailed logging
         const queries = [
-          `SELECT c.metadata FROM cart c WHERE c.id = (SELECT cart_id FROM "order" WHERE id = $1 LIMIT 1)`,
-          `SELECT c.metadata FROM cart c 
-           JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
-           JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
-           WHERE pc.id = (SELECT payment_collection_id FROM "order" WHERE id = $1 LIMIT 1)`
+          // Approach 1: Direct cart_id on order table (Medusa v2 style)
+          {
+            name: "order.cart_id direct",
+            sql: `SELECT c.metadata FROM cart c 
+                  JOIN "order" o ON o.cart_id = c.id 
+                  WHERE o.id = $1`
+          },
+          // Approach 2: Via payment collection link
+          {
+            name: "via payment_collection",
+            sql: `SELECT c.metadata FROM cart c 
+                  JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
+                  JOIN "order" o ON o.payment_collection_id = cpc.payment_collection_id
+                  WHERE o.id = $1`
+          },
+          // Approach 3: Find cart by matching email/created time (rough)
+          {
+            name: "by email match",
+            sql: `SELECT c.metadata FROM cart c 
+                  WHERE c.email = (SELECT email FROM "order" WHERE id = $1)
+                  ORDER BY c.created_at DESC LIMIT 1`
+          }
         ]
 
-        for (const q of queries) {
+        for (const { name, sql } of queries) {
           try {
-            const result = await pgConnection.raw(q, [orderId])
+            logger.info(`[order-sms-handler] Trying query: ${name}`)
+            const result = await pgConnection.raw(sql, [orderId])
             const rows = result?.rows || result || []
             const cartMetadata = rows?.[0]?.metadata
             
             if (cartMetadata) {
               const meta = typeof cartMetadata === 'string' ? JSON.parse(cartMetadata) : cartMetadata
-              if (meta?.is_quick_order) {
-                isQuickOrder = true
-                tmpPassword = meta.tmp_generated_password
-                logger.info(`[order-sms-handler] Found quick order metadata from cart: password=${tmpPassword ? 'YES' : 'NO'}`)
+              logger.info(`[order-sms-handler] Found cart metadata via ${name}: ${JSON.stringify(meta)}`)
+              
+              if (meta?.is_quick_order || meta?.tmp_generated_password) {
+                isQuickOrder = meta.is_quick_order || isQuickOrder
+                tmpPassword = meta.tmp_generated_password || tmpPassword
+                logger.info(`[order-sms-handler] Quick order detected! password=${tmpPassword ? 'YES' : 'NO'}`)
                 break
               }
             }
           } catch (e: any) {
-            // Continue to next query
+            logger.warn(`[order-sms-handler] Query "${name}" failed: ${e.message}`)
           }
         }
       } catch (e: any) {
-        logger.warn(`[order-sms-handler] Could not fetch cart metadata: ${e.message}`)
+        logger.error(`[order-sms-handler] Could not fetch cart metadata: ${e.message}`)
       }
     }
 
@@ -68,7 +86,7 @@ export default async function orderSmsHandler({
     const normalized = phone.replace(/\D/g, "")
 
     // 1. Send Credentials SMS for quick order
-    if (isQuickOrder && tmpPassword && normalized) {
+    if (tmpPassword && normalized) {
       try {
         const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${tmpPassword}`
         
@@ -82,8 +100,8 @@ export default async function orderSmsHandler({
       } catch (e: any) {
         logger.warn(`[order-sms-handler] Failed to send credentials SMS: ${e.message}`)
       }
-    } else if (isQuickOrder && !tmpPassword) {
-      logger.warn(`[order-sms-handler] Quick order but no password found in metadata`)
+    } else {
+      logger.info(`[order-sms-handler] No credentials SMS: isQuickOrder=${isQuickOrder}, hasPassword=${!!tmpPassword}, hasPhone=${!!normalized}`)
     }
 
     // 2. Send Order Confirmation SMS
