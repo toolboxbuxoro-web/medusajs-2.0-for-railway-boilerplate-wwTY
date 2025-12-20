@@ -139,11 +139,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         ...cart.metadata,
         is_quick_order: true,
         is_new_customer: isNewCustomer, // Track if this was a new registration
+        // TEMP: Always include password for testing - will send SMS to existing users too
+        tmp_generated_password: password,
     } as any
-
-    if (isNewCustomer) {
-        metadataUpdate.tmp_generated_password = password
-    }
 
     // Update cart
     await cartModule.updateCarts(cartId, {
