@@ -344,8 +344,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       }
 
       // Auto-register guest user (if phone was verified)
+      console.log("[Checkout] isLoggedIn:", isLoggedIn, "otpVerified:", otpVerified)
       if (!isLoggedIn && otpVerified) {
         try {
+          console.log("[Checkout] Calling auto-register for phone:", phone)
           const resp = await fetch(`${backendUrl}/store/auto-register`, {
             method: "POST",
             headers: { 
@@ -358,13 +360,19 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
               last_name: lastName 
             })
           })
+          const data = await resp.json().catch(() => ({}))
+          console.log("[Checkout] Auto-register response:", resp.status, data)
           if (resp.ok) {
-            console.log("[Checkout] Auto-registered guest user")
+            console.log("[Checkout] Auto-registered guest user successfully")
+          } else {
+            console.error("[Checkout] Auto-register failed:", data.error || data.message)
           }
         } catch (e) {
-          console.error("[Checkout] Auto-register failed:", e)
+          console.error("[Checkout] Auto-register network error:", e)
           // Continue anyway - they can still checkout as guest
         }
+      } else {
+        console.log("[Checkout] Skipping auto-register: isLoggedIn=", isLoggedIn, "otpVerified=", otpVerified)
       }
 
       // Navigate to payment step

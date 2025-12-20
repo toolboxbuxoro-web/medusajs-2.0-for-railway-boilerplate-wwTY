@@ -18,25 +18,34 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
   const { phone, first_name, last_name } = (req.body || {}) as Body
 
+  logger.info(`[auto-register] Request received: phone=${phone}, first_name=${first_name}`)
+
   if (!phone) {
+    logger.warn(`[auto-register] Missing phone`)
     return res.status(400).json({ error: "phone is required" })
   }
 
   const normalized = normalizeUzPhone(phone)
   if (!normalized) {
+    logger.warn(`[auto-register] Invalid phone format: ${phone}`)
     return res.status(400).json({ error: "invalid phone format" })
   }
 
   // Create a technical email from phone (Medusa requires email)
   const email = `${normalized}@phone.local`
   const password = generatePassword()
+  
+  logger.info(`[auto-register] Normalized phone: +${normalized}, email: ${email}`)
 
   try {
     // Check if phone was verified via OTP (using in-memory store)
     const verifiedExpiry = verifiedPhones.get(`+${normalized}`)
     const isVerified = verifiedExpiry && verifiedExpiry > Date.now()
     
+    logger.info(`[auto-register] Verification check: verifiedExpiry=${verifiedExpiry}, isVerified=${isVerified}`)
+    
     if (!isVerified) {
+      logger.warn(`[auto-register] Phone not verified: +${normalized}`)
       return res.status(400).json({ 
         error: "phone_not_verified",
         message: "Номер не подтверждён. Пожалуйста, подтвердите номер.",
@@ -45,6 +54,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // Check if customer already exists
+    logger.info(`[auto-register] Checking if customer exists: ${email}`)
     const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
     const existingCustomers = await customerModule.listCustomers({ email })
     
