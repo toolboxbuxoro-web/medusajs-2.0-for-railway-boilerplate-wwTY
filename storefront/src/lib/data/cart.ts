@@ -113,7 +113,7 @@ export async function addToCart({
   variantId: string
   quantity: number
   countryCode: string
-}) {
+}): Promise<string> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
   }
@@ -134,6 +134,7 @@ export async function addToCart({
       getAuthHeaders()
     )
     revalidateTag("cart")
+    return cart.id // Return cart ID for use in quick order
   } catch (error: any) {
     // Parse the error message for user-friendly display
     const errorMessage = error?.message || error?.toString() || ""
@@ -610,7 +611,6 @@ export async function placeOrder() {
 
   return cartRes.cart
 }
-
 /**
  * Quick Order - simplified checkout flow for phone-based orders.
  * Creates customer if needed, updates cart with contact info, and completes order.
@@ -619,12 +619,15 @@ export async function submitQuickOrder({
   phone,
   firstName,
   countryCode,
+  cartId: passedCartId,
 }: {
   phone: string
   firstName?: string
   countryCode: string
+  cartId?: string // Cart ID passed directly from addToCart
 }): Promise<{ success: boolean; order_id?: string; error?: string }> {
-  const cartId = getCartId()
+  // Use passed cart ID or fallback to cookie
+  const cartId = passedCartId || getCartId()
   if (!cartId) {
     return { success: false, error: "Корзина пуста" }
   }
