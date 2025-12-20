@@ -59,6 +59,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const existingCustomers = await customerModule.listCustomers({ email })
     
     if (existingCustomers?.length > 0) {
+      logger.info(`[auto-register] Customer already exists: ${existingCustomers[0].id}`)
       // Customer exists, just authenticate
       const authModule = req.scope.resolve(Modules.AUTH) as any
       const authResult = await authModule.authenticate("emailpass", {
@@ -73,6 +74,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // Register new customer
+    logger.info(`[auto-register] Creating new auth identity for ${email}`)
     const authModule = req.scope.resolve(Modules.AUTH) as any
     
     // Create auth identity
@@ -80,18 +82,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       body: { email, password },
     })
 
+    logger.info(`[auto-register] Auth register result: success=${authResult?.success}`)
+
     if (!authResult?.success) {
       logger.error("[auto-register] Auth registration failed", authResult)
       return res.status(500).json({ error: "registration_failed" })
     }
 
     // Create customer profile
+    logger.info(`[auto-register] Creating customer profile`)
     const customer = await customerModule.createCustomers({
       email,
       first_name: first_name || "Покупатель",
       last_name: last_name || "",
       phone: `+${normalized}`,
     })
+    
+    logger.info(`[auto-register] Customer profile created: ${customer?.id}`)
 
     // Send SMS with login credentials
     // Format according to Eskiz requirements: resource name + purpose
