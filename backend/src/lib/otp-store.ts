@@ -1,6 +1,13 @@
 import crypto from "crypto"
 import Redis from "ioredis"
-import { REDIS_URL, COOKIE_SECRET } from "./constants"
+import { 
+  REDIS_URL, 
+  COOKIE_SECRET, 
+  OTP_TTL_SECONDS, 
+  OTP_MAX_ATTEMPTS, 
+  OTP_RATE_LIMIT_PER_HOUR, 
+  OTP_SECRET 
+} from "./constants"
 
 export type OtpPurpose = "register" | "reset_password" | "change_password"
 
@@ -9,10 +16,6 @@ type StoredOtp = {
   created_at: number
   attempts: number
 }
-
-const OTP_TTL_SECONDS = Number(process.env.OTP_TTL_SECONDS || 300) // 5 min
-const OTP_MAX_ATTEMPTS = Number(process.env.OTP_MAX_ATTEMPTS || 5)
-const OTP_RATE_LIMIT_PER_HOUR = Number(process.env.OTP_RATE_LIMIT_PER_HOUR || 5)
 
 function otpKey(purpose: OtpPurpose, phone: string) {
   return `otp:${purpose}:${phone}`
@@ -23,7 +26,7 @@ function rateKey(purpose: OtpPurpose, phone: string) {
 }
 
 function otpSecret(): string {
-  return process.env.OTP_SECRET || COOKIE_SECRET || "otp_secret"
+  return OTP_SECRET || COOKIE_SECRET || "otp_secret"
 }
 
 export function generateOtpCode(): string {

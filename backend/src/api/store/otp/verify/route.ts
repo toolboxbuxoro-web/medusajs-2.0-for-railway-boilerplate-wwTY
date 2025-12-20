@@ -80,3 +80,4 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(500).json({ error: "Verification failed. Please try again." })
   }
 }
+

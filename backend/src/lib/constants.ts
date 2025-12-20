@@ -121,6 +121,14 @@ export const ESKIZ_PASSWORD = process.env.ESKIZ_PASSWORD
 export const ESKIZ_FROM = process.env.ESKIZ_FROM || '4546'
 
 /**
+ * OTP Configuration
+ */
+export const OTP_TTL_SECONDS = Number(process.env.OTP_TTL_SECONDS || 300) // 5 min
+export const OTP_MAX_ATTEMPTS = Number(process.env.OTP_MAX_ATTEMPTS || 5)
+export const OTP_RATE_LIMIT_PER_HOUR = Number(process.env.OTP_RATE_LIMIT_PER_HOUR || 5)
+export const OTP_SECRET = process.env.OTP_SECRET
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =
