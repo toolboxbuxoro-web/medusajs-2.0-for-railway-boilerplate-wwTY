@@ -1,10 +1,12 @@
-import { ModuleProviderExports } from "@medusajs/framework/types"
+import type { ModuleProviderExports } from "@medusajs/framework/types"
 import { EskizNotificationService } from "./service"
 
 const services = [EskizNotificationService]
 
-const providerExports: ModuleProviderExports = {
+const providerExport: ModuleProviderExports = {
   services,
 }
 
-export default providerExports
+// CommonJS interop for Medusa provider loader
+export = providerExport
+
