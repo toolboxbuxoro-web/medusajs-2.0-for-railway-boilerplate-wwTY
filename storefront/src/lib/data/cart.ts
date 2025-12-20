@@ -123,8 +123,8 @@ export async function addToCart({
     throw new Error("Error retrieving or creating cart")
   }
 
-  await sdk.store.cart
-    .createLineItem(
+  try {
+    await sdk.store.cart.createLineItem(
       cart.id,
       {
         variant_id: variantId,
@@ -133,10 +133,22 @@ export async function addToCart({
       {},
       getAuthHeaders()
     )
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+    revalidateTag("cart")
+  } catch (error: any) {
+    // Parse the error message for user-friendly display
+    const errorMessage = error?.message || error?.toString() || ""
+    
+    if (errorMessage.includes("required inventory") || errorMessage.includes("inventory")) {
+      throw new Error("Товар временно недоступен. Попробуйте позже или свяжитесь с нами.")
+    }
+    
+    if (errorMessage.includes("out of stock") || errorMessage.includes("insufficient stock")) {
+      throw new Error("Товар закончился на складе")
+    }
+    
+    // Re-throw with medusa error handling for other errors
+    throw medusaError(error)
+  }
 }
 
 export async function updateLineItem({

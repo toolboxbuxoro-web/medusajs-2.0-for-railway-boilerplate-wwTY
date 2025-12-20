@@ -13,25 +13,26 @@ export default async function orderPlacedHandler({
   const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
 
-  // Send email notification
-  try {
-    await notificationModuleService.createNotifications({
-      to: order.email,
-      channel: 'email',
-      template: EmailTemplates.ORDER_PLACED,
-      data: {
-        emailOptions: {
-          replyTo: 'info@toolbox-tools.uz',
-          subject: 'Ваш заказ оформлен!'
-        },
-        order,
-        shippingAddress,
-        preview: 'Спасибо за ваш заказ!'
-      }
-    })
-  } catch (error) {
-    console.error('Error sending order confirmation email:', error)
-  }
+  // Email notification is disabled - no email provider configured
+  // To enable, configure RESEND_API_KEY or SENDGRID_API_KEY in Railway
+  // try {
+  //   await notificationModuleService.createNotifications({
+  //     to: order.email,
+  //     channel: 'email',
+  //     template: EmailTemplates.ORDER_PLACED,
+  //     data: {
+  //       emailOptions: {
+  //         replyTo: 'info@toolbox-tools.uz',
+  //         subject: 'Ваш заказ оформлен!'
+  //       },
+  //       order,
+  //       shippingAddress,
+  //       preview: 'Спасибо за ваш заказ!'
+  //     }
+  //   })
+  // } catch (error) {
+  //   console.error('Error sending order confirmation email:', error)
+  // }
 
   // Send SMS notification via Eskiz
   const phone = shippingAddress?.phone || order.shipping_address?.phone
