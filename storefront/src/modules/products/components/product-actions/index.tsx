@@ -2,7 +2,7 @@
 
 import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslations } from 'next-intl'
 
@@ -14,6 +14,7 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import QuickOrderModal from "../quick-order-modal"
 import { addToCart } from "@lib/data/cart"
+import { getCustomer } from "@lib/data/customer"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { convertToLocale } from "@lib/util/money"
@@ -51,7 +52,9 @@ export default function ProductActions({
   const [isAdding, setIsAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false)
+  const [isQuickOrdering, setIsQuickOrdering] = useState(false)
   const countryCode = useParams().countryCode as string
+  const router = useRouter()
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
@@ -116,16 +119,52 @@ export default function ProductActions({
     setAddError(null)
 
     try {
-      await addToCart({
+      const res = await addToCart({
         variantId: selectedVariant.id,
         quantity: 1,
         countryCode: (countryCode || "uz").toLowerCase(),
       })
+      
+      if (!res.success) {
+        setAddError(res.error || "Не удалось добавить товар в корзину")
+      }
     } catch (e: any) {
       console.error("[ProductActions] addToCart failed:", e)
       setAddError(e?.message || "Не удалось добавить товар в корзину")
     } finally {
       setIsAdding(false)
+    }
+  }
+
+  const handleQuickOrder = async () => {
+    setIsQuickOrdering(true)
+    try {
+      const customer = await getCustomer()
+      
+      if (customer) {
+        // Logged in user: Add to cart and redirect to checkout (Buy Now behavior)
+        if (!selectedVariant?.id) return
+
+        const res = await addToCart({
+          variantId: selectedVariant.id,
+          quantity: 1,
+          countryCode: (countryCode || "uz").toLowerCase(),
+        })
+
+        if (res.success) {
+          router.push(`/${countryCode}/checkout`)
+        } else {
+          setAddError(res.error || "Не удалось добавить товар")
+        }
+      } else {
+        // Guest user: Open Quick Order Modal
+        setIsQuickOrderOpen(true)
+      }
+    } catch (e) {
+      console.error(e)
+      setIsQuickOrderOpen(true) // Fallback to modal on error
+    } finally {
+      setIsQuickOrdering(false)
     }
   }
 
@@ -243,8 +282,9 @@ export default function ProductActions({
         <Button
           variant="secondary"
           className="w-full h-10 bg-gray-100 hover:bg-gray-200 text-gray-800"
-          onClick={() => setIsQuickOrderOpen(true)}
-          disabled={!selectedVariant || !inStock}
+          onClick={handleQuickOrder}
+          disabled={!selectedVariant || !inStock || isQuickOrdering}
+          isLoading={isQuickOrdering}
         >
           {t('quick_order')}
         </Button>
