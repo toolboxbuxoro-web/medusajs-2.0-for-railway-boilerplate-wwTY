@@ -59,17 +59,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const existingCustomers = await customerModule.listCustomers({ email })
     
     if (existingCustomers?.length > 0) {
-      logger.info(`[auto-register] Customer already exists: ${existingCustomers[0].id}`)
-      // Customer exists, just authenticate
-      const authModule = req.scope.resolve(Modules.AUTH) as any
-      const authResult = await authModule.authenticate("emailpass", {
-        body: { email, password: "" }, // We don't know the password
-      })
-      
-      // If exists, return error - they should login
-      return res.status(409).json({ 
-        error: "customer_exists",
-        message: "Аккаунт уже существует. Пожалуйста, войдите." 
+      const existingCustomer = existingCustomers[0]
+      logger.info(`[auto-register] Customer already exists: ${existingCustomer.id}`)
+      // Customer exists - that's OK, continue with checkout
+      // They won't get SMS with password (they already have an account)
+      // But the checkout can proceed and order will be tied to this customer
+      return res.json({ 
+        success: true,
+        already_exists: true,
+        customer_id: existingCustomer.id,
+        message: "Аккаунт уже существует. Заказ будет привязан к вашему аккаунту."
       })
     }
 

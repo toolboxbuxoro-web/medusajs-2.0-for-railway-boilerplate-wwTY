@@ -598,14 +598,21 @@ export class PaymeMerchantService {
 
     this.logger_.info(`[PaymeMerchant] Updated session ${session.id} with payme_state=2`)
 
-    // Attempt to complete the cart in Medusa
+    // Attempt to complete the cart in Medusa using the workflow
     const cartId = currentData.cart_id
     if (cartId) {
       try {
-        const cartModule = this.container_.resolve(Modules.CART) as any
-        const result = await cartModule.completeCart(cartId)
+        // In Medusa 2.0, cart completion is done via workflow, not module method
+        // Import and run the completeCartWorkflow
+        const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
+        
+        this.logger_.info(`[PaymeMerchant] Running completeCartWorkflow for cart ${cartId}`)
+        
+        const workflowResult = await completeCartWorkflow(this.container_).run({
+          input: { id: cartId }
+        })
 
-        const orderId = result?.order?.id
+        const orderId = workflowResult?.result?.id
         if (orderId) {
           // Persist the created order id so storefront can redirect to /order/confirmed/:id
           const dataWithOrder = {
@@ -624,8 +631,8 @@ export class PaymeMerchantService {
             `[PaymeMerchant] Completed cart ${cartId} -> order ${orderId} (saved to session ${session.id})`
           )
         } else {
-          this.logger_.info(
-            `[PaymeMerchant] Completed cart ${cartId} for transaction ${id} (order id not returned)`
+          this.logger_.warn(
+            `[PaymeMerchant] completeCartWorkflow succeeded but no order ID returned for cart ${cartId}`
           )
         }
       } catch (e: any) {
