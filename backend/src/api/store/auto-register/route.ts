@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { normalizeUzPhone } from "../../../lib/phone"
+import { verifiedPhones } from "../otp/verify/route"
 
 type Body = {
   phone: string
@@ -31,10 +32,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const password = generatePassword()
 
   try {
-    // Check if phone was verified via OTP
-    const redis = req.scope.resolve("redis") as any
-    const verifiedKey = `verified_phone:+${normalized}`
-    const isVerified = await redis.get(verifiedKey)
+    // Check if phone was verified via OTP (using in-memory store)
+    const verifiedExpiry = verifiedPhones.get(`+${normalized}`)
+    const isVerified = verifiedExpiry && verifiedExpiry > Date.now()
     
     if (!isVerified) {
       return res.status(400).json({ 

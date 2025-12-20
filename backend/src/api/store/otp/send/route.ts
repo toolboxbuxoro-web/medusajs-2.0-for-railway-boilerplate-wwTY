@@ -2,6 +2,19 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import crypto from "crypto"
 
+// Simple in-memory OTP storage (for environments without Redis)
+const otpStore = new Map<string, { code: string; expires: number; attempts: number }>()
+
+// Cleanup expired entries every 5 minutes
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, value] of otpStore.entries()) {
+    if (value.expires < now) {
+      otpStore.delete(key)
+    }
+  }
+}, 5 * 60 * 1000)
+
 /**
  * POST /store/otp/send
  * Send OTP code to phone number via Eskiz SMS
@@ -38,39 +51,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     
     logger.info(`[OTP] Generating code for ${normalizedPhone}`)
     
-    // Get Redis from cache module (Medusa 2.0 way)
-    let redis: any
-    try {
-      const cacheModule = req.scope.resolve(Modules.CACHE) as any
-      redis = cacheModule?.cacheService?.redis || cacheModule
-      logger.info(`[OTP] Cache module resolved: ${typeof cacheModule}`)
-    } catch (e) {
-      logger.warn(`[OTP] Cache module not available, using in-memory fallback`)
-      // Fallback: skip rate limiting if Redis not available
+    // Check rate limiting (max 3 sends per phone per hour)
+    const existing = otpStore.get(normalizedPhone)
+    if (existing && existing.attempts >= 3 && existing.expires > Date.now()) {
+      return res.status(429).json({ 
+        error: "Too many OTP requests. Please try again later.",
+        retry_after: Math.ceil((existing.expires - Date.now()) / 1000)
+      })
     }
-    
-    const otpKey = `otp:${normalizedPhone}`
-    const attemptsKey = `otp_attempts:${normalizedPhone}`
-    
-    if (redis?.get) {
-      // Check rate limiting (max 3 sends per phone per hour)
-      const currentAttempts = await redis.get(attemptsKey)
-      if (currentAttempts && parseInt(currentAttempts) >= 3) {
-        return res.status(429).json({ 
-          error: "Too many OTP requests. Please try again in 1 hour.",
-          retry_after: 3600
-        })
-      }
 
-      // Store OTP with 5 min expiry
-      await redis.set(otpKey, otpCode, "EX", 300)
-      
-      // Increment attempts counter (1 hour expiry)
-      await redis.incr(attemptsKey)
-      await redis.expire(attemptsKey, 3600)
-    } else {
-      logger.warn(`[OTP] Redis not available, OTP will not be stored`)
-    }
+    // Store OTP with 5 min expiry
+    otpStore.set(normalizedPhone, {
+      code: otpCode,
+      expires: Date.now() + 5 * 60 * 1000, // 5 minutes
+      attempts: (existing?.attempts || 0) + 1
+    })
     
     // Send SMS via Eskiz
     logger.info(`[OTP] Sending SMS to ${normalizedPhone}`)
@@ -108,4 +103,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     })
   }
 }
+
+// Export the OTP store for verification endpoint
+export { otpStore }
+
 

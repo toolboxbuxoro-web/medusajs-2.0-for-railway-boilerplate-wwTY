@@ -1,4 +1,8 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { otpStore } from "../send/route"
+
+// Verified phones storage (valid for 1 hour)
+const verifiedPhones = new Map<string, number>()
 
 /**
  * POST /store/otp/verify
@@ -13,59 +17,55 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   // Normalize phone number
-  const normalizedPhone = phone.replace(/\s+/g, "").replace(/^998/, "+998")
+  let normalizedPhone = phone.replace(/[\s\-\(\)]/g, "")
+  
+  if (normalizedPhone.startsWith("+")) {
+    normalizedPhone = normalizedPhone
+  } else if (normalizedPhone.startsWith("998")) {
+    normalizedPhone = "+" + normalizedPhone
+  } else if (normalizedPhone.startsWith("8") && normalizedPhone.length === 10) {
+    normalizedPhone = "+998" + normalizedPhone.slice(1)
+  } else if (/^\d{9}$/.test(normalizedPhone)) {
+    normalizedPhone = "+998" + normalizedPhone
+  }
   
   if (!/^\+998\d{9}$/.test(normalizedPhone)) {
     return res.status(400).json({ error: "Invalid phone number format" })
   }
 
   try {
-    const redis = req.scope.resolve("redis") as any
-    const otpKey = `otp:${normalizedPhone}`
-    const verifyAttemptsKey = `otp_verify_attempts:${normalizedPhone}`
-    
-    // Check verification attempts (max 5 per code)
-    const verifyAttempts = await redis.get(verifyAttemptsKey)
-    if (verifyAttempts && parseInt(verifyAttempts) >= 5) {
-      // Delete the OTP to force resend
-      await redis.del(otpKey)
-      return res.status(429).json({ 
-        error: "Too many verification attempts. Please request a new code.",
-        should_resend: true
-      })
-    }
-
     // Get stored OTP
-    const storedOtp = await redis.get(otpKey)
+    const stored = otpStore.get(normalizedPhone)
     
-    if (!storedOtp) {
+    if (!stored) {
       return res.status(400).json({ 
         error: "OTP expired or not found. Please request a new code.",
         expired: true
       })
     }
 
-    // Increment verify attempts
-    await redis.incr(verifyAttemptsKey)
-    await redis.expire(verifyAttemptsKey, 300) // Same TTL as OTP
+    // Check if OTP expired
+    if (stored.expires < Date.now()) {
+      otpStore.delete(normalizedPhone)
+      return res.status(400).json({ 
+        error: "OTP expired. Please request a new code.",
+        expired: true
+      })
+    }
 
     // Compare codes
-    if (storedOtp !== code.trim()) {
-      const remaining = 5 - (parseInt(verifyAttempts || "0") + 1)
+    if (stored.code !== code.trim()) {
       return res.status(400).json({ 
         error: "Invalid code. Please try again.",
-        attempts_remaining: remaining
       })
     }
 
     // OTP verified successfully
-    // Delete OTP and attempts
-    await redis.del(otpKey)
-    await redis.del(verifyAttemptsKey)
+    // Delete OTP
+    otpStore.delete(normalizedPhone)
     
-    // Store verified phone temporarily (1 hour) for auto-registration
-    const verifiedKey = `verified_phone:${normalizedPhone}`
-    await redis.set(verifiedKey, "1", "EX", 3600)
+    // Store verified phone (valid for 1 hour)
+    verifiedPhones.set(normalizedPhone, Date.now() + 60 * 60 * 1000)
 
     logger.info(`[OTP] Phone ${normalizedPhone} verified successfully`)
 
@@ -80,6 +80,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(500).json({ error: "Verification failed. Please try again." })
   }
 }
+
+// Export for auto-register to check
+export { verifiedPhones }
+
 
 
 
