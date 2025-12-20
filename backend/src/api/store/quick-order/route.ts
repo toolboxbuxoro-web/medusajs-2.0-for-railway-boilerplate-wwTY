@@ -65,6 +65,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         first_name: first_name || "Покупатель",
         last_name: "",
         phone: `+${normalized}`,
+        has_account: true, // Explicitly mark as registered account
       })
     }
 
@@ -87,6 +88,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           "items.unit_price",
           "items.total",
           "items.title",
+          "metadata", // Ensure metadata is fetched
           "region.id",
           "region.name",
           "region.currency_code",
@@ -113,45 +115,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(400).json({ error: "Корзина пуста" })
     }
 
-    // Update cart with customer info and address
-    await cartModule.updateCarts(cartId, {
-      email,
-      customer_id: customer.id,
-      shipping_address: {
-        first_name: first_name || "Покупатель",
-        last_name: "",
-        phone: `+${normalized}`,
-        address_1: "Будет уточнен при звонке",
-        city: "Ташкент",
-        country_code: "uz",
-        postal_code: "100000",
-      },
-      billing_address: {
-        first_name: first_name || "Покупатель",
-        last_name: "",
-        phone: `+${normalized}`,
-        address_1: "Будет уточнен при звонке",
-        city: "Ташкент",
-        country_code: "uz",
-        postal_code: "100000",
-      },
-    })
+    // Prepare metadata update
+    const metadataUpdate = {
+        ...cart.metadata,
+        is_quick_order: true
+    } as any
 
-    // Generate password if new or reset if needed (we'll need it for the SMS)
-    // We store it in cart metadata to send it later after order is placed
     if (isNewCustomer) {
-      // Update cart with metadata containing the password
-      // This is temporary storage so we can email/SMS it after checkout
-      await cartModule.updateCarts(cartId, {
-         metadata: {
-           ...cart.metadata,
-           tmp_generated_password: password,
-           is_quick_order: true
-         }
-      })
+        metadataUpdate.tmp_generated_password = password
     }
 
-    // Update cart with customer info and address
+    // Update cart with customer info, address, and metadata in one go
     await cartModule.updateCarts(cartId, {
       email,
       customer_id: customer.id,
@@ -173,6 +147,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         country_code: "uz",
         postal_code: "100000",
       },
+      metadata: metadataUpdate
     })
 
     // We no longer complete the order here. We just set up the cart and return success.
