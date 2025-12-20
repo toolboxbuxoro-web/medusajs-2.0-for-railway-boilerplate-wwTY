@@ -175,8 +175,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         input: { id: cartId },
       })
 
-      if (result?.result?.order?.id) {
-        orderId = result.result.order.id
+      // The workflow returns { id: order_id } not { order: { id } }
+      if (result?.result?.id) {
+        orderId = result.result.id
       }
     } catch (e: any) {
       logger.error(`[quick-order] completeCartWorkflow failed: ${e.message}`)
