@@ -614,6 +614,37 @@ export class PaymeMerchantService {
 
         const orderId = workflowResult?.result?.id
         if (orderId) {
+          // Copy cart metadata to order (for quick order credentials SMS)
+          try {
+            const pgConnection = this.container_.resolve("__pg_connection__")
+            
+            // Get cart metadata
+            const cartResult = await pgConnection.raw(
+              `SELECT metadata FROM cart WHERE id = $1`,
+              [cartId]
+            )
+            const cartMetadata = cartResult?.rows?.[0]?.metadata
+            
+            if (cartMetadata) {
+              const meta = typeof cartMetadata === 'string' ? JSON.parse(cartMetadata) : cartMetadata
+              
+              // If cart has quick order data, copy to order
+              if (meta?.is_quick_order || meta?.tmp_generated_password) {
+                await pgConnection.raw(
+                  `UPDATE "order" SET metadata = COALESCE(metadata, '{}')::jsonb || $1::jsonb WHERE id = $2`,
+                  [JSON.stringify({
+                    is_quick_order: meta.is_quick_order,
+                    is_new_customer: meta.is_new_customer,
+                    tmp_generated_password: meta.tmp_generated_password,
+                  }), orderId]
+                )
+                this.logger_.info(`[PaymeMerchant] Copied quick order metadata from cart to order ${orderId}`)
+              }
+            }
+          } catch (metaErr: any) {
+            this.logger_.warn(`[PaymeMerchant] Failed to copy cart metadata to order: ${metaErr.message}`)
+          }
+
           // Persist the created order id so storefront can redirect to /order/confirmed/:id
           const dataWithOrder = {
             ...newData,
