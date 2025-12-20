@@ -89,7 +89,8 @@ async function handleCallback(request: NextRequest) {
   let resolvedOrderId: string | null = null
 
   // Short polling window to handle race between Payme return redirect and order persistence.
-  for (let i = 0; i < 12; i++) {
+  // Increased to 60 checks (approx 30s) as workflows can be slow
+  for (let i = 0; i < 60; i++) {
     try {
       const resp = await fetch(lookupUrl, { 
         cache: "no-store",

@@ -1,5 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+// import { Link } from "@medusajs/framework/modules-link" // Not using Link directly, workflow handles it
+import { createCustomerAccountWorkflow } from "@medusajs/medusa/core-flows"
 import { normalizeUzPhone } from "../../../lib/phone"
 
 type Body = {
@@ -27,18 +29,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const email = `${normalized}@phone.local`
   const password = generatePassword()
 
-  // Get cart ID from header (sent by storefront)
   const cartId = req.headers["x-cart-id"] as string
-  
   if (!cartId) {
     return res.status(400).json({ error: "Корзина пуста. Добавьте товар в корзину." })
   }
 
   try {
-    const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
-    const authModule = req.scope.resolve(Modules.AUTH) as any
-    const cartModule = req.scope.resolve(Modules.CART) as any
-    const paymentModule = req.scope.resolve(Modules.PAYMENT) as any
+    const customerModule = req.scope.resolve(Modules.CUSTOMER)
+    const authModule = req.scope.resolve(Modules.AUTH)
+    const cartModule = req.scope.resolve(Modules.CART)
 
     // Check if customer exists
     const existingCustomers = await customerModule.listCustomers({ email })
@@ -46,30 +45,58 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     let isNewCustomer = false
 
     if (!customer) {
-      // Create new customer
       isNewCustomer = true
-      
+      let authIdentityId = ""
+
+      // 1. Create Auth Identity
       try {
-        await authModule.register("emailpass", {
+        const authData = await authModule.register("emailpass", {
           body: { email, password },
         })
+        authIdentityId = authData?.auth_identity?.id
       } catch (e: any) {
-        // If user already exists in auth, that's ok
         if (!e.message?.includes("already exists")) {
-          logger.warn(`[quick-order] Auth register warning: ${e.message}`)
+            logger.warn(`[quick-order] Auth register warning: ${e.message}`)
+        }
+        // If auth exists but customer doesn't? We might miss the ID.
+        // We could try to list auth identities if filtering allows, but usually emailpass is strict.
+      }
+
+      // 2. Create Customer (and link) via Workflow
+      if (authIdentityId) {
+        try {
+           const { result } = await createCustomerAccountWorkflow(req.scope).run({
+               input: {
+                   auth_identity_id: authIdentityId,
+                   customer: {
+                       email,
+                       first_name: first_name || "Покупатель",
+                       last_name: "",
+                       phone: `+${normalized}`,
+                       has_account: true
+                   }
+               }
+           })
+           customer = result
+           // Note: workflow returns customer object typically.
+        } catch(e: any) {
+            logger.error(`[quick-order] Workflow failed: ${e.message}, falling back to manual`)
         }
       }
 
-      customer = await customerModule.createCustomers({
-        email,
-        first_name: first_name || "Покупатель",
-        last_name: "",
-        phone: `+${normalized}`,
-        has_account: true, // Explicitly mark as registered account
-      })
+      // 3. Fallback: Manual creation (Unlinked)
+      if (!customer) {
+        customer = await customerModule.createCustomers({
+            email,
+            first_name: first_name || "Покупатель",
+            last_name: "",
+            phone: `+${normalized}`,
+            has_account: true,
+        })
+      }
     }
 
-    // Get existing cart using remoteQuery (more robust in Medusa 2.0)
+    // Get existing cart using remoteQuery
     let cart: any
     try {
       const remoteQuery = req.scope.resolve("remoteQuery")
@@ -88,7 +115,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           "items.unit_price",
           "items.total",
           "items.title",
-          "metadata", // Ensure metadata is fetched
+          "metadata",
           "region.id",
           "region.name",
           "region.currency_code",
@@ -125,7 +152,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         metadataUpdate.tmp_generated_password = password
     }
 
-    // Update cart with customer info, address, and metadata in one go
+    // Update cart
     await cartModule.updateCarts(cartId, {
       email,
       customer_id: customer.id,
@@ -150,9 +177,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       metadata: metadataUpdate
     })
 
-    // We no longer complete the order here. We just set up the cart and return success.
-    // The frontend will redirect to checkout.
-    
     logger.info(`[quick-order] Initialized cart ${cartId} for customer ${customer.id}`)
 
     return res.json({
@@ -170,4 +194,3 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     })
   }
 }
-
