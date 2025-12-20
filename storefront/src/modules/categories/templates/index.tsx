@@ -147,12 +147,12 @@ export default function CategoryTemplate({
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-4 p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-gray-50 to-white">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                  <span className="text-2xl sm:text-3xl">📦</span>
+              <div className="flex items-center gap-3 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
+                  <span className="text-lg sm:text-xl">📦</span>
                 </div>
                 <h1 
-                  className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight" 
+                  className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight" 
                   data-testid="category-page-title"
                 >
                   {getLocalizedCategoryName(category, locale)}
