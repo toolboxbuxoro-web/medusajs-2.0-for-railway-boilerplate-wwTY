@@ -10,10 +10,19 @@ function formatPrice(priceString: string): string {
   return smoothPrice.replace(/,/g, " ")
 }
 
-export default function PreviewPrice({ price }: { price: VariantPrice }) {
+export default function PreviewPrice({ 
+  price, 
+  isRed = false 
+}: { 
+  price: VariantPrice
+  isRed?: boolean 
+}) {
   if (!price) {
     return null
   }
+
+  // Price is red if: isRed prop is true OR it's a sale price
+  const showRedPrice = isRed || price.price_type === "sale"
 
   return (
     <div className="flex items-baseline gap-2 flex-wrap">
@@ -29,8 +38,8 @@ export default function PreviewPrice({ price }: { price: VariantPrice }) {
         className={clx(
           "text-lg sm:text-xl font-bold",
           {
-            "text-red-600": price.price_type === "sale",
-            "text-gray-900": price.price_type !== "sale",
+            "text-red-600": showRedPrice,
+            "text-gray-900": !showRedPrice,
           }
         )}
         data-testid="price"
@@ -45,3 +54,4 @@ export default function PreviewPrice({ price }: { price: VariantPrice }) {
     </div>
   )
 }
+

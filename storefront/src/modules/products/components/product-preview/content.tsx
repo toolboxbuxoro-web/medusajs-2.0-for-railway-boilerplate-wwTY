@@ -80,10 +80,19 @@ export default function ProductPreviewContent({
 
         {/* Product Info */}
         <div className="p-3 sm:p-4 flex-1 flex flex-col">
+          {/* Price first - in red */}
+          <div className="mb-2">
+            {cheapestPrice && (
+              <div className="flex items-baseline gap-2">
+                <PreviewPrice price={cheapestPrice} isRed={true} />
+              </div>
+            )}
+          </div>
+          
           {/* Title */}
           <LocalizedClientLink href={`/products/${product.handle}`}>
             <Text 
-              className="text-gray-900 text-sm sm:text-base font-semibold line-clamp-2 mb-2 group-hover:text-red-600 transition-colors min-h-[2.5rem] sm:min-h-[3rem]" 
+              className="text-gray-900 text-sm sm:text-base font-semibold line-clamp-2 group-hover:text-red-600 transition-colors min-h-[2.5rem] sm:min-h-[3rem]" 
               data-testid="product-title"
             >
               {getLocalizedProductTitle(product, localeStr)}
@@ -92,19 +101,6 @@ export default function ProductPreviewContent({
           
           {/* Spacer */}
           <div className="flex-1" />
-          
-          {/* Price or Out of Stock text */}
-          <div className="mt-2">
-            {!isInStock ? (
-              <div className="text-gray-500 text-sm font-medium">
-                Ожидается поступление
-              </div>
-            ) : cheapestPrice && (
-              <div className="flex items-baseline gap-2">
-                <PreviewPrice price={cheapestPrice} />
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
