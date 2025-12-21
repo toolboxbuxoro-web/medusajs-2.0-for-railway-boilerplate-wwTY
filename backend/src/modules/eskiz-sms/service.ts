@@ -106,6 +106,12 @@ export class EskizNotificationService extends AbstractNotificationProviderServic
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "Missing phone number or message content")
     }
 
+    // LOCAL MOCK: Skip actual API call in local environment
+    if (process.env.APP_ENV === 'local' || process.env.NODE_ENV === 'development' || process.env.SKIP_EXTERNAL_SERVICES) {
+      this.logger_.info(`[Eskiz MOCK] Would send SMS to ${toPhone}: "${message}"`)
+      return {}
+    }
+
     const form = new FormData()
     form.set("mobile_phone", toPhone.replace(/\+/g, "")) // Eskiz expects phone without +
     form.set("message", message)
