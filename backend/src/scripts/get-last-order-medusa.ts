@@ -1,7 +1,7 @@
-import { IOrderModuleService } from "@medusajs/types"
-import { Modules } from "@medusajs/utils"
+import { ExecArgs, IOrderModuleService } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 
-export default async function main({ container }) {
+export default async function main({ container }: ExecArgs) {
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   
   const [orders] = await orderModuleService.listAndCountOrders(
