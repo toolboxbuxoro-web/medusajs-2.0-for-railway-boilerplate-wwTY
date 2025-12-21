@@ -296,21 +296,67 @@ export async function login(_currentState: unknown, formData: FormData) {
     console.log(`[LOGIN] Step 3: FAILED - Invalid phone format`)
     return "invalid_phone"
   }
-  const email = `${normalized}@phone.local`
-  console.log(`[LOGIN] Step 3: Technical email="${email}"`)
+  
+  const technicalEmail = `${normalized}@phone.local`
+  const formattedPhone = `+${normalized}`
+  console.log(`[LOGIN] Step 3: Technical email="${technicalEmail}", formatted phone="${formattedPhone}"`)
+
+  // Try to find customer by phone to get their actual email
+  let emailToUse = technicalEmail
+  try {
+    const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+    const response = await fetch(`${backendUrl}/store/customers?q=${encodeURIComponent(formattedPhone)}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+      },
+      cache: "no-store"
+    })
+    if (response.ok) {
+      const data = await response.json()
+      const customer = data.customers?.find((c: any) => c.phone === formattedPhone)
+      if (customer?.email) {
+        emailToUse = customer.email
+        console.log(`[LOGIN] Step 4: Found customer, using stored email="${emailToUse}"`)
+      } else {
+        console.log(`[LOGIN] Step 4: Customer not found by phone, using technical email`)
+      }
+    }
+  } catch (e: any) {
+    console.log(`[LOGIN] Step 4: Error looking up customer: ${e.message}, using technical email`)
+  }
 
   try {
-    console.log(`[LOGIN] Step 4: Calling sdk.auth.login with email="${email}"`)
+    console.log(`[LOGIN] Step 5: Calling sdk.auth.login with email="${emailToUse}"`)
     await sdk.auth
-      .login("customer", "emailpass", { email, password })
+      .login("customer", "emailpass", { email: emailToUse, password })
       .then((token) => {
-        console.log(`[LOGIN] Step 5: SUCCESS - Token received, type=${typeof token}`)
+        console.log(`[LOGIN] Step 6: SUCCESS - Token received, type=${typeof token}`)
         setAuthToken(typeof token === 'string' ? token : token.location)
         revalidateTag("customer")
       })
-    console.log(`[LOGIN] Step 6: Login completed successfully`)
+    console.log(`[LOGIN] Step 7: Login completed successfully`)
   } catch (error: any) {
-    console.error(`[LOGIN] Step 5: FAILED - Error: ${error?.message || error}`)
+    console.error(`[LOGIN] Step 6: FAILED with email="${emailToUse}" - Error: ${error?.message || error}`)
+    
+    // Fallback: if we used stored email and it failed, try technical email
+    if (emailToUse !== technicalEmail) {
+      console.log(`[LOGIN] Step 7: Trying fallback with technical email="${technicalEmail}"`)
+      try {
+        await sdk.auth
+          .login("customer", "emailpass", { email: technicalEmail, password })
+          .then((token) => {
+            console.log(`[LOGIN] Step 8: FALLBACK SUCCESS - Token received`)
+            setAuthToken(typeof token === 'string' ? token : token.location)
+            revalidateTag("customer")
+          })
+        console.log(`[LOGIN] Step 9: Fallback login completed successfully`)
+        return // Success on fallback
+      } catch (fallbackError: any) {
+        console.error(`[LOGIN] Step 8: FALLBACK ALSO FAILED - Error: ${fallbackError?.message}`)
+      }
+    }
+    
     return "invalid_credentials"
   }
 }
