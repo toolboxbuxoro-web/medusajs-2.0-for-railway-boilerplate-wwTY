@@ -47,32 +47,25 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   // Debug logging
 
   const auth = req.scope.resolve(Modules.AUTH) as any
+  const logger = req.scope.resolve("logger") as any
   
-  // Check if identity exists first
-  const identities = await auth.listAuthIdentities({
-    provider_identities: {
-      provider: "emailpass",
-      entity_id: customer.email,
-    },
+  // Try to update password first (most common case)
+  const updateResult = await auth.updateProvider("emailpass", {
+    entity_id: customer.email,
+    password: new_password,
   })
 
-  let resp;
-  if (identities.length === 0) {
-    // Create new identity
-    resp = await auth.register("emailpass", {
-       email: customer.email, 
-       password: new_password 
+  if (!updateResult?.success) {
+    // If identity does not exist — register it
+    logger.info(`[RESET_PASSWORD] updateProvider failed for ${customer.email}, attempting register`)
+    const registerResult = await auth.register("emailpass", {
+      body: { email: customer.email, password: new_password },
     })
-  } else {
-    // Update existing
-    resp = await auth.updateProvider("emailpass", {
-      entity_id: customer.email,
-      password: new_password,
-    })
-  }
 
-  if (!resp) {
-    return res.status(400).json({ error: "password_update_failed" })
+    if (!registerResult?.success) {
+      logger.error(`[RESET_PASSWORD] register also failed for ${customer.email}`)
+      return res.status(400).json({ error: "password_update_failed" })
+    }
   }
 
   return res.json({ success: true })
