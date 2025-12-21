@@ -110,7 +110,14 @@
     "items": "ta mahsulot",
     "item": "ta mahsulot",
     "more": "yana",
-    "see_details": "Batafsil ko'rish"
+    "see_details": "Batafsil ko'rish",
+    "forgot_password": "Parolni unutdingizmi?",
+    "reset_password": "Parolni tiklash",
+    "reset_password_description": "Telefon raqamingizni kiriting, SMS orqali kod oling va yangi parol o'rnating.",
+    "sms_code": "SMS dan kod",
+    "change": "O'zgartirish",
+    "complete_registration": "Ro'yxatdan o'tishni yakunlash",
+    "welcome": "Xush kelibsiz"
   },
   "cart": {
     "your_cart": "Xarid savati",

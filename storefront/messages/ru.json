@@ -110,7 +110,14 @@
     "items": "товаров",
     "item": "товар",
     "more": "ещё",
-    "see_details": "Подробнее"
+    "see_details": "Подробнее",
+    "forgot_password": "Забыли пароль?",
+    "reset_password": "Сброс пароля",
+    "reset_password_description": "Введите телефон, получите код по SMS и задайте новый пароль.",
+    "sms_code": "Код из SMS",
+    "change": "Изменить",
+    "complete_registration": "Завершить регистрацию",
+    "welcome": "Добро пожаловать"
   },
   "cart": {
     "your_cart": "Корзина покупок",
