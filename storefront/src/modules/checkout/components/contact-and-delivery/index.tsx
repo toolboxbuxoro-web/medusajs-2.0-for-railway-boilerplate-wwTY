@@ -465,7 +465,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                   "Content-Type": "application/json",
                                   "x-publishable-api-key": publishableKey
                                 },
-                                body: JSON.stringify({ phone })
+                                body: JSON.stringify({ phone, purpose: "checkout" })
                               })
                               const data = await resp.json()
                               if (resp.ok) {

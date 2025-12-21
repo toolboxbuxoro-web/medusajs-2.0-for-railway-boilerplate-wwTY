@@ -5,11 +5,27 @@ import { generateOtpCode, otpRateLimitCheck, otpStoreSet } from "../../../../lib
 
 type Body = {
   phone: string
+  purpose?: "register" | "reset_password" | "change_password" | "checkout"
+}
+
+// Eskiz-approved SMS templates for each purpose
+function getOtpMessage(code: string, purpose?: string): string {
+  switch (purpose) {
+    case "register":
+      return `Kod podtverzhdeniya dlya registracii na sajte toolbox-tools.uz: ${code}`
+    case "reset_password":
+      return `Kod dlya vosstanovleniya parolya na sajte toolbox-tools.uz: ${code}`
+    case "change_password":
+      return `Kod dlya izmeneniya nomera telefona na sajte toolbox-tools.uz: ${code}`
+    case "checkout":
+    default:
+      return `Kod podtverzhdeniya dlya oformleniya zakaza na sajte toolbox-tools.uz: ${code}`
+  }
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
-  const { phone } = (req.body || {}) as Body
+  const { phone, purpose } = (req.body || {}) as Body
 
   if (!phone) {
     return res.status(400).json({ error: "phone is required" })
@@ -29,8 +45,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const code = generateOtpCode()
   await otpStoreSet(normalized, code)
 
-  const siteName = "toolbox-tools.uz"
-  const message = `${siteName}: ${code}`
+  // Use Eskiz-approved template format based on purpose
+  const message = getOtpMessage(code, purpose)
 
   const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
 
