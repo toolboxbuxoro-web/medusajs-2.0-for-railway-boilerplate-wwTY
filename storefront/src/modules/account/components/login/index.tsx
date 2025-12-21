@@ -14,6 +14,7 @@ type Props = {
 const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useFormState(login, null)
   const t = useTranslations('account')
+  const te = useTranslations('errors')
 
   return (
     <div
@@ -89,7 +90,7 @@ const Login = ({ setCurrentView }: Props) => {
           </button>
         </div>
 
-        <ErrorMessage error={message} data-testid="login-error-message" />
+        <ErrorMessage error={typeof message === "string" ? message : undefined} data-testid="login-error-message" />
 
         <button
           type="submit"

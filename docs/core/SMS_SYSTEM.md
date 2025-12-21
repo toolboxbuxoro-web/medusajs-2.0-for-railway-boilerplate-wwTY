@@ -1,34 +1,20 @@
 # SMS System
 
-Centralized management for all critical SMS communications.
+## Overview
+The SMS system is responsible for delivering OTP codes to users.
 
-## 1. Unified Entry Point
-Post-purchase SMS delivery is strictly centralized in the backend to prevent duplicate or conflicting notifications.
-- **Main Handler**: `backend/src/subscribers/order-sms-handler.ts`.
-- **Trigger**: `order.placed` event.
+## Provider Integration
+- **Current implementation**: Uses a dedicated SMS provider (e.g., Eskiz or similar) via a custom notification provider or direct fetch within the OTP request route.
+- **Message Template**: 
+  - English/Standard: `Your code is: 123456. Do not share it.`
+  - Russian: `Ваш код: 123456. Не сообщайте его никому.`
+  - Uzbek: `Sizning kodingiz: 123456. Uni hech kimga bermang.`
 
-## 2. SMS Types
+## Reliability and Logging
+- **Success Logging**: Every successful SMS dispatch is logged in the backend with the recipient phone and provider response ID.
+- **Error Handling**: If the SMS provider fails, a `failed_to_send_otp` error is returned to the user, and the error is logged for investigation.
+- **Queueing**: (Optional) In high-traffic scenarios, SMS delivery can be offloaded to a background worker (e.g., Redis Streams or BullMQ).
 
-| Type | Source | Logic |
-| :--- | :--- | :--- |
-| **OTP Code** | `otp/request` | Sent immediately during verification. |
-| **Credentials** | `order-sms-handler` | Sent if `tmp_generated_password` is exists in cart metadata. |
-| **Order Confirmation**| `order-sms-handler` | Sent for every successful order. |
-
-## 3. Phone Number Resolution
-The system uses the following priority to find a valid recipient phone:
-1. **Shipping Address**: primary source (used for delivery coord).
-2. **Contact Metadata**: fallback for quick orders or special flows.
-3. **Customer Profile**: last resort if address is missing.
-
-All phone numbers are normalized to the Uzbekistan format (`998...`) before transmission.
-
-## 4. Local Development (Mocking)
-To prevent unnecessary costs and API calls during development:
-- **Condition**: `process.env.APP_ENV === "local"` or `APP_ENV === "development"`.
-- **Behavior**: `EskizSmsService` logs the message to the console instead of calling the Eskiz API.
-- **Verification**: Developers should check backend console logs for "Sent SMS to...".
-
-## 5. Delivery Guarantees
-- **Atomic OTP**: Redis-based verification ensures the same code won't be reused for different actions.
-- **Order-First**: Post-purchase SMS are only triggered *after* the order is persisted in the database, ensuring users don't get notifications for failed transactions.
+## Formatting
+- **Phone Prefix**: All numbers sent to the provider are formatted with a `+` prefix and country code.
+- **Normalization**: Handled by `lib/phone.ts` to ensure consistency.

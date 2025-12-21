@@ -8,7 +8,7 @@ import { redirect } from "next/navigation"
 import { cache } from "react"
 import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
 
-type OtpPurpose = "register" | "reset_password" | "change_password"
+type OtpPurpose = "register" | "reset_password" | "change_password" | "checkout" | "change_phone"
 
 function normalizeUzPhone(input: string): string | null {
   if (!input) return null
@@ -23,6 +23,21 @@ function backendBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
 }
 
+/**
+ * Maps technical backend errors to frontend translation keys (auth.errors.*)
+ */
+function mapBackendError(error: any): string {
+  const message = (error?.message || error?.toString() || "").toLowerCase()
+  if (message.includes("account_exists")) return "account_exists"
+  if (message.includes("otp_cooldown")) return "otp_cooldown"
+  if (message.includes("failed_to_send_otp")) return "failed_to_send_otp"
+  if (message.includes("invalid_code")) return "invalid_code"
+  if (message.includes("too_many_requests")) return "too_many_requests"
+  if (message.includes("phone_not_verified")) return "phone_not_verified"
+  if (message.includes("invalid_phone")) return "invalid_phone"
+  return "error_occurred"
+}
+
 async function otpRequest(phone: string, purpose: OtpPurpose) {
   const resp = await fetch(`${backendBaseUrl()}/store/otp/request`, {
     method: "POST",
@@ -34,7 +49,8 @@ async function otpRequest(phone: string, purpose: OtpPurpose) {
     cache: "no-store",
   })
   if (!resp.ok) {
-    throw new Error(await resp.text().catch(() => "Failed to send code"))
+    const errorJson = await resp.json().catch(() => ({}))
+    throw new Error(errorJson.error || "failed_to_send_otp")
   }
 }
 
@@ -48,7 +64,10 @@ async function otpVerify(phone: string, purpose: OtpPurpose, code: string) {
     body: JSON.stringify({ phone, purpose, code }),
     cache: "no-store",
   })
-  if (!resp.ok) return false
+  if (!resp.ok) {
+    const errorJson = await resp.json().catch(() => ({}))
+    throw new Error(errorJson.error || "invalid_code")
+  }
   const json = await resp.json().catch(() => null)
   return !!json?.verified
 }
@@ -73,22 +92,20 @@ export const updateCustomer = cache(async function (
 })
 
 export async function signup(_currentState: unknown, formData: FormData) {
+  const phone = formData.get("phone") as string
   const password = formData.get("password") as string
   const otpCode = (formData.get("otp_code") as string) || ""
-  const customerForm = {
-    email: formData.get("email") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    phone: formData.get("phone") as string,
+  const first_name = formData.get("first_name") as string
+  const last_name = formData.get("last_name") as string
+
+  const normalizedPhone = normalizeUzPhone(phone)
+  if (!normalizedPhone) {
+    return "invalid_phone"
   }
 
-  try {
-    // Require phone for SMS verification
-    const normalizedPhone = normalizeUzPhone(customerForm.phone)
-    if (!normalizedPhone) {
-      return "invalid_phone"
-    }
+  const technicalEmail = `${normalizedPhone}@phone.local`
 
+  try {
     // Step 1: send OTP if not provided
     if (!otpCode) {
       await otpRequest(normalizedPhone, "register")
@@ -102,20 +119,25 @@ export async function signup(_currentState: unknown, formData: FormData) {
     }
 
     const token = await sdk.auth.register("customer", "emailpass", {
-      email: customerForm.email,
+      email: technicalEmail,
       password: password,
     })
 
     const customHeaders = { authorization: `Bearer ${token}` }
     
     const { customer: createdCustomer } = await sdk.store.customer.create(
-      { ...customerForm, phone: `+${normalizedPhone}` },
+      { 
+        email: technicalEmail,
+        first_name,
+        last_name,
+        phone: `+${normalizedPhone}`
+      },
       {},
       customHeaders
     )
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: customerForm.email,
+      email: technicalEmail,
       password,
     })
 
@@ -124,7 +146,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     revalidateTag("customer")
     return createdCustomer
   } catch (error: any) {
-    return error.toString()
+    return mapBackendError(error)
   }
 }
 
@@ -136,7 +158,7 @@ export async function requestPasswordResetOtp(_currentState: unknown, formData: 
     await otpRequest(normalized, "reset_password")
     return "otp_sent"
   } catch (e: any) {
-    return e?.message || "Ошибка отправки кода"
+    return mapBackendError(e)
   }
 }
 
@@ -145,24 +167,30 @@ export async function resetPasswordWithOtp(_currentState: unknown, formData: For
   const code = (formData.get("otp_code") as string) || ""
   const newPassword = (formData.get("new_password") as string) || ""
   const normalized = normalizeUzPhone(phone)
-  if (!normalized) return "Введите корректный номер телефона (+998...)"
-  if (!code || !newPassword) return "Введите код и новый пароль"
+  
+  if (!normalized) return "invalid_phone"
+  if (!code || !newPassword) return "code_and_password_required"
 
-  const resp = await fetch(`${backendBaseUrl()}/store/otp/reset-password`, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-    },
-    body: JSON.stringify({ phone: normalized, code, new_password: newPassword }),
-    cache: "no-store",
-  })
+  try {
+    const resp = await fetch(`${backendBaseUrl()}/store/otp/reset-password`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+      },
+      body: JSON.stringify({ phone: normalized, code, new_password: newPassword }),
+      cache: "no-store",
+    })
 
-  if (!resp.ok) {
-    return "Не удалось сбросить пароль"
+    if (!resp.ok) {
+      const errorJson = await resp.json().catch(() => ({}))
+      return mapBackendError(errorJson.error || "password_reset_failed")
+    }
+
+    return "success.password_reset"
+  } catch (e: any) {
+    return mapBackendError(e)
   }
-
-  return "Пароль обновлён. Теперь войдите с новым паролем."
 }
 
 export async function forgotPassword(_currentState: unknown, formData: FormData) {
@@ -180,34 +208,78 @@ export async function changePasswordWithOtp(_currentState: any, formData: FormDa
   const newPassword = (formData.get("new_password") as string) || ""
 
   const normalized = normalizeUzPhone(phone)
-  if (!normalized) return "Укажите корректный номер телефона в профиле"
+  if (!normalized) return "invalid_phone"
 
-  // If no code, just send OTP
-  if (!code) {
-    await otpRequest(normalized, "change_password")
-    return "Код отправлен по SMS"
+  try {
+    // If no code, just send OTP
+    if (!code) {
+      await otpRequest(normalized, "change_password")
+      return "otp_sent"
+    }
+
+    const resp = await fetch(`${backendBaseUrl()}/store/otp/change-password`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+      },
+      body: JSON.stringify({
+        phone: normalized,
+        code,
+        old_password: oldPassword,
+        new_password: newPassword,
+      }),
+      cache: "no-store",
+    })
+
+    if (!resp.ok) {
+      const errorJson = await resp.json().catch(() => ({}))
+      return mapBackendError(errorJson.error || "password_change_failed")
+    }
+
+    return "success.password_changed"
+  } catch (e: any) {
+    return mapBackendError(e)
   }
+}
 
-  const resp = await fetch(`${backendBaseUrl()}/store/otp/change-password`, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-    },
-    body: JSON.stringify({
-      phone: normalized,
-      code,
-      old_password: oldPassword,
-      new_password: newPassword,
-    }),
-    cache: "no-store",
-  })
+export async function changePhoneWithOtp(_currentState: any, formData: FormData) {
+  const phone = (formData.get("phone") as string) || ""
+  const code = (formData.get("otp_code") as string) || ""
 
-  if (!resp.ok) {
-    return "Не удалось изменить пароль"
+  const normalized = normalizeUzPhone(phone)
+  if (!normalized) return "invalid_phone"
+
+  try {
+    // If no code, just send OTP
+    if (!code) {
+      await otpRequest(normalized, "change_phone")
+      return "otp_sent"
+    }
+
+    const resp = await fetch(`${backendBaseUrl()}/store/otp/change-phone`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+      },
+      body: JSON.stringify({
+        phone: normalized,
+        code
+      }),
+      cache: "no-store",
+    })
+
+    if (!resp.ok) {
+      const errorJson = await resp.json().catch(() => ({}))
+      return mapBackendError(errorJson.error || "phone_change_failed")
+    }
+
+    revalidateTag("customer")
+    return "success.phone_changed"
+  } catch (e: any) {
+    return mapBackendError(e)
   }
-
-  return "Пароль изменён"
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
@@ -229,7 +301,7 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag("customer")
       })
   } catch (error: any) {
-    return "Неверный номер телефона или пароль"
+    return "invalid_credentials"
   }
 }
 

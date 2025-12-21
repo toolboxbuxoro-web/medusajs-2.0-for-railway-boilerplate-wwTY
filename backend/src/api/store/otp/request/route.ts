@@ -1,7 +1,8 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { normalizeUzPhone } from "../../../../lib/phone"
-import { generateOtpCode, otpRateLimitCheck, otpStoreSet } from "../../../../lib/otp-store"
+import { generateOtpCode, otpRateLimitCheck, otpStoreSet, otpCooldownCheck } from "../../../../lib/otp-store"
+import { findCustomerByPhone } from "../_shared"
 
 type Body = {
   phone: string
@@ -25,7 +26,7 @@ function getOtpMessage(code: string, purpose?: string): string {
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
-  const { phone, purpose } = (req.body || {}) as Body
+  const { phone, purpose = "checkout" } = (req.body || {}) as Body
 
   if (!phone) {
     return res.status(400).json({ error: "phone is required" })
@@ -33,17 +34,31 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   const normalized = normalizeUzPhone(phone)
   if (!normalized) {
-    return res.status(400).json({ error: "invalid phone" })
+    return res.status(400).json({ error: "invalid_phone" })
   }
 
-  // Redis-based rate limiting (atomic INCR)
+  // 1. If register, check if customer already exists
+  if (purpose === "register") {
+    const existing = await findCustomerByPhone(req, normalized)
+    if (existing) {
+      return res.status(400).json({ error: "account_exists" })
+    }
+  }
+
+  // 2. Check Cooldown (60s)
+  const isCooldownAllowed = await otpCooldownCheck(normalized, purpose)
+  if (!isCooldownAllowed) {
+    return res.status(429).json({ error: "otp_cooldown" })
+  }
+
+  // 3. Redis-based rate limiting (atomic INCR per hour)
   const allowed = await otpRateLimitCheck(normalized)
   if (!allowed) {
     return res.status(429).json({ error: "too_many_requests" })
   }
 
   const code = generateOtpCode()
-  await otpStoreSet(normalized, code)
+  await otpStoreSet(normalized, code, purpose)
 
   // Use Eskiz-approved template format based on purpose
   const message = getOtpMessage(code, purpose)

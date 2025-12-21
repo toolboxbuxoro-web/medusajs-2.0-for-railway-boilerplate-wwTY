@@ -18,6 +18,7 @@ function generatePassword(): string {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
   const { phone, first_name, last_name, cart_id } = (req.body || {}) as Body
+  const purpose = "checkout" // auto-register is currently linked to checkout flow
 
   if (!phone) {
     return res.status(400).json({ error: "phone is required" })
@@ -35,18 +36,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     /**
      * 1. Consume OTP verification (ONE-TIME, ATOMIC)
      */
-    const isVerified = await otpStoreConsumeVerified(normalized)
+    const isVerified = await otpStoreConsumeVerified(normalized, purpose)
     if (!isVerified) {
       return res.status(400).json({
-        error: "phone_not_verified",
-        message: "Номер не подтверждён или сессия истекла. Пожалуйста, подтвердите номер ещё раз.",
-        needs_verification: true,
+        error: "phone_not_verified"
       })
     }
 
     const authModule = req.scope.resolve(Modules.AUTH) as any
     const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
-    const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
 
     /**
      * 2. Resolve existing customer (by phone-based email)

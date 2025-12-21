@@ -12,29 +12,36 @@ type Body = {
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const { phone, code, new_password } = (req.body || {}) as Body
+  const purpose = "reset_password"
 
   if (!phone || !code || !new_password) {
-    return res.status(400).json({ error: "phone, code, new_password are required" })
+    return res.status(400).json({ error: "phone_code_password_required" })
   }
 
   const normalized = normalizeUzPhone(phone)
   if (!normalized) {
-    return res.status(400).json({ error: "invalid phone" })
+    return res.status(400).json({ error: "invalid_phone" })
   }
 
-  // Step 1: Verify OTP (this consumes the OTP code)
-  const ok = await otpStoreVerify(normalized, String(code))
+  // Step 1: Verify OTP (this consumes the OTP code in Redis and sets the verified flag)
+  const ok = await otpStoreVerify(normalized, String(code), purpose)
   if (!ok) {
     return res.status(400).json({ error: "invalid_code" })
   }
 
-  // Step 2: Consume the verification flag to prevent reuse
-  await otpStoreConsumeVerified(normalized)
+  // Step 2: Consume the verification flag to prevent reuse in the same request or future ones
+  const consumed = await otpStoreConsumeVerified(normalized, purpose)
+  if (!consumed) {
+    return res.status(400).json({ error: "expired_code" })
+  }
 
   const customer = await findCustomerByPhone(req, phone)
   if (!customer?.email) {
-    // Do not leak existence
-    return res.status(400).json({ error: "invalid_request" })
+    // Return success to avoid leaking customer existence if needed, 
+    // but typically for reset we might want to know if it failed.
+    // However, the check `findCustomerByPhone` is already done at the `request` stage for register.
+    // For reset, if no customer found, we just fail gracefully.
+    return res.status(400).json({ error: "customer_not_found" })
   }
 
   const auth = req.scope.resolve(Modules.AUTH) as any
@@ -44,7 +51,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   })
 
   if (!resp?.success) {
-    return res.status(400).json({ error: resp?.error || "failed" })
+    return res.status(400).json({ error: "password_update_failed" })
   }
 
   return res.json({ success: true })

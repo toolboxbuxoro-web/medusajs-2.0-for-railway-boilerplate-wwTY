@@ -1,25 +1,25 @@
-# UX Rules
+# UX Rules for Authentication
 
-Critical design and interaction guidelines for the Toolbox platform.
+## OTP Resend Timer
+- **Rule**: Every screen that requests an OTP must show a 60-second countdown before allowing a resend.
+- **Implementation**: Handled via local component state and `setInterval`.
+- **Reason**: Prevents SMS provider overage and user frustration from receiving multiple overlapping codes.
 
-## 1. OTP Verification UX
-- **Resend Policy**: A "Resend Code" button must only be active after a 60-second cooldown timer.
-- **Visual Feedback**:
-  - Success of sending is currently indicated via a "Code sent" informational state (overcoming Medusa Error shims).
-  - Verification success is highlighted with the "✓" icon or a Green success block.
+## Error Messages
+- **Rule**: Never show raw technical errors (e.g., `Redis connection failed`).
+- **Standardization**: Backend returns error codes (keys). Frontend maps these keys to localized strings.
+- **Keys**: `account_exists`, `otp_cooldown`, `invalid_code`, `expired_code`, `failed_to_send_otp`.
 
-## 2. Post-Checkout (Order Confirmation)
-The confirmation page follows a "Success -> Guidance -> Details" hierarchy.
-1. **Rahmat! (Thank you!)**: Clear confirmation headline.
-2. **Next Steps Checklist**: Fixed 3-step guide:
-   - Order Processing.
-   - Contact from Manager.
-   - Future tracking in Personal Account.
-3. **Account Block (Conditional)**: If a first account was created, a prominent blue card informs the user that their login data was sent via SMS.
-4. **Technical Email Hygiene**: Technical addresses (`...@phone.local`) are **HIDDEN** from the user. Only the phone number is displayed with an "SMS sent" icon.
+## 2-Step Flows
+- **Rule**: For registration and password reset, use a 2-step process.
+  - **Step 1**: Phone number entry.
+  - **Step 2**: All other details + OTP code.
+- **UI Transition**: The phone number field becomes read-only in Step 2 to ensure the OTP is verified for the correct number.
 
-## 3. Global Localization Standards
-- **Locales**: Standard RU and UZ.
-- **Consistency**: All static labels must reside in `storefront/messages/{ru,uz}.json`.
-- **Dynamic Data**: Dates and Currencies must be formatted using the current locale (`ru-RU` or `uz-UZ`) via `Intl` utilities.
-- **Priority**: Primary focus on the **Uzbekistan market**.
+## Feedback and Success
+- **Rule**: Show distinct success states for sensitive actions like password reset and phone change.
+- **Implementation**: Use the `success` namespace in translation files and clear visual indicators (green badges or success screens).
+
+## Input Masking and Validation
+- **Rule**: OTP input should be numeric-only with `inputMode="numeric"`.
+- **Validation**: Phone numbers should be validated for length and format before allowing the "Send Code" action.

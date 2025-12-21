@@ -367,6 +367,19 @@
     "phone_not_verified": "Avval telefon raqamini tasdiqlang.",
     "invalid_phone": "Iltimos, to'g'ri telefon raqamini kiriting (+998...)",
     "otp_sent": "Kod SMS orqali yuborildi",
-    "otp_sent_info": "Kod SMS orqali yuborildi. Kodni kiriting va tugmani yana bir bor bosing."
+    "otp_sent_info": "Kod SMS orqali yuborildi. Kodni kiriting va tugmani yana bir bor bosing.",
+    "account_exists": "Ushbu raqamga bog'langan akkount mavjud. Iltimos, tizimga kiring yoki parolni tiklang.",
+    "otp_cooldown": "Iltimos, kodni qayta yuborish uchun 60 soniya kuting.",
+    "too_many_requests": "Urinishlar soni juda ko'p. Iltimos, keyinroq urinib ko'ring.",
+    "invalid_credentials": "Telefon raqami yoki parol noto'g'ri.",
+    "error_occurred": "Xatolik yuz berdi. Iltimos, yana urinib ko'ring.",
+    "code_and_password_required": "Kodni va yangi parolni kiriting",
+    "password_reset_failed": "Parolni tiklab bo'lmadi",
+    "password_change_failed": "Parolni o'zgartirib bo'lmadi"
+  },
+  "success": {
+    "password_reset": "Parol muvaffaqiyatli tiklandi. Endi tizimga kirishingiz mumkin.",
+    "password_changed": "Parol muvaffaqiyatli o'zgartirildi.",
+    "phone_changed": "Telefon raqami muvaffaqiyatli o'zgartirildi."
   }
 }

@@ -14,85 +14,27 @@ type MyInformationProps = {
 
 import { useTranslations } from 'next-intl'
 
+import { changePasswordWithOtp } from "@lib/data/customer"
+
 const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
   const t = useTranslations('account')
+  const te = useTranslations('errors')
+  const ts = useTranslations('success')
 
-  const changePassword = async (_currentState: Record<string, any>, formData: FormData) => {
-    const phone = (formData.get("phone") as string) || ""
-    const code = (formData.get("otp_code") as string) || ""
-    const oldPassword = (formData.get("old_password") as string) || ""
-    const newPassword = (formData.get("new_password") as string) || ""
-    const confirm = (formData.get("confirm_password") as string) || ""
-
-    if (!phone) {
-      return { success: false, error: "Укажите номер телефона в профиле" }
-    }
-
-    if (!oldPassword || !newPassword || !confirm) {
-      return { success: false, error: "Заполните поля пароля" }
-    }
-
-    if (newPassword !== confirm) {
-      return { success: false, error: "Пароли не совпадают" }
-    }
-
-    const backend = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
-
-    // Step 1: send OTP if not provided
-    if (!code) {
-      const r = await fetch(`${backend}/store/otp/request`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-        },
-        body: JSON.stringify({ phone, purpose: "change_password" }),
-        cache: "no-store",
-      })
-
-      if (!r.ok) {
-        return { success: false, error: "Не удалось отправить код" }
-      }
-
-      return { success: false, error: "Код отправлен по SMS. Введите код и нажмите «Сохранить» ещё раз." }
-    }
-
-    // Step 2: change password
-    const resp = await fetch(`${backend}/store/otp/change-password`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-      },
-      body: JSON.stringify({
-        phone,
-        code,
-        old_password: oldPassword,
-        new_password: newPassword,
-      }),
-      cache: "no-store",
-    })
-
-    if (!resp.ok) {
-      return { success: false, error: "Не удалось изменить пароль" }
-    }
-
-    return { success: true, error: null }
-  }
-
-  const [state, formAction] = useFormState(changePassword, {
-    success: false,
-    error: null,
-  })
+  const [state, formAction] = useFormState<any, FormData>(changePasswordWithOtp, null)
 
   const clearState = () => {
     setSuccessState(false)
   }
 
   useEffect(() => {
-    setSuccessState(state.success)
+    if (typeof state === "string" && state.startsWith("success.")) {
+      setSuccessState(true)
+    }
   }, [state])
+
+  const errorMessage = typeof state === "string" && !state.startsWith("success.") ? state : undefined
 
   return (
     <form action={formAction} onReset={() => clearState()} className="w-full">
@@ -102,8 +44,8 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
           <span>{t('password_hidden')}</span>
         }
         isSuccess={successState}
-        isError={!!state.error}
-        errorMessage={state.error ?? undefined}
+        isError={!!errorMessage}
+        errorMessage={errorMessage}
         clearState={clearState}
         data-testid="account-password-editor"
       >
