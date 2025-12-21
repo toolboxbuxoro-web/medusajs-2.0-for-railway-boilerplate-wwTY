@@ -286,21 +286,31 @@ export async function login(_currentState: unknown, formData: FormData) {
   const phone = formData.get("phone") as string
   const password = formData.get("password") as string
 
+  console.log(`[LOGIN] Step 1: Received login request for phone="${phone}"`)
+
   // Normalize phone and convert to email format
   const normalized = normalizeUzPhone(phone)
+  console.log(`[LOGIN] Step 2: Normalized phone="${normalized}"`)
+  
   if (!normalized) {
+    console.log(`[LOGIN] Step 3: FAILED - Invalid phone format`)
     return "invalid_phone"
   }
   const email = `${normalized}@phone.local`
+  console.log(`[LOGIN] Step 3: Technical email="${email}"`)
 
   try {
+    console.log(`[LOGIN] Step 4: Calling sdk.auth.login with email="${email}"`)
     await sdk.auth
       .login("customer", "emailpass", { email, password })
       .then((token) => {
+        console.log(`[LOGIN] Step 5: SUCCESS - Token received, type=${typeof token}`)
         setAuthToken(typeof token === 'string' ? token : token.location)
         revalidateTag("customer")
       })
+    console.log(`[LOGIN] Step 6: Login completed successfully`)
   } catch (error: any) {
+    console.error(`[LOGIN] Step 5: FAILED - Error: ${error?.message || error}`)
     return "invalid_credentials"
   }
 }
