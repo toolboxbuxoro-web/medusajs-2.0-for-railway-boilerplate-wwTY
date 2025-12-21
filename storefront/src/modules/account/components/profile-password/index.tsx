@@ -43,7 +43,10 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
     if (!code) {
       const r = await fetch(`${backend}/store/otp/request`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+        },
         body: JSON.stringify({ phone, purpose: "change_password" }),
         cache: "no-store",
       })
@@ -58,7 +61,10 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
     // Step 2: change password
     const resp = await fetch(`${backend}/store/otp/change-password`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+      },
       body: JSON.stringify({
         phone,
         code,

@@ -108,7 +108,10 @@ export class EskizNotificationService extends AbstractNotificationProviderServic
 
     // LOCAL MOCK: Skip actual API call in local environment
     if (process.env.APP_ENV === 'local' || process.env.NODE_ENV === 'development' || process.env.SKIP_EXTERNAL_SERVICES) {
-      this.logger_.info(`[Eskiz MOCK] Would send SMS to ${toPhone}: "${message}"`)
+      // Extract OTP code if possible for better logging format: [MOCK_SMS][OTP] +998XXXXXXXXX → 123456
+      const otpMatch = message.match(/\d{6}/)
+      const otpCode = otpMatch ? otpMatch[0] : "UNKNOWN"
+      this.logger_.info(`[MOCK_SMS][OTP] ${toPhone} → ${otpCode}`)
       return {}
     }
 

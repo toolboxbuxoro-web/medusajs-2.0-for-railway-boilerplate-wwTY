@@ -26,7 +26,10 @@ function backendBaseUrl(): string {
 async function otpRequest(phone: string, purpose: OtpPurpose) {
   const resp = await fetch(`${backendBaseUrl()}/store/otp/request`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+    },
     body: JSON.stringify({ phone, purpose }),
     cache: "no-store",
   })
@@ -38,7 +41,10 @@ async function otpRequest(phone: string, purpose: OtpPurpose) {
 async function otpVerify(phone: string, purpose: OtpPurpose, code: string) {
   const resp = await fetch(`${backendBaseUrl()}/store/otp/verify`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+    },
     body: JSON.stringify({ phone, purpose, code }),
     cache: "no-store",
   })
@@ -80,19 +86,19 @@ export async function signup(_currentState: unknown, formData: FormData) {
     // Require phone for SMS verification
     const normalizedPhone = normalizeUzPhone(customerForm.phone)
     if (!normalizedPhone) {
-      return "Введите корректный номер телефона (+998...)"
+      return "invalid_phone"
     }
 
     // Step 1: send OTP if not provided
     if (!otpCode) {
       await otpRequest(normalizedPhone, "register")
-      return "Код отправлен по SMS. Введите код и нажмите ещё раз."
+      return "otp_sent_info"
     }
 
     // Step 2: verify OTP
     const verified = await otpVerify(normalizedPhone, "register", otpCode)
     if (!verified) {
-      return "Неверный код из SMS"
+      return "invalid_code"
     }
 
     const token = await sdk.auth.register("customer", "emailpass", {
@@ -125,10 +131,10 @@ export async function signup(_currentState: unknown, formData: FormData) {
 export async function requestPasswordResetOtp(_currentState: unknown, formData: FormData) {
   const phone = (formData.get("phone") as string) || ""
   const normalized = normalizeUzPhone(phone)
-  if (!normalized) return "Введите корректный номер телефона (+998...)"
+  if (!normalized) return "invalid_phone"
   try {
     await otpRequest(normalized, "reset_password")
-    return "Код отправлен по SMS"
+    return "otp_sent"
   } catch (e: any) {
     return e?.message || "Ошибка отправки кода"
   }
@@ -144,7 +150,10 @@ export async function resetPasswordWithOtp(_currentState: unknown, formData: For
 
   const resp = await fetch(`${backendBaseUrl()}/store/otp/reset-password`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+    },
     body: JSON.stringify({ phone: normalized, code, new_password: newPassword }),
     cache: "no-store",
   })
@@ -181,7 +190,10 @@ export async function changePasswordWithOtp(_currentState: any, formData: FormDa
 
   const resp = await fetch(`${backendBaseUrl()}/store/otp/change-password`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+    },
     body: JSON.stringify({
       phone: normalized,
       code,
@@ -205,7 +217,7 @@ export async function login(_currentState: unknown, formData: FormData) {
   // Normalize phone and convert to email format
   const normalized = normalizeUzPhone(phone)
   if (!normalized) {
-    return "Введите корректный номер телефона (+998...)"
+    return "invalid_phone"
   }
   const email = `${normalized}@phone.local`
 

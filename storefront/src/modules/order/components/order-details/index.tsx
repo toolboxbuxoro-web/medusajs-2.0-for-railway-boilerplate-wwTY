@@ -4,29 +4,37 @@ import { Text } from "@medusajs/ui"
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
   showStatus?: boolean
+  locale?: string
 }
 
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
-const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const t = useTranslations('order')
-  
-  const formatStatus = (str: string) => {
-    const formatted = str.split("_").join(" ")
-
-    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
-  }
+const OrderDetails = async ({ order, showStatus, locale }: OrderDetailsProps) => {
+  const t = await getTranslations({ locale: locale || 'ru', namespace: 'order' })
+  const isPhoneEmail = order.email?.includes("@phone.local")
+  const tConfirmed = await getTranslations({ locale: locale || 'ru', namespace: 'order_confirmed' })
 
   return (
     <div>
       <Text>
-        {t('order_confirmation_sent_to')}
-        <span
-          className="text-ui-fg-medium-plus font-semibold"
-          data-testid="order-email"
-        >
-          {order.email}
-        </span>
+        {isPhoneEmail ? (
+          <>
+            {tConfirmed('confirmation_sent_sms')}{" "}
+            <span className="text-ui-fg-medium-plus font-semibold" data-testid="order-phone">
+              {order.shipping_address?.phone}
+            </span>
+          </>
+        ) : (
+          <>
+            {t('order_confirmation_sent_to')}{" "}
+            <span
+              className="text-ui-fg-medium-plus font-semibold"
+              data-testid="order-email"
+            >
+              {order.email}
+            </span>
+          </>
+        )}
         .
       </Text>
       <Text className="mt-2">

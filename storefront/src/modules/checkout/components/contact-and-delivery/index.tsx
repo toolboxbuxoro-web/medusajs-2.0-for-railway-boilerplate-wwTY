@@ -357,7 +357,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
             body: JSON.stringify({ 
               phone, 
               first_name: firstName, 
-              last_name: lastName 
+              last_name: lastName,
+              cart_id: cart!.id
             })
           })
           const data = await resp.json().catch(() => ({}))

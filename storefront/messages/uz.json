@@ -339,6 +339,34 @@
     "discount": "Chegirma",
     "shipping": "Yetkazib berish",
     "taxes": "Soliqlar",
-    "total": "Jami"
+    "total": "Jami",
+    "order_number": "Buyurtma raqami:"
+  },
+  "order_confirmed": {
+    "title": "Rahmat!",
+    "subtitle": "Buyurtmangiz muvaffaqiyatli rasmiylashtirildi.",
+    "account_created_title": "🔐 Endi sizda shaxsiy kabinet bor",
+    "account_created_text": "Buyurtmalarni kuzatib borish uchun biz avtomatik ravishda akkount yaratdik. Kirish ma'lumotlari (login va parol) sizga SMS orqali yuborildi.",
+    "login_button": "Akkountga kirish",
+    "login_helper": "SMSdagi telefon raqami va paroldan foydalaning",
+    "whats_next_title": "Keyingi qadamlar?",
+    "whats_next_step1": "Biz buyurtmangizni qayta ishlashni boshladik",
+    "whats_next_step2": "Zarur bo'lganda, menejer siz bilan bog'lanadi",
+    "whats_next_step3": "Buyurtma holatini shaxsiy kabinetda kuzatib borishingiz mumkin",
+    "confirmation_sent_sms": "Buyurtma tafsilotlari va kirish ma'lumotlari quyidagi raqamga SMS orqali yuborildi: "
+  },
+  "payment": {
+    "header": "To'lov",
+    "method": "To'lov usuli",
+    "details": "To'lov tafsilotlari",
+    "paid_at": "{date} da to'langan"
+  },
+  "errors": {
+    "failed_to_send_otp": "SMS yuborib bo'lmadi. Keyinroq qayta urinib ko'ring yoki qo'llab-quvvatlash xizmatiga murojaat qiling.",
+    "invalid_code": "Tasdiqlash kodi noto'g'ri.",
+    "phone_not_verified": "Avval telefon raqamini tasdiqlang.",
+    "invalid_phone": "Iltimos, to'g'ri telefon raqamini kiriting (+998...)",
+    "otp_sent": "Kod SMS orqali yuborildi",
+    "otp_sent_info": "Kod SMS orqali yuborildi. Kodni kiriting va tugmani yana bir bor bosing."
   }
 }

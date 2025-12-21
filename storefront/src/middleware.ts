@@ -142,7 +142,7 @@ export async function middleware(request: NextRequest) {
     (!isOnboarding || onboardingCookie) &&
     (!cartId || cartIdCookie)
   ) {
-    return NextResponse.next()
+    return intlResponse
   }
 
   // Build redirect path

@@ -6,24 +6,25 @@ import Divider from "@modules/common/components/divider"
 
 type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
+  locale?: string
 }
 
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
-const ShippingDetails = ({ order }: ShippingDetailsProps) => {
-  const t = useTranslations('order')
+const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
+  const t = await getTranslations({ locale: locale || 'ru', namespace: 'order' })
   
   return (
     <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
+      <Heading level="h2" className="flex flex-row text-xl font-bold my-6">
         {t('delivery')}
       </Heading>
-      <div className="flex items-start gap-x-8">
+      <div className="flex flex-col gap-y-6">
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col"
           data-testid="shipping-address-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
             {t('shipping_address')}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
@@ -44,10 +45,10 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3 "
+          className="flex flex-col"
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">{t('contact')}</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('contact')}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.phone}
           </Text>
@@ -55,14 +56,14 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col"
           data-testid="shipping-method-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">{t('method')}</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('method')}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {(order as any).shipping_methods[0]?.name} (
+            {(order as any).shipping_methods?.[0]?.name} (
             {convertToLocale({
-              amount: order.shipping_methods?.[0].total ?? 0,
+              amount: order.shipping_methods?.[0]?.total ?? 0,
               currency_code: order.currency_code,
             })
               .replace(/,/g, "")

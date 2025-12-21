@@ -7,6 +7,7 @@ type Body = {
   phone: string
   first_name?: string
   last_name?: string
+  cart_id?: string
 }
 
 function generatePassword(): string {
@@ -16,7 +17,7 @@ function generatePassword(): string {
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
-  const { phone, first_name, last_name } = (req.body || {}) as Body
+  const { phone, first_name, last_name, cart_id } = (req.body || {}) as Body
 
   if (!phone) {
     return res.status(400).json({ error: "phone is required" })
@@ -135,26 +136,28 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     /**
-     * 4. GUARANTEE SMS DELIVERY WITH CREDENTIALS
-     * If SMS fails → auto-register MUST FAIL
+     * 4. Centralized SMS Logic:
+     * We no longer send SMS here. Instead, we save credentials to the cart metadata
+     * if cart_id is provided. order-sms-handler.ts will send the credentials
+     * once the order is placed.
      */
-    const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
-
-    try {
-      await notificationModule.createNotifications({
-        to: `+${normalized}`,
-        channel: "sms",
-        template: "auto-register",
-        data: {
-          message: smsMessage,
-        },
-      })
-    } catch (smsError: any) {
-      logger.error(`[auto-register] SMS sending failed: ${smsError.message}`)
-      return res.status(500).json({
-        error: "sms_failed",
-        message: "Не удалось отправить SMS с логином и паролем. Пожалуйста, попробуйте позже.",
-      })
+    if (cart_id) {
+       const cartModule = req.scope.resolve(Modules.CART)
+       try {
+         const [cart] = await cartModule.listCarts({ id: cart_id })
+         if (cart) {
+           await cartModule.updateCarts(cart_id, {
+             metadata: {
+               ...cart.metadata,
+               tmp_generated_password: password,
+               is_new_customer: true,
+             }
+           })
+           logger.info(`[auto-register] Updated cart ${cart_id} with credentials metadata`)
+         }
+       } catch (err: any) {
+         logger.warn(`[auto-register] Failed to update cart metadata: ${err.message}`)
+       }
     }
 
     /**
