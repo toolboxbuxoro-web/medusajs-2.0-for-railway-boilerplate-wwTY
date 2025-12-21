@@ -51,7 +51,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   // Check if identity exists first
   const identities = await auth.listAuthIdentities({
     provider_identities: {
-      provider_id: "emailpass",
+      provider: "emailpass",
       entity_id: customer.email,
     },
   })

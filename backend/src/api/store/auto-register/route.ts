@@ -115,7 +115,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       const identities = await authModule.listAuthIdentities({
         provider_identities: {
           entity_id: email,
-          provider_id: "emailpass",
+          provider: "emailpass",
         },
       })
 
