@@ -13,8 +13,9 @@ export default async function orderSmsHandler({
 
   try {
     // 1. Retrieve order with all necessary relations
+    // Note: 'customer' is NOT a valid relation on Order in Medusa v2
     const order = await orderModule.retrieveOrder(orderId, {
-      relations: ["summary", "shipping_address", "customer", "items"]
+      relations: ["summary", "shipping_address", "items"]
     })
 
     logger.info(`[order-sms-handler] Processing order ${orderId}, order.metadata: ${JSON.stringify(order.metadata || {})}`)
@@ -78,12 +79,10 @@ export default async function orderSmsHandler({
     // 3. Robust Phone Resolution Logic
     // Fallback priority: 
     // 1) Shipping address (best for delivery)
-    // 2) Customer profile
-    // 3) Order metadata (special cases)
+    // 2) Order metadata (special cases like quick order)
     const orderAny = order as any
     const rawPhone = 
       orderAny.shipping_address?.phone || 
-      orderAny.customer?.phone || 
       (orderAny.metadata?.phone as string) || 
       (orderAny.metadata?.quick_order_phone as string) || 
       ""
@@ -91,6 +90,7 @@ export default async function orderSmsHandler({
     const normalized = rawPhone.replace(/\D/g, "")
     
     logger.info(`[order-sms-handler] Resolution: phone=${normalized}, isQuickOrder=${!!isQuickOrder}, hasPassword=${!!tmpPassword}`)
+
 
     if (!normalized) {
       logger.warn(`[order-sms-handler] Skip SMS: No phone number resolved for order ${orderId}`)
