@@ -490,8 +490,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                             <input
                               type="text"
                               inputMode="numeric"
-                              maxLength={4}
-                              placeholder="Введите 4-значный код"
+                              maxLength={6}
+                              placeholder="Введите 6-значный код"
                               value={otpCode}
                               onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                               className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-center text-xl tracking-widest font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -523,8 +523,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                 }
                                 setOtpLoading(false)
                               }}
-                              disabled={otpLoading || otpCode.length < 4}
-                              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                                disabled={otpLoading || otpCode.length < 6}
+                                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
                             >
                               {otpLoading ? "..." : "✓"}
                             </button>
