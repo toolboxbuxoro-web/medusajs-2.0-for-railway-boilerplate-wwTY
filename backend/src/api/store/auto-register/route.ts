@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { normalizeUzPhone } from "../../../lib/phone"
-import { verifiedPhones } from "../otp/verify/route"
+import { otpStoreConsumeVerified } from "../../../lib/otp-store"
 
 type Body = {
   phone: string
@@ -10,7 +10,7 @@ type Body = {
 }
 
 function generatePassword(): string {
-  // Generate 6-digit numeric password
+  // 6-digit numeric password (SMS-friendly)
   return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
@@ -18,124 +18,158 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
   const { phone, first_name, last_name } = (req.body || {}) as Body
 
-  logger.info(`[auto-register] Request received: phone=${phone}, first_name=${first_name}`)
-
   if (!phone) {
-    logger.warn(`[auto-register] Missing phone`)
     return res.status(400).json({ error: "phone is required" })
   }
 
   const normalized = normalizeUzPhone(phone)
   if (!normalized) {
-    logger.warn(`[auto-register] Invalid phone format: ${phone}`)
     return res.status(400).json({ error: "invalid phone format" })
   }
 
-  // Create a technical email from phone (Medusa requires email)
   const email = `${normalized}@phone.local`
   const password = generatePassword()
-  
-  logger.info(`[auto-register] Normalized phone: +${normalized}, email: ${email}`)
 
   try {
-    // Check if phone was verified via OTP (using in-memory store)
-    const verifiedExpiry = verifiedPhones.get(`+${normalized}`)
-    const isVerified = verifiedExpiry && verifiedExpiry > Date.now()
-    
-    logger.info(`[auto-register] Verification check: verifiedExpiry=${verifiedExpiry}, isVerified=${isVerified}`)
-    
+    /**
+     * 1. Consume OTP verification (ONE-TIME, ATOMIC)
+     */
+    const isVerified = await otpStoreConsumeVerified(normalized)
     if (!isVerified) {
-      logger.warn(`[auto-register] Phone not verified: +${normalized}`)
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "phone_not_verified",
-        message: "Номер не подтверждён. Пожалуйста, подтвердите номер.",
-        needs_verification: true
+        message: "Номер не подтверждён или сессия истекла. Пожалуйста, подтвердите номер ещё раз.",
+        needs_verification: true,
       })
     }
 
-    // Check if customer already exists
-    logger.info(`[auto-register] Checking if customer exists: ${email}`)
-    const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
-    const existingCustomers = await customerModule.listCustomers({ email })
-    
-    if (existingCustomers?.length > 0) {
-      const existingCustomer = existingCustomers[0]
-      logger.info(`[auto-register] Customer already exists: ${existingCustomer.id}`)
-      // Customer exists - that's OK, continue with checkout
-      // They won't get SMS with password (they already have an account)
-      // But the checkout can proceed and order will be tied to this customer
-      return res.json({ 
-        success: true,
-        already_exists: true,
-        customer_id: existingCustomer.id,
-        message: "Аккаунт уже существует. Заказ будет привязан к вашему аккаунту."
-      })
-    }
-
-    // Register new customer
-    logger.info(`[auto-register] Creating new auth identity for ${email}`)
     const authModule = req.scope.resolve(Modules.AUTH) as any
-    
-    // Create auth identity
-    const authResult = await authModule.register("emailpass", {
-      body: { email, password },
-    })
-
-    logger.info(`[auto-register] Auth register result: success=${authResult?.success}`)
-
-    if (!authResult?.success) {
-      logger.error("[auto-register] Auth registration failed", authResult)
-      return res.status(500).json({ error: "registration_failed" })
-    }
-
-    // Create customer profile
-    logger.info(`[auto-register] Creating customer profile`)
-    const customer = await customerModule.createCustomers({
-      email,
-      first_name: first_name || "Покупатель",
-      last_name: last_name || "",
-      phone: `+${normalized}`,
-    })
-    
-    logger.info(`[auto-register] Customer profile created: ${customer?.id}`)
-
-    // Send SMS with login credentials
-    // Format according to Eskiz requirements: resource name + purpose
-    logger.info(`[auto-register] Sending credentials SMS to +${normalized}`)
+    const customerModule = req.scope.resolve(Modules.CUSTOMER) as any
     const notificationModule = req.scope.resolve(Modules.NOTIFICATION) as any
-    const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
-    
-    await notificationModule.createNotifications({
-      to: `+${normalized}`,  // Include + prefix
-      channel: "sms",
-      template: "auto-register",
-      data: {
-        message: smsMessage
+
+    /**
+     * 2. Resolve existing customer (by phone-based email)
+     */
+    const existingCustomers = await customerModule.listCustomers({ email })
+
+    let customerId: string
+    let authIdentityId: string | null = null
+
+    if (existingCustomers.length > 0) {
+      /**
+       * EXISTING CUSTOMER
+       * → reset password
+       * → guarantee SMS delivery
+       */
+      const customer = existingCustomers[0]
+      customerId = customer.id
+
+      // Try to update password for existing auth identity
+      const updateResult = await authModule.updateProvider("emailpass", {
+        entity_id: email,
+        password,
+      })
+
+      if (!updateResult?.success) {
+        // If identity does not exist — register it
+        const registerResult = await authModule.register("emailpass", {
+          body: { email, password },
+        })
+
+        if (!registerResult?.success) {
+          throw new Error("auth_identity_update_failed")
+        }
+
+        authIdentityId = registerResult.authIdentity.id
       }
-    })
+    } else {
+      /**
+       * NEW CUSTOMER
+       * → create auth identity
+       * → create customer
+       */
+      const registerResult = await authModule.register("emailpass", {
+        body: { email, password },
+      })
 
-    logger.info(`[auto-register] Customer created: ${email}, SMS sent to +${normalized}`)
+      if (!registerResult?.success) {
+        throw new Error("registration_failed")
+      }
 
-    // Authenticate and get token
-    const loginResult = await authModule.authenticate("emailpass", {
-      body: { email, password },
-    })
+      authIdentityId = registerResult.authIdentity.id
 
-    if (!loginResult?.success || !loginResult?.authIdentity) {
-      return res.status(500).json({ error: "login_after_register_failed" })
+      const customer = await customerModule.createCustomers({
+        email,
+        first_name: first_name || "Покупатель",
+        last_name: last_name || "",
+        phone: `+${normalized}`,
+        has_account: true,
+      })
+
+      customerId = customer.id
     }
 
-    // Generate JWT token
-    const token = await authModule.generateJwtToken(loginResult.authIdentity.id, "customer")
+    /**
+     * 3. Ensure authIdentity ↔ customer link
+     */
+    if (!authIdentityId) {
+      const identities = await authModule.listAuthIdentities({
+        provider_identities: {
+          entity_id: email,
+          provider_id: "emailpass",
+        },
+      })
 
+      authIdentityId = identities[0]?.id
+    }
+
+    if (authIdentityId && customerId) {
+      await authModule.updateAuthIdentities([
+        {
+          id: authIdentityId,
+          app_metadata: {
+            customer_id: customerId,
+          },
+        },
+      ])
+    }
+
+    /**
+     * 4. GUARANTEE SMS DELIVERY WITH CREDENTIALS
+     * If SMS fails → auto-register MUST FAIL
+     */
+    const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${password}`
+
+    try {
+      await notificationModule.createNotifications({
+        to: `+${normalized}`,
+        channel: "sms",
+        template: "auto-register",
+        data: {
+          message: smsMessage,
+        },
+      })
+    } catch (smsError: any) {
+      logger.error(`[auto-register] SMS sending failed: ${smsError.message}`)
+      return res.status(500).json({
+        error: "sms_failed",
+        message: "Не удалось отправить SMS с логином и паролем. Пожалуйста, попробуйте позже.",
+      })
+    }
+
+    /**
+     * 5. SUCCESS
+     * auto-register does NOT log in the user
+     * it only guarantees account + credentials delivery
+     */
     return res.json({
       success: true,
-      token,
-      customer_id: customer?.id,
+      customer_id: customerId,
     })
-
   } catch (error: any) {
     logger.error("[auto-register] Error:", error)
-    return res.status(500).json({ error: error?.message || "registration_failed" })
+    return res.status(500).json({
+      error: error?.message || "registration_failed",
+    })
   }
 }

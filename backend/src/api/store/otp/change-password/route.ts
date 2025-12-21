@@ -23,7 +23,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(400).json({ error: "invalid phone" })
   }
 
-  const ok = await otpStoreVerify("change_password", normalized, String(code))
+  const ok = await otpStoreVerify(normalized, String(code))
   if (!ok) {
     return res.status(400).json({ error: "invalid_code" })
   }

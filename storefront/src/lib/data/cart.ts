@@ -554,48 +554,6 @@ export async function placeOrder() {
     throw new Error("No existing cart found when placing an order")
   }
 
-  // Get cart data for auto-registration
-  const cart = await retrieveCart()
-  if (!cart) {
-    throw new Error("Cart not found")
-  }
-
-  // Check if user is authenticated
-  const authHeaders = getAuthHeaders()
-  const isAuthenticated = 'authorization' in authHeaders && authHeaders.authorization
-
-  // If not authenticated and cart has phone, auto-register
-  if (!isAuthenticated && cart.shipping_address?.phone) {
-    const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
-    
-    try {
-      const resp = await fetch(`${backendUrl}/store/auto-register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: cart.shipping_address.phone,
-          first_name: cart.shipping_address.first_name,
-          last_name: cart.shipping_address.last_name,
-        }),
-        cache: "no-store",
-      })
-
-      if (resp.ok) {
-        const data = await resp.json()
-        if (data.token) {
-          // Import setAuthToken dynamically to avoid circular deps
-          const { setAuthToken } = await import("./cookies")
-          setAuthToken(data.token)
-          revalidateTag("customer")
-        }
-      }
-      // If auto-register fails (e.g., customer exists), continue with order
-    } catch (e) {
-      // Silent fail - user can still place order as guest
-      console.error("[placeOrder] auto-register failed:", e)
-    }
-  }
-
   const cartRes = await sdk.store.cart
     .complete(cartId, {}, getAuthHeaders())
     .then((cartRes) => {

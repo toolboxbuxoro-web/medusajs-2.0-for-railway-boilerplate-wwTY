@@ -459,7 +459,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                             try {
                               const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
                               const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-                              const resp = await fetch(`${backendUrl}/store/otp/send`, {
+                              const resp = await fetch(`${backendUrl}/store/otp/request`, {
                                 method: "POST",
                                 headers: { 
                                   "Content-Type": "application/json",

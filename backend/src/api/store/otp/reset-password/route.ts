@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { normalizeUzPhone } from "../../../../lib/phone"
-import { otpStoreVerify } from "../../../../lib/otp-store"
+import { otpStoreVerify, otpStoreConsumeVerified } from "../../../../lib/otp-store"
 import { findCustomerByPhone } from "../_shared"
 
 type Body = {
@@ -22,10 +22,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(400).json({ error: "invalid phone" })
   }
 
-  const ok = await otpStoreVerify("reset_password", normalized, String(code))
+  // Step 1: Verify OTP (this consumes the OTP code)
+  const ok = await otpStoreVerify(normalized, String(code))
   if (!ok) {
     return res.status(400).json({ error: "invalid_code" })
   }
+
+  // Step 2: Consume the verification flag to prevent reuse
+  await otpStoreConsumeVerified(normalized)
 
   const customer = await findCustomerByPhone(req, phone)
   if (!customer?.email) {
