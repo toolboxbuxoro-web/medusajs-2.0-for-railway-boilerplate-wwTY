@@ -117,7 +117,8 @@
     "sms_code": "Код из SMS",
     "change": "Изменить",
     "complete_registration": "Завершить регистрацию",
-    "welcome": "Добро пожаловать"
+    "welcome": "Добро пожаловать",
+    "back_to_login": "Назад ко входу"
   },
   "cart": {
     "your_cart": "Корзина покупок",

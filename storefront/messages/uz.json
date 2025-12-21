@@ -117,7 +117,8 @@
     "sms_code": "SMS dan kod",
     "change": "O'zgartirish",
     "complete_registration": "Ro'yxatdan o'tishni yakunlash",
-    "welcome": "Xush kelibsiz"
+    "welcome": "Xush kelibsiz",
+    "back_to_login": "Kirishga qaytish"
   },
   "cart": {
     "your_cart": "Xarid savati",
