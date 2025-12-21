@@ -44,13 +44,34 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(400).json({ error: "customer_not_found" })
   }
 
+  // Debug logging
+
   const auth = req.scope.resolve(Modules.AUTH) as any
-  const resp = await auth.updateProvider("emailpass", {
-    entity_id: customer.email,
-    password: new_password,
+  
+  // Check if identity exists first
+  const identities = await auth.listAuthIdentities({
+    provider_identities: {
+      provider_id: "emailpass",
+      entity_id: customer.email,
+    },
   })
 
-  if (!resp?.success) {
+  let resp;
+  if (identities.length === 0) {
+    // Create new identity
+    resp = await auth.register("emailpass", {
+       email: customer.email, 
+       password: new_password 
+    })
+  } else {
+    // Update existing
+    resp = await auth.updateProvider("emailpass", {
+      entity_id: customer.email,
+      password: new_password,
+    })
+  }
+
+  if (!resp) {
     return res.status(400).json({ error: "password_update_failed" })
   }
 
