@@ -80,11 +80,12 @@ export default async function orderSmsHandler({
     // 1) Shipping address (best for delivery)
     // 2) Customer profile
     // 3) Order metadata (special cases)
+    const orderAny = order as any
     const rawPhone = 
-      order.shipping_address?.phone || 
-      order.customer?.phone || 
-      (order.metadata?.phone as string) || 
-      (order.metadata?.quick_order_phone as string) || 
+      orderAny.shipping_address?.phone || 
+      orderAny.customer?.phone || 
+      (orderAny.metadata?.phone as string) || 
+      (orderAny.metadata?.quick_order_phone as string) || 
       ""
 
     const normalized = rawPhone.replace(/\D/g, "")
