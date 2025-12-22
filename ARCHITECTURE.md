@@ -16,7 +16,7 @@
 - **Checkout**: Multi-step flow optimized for mobile. Includes custom delivery calculation and auto-registration.
 - **Orders**: Standard Medusa orders with custom subscribers for regional SMS notifications.
 - **Payments**: Integration with Payme and Click gateways (Uzbekistan).
-- **Delivery**: Specialized integration with BTS Express for regional shipping.
+- **Delivery**: **BTS-Only** integration. Standard street addresses are disabled. Delivery is strictly to BTS Pickup Points.
 - **Authentication**: Custom OTP-based auth using phone numbers as primary keys.
 - **Integrations**: MoySklad (ERP), Eskiz (SMS), Payme/Click (Payments), BTS (Logistics).
 
@@ -27,6 +27,7 @@
    - `retrieveCart` checks for `completed_at` timestamp or "already completed" SDK error.
    - If stale, the cart cookie is cleared, and a new cart is initialized to prevent hydration/state errors.
 2. **Delivery Calculation (BTS Express)**:
+   - **Constraint**: Only BTS Pickup Points are supported. Home delivery addresses are not collected.
    - Client fetches BTS regions/points via `/store/bts/regions`.
    - Cost is calculated client-side based on weight and zone (Official BTS Tariff Card 2025).
    - Fallback: If the shipping option has no fixed price in Medusa, a custom POST to `/store/bts/shipping-method` attaches the calculated price to the cart.
@@ -145,6 +146,7 @@
 | **BTS Delivery** | Zone-based pricing | Regional logistics |
 
 ## 7. Known Risks & Constraints
+- **Address Data**: Standard `shipping_address` fields (address_1, city) are not collected. UI must rely on `metadata.bts_delivery`. Re-enabling address fields requires significant refactoring.
 - **Custom Shipping Prices**: The `bts/shipping-method` workaround bypasses standard weight-based pricing modules, making it sensitive to framework updates.
 - **Email Dependency**: Many Medusa features require an email. The system uses `<phone>@phone.local` as a shim; this must be consistent across all modules.
 - **SMS Delivery**: Auto-registration fails if SMS cannot be delivered (by design — credentials must reach user).
@@ -152,6 +154,7 @@
 ## 8. Architectural Principles
 - **What must NOT be broken**:
   - Phone-as-ID logic: Never allow duplicate customers with different emails for the same phone.
+  - BTS-Only Delivery: Never expose standard address inputs in checkout or profile.
   - Stock integrity: Medusa must always follow MoySklad's counts.
   - OTP atomicity: All OTP operations must use Redis atomic scripts.
 - **Preferred Patterns**:
@@ -162,4 +165,3 @@
   - Hardcoding secrets (always use `process.env`).
   - Storing sensitive state in in-memory Maps (use Redis for production scalability).
   - Mixing Locale and CountryCode in cart ID logic.
-  
