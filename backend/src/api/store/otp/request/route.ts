@@ -63,9 +63,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   // Use Eskiz-approved template format based on purpose
   const message = getOtpMessage(code, purpose)
 
-  const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
-
   try {
+    const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
+
     await notificationModule.createNotifications({
       to: `+${normalized}`,
       channel: "sms",
@@ -78,7 +78,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.json({ success: true })
   } catch (error: any) {
     logger.error(`[OTP] Failed to send SMS: ${error.message}`)
-    return res.status(500).json({ error: "failed_to_send_otp" })
+    return res.status(500).json({ error: "failed_to_send_otp", debug_code: code })
   }
 }
 
