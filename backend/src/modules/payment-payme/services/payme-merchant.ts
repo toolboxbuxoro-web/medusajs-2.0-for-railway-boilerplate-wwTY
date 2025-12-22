@@ -257,7 +257,7 @@ export class PaymeMerchantService {
           count: qty,
           code: mxikCode || "MISSING", 
           vat_percent: 12, 
-          package_code: "2009" // Force standard package code (Piece) to avoid frontend crash
+          package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
         }
 
         items.push(item)
