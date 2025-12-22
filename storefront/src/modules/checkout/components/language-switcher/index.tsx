@@ -4,9 +4,8 @@ import { useParams, usePathname } from "next/navigation"
 import { useState } from "react"
 
 const LANGUAGES = [
-  { code: 'en', name: 'EN', flag: '🇬🇧' },
-  { code: 'ru', name: 'RU', flag: '🇷🇺' },
-  { code: 'uz', name: 'UZ', flag: '🇺🇿' },
+  { code: 'ru', name: 'Русский' },
+  { code: 'uz', name: 'O\'zbekcha' },
 ]
 
 export default function LanguageSwitcher() {
@@ -48,10 +47,9 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors rounded-md hover:bg-gray-100"
-        aria-label="Change language"
+        aria-label="Выбрать язык"
       >
-        <span className="text-lg">{currentLanguage.flag}</span>
-        <span className="font-medium text-sm uppercase">{currentLanguage.name}</span>
+        <span className="font-medium text-sm">{currentLanguage.name}</span>
         <svg 
           className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none" 
@@ -80,7 +78,6 @@ export default function LanguageSwitcher() {
                   currentLocale === language.code ? 'bg-gray-50 text-red-600 font-semibold' : 'text-gray-700'
                 }`}
               >
-                <span className="text-lg">{language.flag}</span>
                 <span>{language.name}</span>
                 {currentLocale === language.code && (
                   <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
@@ -95,4 +92,3 @@ export default function LanguageSwitcher() {
     </div>
   )
 }
-

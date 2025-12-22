@@ -5,9 +5,9 @@ import { useLocale } from 'next-intl'
 import { useState, useRef, useEffect } from 'react'
 import { locales, type Locale } from '../../../../i18n'
 
-const languages: Record<Locale, { name: string; flag: string }> = {
-  ru: { name: 'Русский', flag: '🇷🇺' },
-  uz: { name: 'O\'zbekcha', flag: '🇺🇿' },
+const languages: Record<Locale, { name: string }> = {
+  ru: { name: 'Русский' },
+  uz: { name: 'O\'zbekcha' },
 }
 
 export default function LanguageSwitcher() {
