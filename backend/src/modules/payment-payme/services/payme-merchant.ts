@@ -253,11 +253,11 @@ export class PaymeMerchantService {
 
         const item: any = {
           title: title.substring(0, 128), // Payme limit: 128 chars
-          price: unit + remainder, // Price per unit in tiyin, adjusted to preserve exact line total
+          price: unit + remainder, // Price per unit in tiyin
           count: qty,
-          code: mxikCode || "MISSING", // Will cause error if missing
-          vat_percent: 12, // Standard VAT in Uzbekistan
-          package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
+          code: mxikCode || "MISSING", 
+          vat_percent: 12, 
+          package_code: "2009" // Force standard package code (Piece) to avoid frontend crash
         }
 
         items.push(item)
