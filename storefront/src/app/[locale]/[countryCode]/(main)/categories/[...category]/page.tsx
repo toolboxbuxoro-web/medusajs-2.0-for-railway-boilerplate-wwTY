@@ -2,7 +2,8 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
-import { getLocalizedCategoryDescription, getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedField } from "@lib/util/localization"
+import { generateAlternates } from "@lib/util/seo"
 import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
@@ -53,20 +54,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
 
     const title = product_categories
-      .map((category: StoreProductCategory) => getLocalizedCategoryName(category, params.locale))
+      .map((category: StoreProductCategory) => 
+        getLocalizedField(category, "name", params.locale) || category.name
+      )
       .join(" | ")
 
     const lastCategory = product_categories[product_categories.length - 1]
     const description =
-      getLocalizedCategoryDescription(lastCategory, params.locale) ??
+      getLocalizedField(lastCategory, "description", params.locale) ||
       `${title} category.`
 
+    const alternates = generateAlternates(
+      params.countryCode,
+      `/categories/${params.category.join("/")}`,
+      params.locale
+    )
+
     return {
-      title: `${title} | Medusa Store`,
+      title: `${title} | Toolbox`,
       description,
-      alternates: {
-        canonical: `${params.category.join("/")}`,
-      },
+      alternates,
     }
   } catch (error) {
     notFound()

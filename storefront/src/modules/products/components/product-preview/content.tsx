@@ -8,7 +8,7 @@ import PreviewPrice from "./price"
 import ProductPreviewOverlay from "./overlay"
 import { HttpTypes } from "@medusajs/types"
 import { useParams } from "next/navigation"
-import { getLocalizedProductTitle } from "@lib/util/get-localized-product"
+import { getLocalizedField } from "@lib/util/localization"
 import { useMemo } from "react"
 
 export default function ProductPreviewContent({
@@ -60,14 +60,9 @@ export default function ProductPreviewContent({
             />
           </LocalizedClientLink>
           
-          {/* Badge - Out of Stock (priority over sale) */}
-          {!isInStock ? (
+          {!isInStock && (
             <div className="absolute top-2 left-2 bg-gray-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg pointer-events-none">
               Нет в наличии
-            </div>
-          ) : cheapestPrice?.price_type === "sale" && (
-            <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg pointer-events-none">
-              SALE
             </div>
           )}
           
@@ -95,7 +90,7 @@ export default function ProductPreviewContent({
               className="text-gray-900 text-sm sm:text-base font-semibold line-clamp-2 group-hover:text-red-600 transition-colors min-h-[2.5rem] sm:min-h-[3rem]" 
               data-testid="product-title"
             >
-              {getLocalizedProductTitle(product, localeStr)}
+              {getLocalizedField(product, "title", localeStr) || product.title}
             </Text>
           </LocalizedClientLink>
           

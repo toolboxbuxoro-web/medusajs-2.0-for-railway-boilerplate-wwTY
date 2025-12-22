@@ -11,7 +11,7 @@ import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { getLocalizedCollectionTitle, getLocalizedProductTitle } from "@lib/util/get-localized-product"
+import { getLocalizedField } from "@lib/util/localization"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -30,9 +30,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return notFound()
   }
 
-  const productTitle = getLocalizedProductTitle(product, locale)
+  const productTitle = getLocalizedField(product, "title", locale) || product.title
   const collectionTitle =
-    product.collection ? getLocalizedCollectionTitle(product.collection, locale) : null
+    product.collection ? (getLocalizedField(product.collection, "title", locale) || product.collection.title) : null
 
   return (
     <>

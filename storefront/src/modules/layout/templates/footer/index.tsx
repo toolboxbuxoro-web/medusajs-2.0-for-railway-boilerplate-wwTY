@@ -85,6 +85,38 @@ export default async function Footer() {
               <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
                 <li>
                   <LocalizedClientLink
+                    href="/delivery"
+                    className="hover:text-ui-fg-base"
+                  >
+                    {t('delivery')}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/about"
+                    className="hover:text-ui-fg-base"
+                  >
+                    {t('about') || 'О компании'}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/customer-service"
+                    className="hover:text-ui-fg-base"
+                  >
+                    {t('support') || 'Поддержка'}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/stores"
+                    className="hover:text-ui-fg-base"
+                  >
+                    {t('stores') || 'Магазины'}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
                     href="/account"
                     className="hover:text-ui-fg-base"
                   >

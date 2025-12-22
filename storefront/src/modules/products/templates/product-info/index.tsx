@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useParams } from "next/navigation"
 import FavoriteButton from "@modules/products/components/favorite-button"
 import ProductSpecs from "@modules/products/components/product-specs"
-import { getLocalizedProductDescription, getLocalizedProductTitle } from "@lib/util/get-localized-product"
+import { getLocalizedField } from "@lib/util/localization"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -27,7 +27,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         className="text-xl sm:text-2xl font-bold leading-tight text-gray-900"
         data-testid="product-title"
       >
-        {getLocalizedProductTitle(product, localeStr)}
+        {getLocalizedField(product, "title", localeStr) || product.title}
       </Heading>
 
       {/* Product Code & Rating Row */}
@@ -55,12 +55,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
           </div>
         )}
         
-        {/* Black Friday Badge */}
-        {!!product.metadata?.black_friday && (
-          <span className="inline-block bg-black text-white text-xs px-2.5 py-1 rounded font-semibold">
-            {t('black_friday')}
-          </span>
-        )}
+
       </div>
 
       <div className="flex items-center gap-4 py-2">
@@ -73,16 +68,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       </div>
 
       {/* Description (collapsible on mobile) */}
-      {(product.metadata?.description_uz || product.description) && (
-        <div className="pt-4 border-t border-gray-100">
-          <Text
-            className="text-sm text-gray-600 whitespace-pre-line line-clamp-4"
-            data-testid="product-description"
-          >
-            {getLocalizedProductDescription(product, localeStr)}
-          </Text>
-        </div>
-      )}
+            {getLocalizedField(product, "description", localeStr) || product.description}
     </div>
   )
 }

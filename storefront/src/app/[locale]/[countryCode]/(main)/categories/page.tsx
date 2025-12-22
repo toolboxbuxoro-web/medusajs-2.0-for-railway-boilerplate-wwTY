@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 
 import { getCategoriesList } from "@lib/data/categories"
-import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedField } from "@lib/util/localization"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { getTranslations } from "next-intl/server"
@@ -27,7 +27,7 @@ const CategoryCard = ({
   category: HttpTypes.StoreProductCategory
   locale: string
 }) => {
-  const name = getLocalizedCategoryName(category, locale)
+  const name = getLocalizedField(category, "name", locale) || category.name
   const imageUrl = category.metadata?.image_url as string | undefined
   const iconUrl = category.metadata?.icon_url as string | undefined
 

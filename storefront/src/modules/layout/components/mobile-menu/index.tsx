@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedField } from "@lib/util/localization"
+import { useTranslations } from "next-intl"
 
 type MobileMenuProps = {
   categories: HttpTypes.StoreProductCategory[]
@@ -45,6 +46,7 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
 export default function MobileMenu({ categories, locale }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const t = useTranslations("nav")
 
   // Close menu on route change
   useEffect(() => {
@@ -112,22 +114,12 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
 
         {/* Menu Content */}
         <div className="overflow-y-auto h-[calc(100%-60px)]">
-          {/* Quick Links */}
-          <div className="p-4 border-b border-gray-200">
-            <LocalizedClientLink
-              href="/black-friday"
-              className="flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg font-semibold"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-lg">🔥</span>
-              Black Friday
-            </LocalizedClientLink>
-          </div>
+
 
           {/* Account Links */}
           <div className="p-4 border-b border-gray-200">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Аккаунт
+              {t("account")}
             </h3>
             <div className="space-y-1">
               <LocalizedClientLink
@@ -138,7 +130,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Мой аккаунт
+                {t("account")}
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/account/orders"
@@ -148,7 +140,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                Мои заказы
+                {t("orders")}
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/favorites"
@@ -158,7 +150,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                Избранное
+                {t("favorites")}
               </LocalizedClientLink>
             </div>
           </div>
@@ -166,7 +158,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
           {/* Categories */}
           <div className="p-4 border-b border-gray-200">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Категории
+              {t("catalog")}
             </h3>
             <div className="space-y-1">
               <LocalizedClientLink
@@ -177,7 +169,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
-                Все товары
+                {t("all_products")}
               </LocalizedClientLink>
               {categories.slice(0, 10).map((category) => (
                 <LocalizedClientLink
@@ -187,7 +179,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                   onClick={() => setIsOpen(false)}
                 >
                   <CategoryIcon category={category} />
-                  {getLocalizedCategoryName(category, locale)}
+                  {getLocalizedField(category, "name", locale) || category.name}
                 </LocalizedClientLink>
               ))}
             </div>
@@ -196,7 +188,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
           {/* Info Links */}
           <div className="p-4">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Информация
+              {t("info")}
             </h3>
             <div className="space-y-1">
               <LocalizedClientLink
@@ -207,7 +199,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                 </svg>
-                Доставка
+                {t("delivery")}
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/about"
@@ -217,7 +209,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                О компании
+                {t("about")}
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/stores"
@@ -228,17 +220,17 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Магазины
+                {t("stores")}
               </LocalizedClientLink>
               <LocalizedClientLink
-                href="/support"
+                href="/customer-service"
                 className="flex items-center gap-3 px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                Поддержка
+                {t("support")}
               </LocalizedClientLink>
             </div>
           </div>

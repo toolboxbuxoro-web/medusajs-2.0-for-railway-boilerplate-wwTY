@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useParams } from "next/navigation"
 
+import { useTranslations } from "next-intl"
+
 import type { Banner } from "@lib/data/banners"
+
+import { getLocalizedField } from "@lib/util/localization"
 
 const AUTOPLAY_INTERVAL = 6000
 
@@ -22,6 +26,7 @@ type Slide = {
 export default function BannerSlider({ slides: serverSlides }: { slides?: Banner[] }) {
   const [current, setCurrent] = useState(0)
   const { locale } = useParams()
+  const t = useTranslations("home")
   const containerRef = useRef<HTMLDivElement>(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
@@ -32,10 +37,11 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
     if (!serverSlides?.length) return []
     
     return serverSlides.map((b) => {
-      const title = (locale === "uz" && b.title_uz) ? b.title_uz : (b.title || "")
-      const subtitle = (locale === "uz" && b.subtitle_uz) ? b.subtitle_uz : (b.subtitle || "")
-      const description = (locale === "uz" && b.description_uz) ? b.description_uz : (b.description || "")
-      const cta = (locale === "uz" && b.cta_uz) ? b.cta_uz : (b.cta || "")
+      const currentLocale = locale as string
+      const title = getLocalizedField(b as any, "title", currentLocale) || ""
+      const subtitle = getLocalizedField(b as any, "subtitle", currentLocale) || ""
+      const description = getLocalizedField(b as any, "description", currentLocale) || ""
+      const cta = getLocalizedField(b as any, "cta", currentLocale) || ""
       
       // Check if slide has any text content
       const hasContent = !!(title || subtitle || description || cta)
@@ -193,6 +199,12 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                         {slide.description}
                       </p>
                     )}
+
+                    {/* BTS Micro-copy */}
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-red-500 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-sm w-fit shadow-sm">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+                      <span>{t("hero_bts_msg")}</span>
+                    </div>
                     
                     {/* CTA Button */}
                     {slide.cta && (

@@ -125,7 +125,7 @@ const Register = ({ setCurrentView }: Props) => {
                   disabled={timer > 0}
                   className="text-xs font-medium text-red-600 hover:text-red-700 disabled:text-gray-400 transition-colors"
                 >
-                  {timer > 0 ? `Отправить повторно через ${timer}с` : "Отправить код повторно"}
+                  {timer > 0 ? t("otp_resend_in", { seconds: timer }) : t("otp_resend")}
                 </button>
                 <button
                   type="button"
@@ -226,7 +226,7 @@ const Register = ({ setCurrentView }: Props) => {
                 className="w-full py-3 sm:py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="register-button"
               >
-                {step === 1 ? "Получить код" : t('create_account')}
+                {step === 1 ? t("otp_get_code") : t('create_account')}
               </button>
             </>
           )}

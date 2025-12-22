@@ -9,7 +9,7 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { getLocalizedCategoryDescription, getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedField } from "@lib/util/localization"
 
 export default function CategoryTemplate({
   categories,
@@ -41,7 +41,7 @@ export default function CategoryTemplate({
         <div className="relative w-full aspect-square shrink-0">
           <Image
             src={imageUrl}
-            alt={getLocalizedCategoryName(c, locale)}
+            alt={getLocalizedField(c, "name", locale) || c.name}
             fill
             sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 250px"
             className="object-cover"
@@ -65,7 +65,7 @@ export default function CategoryTemplate({
 
     return (
       <span className="text-gray-300 font-black text-4xl select-none">
-        {getLocalizedCategoryName(c, locale).slice(0, 1).toUpperCase()}
+        {(getLocalizedField(c, "name", locale) || c.name).slice(0, 1).toUpperCase()}
       </span>
     )
   }
@@ -90,12 +90,12 @@ export default function CategoryTemplate({
                 className="hover:text-red-600"
                 data-testid="sort-by-link"
               >
-                {getLocalizedCategoryName(parent, locale)}
+                {getLocalizedField(parent, "name", locale) || parent.name}
               </LocalizedClientLink>
             </span>
           ))}
           <span className="mx-1 sm:mx-2">/</span>
-          <span className="text-gray-900 font-medium">{getLocalizedCategoryName(category, locale)}</span>
+          <span className="text-gray-900 font-medium">{getLocalizedField(category, "name", locale) || category.name}</span>
         </nav>
 
         {/* Compact Category Header */}
@@ -121,7 +121,7 @@ export default function CategoryTemplate({
                     <div className="relative w-full h-full rounded-xl sm:rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/60 group-hover:ring-white transition-all duration-300">
                       <Image
                         src={category.metadata.image_url as string}
-                        alt={getLocalizedCategoryName(category, locale)}
+                        alt={getLocalizedField(category, "name", locale) || category.name}
                         fill
                         priority
                         sizes="(max-width: 640px) 80px, (max-width: 1024px) 112px, 144px"
@@ -136,11 +136,11 @@ export default function CategoryTemplate({
                       className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 tracking-tight" 
                       data-testid="category-page-title"
                     >
-                      {getLocalizedCategoryName(category, locale)}
+                      {getLocalizedField(category, "name", locale) || category.name}
                     </h1>
-                    {getLocalizedCategoryDescription(category, locale) && (
+                    {(getLocalizedField(category, "description", locale) || category.description) && (
                       <p className="text-gray-500 text-sm sm:text-base max-w-xl leading-relaxed line-clamp-2">
-                        {getLocalizedCategoryDescription(category, locale) as string}
+                        {(getLocalizedField(category, "description", locale) || category.description) as string}
                       </p>
                     )}
                   </div>
@@ -155,7 +155,7 @@ export default function CategoryTemplate({
                   className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight" 
                   data-testid="category-page-title"
                 >
-                  {getLocalizedCategoryName(category, locale)}
+                  {getLocalizedField(category, "name", locale) || category.name}
                 </h1>
               </div>
             )}
@@ -178,7 +178,7 @@ export default function CategoryTemplate({
                   
                   <div className="px-0.5">
                     <div className="font-semibold text-gray-800 text-xs sm:text-sm leading-tight line-clamp-2 group-hover:text-red-600 transition-colors">
-                      {getLocalizedCategoryName(c, locale)}
+                      {getLocalizedField(c, "name", locale) || c.name}
                     </div>
                   </div>
                 </LocalizedClientLink>

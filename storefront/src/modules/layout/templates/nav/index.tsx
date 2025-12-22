@@ -16,7 +16,7 @@ import CatalogDropdown from "@modules/layout/components/catalog-dropdown"
 import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
 import FavoritesButton from "@modules/layout/components/favorites-button"
 import { type Locale } from '../../../../i18n'
-import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedField } from "@lib/util/localization"
 
 type NavProps = {
   locale: string
@@ -98,6 +98,9 @@ export default async function Nav({ locale }: NavProps) {
 
             {/* Icons - Compact on mobile, right aligned */}
             <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 navbar-icons ml-auto sm:ml-0">
+              {/* Delivery Link - Desktop */}
+
+
               {/* Search icon for mobile */}
               <LocalizedClientLink
                 href="/search"
@@ -205,7 +208,7 @@ export default async function Nav({ locale }: NavProps) {
                      category.handle === "stroymaterialy" ? "🧱" : "📦"}
                   </span>
                 )}
-                <span>{getLocalizedCategoryName(category, locale)}</span>
+                <span>{getLocalizedField(category, "name", locale) || category.name}</span>
               </LocalizedClientLink>
             ))}
           </div>

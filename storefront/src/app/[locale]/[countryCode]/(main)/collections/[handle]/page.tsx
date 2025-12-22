@@ -9,7 +9,8 @@ import { listRegions } from "@lib/data/regions"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import { getLocalizedCollectionTitle } from "@lib/util/get-localized-product"
+import { getLocalizedField } from "@lib/util/localization"
+import { generateAlternates } from "@lib/util/seo"
 
 // Force dynamic rendering to avoid DYNAMIC_SERVER_USAGE errors
 export const dynamic = "force-dynamic"
@@ -56,19 +57,26 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const collection = await getCollectionByHandle(params.handle)
+  const { handle, locale, countryCode } = params
+  const collection = await getCollectionByHandle(handle)
 
   if (!collection) {
     notFound()
   }
 
-  const title = getLocalizedCollectionTitle(collection as any, params.locale)
-  const metadata = {
-    title: `${title} | Medusa Store`,
-    description: `${title} collection`,
-  } as Metadata
+  const title = getLocalizedField(collection as any, "title", locale) || collection.title
+  const description = `${title} collection`
+  const alternates = generateAlternates(
+    countryCode,
+    `/collections/${handle}`,
+    locale
+  )
 
-  return metadata
+  return {
+    title: `${title} | Toolbox`,
+    description,
+    alternates,
+  }
 }
 
 export default async function CollectionPage({ params, searchParams }: Props) {

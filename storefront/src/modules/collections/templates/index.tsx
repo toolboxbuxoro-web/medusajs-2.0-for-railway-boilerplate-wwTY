@@ -8,7 +8,7 @@ import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import { HttpTypes } from "@medusajs/types"
-import { getLocalizedCollectionTitle } from "@lib/util/get-localized-product"
+import { getLocalizedField } from "@lib/util/localization"
 import CollectionBanner from "../components/collection-banner"
 
 export default function CollectionTemplate({
@@ -36,7 +36,7 @@ export default function CollectionTemplate({
         
         <div className="mb-8 text-2xl-semi">
           <h1>
-            {getLocalizedCollectionTitle(collection, localeStr)}
+            {getLocalizedField(collection, "title", localeStr)}
           </h1>
         </div>
         <Suspense fallback={<SkeletonProductGrid />}>

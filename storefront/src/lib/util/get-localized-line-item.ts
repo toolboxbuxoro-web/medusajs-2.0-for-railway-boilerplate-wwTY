@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
-import { getLocalizedProductTitle } from "./get-localized-product"
+import { getLocalizedField } from "./localization"
 
 type LineItem = HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
 
@@ -9,20 +9,20 @@ export const getLocalizedLineItemTitle = (item: LineItem, locale: string) => {
     ((item as any).title as string | undefined) ??
     ""
 
-  if (locale !== "uz") {
-    return fallback
-  }
-
   const product = (item as any)?.variant?.product as
     | HttpTypes.StoreProduct
     | undefined
 
   if (product) {
-    return getLocalizedProductTitle(product, locale)
+    const localized = getLocalizedField(product, "title", locale)
+    if (localized) {
+      return localized
+    }
   }
 
   return fallback
 }
+
 
 
 

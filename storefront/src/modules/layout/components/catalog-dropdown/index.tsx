@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { ChevronDown, ChevronRight, XMark } from "@medusajs/icons"
-import { getLocalizedCategoryName } from "@lib/util/get-localized-category-name"
+import { getLocalizedField } from "@lib/util/localization"
 
 type CatalogDropdownProps = {
   categories: HttpTypes.StoreProductCategory[]
@@ -213,7 +213,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                     >
                       <div className="flex items-center gap-4">
                         <CategoryIcon category={category} />
-                        <span className="font-medium">{getLocalizedCategoryName(category, locale)}</span>
+                        <span className="font-medium">{getLocalizedField(category, "name", locale) || category.name}</span>
                       </div>
                       <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${activeCategory?.id === category.id && !isMobile ? "text-red-600 translate-x-1" : ""}`} />
                     </div>
@@ -238,7 +238,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                         >
                            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                         </button>
-                        <span className="font-bold text-lg truncate">{getLocalizedCategoryName(activeCategory, locale)}</span>
+                        <span className="font-bold text-lg truncate">{getLocalizedField(activeCategory, "name", locale) || activeCategory.name}</span>
                      </div>
                   )}
 
@@ -269,7 +269,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                               )}
                            </div>
                            <div>
-                              <h2 className="text-3xl font-bold text-gray-900 mb-1">{getLocalizedCategoryName(activeCategory, locale)}</h2>
+                              <h2 className="text-3xl font-bold text-gray-900 mb-1">{getLocalizedField(activeCategory, "name", locale) || activeCategory.name}</h2>
                               <LocalizedClientLink 
                                 href={`/categories/${activeCategory.handle}`}
                                 onClick={handleClose}
@@ -317,7 +317,7 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
                                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
                               </div>
                               <span className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors mb-1">
-                                {getLocalizedCategoryName(child, locale)}
+                                {getLocalizedField(child, "name", locale) || child.name}
                               </span>
                               <span className="text-xs text-gray-500 line-clamp-2">
                                 {child.metadata?.description_short as string || "Все товары категории"}

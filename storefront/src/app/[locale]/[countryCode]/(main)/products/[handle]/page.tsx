@@ -4,7 +4,8 @@ import { notFound } from "next/navigation"
 import ProductTemplate from "@modules/products/templates"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getProductByHandle, getProductsList } from "@lib/data/products"
-import { getLocalizedProductTitle } from "@lib/util/get-localized-product"
+import { getLocalizedField } from "@lib/util/localization"
+import { generateAlternates } from "@lib/util/seo"
 
 type Props = {
   params: { locale: string; countryCode: string; handle: string }
@@ -46,8 +47,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { handle } = params
-  const region = await getRegion(params.countryCode)
+  const { handle, locale, countryCode } = params
+  const region = await getRegion(countryCode)
 
   if (!region) {
     notFound()
@@ -59,14 +60,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
-  const title = getLocalizedProductTitle(product, params.locale)
+  const title = getLocalizedField(product, "title", locale) || product.title
+  const description = getLocalizedField(product, "description", locale) || title
+
+  const alternates = generateAlternates(
+    countryCode,
+    `/products/${handle}`,
+    locale
+  )
 
   return {
     title: `${title} | Toolbox`,
-    description: `${title}`,
+    description,
+    alternates,
     openGraph: {
       title: `${title} | Toolbox`,
-      description: `${title}`,
+      description,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }

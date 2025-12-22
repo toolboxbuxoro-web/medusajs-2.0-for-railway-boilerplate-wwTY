@@ -1,7 +1,7 @@
 {
   "nav": {
     "location": "Moskva",
-    "stores": "do'kon",
+    "stores": "Do'konlar",
     "delivery": "Yetkazib berish va to'lov",
     "support": "Xizmat va qo'llab-quvvatlash",
     "about": "Biz haqimizda",
@@ -17,7 +17,9 @@
     "all_products": "Barcha mahsulotlar",
     "black_friday": "QORA JUMA",
     "promotions": "% Aksiyalar",
-    "for_business": "Biznes uchun"
+    "for_business": "Biznes uchun",
+    "orders": "Mening buyurtmalarim",
+    "info": "Ma'lumot"
   },
   "hero": {
     "brand": "INTERSKOL",
@@ -34,6 +36,10 @@
     "tagline": "Professional asboblar va jihozlar",
     "categories": "Kategoriyalar",
     "collections": "Kolleksiyalar",
+    "delivery": "Yetkazib berish",
+    "about": "Toolbox ҳақида",
+    "support": "Қўллаб-қувватлаш",
+    "stores": "Do'konlar",
     "info": "Ma'lumot",
     "account": "Shaxsiy kabinet",
     "cart": "Savat",
@@ -119,7 +125,18 @@
     "change": "O'zgartirish",
     "complete_registration": "Ro'yxatdan o'tishni yakunlash",
     "welcome": "Xush kelibsiz",
-    "back_to_login": "Kirishga qaytish"
+    "back_to_login": "Kirishga qaytish",
+    "otp_sending": "Yuborilmoqda...",
+    "otp_get_code": "Kod olish",
+    "otp_verify": "Tasdiqlash",
+    "otp_resend_in": "{seconds}s dan keyin qayta yuborish",
+    "otp_resend": "Kodni qayta yuborish",
+    "otp_code_sent_to": "Kod {phone} raqamiga yuborildi",
+    "otp_phone_verified": "Raqam tasdiqlandi",
+    "otp_please_verify": "Iltimos, telefon raqamini tasdiqlang",
+    "otp_enter_code": "6 xonali kodni kiriting",
+    "trust_secure": "Xavfsiz",
+    "trust_protected": "Himoyalangan"
   },
   "cart": {
     "your_cart": "Xarid savati",
@@ -129,8 +146,8 @@
     "sign_in": "Kirish yoki ro'yxatdan o'tish",
     "sign_in_description": "Buyurtma holatini kuzatish va shaxsiy takliflar olish imkoniyatiga ega bo'lasiz",
     "subtotal": "Oraliq jami",
-    "subtotal_excl": "Oraliq jami (yetkazib berish va soliqsiz)",
-    "shipping": "Yetkazib berish",
+    "subtotal_excl": "Oraliq jami (berishsiz va soliqsiz)",
+    "shipping": "BTS orqali berish",
     "taxes": "Soliqlar",
     "total": "Jami",
     "discount": "Chegirma",
@@ -250,19 +267,24 @@
     "weight": "Og'irligi",
     "dimensions": "O'lchamlari",
     "country_of_origin": "Ishlab chiqarilgan mamlakat",
-    "fast_delivery": "Tez yetkazib berish",
-    "fast_delivery_desc": "Sizning posilkangiz 3-5 ish kuni ichida qabul qilish punktiga yoki uyingizga yetib boradi.",
+    "pickup_and_returns": "Olish va qaytarish",
+    "bts_pickup_title": "Toolbox do'konlaridan olib ketish",
+    "bts_pickup_desc": "Buyurtmangizni bugun istalgan firmaviy do'kondan oling. Kuryersiz, kutmasdan.",
+    "bts_same_day": "Bugun berishga tayyor",
+    "bts_same_day_desc": "Agar mahsulot shahringizda mavjud bo'lsa, buyurtmani o'sha kuni olib ketish mumkin.",
+    "return_policy": "14 kun ichida qaytarish",
+    "return_policy_desc": "Mahsulot yoqmasa, ortiqcha savollarsiz pulni qaytaramiz.",
+    "warranty_info": "Kafolat",
+    "warranty_info_desc": "Barcha assortimentga rasmiy ishlab chiqaruvchi kafolati.",
     "simple_exchanges": "Oddiy almashish",
-    "simple_exchanges_desc": "O'lcham to'g'ri kelmadimi? Havotir olmang - biz mahsulotni yangisiga almashtirib beramiz.",
-    "easy_returns": "Oson qaytarish",
-    "easy_returns_desc": "Shunchaki mahsulotni qaytaring va biz pulingizni qaytarib beramiz. Ortiqcha savollarsiz - biz qaytarish jarayoni muammosiz bo'lishi uchun qo'limizdan kelganini qilamiz.",
-    "shipping_returns": "Yetkazib berish va qaytarish",
+    "simple_exchanges_desc": "Mahsulot to'g'ri kelmadimi? Istalgan do'konimizda mosini almashtirib beramiz.",
+    "easy_returns": "Qaytarish",
+    "easy_returns_desc": "Mahsulotni 14 kun ichida qaytaring va pulingizni oling.",
     "related_products_desc": "Sizni ushbu mahsulotlar ham qiziqtirishi mumkin.",
     "select": "Tanlash",
     "add_to_cart": "Savatga qo'shish",
     "out_of_stock": "Omborda yo'q",
     "in_stock": "Omborda bor",
-    "ships_in": "Jo'natish",
     "description": "Tavsif",
     "specifications": "Xususiyatlari",
     "reviews": "Sharhlar",
@@ -277,8 +299,12 @@
     "promo_dates": "5-30 noyabr",
     "available_in_city": "Sizning shahringizda {count} dona",
     "in_stock_count": "Omborda {count} dona",
-    "pickup_info": "Olib ketish: bugun, bepul, 4 ta do'kondan",
-    "courier_info": "Kuryer orqali: bugun, 290 P dan",
+    "bts_pickup_today": "Bugun Toolbox do'konlaridan olib ketish",
+    "bts_pickup_subtitle": "Bepul • Kuryersiz • Do'konda berish",
+    "bts_stores_available": "Do'kon manzillarini ko'rish",
+    "warranty_badge": "Kafolat: {time}",
+    "trust_microcopy": "Rasmiy tovar • 14 kun qaytarish",
+    "quick_order_microcopy": "15 daqiqa ichida qo'ng'iroq qilamiz",
     "select_variant": "Variantni tanlang",
     "quick_order": "Tez buyurtma",
     "installments": "to'lovlar bo'lib-bo'lib"
@@ -390,5 +416,131 @@
     "password_reset": "Parol muvaffaqiyatli tiklandi. Endi tizimga kirishingiz mumkin.",
     "password_changed": "Parol muvaffaqiyatli o'zgartirildi.",
     "phone_changed": "Telefon raqami muvaffaqiyatli o'zgartirildi."
+  },
+  "delivery_page": {
+    "title": "Buyurtmalarni yetkazib berish va qabul qilish",
+    "subtitle": "Barcha buyurtmalar BTS tarqatish punktlari orqali beriladi",
+    "description": "Biz kuryer orqali yetkazib bermaymiz. Siz buyurtmani o'zingizga qulay BTS punktidan olib ketasiz.",
+    "how_it_works": {
+      "title": "Bu qanday ishlaydi",
+      "step_1": "Siz saytda buyurtma rasmiylashtirasiz",
+      "step_2": "Viloyat va BTS tarqatish punktini tanlaysiz",
+      "step_3": "Biz buyurtmani yig'amiz",
+      "step_4": "Siz buyurtmani BTS punktidan olib ketasiz"
+    },
+    "where_to_pickup": {
+      "title": "Buyurtmani qayerdan olish mumkin",
+      "description": "Buyurtmani hududingizdagi BTS punktlaridan biridan olishingiz mumkin.",
+      "note": "Dolzarb tarqatish punkti buyurtma rasmiylashtirishda tanlanadi."
+    },
+    "timing_cost": {
+      "title": "Muddati va narxi",
+      "timing": "Odatda buyurtma 1–2 ish kuni ichida tayyor bo'ladi.",
+      "cost_free": "Buyurtmani BTS punktida olish — bepul",
+      "cost_paid": "Narx buyurtma rasmiylashtirishda ko'rsatiladi"
+    },
+    "faq": {
+      "title": "Tez-tez so'raladigan savollar",
+      "q1": "Uyga yetkazib berish mumkinmi?",
+      "a1": "Yo'q, biz faqat BTS tarqatish punktlari orqali ishlaymiz.",
+      "q2": "Buyurtmani rasmiylashtirilgan kuni olish mumkinmi?",
+      "a2": "Ba'zan, agar mahsulot sizning hududingizdagi omborda mavjud bo'lsa.",
+      "q3": "Buyurtmani olish uchun nima kerak?",
+      "a3": "Sizga telefon va buyurtma raqami kerak bo'ladi.",
+      "q4": "Mahsulotni qaytarish mumkinmi?",
+      "a4": "Ha, batafsil ma'lumot xizmat ko'rsatish sahifasida."
+    },
+    "cta": {
+      "shop_now": "Xarid qilishga o'tish",
+      "view_points": "Tarqatish punktlarini ko'rish",
+      "contact_support": "Qo'llab-quvvatlash xizmati bilan bog'lanish"
+    }
+  },
+  "about_page": {
+    "hero": {
+      "title": "Toolbox ҳақида",
+      "subtitle": "Иш учун асбоб ва ускуналар. 2019 йилдан бери.",
+      "bullets": {
+        "years": "2019 йилдан бери бозорда",
+        "branches": "Бухорода 3 та филиал",
+        "service": "Кафолат ва сервис"
+      }
+    },
+    "timeline": {
+      "title": "Биз қандай ривожландик",
+      "steps": {
+        "start": { "year": "2019", "text": "38 м² майдонда старт, электр асбоблар" },
+        "growth": { "year": "2022", "text": "Ассортимент ўсиши ва филиаллар очилиши" },
+        "today": { "year": "Бугун", "text": "Бухорода 3 та дўкон, минглаб мижозлар" }
+      }
+    },
+    "today": {
+      "title": "Toolbox бугун",
+      "p1": "Биз усталар ва қурилиш компанияларини ишончли асбоблар билан таъминлаймиз. Каталогимизда фақат текширилган брендлар мавжуд.",
+      "p2": "Биз учун ҳар бир мижоз ўз вазифасига мос ечим топиши муҳим — кичик таъмирдан тортиб йирик ишлаб чиқаришгача.",
+      "p3": "Биз харид қилиш тез ва сервис исталган вақтда мавжуд бўлиши устида ишламоқдамиз.",
+      "cards": {
+        "catalog": { "title": "Ассортимент", "text": "Минглаб турдаги асбоблар" },
+        "service": { "title": "Сервис", "text": "Расмий кафолат" },
+        "pickup": { "title": "Олиб кетиш", "text": "BTS пунктлари орқали" }
+      }
+    },
+    "presence": {
+      "title": "Биз маҳаллий даражада ишлаймиз",
+      "city": "Бухоро",
+      "text": "Биз нафақат интернетдаги витрина, балки ҳақиқий дўконлар тармоғимиз. Қўллаб-кувватлаш ва сервисга оид барча масалалар филиалларимизда жойида ҳал қилинади."
+    },
+    "mission": {
+      "title": "Бизнинг мақсадимиз",
+      "description": "Ўзбекистонда сифати, кафолати ва сервиси билан ишонч қозонган асбоблар брендига айланиш."
+    },
+    "cta": {
+      "store": "Каталогга ўтиш",
+      "support": "Қўллаб-қувватлаш хизмати"
+    }
+  },
+  "stores_page": {
+    "hero": {
+      "title": "Bizning do'konlar",
+      "subtitle": "Oflayn xaridlar — do'konlarda. Onlayn-buyurtmalar — BTS tarqatish punktlari orqali."
+    },
+    "city_bukhara": {
+      "title": "Buxoro — 3 ta do'kon",
+      "stores": {
+        "store1": "Toolbox — 1-sonli filial",
+        "store2": "Toolbox — 2-sonli filial",
+        "store3": "Toolbox — 3-sonli filial"
+      }
+    },
+    "store_card": {
+      "description": "Asbob va uskunalarni sotish",
+      "route": "Yo'nalish tuzish"
+    },
+    "coming_soon": {
+      "title": "Tez orada ochiladi",
+      "city": "Qarshi",
+      "region": "Qashqadaryo",
+      "badge": "Tez orada",
+      "text": "Biz sizga yaqinroq bo'lish uchun kengaymoqdamiz"
+    },
+    "info_block": {
+      "important": "Muhim",
+      "text_online": "Saytdagi onlayn-buyurtmalar BTS olib ketish punktlari orqali beriladi, ularni buyurtma berishda o'zingiz tanlaysiz.",
+      "text_offline": "Do'konda amalga oshirilgan xaridlar joyida beriladi."
+    },
+    "cta": {
+      "catalog": "Katalogga o'tish",
+      "delivery": "Olib ketish qanday ishlaydi"
+    },
+    "seo": {
+      "title": "Bizning do'konlar | Toolbox",
+      "description": "Buxorodagi Toolbox do'konlari va buyurtmalarni berish punktlari manzillari. BTS orqali buyurtmalarni olib ketish."
+    }
+  },
+  "home": {
+    "popular_products": "Ommabop mahsulotlar",
+    "hero_bts_msg": "Do'konlarimizdan olib keting",
+    "seo_title": "Toolbox — Professional asboblar va jihozlar",
+    "seo_description": "Professionallar va biznes uchun onlayn-gipermarket. Qurilish, ta'mirlash va ishlab chiqarish uchun asl mahsulotlar. Toolbox do'konlaridan olib ketish."
   }
 }

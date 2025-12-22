@@ -244,21 +244,36 @@ export default function ProductActions({
           )}
         </div>
 
+        {/* BTS Pickup Info - No Couriers */}
         <div className="space-y-3 mb-6">
           <div className="flex items-center gap-2 text-sm">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span>{t('pickup_info')}</span>
+            <span className="text-green-700 font-medium">{t('bts_pickup_today')}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          <div className="text-xs text-gray-500 ml-7">{t('bts_pickup_subtitle')}</div>
+          <a 
+            href={`/${countryCode}/stores`}
+            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 ml-7 transition-colors"
+          >
+            <span>{t('bts_stores_available')}</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-            <span>{t('courier_info')}</span>
-          </div>
+          </a>
         </div>
+
+        {/* Warranty Badge - Only show if product has warranty */}
+        {product.metadata?.warranty && (
+          <div className="flex items-center gap-2 text-sm text-gray-700 mb-4 bg-green-50 p-3 rounded-lg border border-green-100">
+            <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>{t('warranty_badge', { time: String(product.metadata.warranty) })}</span>
+          </div>
+        )}
 
         <Button
           onClick={handleAddToCart}
@@ -274,11 +289,10 @@ export default function ProductActions({
             ? t('out_of_stock')
             : t('add_to_cart')}
         </Button>
-        {addError && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
-            {addError}
-          </div>
-        )}
+        {/* Trust micro-copy */}
+        <div className="text-xs text-gray-500 text-center mt-2 mb-3">
+          {t('trust_microcopy')}
+        </div>
         <Button
           variant="secondary"
           className="w-full h-10 bg-gray-100 hover:bg-gray-200 text-gray-800"
@@ -288,6 +302,9 @@ export default function ProductActions({
         >
           {t('quick_order')}
         </Button>
+        <div className="text-xs text-gray-500 text-center mt-2">
+          {t('quick_order_microcopy')}
+        </div>
         <QuickOrderModal
           product={product}
           variant={selectedVariant}

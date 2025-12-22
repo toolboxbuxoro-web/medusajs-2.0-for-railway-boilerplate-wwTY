@@ -85,6 +85,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   availableShippingMethods,
 }) => {
   const t = useTranslations("checkout")
+  const tAccount = useTranslations("account")
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -279,7 +280,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     
     // Guests must verify phone before proceeding
     if (!isLoggedIn && !otpVerified) {
-      setError("Пожалуйста, подтвердите номер телефона")
+      setError(tAccount("otp_please_verify"))
       return
     }
     
@@ -483,7 +484,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                           disabled={otpLoading}
                           className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
                         >
-                          {otpLoading ? "Отправка..." : "Получить код подтверждения"}
+                          {otpLoading ? tAccount("otp_sending") : tAccount("otp_get_code")}
                         </button>
                       ) : (
                         <div className="space-y-3">
@@ -492,7 +493,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                               type="text"
                               inputMode="numeric"
                               maxLength={6}
-                              placeholder="Введите 6-значный код"
+                              placeholder={tAccount("otp_enter_code")}
                               value={otpCode}
                               onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                               className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-center text-xl tracking-widest font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -531,9 +532,9 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                             </button>
                           </div>
                           <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-500">Код отправлен на {phone}</span>
+                            <span className="text-gray-500">{tAccount("otp_code_sent_to", { phone })}</span>
                             {resendTimer > 0 ? (
-                              <span className="text-gray-400">Повторить через {resendTimer}с</span>
+                              <span className="text-gray-400">{tAccount("otp_resend_in", { seconds: resendTimer })}</span>
                             ) : (
                               <button
                                 type="button"
@@ -543,7 +544,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                 }}
                                 className="text-blue-600 hover:underline"
                               >
-                                Отправить снова
+                                {tAccount("otp_resend")}
                               </button>
                             )}
                           </div>
@@ -558,7 +559,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      <span className="font-medium">Номер подтверждён</span>
+                      <span className="font-medium">{tAccount("otp_phone_verified")}</span>
                     </div>
                   )}
                 </div>
