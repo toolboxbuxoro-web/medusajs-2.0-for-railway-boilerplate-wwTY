@@ -64,6 +64,7 @@
     "addresses": "Адреса",
     "orders": "Заказы",
     "logout": "Выйти",
+    "logout_confirmation": "Вы уверены, что хотите выйти?",
     "hello": "Здравствуйте",
     "signed_in_as": "Вы вошли как:",
     "recent_orders": "Недавние заказы",

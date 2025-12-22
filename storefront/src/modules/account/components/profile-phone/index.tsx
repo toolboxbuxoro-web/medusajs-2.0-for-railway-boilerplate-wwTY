@@ -56,7 +56,7 @@ const ProfilePhone: React.FC<MyInformationProps> = ({ customer }) => {
             data-testid="phone-input"
           />
           <Input
-            label={t('sms_code') || "Код из SMS"}
+            label={t('sms_code')}
             name="otp_code"
             type="text"
             data-testid="otp-code-input"

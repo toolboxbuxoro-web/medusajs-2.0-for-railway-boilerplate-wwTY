@@ -23,13 +23,14 @@ const AccountNav = ({
   const t = useTranslations('account')
 
   const handleLogout = async () => {
-    await signout(countryCode)
+    if (window.confirm(t('logout_confirmation'))) {
+      await signout(countryCode)
+    }
   }
 
   const navItems = [
     { href: "/account", label: t('overview'), icon: <User size={18} />, testId: "overview-link" },
     { href: "/account/profile", label: t('profile'), icon: <User size={18} />, testId: "profile-link" },
-    { href: "/account/addresses", label: t('addresses'), icon: <MapPin size={18} />, testId: "addresses-link" },
     { href: "/account/orders", label: t('orders'), icon: <Package size={18} />, testId: "orders-link" },
   ]
 

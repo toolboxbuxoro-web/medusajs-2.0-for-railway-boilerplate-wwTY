@@ -25,7 +25,15 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
               {t('hello')}, {customer?.first_name}
             </h1>
             <p className="text-sm text-gray-500">
-              {t('signed_in_as')} <span className="font-semibold text-gray-900" data-testid="customer-email" data-value={customer?.email}>{customer?.email}</span>
+              {customer?.email?.endsWith("@phone.local") ? (
+                <>
+                  {t('phone')}: <span className="font-semibold text-gray-900" data-testid="customer-phone" data-value={customer?.phone}>{customer?.phone}</span>
+                </>
+              ) : (
+                <>
+                  {t('signed_in_as')} <span className="font-semibold text-gray-900" data-testid="customer-email" data-value={customer?.email}>{customer?.email}</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -51,18 +59,6 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
             </div>
           </div>
 
-          {/* Addresses Card */}
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-            <div className="flex flex-col gap-y-2">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">{t('saved_addresses')}</h3>
-              <div className="flex items-baseline gap-x-2">
-                <span className="text-3xl sm:text-4xl font-bold text-red-600" data-testid="addresses-count" data-value={customer?.addresses?.length || 0}>
-                  {customer?.addresses?.length || 0}
-                </span>
-                <span className="text-sm text-gray-500">{t('addresses')}</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Recent Orders Section */}
@@ -138,7 +134,7 @@ const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
     return 0
   }
 
-  if (customer.email) {
+  if (customer.email && !customer.email.endsWith("@phone.local")) {
     count++
   }
 
@@ -150,15 +146,7 @@ const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
     count++
   }
 
-  const billingAddress = customer.addresses?.find(
-    (addr) => addr.is_default_billing
-  )
-
-  if (billingAddress) {
-    count++
-  }
-
-  return (count / 4) * 100
+  return (count / 3) * 100
 }
 
 export default Overview

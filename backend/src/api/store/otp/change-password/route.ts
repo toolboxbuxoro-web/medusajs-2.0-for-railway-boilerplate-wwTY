@@ -29,6 +29,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(400).json({ error: "invalid_code" })
   }
 
+  // 2. Resolve current customer from session
+  const authIdentityId = (req as any).auth_context?.auth_identity_id
+  if (!authIdentityId) {
+    return res.status(401).json({ error: "unauthorized" })
+  }
+
   const customer = await findCustomerByPhone(req, phone)
   if (!customer?.email) {
     return res.status(400).json({ error: "customer_not_found" })

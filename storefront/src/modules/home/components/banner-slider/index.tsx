@@ -56,10 +56,8 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
   
   const total = slides.length
   
-  // Don't render if no banners
-  if (total === 0) return null
-
   const goToSlide = useCallback((index: number) => {
+    if (total === 0) return // Safety check
     if (index < 0) {
       setCurrent(total - 1)
     } else if (index >= total) {
@@ -101,7 +99,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
     e.preventDefault()
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = () => {
     if (!isDragging.current) return
   }
 
@@ -127,12 +125,17 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
+    if (total <= 1) return // Don't autoplay if 0 or 1 slide
+
     const id = setInterval(() => {
       setCurrent((prev) => (prev + 1) % total)
     }, AUTOPLAY_INTERVAL)
 
     return () => clearInterval(id)
   }, [total])
+
+  // Don't render if no banners
+  if (total === 0) return null
 
   return (
     <div 

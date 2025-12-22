@@ -73,7 +73,7 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
             data-testid="confirm-password-input"
           />
           <Input
-            label={t('sms_code') || "Код из SMS"}
+            label={t('sms_code')}
             type="text"
             name="otp_code"
             data-testid="otp-code-input"

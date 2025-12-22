@@ -14,6 +14,17 @@ import { getTranslations } from 'next-intl/server'
 const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
   const t = await getTranslations({ locale: locale || 'ru', namespace: 'order' })
   
+  /**
+   * BTS-ONLY DELIVERY DESIGN
+   * 
+   * This project strictly uses BTS Pickup points. 
+   * Traditional street addresses (address_1, city, etc.) are intentionally 
+   * excluded from the UI to reflect the business model.
+   * 
+   * Delivery data is extracted from order.metadata.bts_delivery.
+   */
+  const btsDelivery = (order.metadata?.bts_delivery as any) || {}
+
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-xl font-bold my-6">
@@ -25,34 +36,44 @@ const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
-            {t('shipping_address')}
+            {t('delivery_method') || "Способ доставки"}
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.first_name}{" "}
-            {order.shipping_address?.last_name}
+          <Text className="txt-medium text-ui-fg-subtle mb-4">
+            BTS Pickup (Склад)
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.address_1}{" "}
-            {order.shipping_address?.address_2}
+
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
+            {t('bts_delivery_point') || "Пункт выдачи BTS"}
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.postal_code},{" "}
-            {order.shipping_address?.city}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.country_code?.toUpperCase()}
-          </Text>
+          <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 mb-2">
+            <Text className="text-sm font-bold text-gray-900 mb-1">
+              {btsDelivery.region || "Регион не указан"}
+            </Text>
+            <Text className="text-xs text-gray-600 font-medium">
+              {btsDelivery.point || "Пункт не указан"}
+            </Text>
+            {btsDelivery.point_address && (
+              <Text className="text-xs text-gray-400 mt-1 italic">
+                {btsDelivery.point_address}
+              </Text>
+            )}
+          </div>
         </div>
 
         <div
           className="flex flex-col"
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('contact')}</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('recipient') || "Получатель"}</Text>
+          <Text className="txt-medium text-ui-fg-subtle">
+            {order.shipping_address?.first_name} {order.shipping_address?.last_name}
+          </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.phone}
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
+          {!order.email?.includes("@phone.local") && (
+            <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
+          )}
         </div>
 
         <div
@@ -61,14 +82,19 @@ const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('method')}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {(order as any).shipping_methods?.[0]?.name} (
-            {convertToLocale({
-              amount: order.shipping_methods?.[0]?.total ?? 0,
-              currency_code: order.currency_code,
-            })
-              .replace(/,/g, "")
-              .replace(/\./g, ",")}
-            )
+            {(order as any).shipping_methods?.[0]?.name}
+            {order.shipping_methods?.[0]?.total !== undefined && (
+              <>
+                {" "}
+                ({convertToLocale({
+                  amount: order.shipping_methods?.[0]?.total ?? 0,
+                  currency_code: order.currency_code,
+                })
+                  .replace(/,/g, "")
+                  .replace(/\./g, ",")}
+                )
+              </>
+            )}
           </Text>
         </div>
       </div>

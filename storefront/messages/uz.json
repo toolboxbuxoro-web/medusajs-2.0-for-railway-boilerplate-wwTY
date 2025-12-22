@@ -64,6 +64,7 @@
     "addresses": "Manzillar",
     "orders": "Buyurtmalar",
     "logout": "Chiqish",
+    "logout_confirmation": "Chiqishni tasdiqlaysizmi?",
     "hello": "Salom",
     "signed_in_as": "Siz kirgan:",
     "recent_orders": "So'nggi buyurtmalar",
