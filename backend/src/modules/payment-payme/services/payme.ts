@@ -87,11 +87,22 @@ export class PaymePaymentProviderService extends AbstractPaymentProvider<Options
     // Include order_id so callback can identify which order was paid
     const returnUrl = `${cleanStoreUrl}/api/payme-callback?order_id=${encodeURIComponent(orderId)}`
 
+    if (!this.options_.payme_id) {
+       this.logger_.error(`[Payme] Missing payme_id in options!`)
+       throw new Error("Payme configuration error: Missing PAYME_ID")
+    }
+
     // Payme format: m=merchant_id;ac.order_id=order_id;a=amount;c=return_url
     const paramString = `m=${this.options_.payme_id};ac.order_id=${orderId};a=${amountForPayme};c=${returnUrl}`
+    
+    // Debug log to verify parameters before encoding
+    this.logger_.info(`[Payme] Generating URL with params: ${paramString}`)
+
     const encodedParams = Buffer.from(paramString).toString("base64")
 
     const paymentUrl = `${this.paymeUrl_}/${encodedParams}`
+    
+    this.logger_.info(`[Payme] Generated Payment URL: ${paymentUrl}`)
 
     return paymentUrl
   }
