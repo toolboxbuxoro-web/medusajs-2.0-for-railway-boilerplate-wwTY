@@ -304,7 +304,7 @@ export class PaymeMerchantService {
       const itemsSum = items.reduce((sum, item) => sum + (item.price * item.count), 0)
 
       // #region payme debug
-      if (process.env.PAYME_FISCAL_DEBUG === "true") {
+      if (true) {
         try {
           const rawUnitPrices = rows
             .map((r: any) => Number(r.unit_price))
@@ -323,8 +323,10 @@ export class PaymeMerchantService {
             codeLen: typeof it?.code === "string" ? it.code.length : null,
           }))
 
+          
+          // Force log this for debugging production issue
           this.logger_.info(
-            `[PaymeMerchant][FiscalDebug] cart=${cartId} expected=${expectedTotal ?? null} items=${items.length} itemsSum=${itemsSum} rawUnitPrice[min,max]=${rawMin},${rawMax} shippingAmounts=${shippingAmounts.join(",") || "none"} sample=${JSON.stringify(sample)}`
+            `[PaymeMerchant][FiscalDebug] cart=${cartId} expected=${expectedTotal ?? null} items=${items.length} itemsSum=${itemsSum} rawUnitPrice[min,max]=${rawMin},${rawMax} shippingAmounts=${shippingAmounts.join(",") || "none"} sample=${JSON.stringify(items)}`
           )
         } catch (_e) {}
       }
