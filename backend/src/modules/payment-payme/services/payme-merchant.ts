@@ -186,20 +186,6 @@ export class PaymeMerchantService {
    * @param expectedTotal - Expected total in tiyins to validate sum matches.
    */
   private async getCartItemsForFiscalization(cartId: string, expectedTotal?: number) {
-    // DEBUG MODE: Return single hardcoded item to isolate "replace of null" error
-    // ignoring real items for now
-    this.logger_.info(`[PaymeMerchant][DEBUG] Returning single hardcoded fiscal item for cart ${cartId}`)
-    
-    return [{
-      title: "Order Payment",
-      price: Math.round((expectedTotal || 0)), 
-      count: 1,
-      code: "09017001006000000", // Generic code
-      vat_percent: 0, // Simplify VAT
-      package_code: "2009" // Standard piece
-    }]
-
-    /*
     try {
       const pgConnection = this.container_.resolve("__pg_connection__")
       const hasDeletedAt = await this.hasColumn(pgConnection, "cart_line_item", "deleted_at")

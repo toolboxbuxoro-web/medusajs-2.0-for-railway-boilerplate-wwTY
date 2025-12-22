@@ -32,9 +32,6 @@ export async function POST(
     // Обработка JSON-RPC запроса
     const { method, params, id } = req.body as any
     const result = await paymeMerchantService.handleRequest(method, params)
-    
-    // Debug: Log the full response to catch structure errors causing frontend crashes
-    console.log(`[PaymeRoute] Sending result for method ${method}:`, JSON.stringify(result))
 
     res.json({
       result,
