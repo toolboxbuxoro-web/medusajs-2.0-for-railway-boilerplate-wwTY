@@ -33,9 +33,7 @@ export default async function Home({
   const tHome = await getTranslations({ locale, namespace: 'home' })
   const banners = await listBanners()
 
-  if (!collections || !region) {
-    return null
-  }
+  const safeCollections = collections || []
 
   return (
     <>
@@ -43,7 +41,7 @@ export default async function Home({
         <BannerSlider slides={banners} />
       </div>
 
-      <TopCategories locale={locale} collections={collections} />
+      <TopCategories locale={locale} collections={safeCollections} />
       
       {/* Featured Products Section */}
       <div className="bg-white py-12 sm:py-16 lg:py-24">
@@ -60,12 +58,22 @@ export default async function Home({
               </svg>
             </LocalizedClientLink>
           </div>
+          
           <div className="flex flex-col gap-y-12">
-            <FeaturedProducts collections={collections} region={region} locale={locale} />
+            {safeCollections.length > 0 && region ? (
+              <ul className="flex flex-col gap-y-12 list-none p-0 m-0">
+                <FeaturedProducts collections={safeCollections} region={region} locale={locale} />
+              </ul>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-gray-500 italic">
+                  {tHome('products_loading')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </>
   )
 }
-

@@ -17,32 +17,20 @@ export const retrieveRegion = cache(async function (id: string) {
     .catch(medusaError)
 })
 
-const regionMap = new Map<string, HttpTypes.StoreRegion>()
-
 export const getRegion = cache(async function (countryCode: string) {
-  try {
-    if (regionMap.has(countryCode)) {
-      return regionMap.get(countryCode)
-    }
+  const regions = await listRegions()
 
-    const regions = await listRegions()
-
-    if (!regions) {
-      return null
-    }
-
-    regions.forEach((region) => {
-      region.countries?.forEach((c) => {
-        regionMap.set(c?.iso_2 ?? "", region)
-      })
-    })
-
-    const region = countryCode
-      ? regionMap.get(countryCode)
-      : regionMap.get("us")
-
-    return region
-  } catch (e: any) {
+  if (!regions) {
     return null
   }
+
+  const region = regions.find((region) => 
+    region.countries?.some((c) => c?.iso_2 === countryCode)
+  )
+
+  if (!region) {
+    return regions.find((r) => r.countries?.some((c) => c?.iso_2 === "us")) || regions[0]
+  }
+
+  return region
 })
