@@ -175,11 +175,6 @@ export default function ProductActions({
 
   const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
   const isOnSale = selectedPrice?.price_type === "sale"
-  const installmentPrice = selectedPrice?.calculated_price_number ? selectedPrice.calculated_price_number / 4 : 0
-  const formattedInstallmentPrice = selectedPrice ? convertToLocale({
-      amount: installmentPrice,
-      currency_code: selectedPrice.currency_code,
-    }) : ""
 
   return (
     <>
@@ -311,11 +306,6 @@ export default function ProductActions({
           isOpen={isQuickOrderOpen}
           onClose={() => setIsQuickOrderOpen(false)}
         />
-        {formattedInstallmentPrice && (
-          <div className="text-sm text-gray-600 mt-4">
-            <span className="font-semibold">{formattedInstallmentPrice}</span> × 4 {t('installments')}
-          </div>
-        )}
         <MobileActions
           product={product}
           variant={selectedVariant}
