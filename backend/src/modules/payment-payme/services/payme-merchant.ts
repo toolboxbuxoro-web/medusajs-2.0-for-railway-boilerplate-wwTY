@@ -256,6 +256,7 @@ export class PaymeMerchantService {
           price: unit + remainder, // Price per unit in tiyin
           count: qty,
           code: mxikCode || "MISSING", 
+          units: "", // Defensive default to prevent .replace() crash
           vat_percent: 12, 
           package_code: productMetadata.package_code || "2009" // Default to '2009' (Piece) if not specified
         }
@@ -294,6 +295,7 @@ export class PaymeMerchantService {
             price: Math.round(shippingAmount * 100), // Convert to tiyin
             count: 1,
             code: SHIPPING_MXIK_CODE,
+            units: "", // Defensive default
             vat_percent: 12,
             package_code: "2009" // Service
           })
@@ -452,8 +454,19 @@ export class PaymeMerchantService {
     // Return with detail object for fiscalization (чекопечать)
     return { 
       allow: true,
+      account: account || { order_id: orderId }, // Echo account for defensive UI logic
       detail: {
         receipt_type: 0, // 0 = sale, 1 = return
+        shipping: {
+          title: "Самовывоз", // Default title for BTS-only (pickup)
+          price: 0,
+          address: "" // Explicit empty string for address to prevent .replace() crash
+        },
+        customer: {
+          name: "",
+          phone: "",
+          address: ""
+        },
         items: items
       }
     }
@@ -491,7 +504,8 @@ export class PaymeMerchantService {
       return {
         create_time: currentData.payme_create_time,
         transaction: session.id,
-        state: currentData.payme_state
+        state: currentData.payme_state,
+        account: account || { order_id: orderId } // Echo account
       }
     }
 
@@ -532,7 +546,8 @@ export class PaymeMerchantService {
     return {
       create_time: time,
       transaction: session.id, // Return Medusa Session ID for subsequent calls
-      state: 1
+      state: 1,
+      account: account || { order_id: orderId } // Echo account
     }
   }
 
