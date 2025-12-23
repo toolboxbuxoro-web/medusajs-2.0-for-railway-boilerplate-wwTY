@@ -224,12 +224,23 @@ const ProductMetadataJsonEditor = ({ data }: WidgetProps) => {
     setMessage(null)
 
     try {
+      // Logic to delete keys that were removed in the JSON editor
+      // Medusa merges metadata by default, so we must explicitly set removed keys to null
+      const currentKeys = Object.keys(data.metadata || {})
+      const newKeys = Object.keys(parsedJson)
+      const keysToRemove = currentKeys.filter(key => !newKeys.includes(key))
+      
+      const metadataUpdate = { ...parsedJson }
+      keysToRemove.forEach(key => {
+        metadataUpdate[key] = null
+      })
+
       const response = await fetch(`/admin/products/${data.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          metadata: parsedJson, // Completely replace with new JSON
+          metadata: metadataUpdate,
         }),
       })
 
