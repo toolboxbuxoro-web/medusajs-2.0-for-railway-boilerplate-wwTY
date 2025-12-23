@@ -1,5 +1,5 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
-import { useState, useEffect, useMemo } from "react"
+import { useState } from "react"
 
 type WidgetProps = {
   data: {
@@ -9,259 +9,163 @@ type WidgetProps = {
 }
 
 // ============================================================================
-// TYPE DEFINITIONS (Shared with storefront)
-// ============================================================================
-
-type ProfessionalLevel = "бытовой" | "профессиональный"
-
-interface ProductMetadata {
-  brand: string
-  category: string
-  professional_level: ProfessionalLevel
-  pickup_only: boolean
-  short_description: string
-  features: string[]
-  use_cases: string[]
-  specifications: Record<string, string>
-  seo_title: string
-  seo_description: string
-  seo_keywords: string[]
-}
-
-const EMPTY_METADATA: ProductMetadata = {
-  brand: "",
-  category: "",
-  professional_level: "бытовой",
-  pickup_only: true, // Always true - BTS only
-  short_description: "",
-  features: [],
-  use_cases: [],
-  specifications: {},
-  seo_title: "",
-  seo_description: "",
-  seo_keywords: [],
-}
-
-// ============================================================================
-// VALIDATION
-// ============================================================================
-
-interface ValidationResult {
-  valid: boolean
-  errors: Record<string, string>
-}
-
-function validateMetadata(data: ProductMetadata): ValidationResult {
-  const errors: Record<string, string> = {}
-
-  if (!data.brand?.trim()) {
-    errors.brand = "Бренд обязателен"
-  }
-  if (!data.category?.trim()) {
-    errors.category = "Категория обязательна"
-  }
-  if (!data.short_description?.trim()) {
-    errors.short_description = "Краткое описание обязательно"
-  }
-  if (data.short_description && data.short_description.length > 200) {
-    errors.short_description = "Максимум 200 символов"
-  }
-  if (!data.seo_title?.trim()) {
-    errors.seo_title = "SEO заголовок обязателен"
-  }
-  if (data.seo_title && data.seo_title.length > 60) {
-    errors.seo_title = "Максимум 60 символов"
-  }
-  if (!data.seo_description?.trim()) {
-    errors.seo_description = "SEO описание обязательно"
-  }
-  if (data.seo_description && data.seo_description.length > 160) {
-    errors.seo_description = "Максимум 160 символов"
-  }
-
-  return {
-    valid: Object.keys(errors).length === 0,
-    errors,
-  }
-}
-
-// ============================================================================
 // STYLES
 // ============================================================================
 
 const styles = {
-  container: {
-    background: "white",
+  trigger: {
+    padding: "12px 20px",
+    background: "#3b82f6",
+    color: "white",
+    border: "none",
     borderRadius: "8px",
-    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-    border: "1px solid #e5e7eb",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: 600,
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  overlay: {
+    position: "fixed" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0,0,0,0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+  },
+  modal: {
+    background: "white",
+    borderRadius: "12px",
+    width: "90%",
+    maxWidth: "1200px",
+    maxHeight: "90vh",
+    overflow: "auto",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
   },
   header: {
-    padding: "16px",
+    padding: "20px 24px",
     borderBottom: "1px solid #e5e7eb",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    position: "sticky" as const,
+    top: 0,
+    background: "white",
+    zIndex: 1,
   },
   title: {
     margin: 0,
-    fontSize: "14px",
+    fontSize: "18px",
     fontWeight: 600,
+  },
+  closeBtn: {
+    background: "none",
+    border: "none",
+    fontSize: "24px",
+    cursor: "pointer",
+    color: "#6b7280",
+    padding: "4px 8px",
   },
   body: {
-    padding: "16px",
+    padding: "24px",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "24px",
   },
-  section: {
-    marginBottom: "20px",
-    paddingBottom: "16px",
-    borderBottom: "1px solid #f3f4f6",
-  },
-  sectionTitle: {
-    fontSize: "12px",
-    fontWeight: 600,
-    color: "#374151",
-    marginBottom: "12px",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.5px",
-  },
-  fieldGroup: {
-    marginBottom: "12px",
+  column: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "12px",
   },
   label: {
-    display: "block",
-    fontSize: "12px",
-    color: "#6b7280",
-    marginBottom: "4px",
-  },
-  input: {
-    width: "100%",
-    padding: "8px 12px",
-    border: "1px solid #d1d5db",
-    borderRadius: "6px",
     fontSize: "14px",
-  },
-  inputError: {
-    borderColor: "#ef4444",
+    fontWeight: 600,
+    color: "#374151",
+    marginBottom: "8px",
   },
   textarea: {
     width: "100%",
-    padding: "8px 12px",
+    minHeight: "400px",
+    padding: "12px",
     border: "1px solid #d1d5db",
-    borderRadius: "6px",
-    fontSize: "14px",
-    minHeight: "60px",
+    borderRadius: "8px",
+    fontSize: "13px",
+    fontFamily: "monospace",
     resize: "vertical" as const,
   },
-  select: {
-    width: "100%",
-    padding: "8px 12px",
-    border: "1px solid #d1d5db",
-    borderRadius: "6px",
-    fontSize: "14px",
-    background: "white",
+  textareaError: {
+    borderColor: "#ef4444",
   },
-  error: {
-    fontSize: "11px",
-    color: "#ef4444",
-    marginTop: "4px",
-  },
-  hint: {
-    fontSize: "11px",
-    color: "#9ca3af",
-    marginTop: "4px",
-  },
-  badge: {
-    display: "inline-block",
-    padding: "2px 8px",
-    borderRadius: "4px",
-    fontSize: "11px",
-    fontWeight: 500,
-  },
-  readOnlyBadge: {
-    background: "#fef3c7",
-    color: "#92400e",
-  },
-  arrayContainer: {
-    display: "flex",
-    flexWrap: "wrap" as const,
-    gap: "6px",
-    marginBottom: "8px",
-  },
-  arrayItem: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "4px",
-    padding: "4px 8px",
-    background: "#f3f4f6",
-    borderRadius: "4px",
-    fontSize: "12px",
-  },
-  removeBtn: {
-    background: "none",
-    border: "none",
-    color: "#9ca3af",
-    cursor: "pointer",
-    padding: "0 2px",
-    fontSize: "14px",
-  },
-  addBtn: {
-    padding: "6px 12px",
-    background: "#f3f4f6",
-    border: "1px dashed #d1d5db",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "12px",
-    color: "#6b7280",
-  },
-  specRow: {
-    display: "flex",
-    gap: "8px",
-    marginBottom: "8px",
-    alignItems: "center",
-  },
-  specInput: {
-    flex: 1,
-    padding: "6px 10px",
-    border: "1px solid #d1d5db",
-    borderRadius: "4px",
-    fontSize: "13px",
-  },
-  button: {
-    padding: "8px 16px",
-    background: "#3b82f6",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  buttonDisabled: {
-    background: "#9ca3af",
-    cursor: "not-allowed",
-  },
-  previewBtn: {
-    padding: "8px 16px",
-    background: "#f3f4f6",
-    color: "#374151",
-    border: "1px solid #d1d5db",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  jsonPreview: {
+  pre: {
     background: "#1f2937",
     color: "#10b981",
     padding: "12px",
-    borderRadius: "6px",
-    fontSize: "11px",
+    borderRadius: "8px",
+    fontSize: "12px",
     fontFamily: "monospace",
-    whiteSpace: "pre-wrap" as const,
     overflow: "auto",
-    maxHeight: "300px",
+    minHeight: "400px",
+    margin: 0,
   },
-  message: {
-    fontSize: "13px",
-    marginLeft: "12px",
+  error: {
+    color: "#ef4444",
+    fontSize: "12px",
+    marginTop: "4px",
+  },
+  success: {
+    color: "#10b981",
+    fontSize: "12px",
+    marginTop: "4px",
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "8px",
+    marginTop: "8px",
+  },
+  button: {
+    padding: "8px 16px",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: 500,
+  },
+  primaryBtn: {
+    background: "#3b82f6",
+    color: "white",
+  },
+  secondaryBtn: {
+    background: "#f3f4f6",
+    color: "#374151",
+    border: "1px solid #d1d5db",
+  },
+  dangerBtn: {
+    background: "#ef4444",
+    color: "white",
+  },
+  footer: {
+    padding: "16px 24px",
+    borderTop: "1px solid #e5e7eb",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "sticky" as const,
+    bottom: 0,
+    background: "white",
+  },
+  badge: {
+    padding: "4px 8px",
+    borderRadius: "4px",
+    fontSize: "11px",
+    fontWeight: 600,
+    background: "#fef3c7",
+    color: "#92400e",
   },
 }
 
@@ -269,89 +173,50 @@ const styles = {
 // COMPONENT
 // ============================================================================
 
-const ProductMetadataWidget = ({ data }: WidgetProps) => {
-  const [formData, setFormData] = useState<ProductMetadata>(EMPTY_METADATA)
+const ProductMetadataJsonEditor = ({ data }: WidgetProps) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [jsonInput, setJsonInput] = useState("")
+  const [validationError, setValidationError] = useState("")
   const [isSaving, setIsSaving] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  // Array input states
-  const [newFeature, setNewFeature] = useState("")
-  const [newUseCase, setNewUseCase] = useState("")
-  const [newSpecKey, setNewSpecKey] = useState("")
-  const [newSpecValue, setNewSpecValue] = useState("")
-  const [newKeyword, setNewKeyword] = useState("")
+  const currentJson = JSON.stringify(data.metadata || {}, null, 2)
 
-  // Load existing metadata
-  useEffect(() => {
-    if (data.metadata) {
-      setFormData({
-        brand: data.metadata.brand || "",
-        category: data.metadata.category || "",
-        professional_level: data.metadata.professional_level || "бытовой",
-        pickup_only: true, // Always true
-        short_description: data.metadata.short_description || "",
-        features: Array.isArray(data.metadata.features) ? data.metadata.features : [],
-        use_cases: Array.isArray(data.metadata.use_cases) ? data.metadata.use_cases : [],
-        specifications: 
-          data.metadata.specifications && typeof data.metadata.specifications === "object"
-            ? data.metadata.specifications
-            : {},
-        seo_title: data.metadata.seo_title || "",
-        seo_description: data.metadata.seo_description || "",
-        seo_keywords: Array.isArray(data.metadata.seo_keywords) ? data.metadata.seo_keywords : [],
-      })
-    }
-  }, [data])
-
-  // Validation
-  const validation = useMemo(() => validateMetadata(formData), [formData])
-
-  // Handlers
-  const updateField = (field: keyof ProductMetadata, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const handleOpen = () => {
+    setJsonInput(currentJson)
+    setValidationError("")
+    setMessage(null)
+    setIsOpen(true)
   }
 
-  const addToArray = (field: "features" | "use_cases" | "seo_keywords", value: string) => {
-    if (value.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: [...prev[field], value.trim()],
-      }))
+  const handleClose = () => {
+    setIsOpen(false)
+  }
+
+  const handleFormat = () => {
+    try {
+      const parsed = JSON.parse(jsonInput)
+      setJsonInput(JSON.stringify(parsed, null, 2))
+      setValidationError("")
+    } catch (err) {
+      setValidationError("Невозможно форматировать: некорректный JSON")
     }
   }
 
-  const removeFromArray = (field: "features" | "use_cases" | "seo_keywords", index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: prev[field].filter((_, i) => i !== index),
-    }))
-  }
-
-  const addSpec = () => {
-    if (newSpecKey.trim() && newSpecValue.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        specifications: {
-          ...prev.specifications,
-          [newSpecKey.trim()]: newSpecValue.trim(),
-        },
-      }))
-      setNewSpecKey("")
-      setNewSpecValue("")
-    }
-  }
-
-  const removeSpec = (key: string) => {
-    setFormData((prev) => {
-      const { [key]: _, ...rest } = prev.specifications
-      return { ...prev, specifications: rest }
-    })
+  const handleRestore = () => {
+    setJsonInput(currentJson)
+    setValidationError("")
+    setMessage({ type: "success", text: "Восстановлено из резервной копии" })
+    setTimeout(() => setMessage(null), 3000)
   }
 
   const handleSave = async () => {
-    if (!validation.valid) {
-      setMessage({ type: "error", text: "Исправьте ошибки валидации" })
+    // Validate JSON
+    let parsedJson
+    try {
+      parsedJson = JSON.parse(jsonInput)
+    } catch (err) {
+      setValidationError("Ошибка парсинга JSON. Проверьте синтаксис.")
       return
     }
 
@@ -359,15 +224,18 @@ const ProductMetadataWidget = ({ data }: WidgetProps) => {
     setMessage(null)
 
     try {
+      // Create backup
+      const timestamp = Date.now()
+      const backupKey = `_backup_${timestamp}`
+      
       const response = await fetch(`/admin/products/${data.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           metadata: {
-            ...data.metadata, // Preserve existing fields
-            ...formData,
-            pickup_only: true, // Always enforce
+            ...parsedJson,
+            [backupKey]: data.metadata, // Save old metadata as backup
           },
         }),
       })
@@ -376,8 +244,10 @@ const ProductMetadataWidget = ({ data }: WidgetProps) => {
         throw new Error("Failed to save")
       }
 
-      setMessage({ type: "success", text: "Сохранено ✓" })
-      setTimeout(() => setMessage(null), 3000)
+      setMessage({ type: "success", text: `✓ Сохранено! Резервная копия: ${backupKey}` })
+      setTimeout(() => {
+        setIsOpen(false)
+      }, 2000)
     } catch (error) {
       setMessage({ type: "error", text: "Ошибка сохранения" })
     } finally {
@@ -386,310 +256,102 @@ const ProductMetadataWidget = ({ data }: WidgetProps) => {
   }
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <h2 style={styles.title}>📦 Контент продукта</h2>
-        <span style={{ ...styles.badge, ...styles.readOnlyBadge }}>
-          Только самовывоз
-        </span>
-      </div>
+    <>
+      {/* Trigger Button */}
+      <button style={styles.trigger} onClick={handleOpen}>
+        📝 Редактировать метаданные (JSON)
+      </button>
 
-      <div style={styles.body}>
-        {/* Core Info Section */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Основная информация</div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Бренд *</label>
-            <input
-              type="text"
-              value={formData.brand}
-              onChange={(e) => updateField("brand", e.target.value)}
-              style={{
-                ...styles.input,
-                ...(validation.errors.brand ? styles.inputError : {}),
-              }}
-              placeholder="ALTECO"
-            />
-            {validation.errors.brand && (
-              <div style={styles.error}>{validation.errors.brand}</div>
-            )}
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Категория *</label>
-            <input
-              type="text"
-              value={formData.category}
-              onChange={(e) => updateField("category", e.target.value)}
-              style={{
-                ...styles.input,
-                ...(validation.errors.category ? styles.inputError : {}),
-              }}
-              placeholder="Дрели-шуруповерты"
-            />
-            {validation.errors.category && (
-              <div style={styles.error}>{validation.errors.category}</div>
-            )}
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Уровень</label>
-            <select
-              value={formData.professional_level}
-              onChange={(e) =>
-                updateField("professional_level", e.target.value as ProfessionalLevel)
-              }
-              style={styles.select}
-            >
-              <option value="бытовой">Бытовой</option>
-              <option value="профессиональный">Профессиональный</option>
-            </select>
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Краткое описание *</label>
-            <textarea
-              value={formData.short_description}
-              onChange={(e) => updateField("short_description", e.target.value)}
-              style={{
-                ...styles.textarea,
-                ...(validation.errors.short_description ? styles.inputError : {}),
-              }}
-              placeholder="45 Н·м, бесщеточный двигатель..."
-            />
-            <div style={styles.hint}>{formData.short_description.length}/200</div>
-            {validation.errors.short_description && (
-              <div style={styles.error}>{validation.errors.short_description}</div>
-            )}
-          </div>
-        </div>
-
-        {/* Features Section */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Особенности</div>
-          <div style={styles.arrayContainer}>
-            {formData.features.map((f, i) => (
-              <span key={i} style={styles.arrayItem}>
-                {f}
-                <button style={styles.removeBtn} onClick={() => removeFromArray("features", i)}>
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
-              type="text"
-              value={newFeature}
-              onChange={(e) => setNewFeature(e.target.value)}
-              style={{ ...styles.input, flex: 1 }}
-              placeholder="Добавить особенность..."
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  addToArray("features", newFeature)
-                  setNewFeature("")
-                }
-              }}
-            />
-            <button
-              style={styles.addBtn}
-              onClick={() => {
-                addToArray("features", newFeature)
-                setNewFeature("")
-              }}
-            >
-              + Добавить
-            </button>
-          </div>
-        </div>
-
-        {/* Use Cases Section */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Применение</div>
-          <div style={styles.arrayContainer}>
-            {formData.use_cases.map((u, i) => (
-              <span key={i} style={styles.arrayItem}>
-                {u}
-                <button style={styles.removeBtn} onClick={() => removeFromArray("use_cases", i)}>
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
-              type="text"
-              value={newUseCase}
-              onChange={(e) => setNewUseCase(e.target.value)}
-              style={{ ...styles.input, flex: 1 }}
-              placeholder="Сверление, монтаж..."
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  addToArray("use_cases", newUseCase)
-                  setNewUseCase("")
-                }
-              }}
-            />
-            <button
-              style={styles.addBtn}
-              onClick={() => {
-                addToArray("use_cases", newUseCase)
-                setNewUseCase("")
-              }}
-            >
-              + Добавить
-            </button>
-          </div>
-        </div>
-
-        {/* Specifications Section */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>Характеристики</div>
-          {Object.entries(formData.specifications).map(([key, value]) => (
-            <div key={key} style={styles.specRow}>
-              <input type="text" value={key} disabled style={{ ...styles.specInput, background: "#f9fafb" }} />
-              <input type="text" value={value} disabled style={{ ...styles.specInput, background: "#f9fafb" }} />
-              <button style={styles.removeBtn} onClick={() => removeSpec(key)}>
+      {/* Modal */}
+      {isOpen && (
+        <div style={styles.overlay} onClick={handleClose}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div style={styles.header}>
+              <h2 style={styles.title}>JSON Редактор метаданных</h2>
+              <button style={styles.closeBtn} onClick={handleClose}>
                 ×
               </button>
             </div>
-          ))}
-          <div style={styles.specRow}>
-            <input
-              type="text"
-              value={newSpecKey}
-              onChange={(e) => setNewSpecKey(e.target.value)}
-              style={styles.specInput}
-              placeholder="Название (Напряжение)"
-            />
-            <input
-              type="text"
-              value={newSpecValue}
-              onChange={(e) => setNewSpecValue(e.target.value)}
-              style={styles.specInput}
-              placeholder="Значение (21 В)"
-            />
-            <button style={styles.addBtn} onClick={addSpec}>
-              +
-            </button>
-          </div>
-        </div>
 
-        {/* SEO Section */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>SEO</div>
+            {/* Body */}
+            <div style={styles.body}>
+              {/* Left Column: JSON Input */}
+              <div style={styles.column}>
+                <div>
+                  <div style={styles.label}>Новый JSON (вставьте сюда)</div>
+                  <textarea
+                    value={jsonInput}
+                    onChange={(e) => {
+                      setJsonInput(e.target.value)
+                      setValidationError("")
+                    }}
+                    style={{
+                      ...styles.textarea,
+                      ...(validationError ? styles.textareaError : {}),
+                    }}
+                    placeholder='{"brand": "Bosch", "category": "Tools"}'
+                  />
+                  {validationError && <div style={styles.error}>{validationError}</div>}
+                </div>
 
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>SEO Заголовок *</label>
-            <input
-              type="text"
-              value={formData.seo_title}
-              onChange={(e) => updateField("seo_title", e.target.value)}
-              style={{
-                ...styles.input,
-                ...(validation.errors.seo_title ? styles.inputError : {}),
-              }}
-            />
-            <div style={styles.hint}>{formData.seo_title.length}/60</div>
-            {validation.errors.seo_title && (
-              <div style={styles.error}>{validation.errors.seo_title}</div>
-            )}
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>SEO Описание *</label>
-            <textarea
-              value={formData.seo_description}
-              onChange={(e) => updateField("seo_description", e.target.value)}
-              style={{
-                ...styles.textarea,
-                ...(validation.errors.seo_description ? styles.inputError : {}),
-              }}
-            />
-            <div style={styles.hint}>{formData.seo_description.length}/160</div>
-            {validation.errors.seo_description && (
-              <div style={styles.error}>{validation.errors.seo_description}</div>
-            )}
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Ключевые слова</label>
-            <div style={styles.arrayContainer}>
-              {formData.seo_keywords.map((kw, i) => (
-                <span key={i} style={styles.arrayItem}>
-                  {kw}
-                  <button style={styles.removeBtn} onClick={() => removeFromArray("seo_keywords", i)}>
-                    ×
+                <div style={styles.buttonGroup}>
+                  <button
+                    style={{ ...styles.button, ...styles.secondaryBtn }}
+                    onClick={handleFormat}
+                  >
+                    ✨ Форматировать
                   </button>
-                </span>
-              ))}
+                  <button
+                    style={{ ...styles.button, ...styles.secondaryBtn }}
+                    onClick={handleRestore}
+                  >
+                    ↺ Восстановить
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Current JSON (Backup) */}
+              <div style={styles.column}>
+                <div>
+                  <div style={styles.label}>
+                    Текущий JSON (резервная копия)
+                    <span style={{ ...styles.badge, marginLeft: "8px" }}>Только чтение</span>
+                  </div>
+                  <pre style={styles.pre}>{currentJson}</pre>
+                </div>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <input
-                type="text"
-                value={newKeyword}
-                onChange={(e) => setNewKeyword(e.target.value)}
-                style={{ ...styles.input, flex: 1 }}
-                placeholder="Ключевое слово..."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    addToArray("seo_keywords", newKeyword)
-                    setNewKeyword("")
-                  }
-                }}
-              />
-              <button
-                style={styles.addBtn}
-                onClick={() => {
-                  addToArray("seo_keywords", newKeyword)
-                  setNewKeyword("")
-                }}
-              >
-                + Добавить
-              </button>
+
+            {/* Footer */}
+            <div style={styles.footer}>
+              <div>
+                {message && (
+                  <span style={message.type === "success" ? styles.success : styles.error}>
+                    {message.text}
+                  </span>
+                )}
+              </div>
+              <div style={styles.buttonGroup}>
+                <button
+                  style={{ ...styles.button, ...styles.secondaryBtn }}
+                  onClick={handleClose}
+                >
+                  Отмена
+                </button>
+                <button
+                  style={{ ...styles.button, ...styles.primaryBtn }}
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Сохранение..." : "💾 Сохранить"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* JSON Preview */}
-        {showPreview && (
-          <div style={{ marginBottom: "16px" }}>
-            <pre style={styles.jsonPreview}>{JSON.stringify(formData, null, 2)}</pre>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <button
-            onClick={handleSave}
-            disabled={isSaving || !validation.valid}
-            style={{
-              ...styles.button,
-              ...(isSaving || !validation.valid ? styles.buttonDisabled : {}),
-            }}
-          >
-            {isSaving ? "Сохранение..." : "Сохранить"}
-          </button>
-
-          <button style={styles.previewBtn} onClick={() => setShowPreview(!showPreview)}>
-            {showPreview ? "Скрыть JSON" : "Показать JSON"}
-          </button>
-
-          {message && (
-            <span
-              style={{
-                ...styles.message,
-                color: message.type === "success" ? "#10b981" : "#ef4444",
-              }}
-            >
-              {message.text}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   )
 }
 
@@ -697,4 +359,4 @@ export const config = defineWidgetConfig({
   zone: "product.details.after",
 })
 
-export default ProductMetadataWidget
+export default ProductMetadataJsonEditor
