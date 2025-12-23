@@ -224,19 +224,12 @@ const ProductMetadataJsonEditor = ({ data }: WidgetProps) => {
     setMessage(null)
 
     try {
-      // Create backup
-      const timestamp = Date.now()
-      const backupKey = `_backup_${timestamp}`
-      
       const response = await fetch(`/admin/products/${data.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          metadata: {
-            ...parsedJson,
-            [backupKey]: data.metadata, // Save old metadata as backup
-          },
+          metadata: parsedJson, // Completely replace with new JSON
         }),
       })
 
@@ -244,7 +237,7 @@ const ProductMetadataJsonEditor = ({ data }: WidgetProps) => {
         throw new Error("Failed to save")
       }
 
-      setMessage({ type: "success", text: `✓ Сохранено! Резервная копия: ${backupKey}` })
+      setMessage({ type: "success", text: "✓ Метаданные успешно обновлены!" })
       setTimeout(() => {
         setIsOpen(false)
       }, 2000)
