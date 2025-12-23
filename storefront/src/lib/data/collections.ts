@@ -34,24 +34,20 @@ export const getCollectionsWithProducts = cache(
       return null
     }
 
-    const collectionIds = collections
-      .map((collection) => collection.id)
-      .filter(Boolean) as string[]
-
-    const { response } = await getProductsList({
-      queryParams: { collection_id: collectionIds },
-      countryCode,
-    })
-
-    return collections.map((collection) => {
-      const collectionProducts = response.products.filter(
-        (product) => product.collection_id === collection.id
-      )
+    const collectionPromises = collections.map(async (collection) => {
+      const { response } = await getProductsList({
+        queryParams: { collection_id: [collection.id], limit: 5 },
+        countryCode,
+      })
 
       return {
         ...collection,
-        products: collectionProducts,
+        products: response.products,
       } as unknown as HttpTypes.StoreCollection
     })
+
+    const collectionsWithProducts = await Promise.all(collectionPromises)
+
+    return collectionsWithProducts
   }
 )
