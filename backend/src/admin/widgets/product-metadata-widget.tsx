@@ -694,7 +694,7 @@ const ProductMetadataWidget = ({ data }: WidgetProps) => {
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.side.after",
+  zone: "product.details.after",
 })
 
 export default ProductMetadataWidget
