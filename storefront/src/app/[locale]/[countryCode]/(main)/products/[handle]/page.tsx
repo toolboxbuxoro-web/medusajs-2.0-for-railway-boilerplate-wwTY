@@ -6,6 +6,7 @@ import { getRegion, listRegions } from "@lib/data/regions"
 import { getProductByHandle, getProductsList } from "@lib/data/products"
 import { getLocalizedField } from "@lib/util/localization"
 import { generateAlternates } from "@lib/util/seo"
+import { parseProductMetadata } from "@modules/products/types/product-metadata"
 
 type Props = {
   params: { locale: string; countryCode: string; handle: string }
@@ -60,8 +61,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
-  const title = getLocalizedField(product, "title", locale) || product.title
-  const description = getLocalizedField(product, "description", locale) || title
+  // Parse structured metadata with safe defaults
+  const metadata = parseProductMetadata(product.metadata)
+
+  // SEO Fallback Chain:
+  // title: seo_title → localized title → product.title
+  // description: seo_description → short_description → localized description → product.description
+  const localizedTitle = getLocalizedField(product, "title", locale) || product.title
+  const localizedDescription = getLocalizedField(product, "description", locale) || product.description || ""
+
+  const seoTitle = metadata.seo_title || localizedTitle
+  const seoDescription = 
+    metadata.seo_description || 
+    metadata.short_description || 
+    localizedDescription.slice(0, 160)
 
   const alternates = generateAlternates(
     countryCode,
@@ -70,12 +83,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   )
 
   return {
-    title: `${title} | Toolbox`,
-    description,
+    title: `${seoTitle} | Toolbox`,
+    description: seoDescription,
+    keywords: metadata.seo_keywords.length > 0 ? metadata.seo_keywords : undefined,
     alternates,
     openGraph: {
-      title: `${title} | Toolbox`,
-      description,
+      title: `${seoTitle} | Toolbox`,
+      description: seoDescription,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }

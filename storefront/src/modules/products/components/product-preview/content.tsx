@@ -75,7 +75,21 @@ export default function ProductPreviewContent({
 
         {/* Product Info */}
         <div className="p-3 sm:p-4 flex-1 flex flex-col">
-          {/* Price first - in red */}
+          {/* Badges Row */}
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {/* BTS Badge - Always show (pickup_only is always true per business rule) */}
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              Самовывоз
+            </span>
+            {/* Professional Badge */}
+            {(product.metadata as any)?.professional_level === "профессиональный" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                PRO
+              </span>
+            )}
+          </div>
+
+          {/* Price */}
           <div className="mb-2">
             {cheapestPrice && (
               <div className="flex items-baseline gap-2">

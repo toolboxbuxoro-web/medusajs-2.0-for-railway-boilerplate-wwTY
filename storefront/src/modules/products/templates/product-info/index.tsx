@@ -6,7 +6,10 @@ import { useTranslations } from 'next-intl'
 import { useParams } from "next/navigation"
 import FavoriteButton from "@modules/products/components/favorite-button"
 import ProductSpecs from "@modules/products/components/product-specs"
+import ProductFeatures from "@modules/products/components/product-features"
+import ProductUseCases from "@modules/products/components/product-use-cases"
 import { getLocalizedField } from "@lib/util/localization"
+import { parseProductMetadata } from "@modules/products/types/product-metadata"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -17,7 +20,12 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
   const { locale } = useParams()
   const localeStr = String(locale || "ru")
   
-  const warrantyYears = product.metadata?.warranty as string || null
+  // Parse structured metadata with safe defaults
+  const metadata = parseProductMetadata(product.metadata)
+  
+  // Fallback warranty from legacy field if not in structured
+  const warrantyYears = metadata.specifications?.["Гарантия"] || 
+    (product.metadata as any)?.warranty as string || null
 
   return (
     <div id="product-info" className="space-y-4">
@@ -30,17 +38,23 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         {getLocalizedField(product, "title", localeStr) || product.title}
       </Heading>
 
-      {/* Product Code & Rating Row */}
+      {/* Short Description (Above Fold) */}
+      {metadata.short_description && (
+        <Text className="text-gray-600 text-sm sm:text-base leading-relaxed">
+          {metadata.short_description}
+        </Text>
+      )}
+
+      {/* Product Code & Brand Row */}
       <div className="flex flex-wrap items-center gap-3 text-sm">
+        {metadata.brand && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+            {metadata.brand}
+          </span>
+        )}
         <span className="text-gray-500">
-          {t('code')}: <span className="text-gray-700">{(product.metadata?.code as string) || product.id.slice(0, 8)}</span>
+          {t('code')}: <span className="text-gray-700">{(product.metadata as any)?.code || product.id.slice(0, 8)}</span>
         </span>
-        
-        {/* Placeholder for rating - can be implemented later */}
-        {/* <div className="flex items-center gap-1">
-          <span className="text-yellow-400">★★★★★</span>
-          <span className="text-gray-500">1207 отзывов</span>
-        </div> */}
       </div>
 
       {/* Badges Row */}
@@ -54,23 +68,56 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
             <span>Гарантия производителя {warrantyYears}</span>
           </div>
         )}
-        
-
+        {/* Professional Badge */}
+        {metadata.professional_level === "профессиональный" && (
+          <div className="inline-flex items-center gap-1.5 text-sm text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full">
+            <span>PRO</span>
+          </div>
+        )}
+        {/* BTS Badge */}
+        <div className="inline-flex items-center gap-1.5 text-sm text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Только самовывоз</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 py-2">
         <FavoriteButton productId={product.id} />
       </div>
 
+      {/* Features (Above Fold - First 4) */}
+      {metadata.features.length > 0 && (
+        <div className="pt-2 border-t border-gray-100">
+          <ProductFeatures features={metadata.features} maxItems={4} showTitle={false} />
+        </div>
+      )}
+
       {/* Specifications */}
       <div className="pt-2 border-t border-gray-100">
         <ProductSpecs product={product} maxItems={6} />
       </div>
 
-      {/* Description (collapsible on mobile) */}
+      {/* Use Cases */}
+      {metadata.use_cases.length > 0 && (
+        <div className="pt-2 border-t border-gray-100">
+          <ProductUseCases useCases={metadata.use_cases} showTitle={true} />
+        </div>
+      )}
+
+      {/* Description */}
+      {(getLocalizedField(product, "description", localeStr) || product.description) && (
+        <div className="pt-2 border-t border-gray-100">
+          <Text className="text-gray-600 text-sm leading-relaxed">
             {getLocalizedField(product, "description", localeStr) || product.description}
+          </Text>
+        </div>
+      )}
     </div>
   )
 }
 
 export default ProductInfo
+

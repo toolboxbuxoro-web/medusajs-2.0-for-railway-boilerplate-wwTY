@@ -12,10 +12,21 @@ type ProductSpecsProps = {
 // Helper to extract specs from product metadata
 const getProductSpecs = (product: HttpTypes.StoreProduct): { label: string; value: string }[] => {
   const specs: { label: string; value: string }[] = []
-  const metadata = product.metadata || {}
+  const metadata = (product.metadata || {}) as Record<string, any>
+  
+  // 1. Structured Specifications (New Model - Priority)
+  // Logic: metadata.specifications = { "Label": "Value" }
+  if (metadata.specifications && typeof metadata.specifications === "object") {
+    Object.entries(metadata.specifications).forEach(([label, value]) => {
+      if (value && typeof value === "string" && value !== "-") {
+        specs.push({ label, value })
+      }
+    })
+  }
 
-  // Common spec fields that might be in metadata
-  const specFields = [
+  // 2. Legacy Flat Metadata Fallback
+  // Only add if not already present in specs (e.g. during migration)
+  const legacySpecFields = [
     { key: "battery_type", label: "Тип аккумулятора" },
     { key: "voltage", label: "Напряжение" },
     { key: "power", label: "Мощность" },
@@ -30,14 +41,19 @@ const getProductSpecs = (product: HttpTypes.StoreProduct): { label: string; valu
     { key: "warranty", label: "Гарантия" },
   ]
 
-  specFields.forEach(({ key, label }) => {
-    const value = metadata[key]
-    if (value && typeof value === "string") {
-      specs.push({ label, value })
+  legacySpecFields.forEach(({ key, label }) => {
+    // Check if this label was already added via structured specs
+    const alreadyAdded = specs.some(s => s.label.toLowerCase() === label.toLowerCase())
+    
+    if (!alreadyAdded) {
+      const value = metadata[key]
+      if (value && typeof value === "string" && value !== "-") {
+        specs.push({ label, value })
+      }
     }
   })
 
-  // Add standard product fields
+  // 3. Standard Medusa Product Fields (Core)
   if (product.material) {
     specs.push({ label: "Материал", value: product.material })
   }
