@@ -5,14 +5,14 @@ import { HttpTypes } from "@medusajs/types"
 
 export const listRegions = cache(async function () {
   return sdk.store.region
-    .list({}, { next: { tags: ["regions"] } })
+    .list({}, { next: { tags: ["regions"], revalidate: 30 } })
     .then(({ regions }) => regions)
     .catch(medusaError)
 })
 
 export const retrieveRegion = cache(async function (id: string) {
   return sdk.store.region
-    .retrieve(id, {}, { next: { tags: ["regions"] } })
+    .retrieve(id, {}, { next: { tags: ["regions"], revalidate: 30 } })
     .then(({ region }) => region)
     .catch(medusaError)
 })

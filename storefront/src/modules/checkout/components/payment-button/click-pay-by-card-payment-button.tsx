@@ -5,7 +5,7 @@ import Script from "next/script"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslations } from "next-intl"
 import { useRouter, useSearchParams } from "next/navigation"
-import { placeOrder, initiatePaymentSession } from "@lib/data/cart"
+import { initiatePaymentSession } from "@lib/data/cart"
 import { isClickPayByCard } from "@lib/constants"
 
 type PaymentStatus = "idle" | "checking" | "placing_order" | "error" | "cancelled"
@@ -54,16 +54,6 @@ export const ClickPayByCardPaymentButton = ({
       return "error"
     }
   }, [cart.id])
-
-  const completeOrder = useCallback(async () => {
-    setStatus("placing_order")
-    try {
-      await placeOrder()
-    } catch (err: any) {
-      setErrorMessage(err.message || "Ошибка при создании заказа")
-      setStatus("error")
-    }
-  }, [])
 
   // Refresh payment session once so we have up-to-date amount/public config for checkout.js
   useEffect(() => {
@@ -143,8 +133,12 @@ export const ClickPayByCardPaymentButton = ({
             return
           }
           if (st === "authorized") {
-            await completeOrder()
-            return
+            // For Click Pay-by-card, order is created on the backend via callback.
+            // Frontend must not call placeOrder() to avoid double orders.
+            console.log(
+              "[Checkout] Skipping frontend order creation for Click provider (pay-by-card, status=authorized, waiting for completed)"
+            )
+            // Keep polling until we see 'completed'.
           }
           if (st === "cancelled") {
             setStatus("cancelled")
@@ -173,11 +167,14 @@ export const ClickPayByCardPaymentButton = ({
       session?.status === "authorized" ||
       (session?.data as any)?.click_state === "completed"
     ) {
-      completeOrder().catch((err) => {
-        console.error("[ClickPayByCardButton] Error completing order:", err)
-      })
+      console.log(
+        "[Checkout] Skipping frontend order creation for Click provider (pay-by-card, session authorized/completed)"
+      )
+      router.push(
+        `/${cart.region?.countries?.[0]?.iso_2 || "uz"}/account/orders`
+      )
     }
-  }, [searchParams, session, checkPaymentStatus, completeOrder, router, cart.region?.countries])
+  }, [searchParams, session, checkPaymentStatus, router, cart.region?.countries])
 
   const widget = useMemo(() => {
     if (!data) return null

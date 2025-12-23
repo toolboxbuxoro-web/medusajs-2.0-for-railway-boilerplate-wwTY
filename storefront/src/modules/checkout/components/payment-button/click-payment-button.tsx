@@ -5,7 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 import React, { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter, useSearchParams } from "next/navigation"
-import { placeOrder, initiatePaymentSession } from "@lib/data/cart"
+import { initiatePaymentSession } from "@lib/data/cart"
 import { isClick } from "@lib/constants"
 
 type PaymentStatus = "idle" | "checking" | "placing_order" | "error" | "cancelled"
@@ -43,17 +43,6 @@ export const ClickPaymentButton = ({
     }
   }, [cart.id])
 
-  const completeOrder = useCallback(async () => {
-    setStatus("placing_order")
-    try {
-      await placeOrder()
-    } catch (err: any) {
-      console.error("[ClickButton] Error placing order:", err)
-      setErrorMessage(err.message || "Ошибка при создании заказа")
-      setStatus("error")
-    }
-  }, [])
-
   useEffect(() => {
     const paymentStatus = searchParams.get("payment_status")
     const paymentError = searchParams.get("payment_error")
@@ -82,8 +71,12 @@ export const ClickPaymentButton = ({
           }
 
           if (st === "authorized") {
-            await completeOrder()
-            return
+            // For Click, order is created on the backend via callback (like Payme).
+            // Frontend must not call placeOrder() to avoid double orders.
+            console.log(
+              "[Checkout] Skipping frontend order creation for Click provider (status=authorized, waiting for completed)"
+            )
+            // Keep polling until we see 'completed'.
           }
 
           if (st === "cancelled") {
@@ -111,12 +104,18 @@ export const ClickPaymentButton = ({
       checkAndComplete()
     }
 
-    if (session?.status === "authorized" || (session?.data as any)?.click_state === "completed") {
-      completeOrder().catch((err) => {
-        console.error("[ClickButton] Error completing order:", err)
-      })
+    if (
+      session?.status === "authorized" ||
+      (session?.data as any)?.click_state === "completed"
+    ) {
+      console.log(
+        "[Checkout] Skipping frontend order creation for Click provider (session authorized/completed)"
+      )
+      router.push(
+        `/${cart.region?.countries?.[0]?.iso_2 || "uz"}/account/orders`
+      )
     }
-  }, [searchParams, session, checkPaymentStatus, completeOrder, router, cart.region?.countries])
+  }, [searchParams, session, checkPaymentStatus, router, cart.region?.countries])
 
   const handlePayment = async () => {
     if (isCartEmpty) {
@@ -128,7 +127,12 @@ export const ClickPaymentButton = ({
     setErrorMessage(null)
 
     if (session?.status === "authorized") {
-      await completeOrder()
+      console.log(
+        "[Checkout] Skipping frontend order creation for Click provider (handlePayment, already authorized)"
+      )
+      router.push(
+        `/${cart.region?.countries?.[0]?.iso_2 || "uz"}/account/orders`
+      )
       return
     }
 

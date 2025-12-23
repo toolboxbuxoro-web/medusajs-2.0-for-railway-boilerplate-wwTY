@@ -8,7 +8,12 @@ type Body = {
   amount: number
 }
 
-async function hasColumn(pg: any, tableName: string, columnName: string): Promise<boolean> {
+const columnCache: Record<string, boolean> = {}
+
+async function hasColumnCached(pg: any, tableName: string, columnName: string): Promise<boolean> {
+  const cacheKey = `${tableName}.${columnName}`
+  if (cacheKey in columnCache) return columnCache[cacheKey]
+
   try {
     const res = await pg.raw(
       `
@@ -22,7 +27,8 @@ async function hasColumn(pg: any, tableName: string, columnName: string): Promis
       [tableName, columnName]
     )
     const rows = res?.rows || res || []
-    return !!rows?.length
+    columnCache[cacheKey] = !!rows?.length
+    return columnCache[cacheKey]
   } catch {
     return false
   }
@@ -42,6 +48,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
   const { cart_id, shipping_option_id, amount } = (req.body || {}) as Partial<Body>
 
+  const startTime = Date.now()
+  logger?.info?.(`[store/bts/shipping-method] Processing request for cart ${cart_id}, option ${shipping_option_id}, amount ${amount}`)
+
   if (!cart_id || !shipping_option_id || typeof amount !== "number") {
     return res.status(400).json({ error: "cart_id, shipping_option_id, amount are required" })
   }
@@ -58,16 +67,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     await pg.raw(`DELETE FROM cart_shipping_method WHERE cart_id = ?`, [cart_id])
 
     const cols = {
-      id: await hasColumn(pg, "cart_shipping_method", "id"),
-      cart_id: await hasColumn(pg, "cart_shipping_method", "cart_id"),
-      shipping_option_id: await hasColumn(pg, "cart_shipping_method", "shipping_option_id"),
-      name: await hasColumn(pg, "cart_shipping_method", "name"),
-      amount: await hasColumn(pg, "cart_shipping_method", "amount"),
-      raw_amount: await hasColumn(pg, "cart_shipping_method", "raw_amount"),
-      currency_code: await hasColumn(pg, "cart_shipping_method", "currency_code"),
-      data: await hasColumn(pg, "cart_shipping_method", "data"),
-      created_at: await hasColumn(pg, "cart_shipping_method", "created_at"),
-      updated_at: await hasColumn(pg, "cart_shipping_method", "updated_at"),
+      id: await hasColumnCached(pg, "cart_shipping_method", "id"),
+      cart_id: await hasColumnCached(pg, "cart_shipping_method", "cart_id"),
+      shipping_option_id: await hasColumnCached(pg, "cart_shipping_method", "shipping_option_id"),
+      name: await hasColumnCached(pg, "cart_shipping_method", "name"),
+      amount: await hasColumnCached(pg, "cart_shipping_method", "amount"),
+      raw_amount: await hasColumnCached(pg, "cart_shipping_method", "raw_amount"),
+      currency_code: await hasColumnCached(pg, "cart_shipping_method", "currency_code"),
+      data: await hasColumnCached(pg, "cart_shipping_method", "data"),
+      created_at: await hasColumnCached(pg, "cart_shipping_method", "created_at"),
+      updated_at: await hasColumnCached(pg, "cart_shipping_method", "updated_at"),
     }
 
     // Determine cart currency if the column exists.
@@ -77,7 +86,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         const r = await pg.raw(`SELECT currency_code FROM cart WHERE id = ? LIMIT 1`, [cart_id])
         const rows = r?.rows || r || []
         currencyCode = rows?.[0]?.currency_code || null
-      } catch {
+      } catch (err: any) {
+        logger?.warn?.(`[store/bts/shipping-method] Failed to get cart currency: ${err.message}`)
         currencyCode = null
       }
     }
@@ -91,8 +101,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         if (optionRows.length > 0 && optionRows[0]?.name) {
           shippingOptionName = optionRows[0].name
         }
-      } catch {
-        // Use default name
+      } catch (err: any) {
+        logger?.warn?.(`[store/bts/shipping-method] Failed to get shipping option name: ${err.message}`)
       }
     }
 
@@ -132,7 +142,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       insertCols.push("raw_amount")
       placeholders.push("?")
       // Medusa 2.0 BigNumber in DB expects { "value": "..." }
-      // Knex/PG will automatically stringify the object for JSONB column
       values.push({
         value: amount.toString()
       })
@@ -169,18 +178,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     )
 
     // Trigger cart recalculation via Cart Module to update totals
-    // This ensures cart.subtotal, cart.total, etc. are updated correctly
     try {
       await cartModule.updateCarts(cart_id, {})
-      logger?.info?.(`[store/bts/shipping-method] Cart ${cart_id} recalculated after shipping method insert`)
+      logger?.info?.(`[store/bts/shipping-method] Cart ${cart_id} recalculated successfully in ${Date.now() - startTime}ms`)
     } catch (recalcError: any) {
-      // Log but don't fail - the shipping method is already inserted
-      logger?.warn?.(`[store/bts/shipping-method] Cart recalculation warning: ${recalcError?.message || recalcError}`)
+      logger?.warn?.(`[store/bts/shipping-method] Cart recalculation warning for ${cart_id}: ${recalcError?.message || recalcError}`)
     }
 
-    return res.json({ success: true })
+    return res.json({ success: true, duration: Date.now() - startTime })
   } catch (e: any) {
-    logger?.error?.(`[store/bts/shipping-method] Error: ${e?.message || e}`)
+    logger?.error?.(`[store/bts/shipping-method] Fatal error for cart ${cart_id} after ${Date.now() - startTime}ms: ${e?.message || e}`)
     return res.status(500).json({ error: e?.message || "internal_error" })
   }
 }

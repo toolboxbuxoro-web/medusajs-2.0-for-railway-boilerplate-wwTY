@@ -501,6 +501,8 @@ export class ClickMerchantService {
         click_error: 0,
         click_error_note: "Success",
         sign_time,
+        // Store cart_id explicitly in session data, same pattern as Payme
+        cart_id: session.cart_id,
       },
     })
 
@@ -667,8 +669,16 @@ export class ClickMerchantService {
 
     // On success, complete cart to create order
     if (clickError === 0) {
-      const cartId = currentData.cart_id || session.cart_id
-      if (cartId && !session.completed_at) {
+      const cartId = currentData.cart_id
+
+      if (!cartId) {
+        // Follow the same backend-only cart_id pattern as Payme:
+        // cart_id must be present in session.data (set during Prepare) and
+        // we never attempt to guess or derive it here.
+        this.logger_.error(
+          `[ClickMerchant] Missing cart_id for merchant_trans_id=${merchant_trans_id}. Cannot complete cart.`
+        )
+      } else if (!session.completed_at) {
         try {
           await completeCartWorkflow(this.container_).run({
             input: { id: cartId },

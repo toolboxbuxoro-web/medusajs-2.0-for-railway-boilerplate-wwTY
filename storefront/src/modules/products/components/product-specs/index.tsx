@@ -24,36 +24,7 @@ const getProductSpecs = (product: HttpTypes.StoreProduct): { label: string; valu
     })
   }
 
-  // 2. Legacy Flat Metadata Fallback
-  // Only add if not already present in specs (e.g. during migration)
-  const legacySpecFields = [
-    { key: "battery_type", label: "Тип аккумулятора" },
-    { key: "voltage", label: "Напряжение" },
-    { key: "power", label: "Мощность" },
-    { key: "max_torque", label: "Макс. крутящий момент" },
-    { key: "drilling_diameter_metal", label: "Макс диаметр сверления (металл)" },
-    { key: "drilling_diameter_wood", label: "Макс диаметр сверления (дерево)" },
-    { key: "charger_included", label: "Зарядное устройство в комплекте" },
-    { key: "weight", label: "Вес нетто" },
-    { key: "brand", label: "Бренд" },
-    { key: "manufacturer", label: "Производитель" },
-    { key: "country", label: "Страна производства" },
-    { key: "warranty", label: "Гарантия" },
-  ]
-
-  legacySpecFields.forEach(({ key, label }) => {
-    // Check if this label was already added via structured specs
-    const alreadyAdded = specs.some(s => s.label.toLowerCase() === label.toLowerCase())
-    
-    if (!alreadyAdded) {
-      const value = metadata[key]
-      if (value && typeof value === "string" && value !== "-") {
-        specs.push({ label, value })
-      }
-    }
-  })
-
-  // 3. Standard Medusa Product Fields (Core)
+  // Standard Medusa Product Fields (Core)
   if (product.material) {
     specs.push({ label: "Материал", value: product.material })
   }

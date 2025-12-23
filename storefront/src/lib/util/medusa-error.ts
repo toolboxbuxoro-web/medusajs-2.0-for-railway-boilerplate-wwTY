@@ -11,12 +11,17 @@ export default function medusaError(error: any): never {
     // Extracting the error message from the response data
     const message = error.response.data.message || error.response.data
 
-    throw new Error(message.charAt(0).toUpperCase() + message.slice(1) + ".")
+    const finalMessage = message.charAt(0).toUpperCase() + message.slice(1) + "."
+    console.error(`[MedusaError] ${u.toString()} - ${error.response.status}:`, error.response.data)
+    
+    throw new Error(`${finalMessage} (Status: ${error.response.status}, URL: ${u.pathname})`)
   } else if (error.request) {
     // The request was made but no response was received
-    throw new Error("No response received: " + error.request)
+    console.error(`[MedusaError] No response received for request:`, error.config?.url)
+    throw new Error("No response received from server. Check your internet connection or backend status.")
   } else {
     // Something happened in setting up the request that triggered an Error
+    console.error(`[MedusaError] Setup error:`, error.message)
     throw new Error("Error setting up the request: " + error.message)
   }
 }

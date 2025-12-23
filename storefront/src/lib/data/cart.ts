@@ -288,11 +288,18 @@ export async function setShippingMethod({
             shipping_option_id: shippingMethodId,
             amount: amount,
           }),
+        }).catch((e) => {
+          console.error(`[setShippingMethod] Fetch error for BTS fallback:`, e)
+          throw e
         })
 
         if (resp.ok) {
+          console.log(`[setShippingMethod] Successfully set BTS shipping method for cart ${cartId}`)
           revalidateTag("cart")
           return { success: true }
+        } else {
+          const errData = await resp.json().catch(() => ({}))
+          console.error(`[setShippingMethod] BTS fallback failed:`, resp.status, errData)
         }
       }
     }
@@ -499,12 +506,18 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
               amount: btsEstimatedCostNum,
             }),
             cache: "no-store",
+          }).catch((e) => {
+            console.error(`[setAddresses] Fetch error for BTS fallback:`, e)
+            throw e
           })
           
           if (!resp.ok) {
             const errorData = await resp.json().catch(() => ({}))
+            console.error(`[setAddresses] BTS fallback failed:`, resp.status, errorData)
             throw new Error(errorData.message || "Failed to set BTS shipping method")
           }
+          
+          console.log(`[setAddresses] Successfully set BTS shipping method via fallback for cart ${cartId}`)
           
           // Invalidate cart cache so Payment component sees the shipping method
           revalidateTag("cart")
@@ -565,8 +578,13 @@ export async function placeOrder() {
   if (cartRes?.type === "order") {
     const countryCode =
       cartRes.order.shipping_address?.country_code?.toLowerCase()
+    
+    // Get locale from cookies to avoid unnecessary redirect by middleware
+    const cookieStore = await nextCookies()
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || "ru"
+    
     removeCartId()
-    redirect(`/${countryCode}/order/confirmed/${cartRes?.order.id}`)
+    redirect(`/${locale}/${countryCode}/order/confirmed/${cartRes?.order.id}`)
   }
 
   return cartRes.cart
