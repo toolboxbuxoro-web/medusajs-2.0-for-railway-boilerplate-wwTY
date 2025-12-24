@@ -11,14 +11,5 @@ export default async function ProductPreview({
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
 }) {
-  const [pricedProduct] = await getProductsById({
-    ids: [product.id!],
-    regionId: region.id,
-  })
-
-  if (!pricedProduct) {
-    return null
-  }
-
-  return <ProductPreviewContent product={pricedProduct} isFeatured={isFeatured} />
+  return <ProductPreviewContent product={product} isFeatured={isFeatured} />
 }
