@@ -73,6 +73,13 @@ const medusaConfig = {
   },
   modules: [
     {
+      key: Modules.CACHE,
+      resolve: "@medusajs/cache-redis",
+      options: {
+        redisUrl: REDIS_URL,
+      },
+    },
+    {
       key: "moysklad",
       resolve: "./src/modules/moysklad",
     },
