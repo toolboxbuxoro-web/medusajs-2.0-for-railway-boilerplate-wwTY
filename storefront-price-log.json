@@ -1,0 +1,2494 @@
+{
+  "timestamp": "2025-12-24T11:56:30.312Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:56:30.533Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:56:30.549Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:56:32.355Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:56:46.143Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:08.459Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:08.794Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:08.938Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:20.907Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFRZWWWX9VRRE6Q5ZD5EJ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFY1HFK844EMFPT87HY88",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:20.942Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFJKG6412CFNWF5G3FD5W",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFPZCR9VQ89HCW3EKQ9XC",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:20.948Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y88DD6GR8YS4HMXY8P2H1",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y8CRP51JE4W75NZAW7TVN",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:20.954Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFB8YGWRA53TVQ98PM12P",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFGGW7Q2B3S0E7WFNGVD1",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:20.958Z",
+  "method": "getProductsById",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:20.965Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEQC4PR4XHR2ZSWA294CZ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YEVXP86JAQY0JFWBFXSB0",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.072Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y40TF3A1VABPJSS739K9Y",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y459WZ237ZHN91HN308GF",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.076Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YF49Q2YETG47SNJ8YXAJ7",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF8RZWNJNAJC59F7ST33Q",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.120Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEY0EXK6E6BFBQTSJP7CX",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF2A10XBC1TF8P93N6P05",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.571Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFRZWWWX9VRRE6Q5ZD5EJ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFY1HFK844EMFPT87HY88",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.906Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y88DD6GR8YS4HMXY8P2H1",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y8CRP51JE4W75NZAW7TVN",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.907Z",
+  "method": "getProductsById",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.910Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YF49Q2YETG47SNJ8YXAJ7",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF8RZWNJNAJC59F7ST33Q",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:21.920Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEQC4PR4XHR2ZSWA294CZ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YEVXP86JAQY0JFWBFXSB0",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.081Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFB8YGWRA53TVQ98PM12P",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFGGW7Q2B3S0E7WFNGVD1",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.093Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFJKG6412CFNWF5G3FD5W",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFPZCR9VQ89HCW3EKQ9XC",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.097Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEY0EXK6E6BFBQTSJP7CX",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF2A10XBC1TF8P93N6P05",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.098Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YF49Q2YETG47SNJ8YXAJ7",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF8RZWNJNAJC59F7ST33Q",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.101Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y40TF3A1VABPJSS739K9Y",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y459WZ237ZHN91HN308GF",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.104Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y40TF3A1VABPJSS739K9Y",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y459WZ237ZHN91HN308GF",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.189Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFB8YGWRA53TVQ98PM12P",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFGGW7Q2B3S0E7WFNGVD1",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.193Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFJKG6412CFNWF5G3FD5W",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFPZCR9VQ89HCW3EKQ9XC",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.351Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y88DD6GR8YS4HMXY8P2H1",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y8CRP51JE4W75NZAW7TVN",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.355Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEY0EXK6E6BFBQTSJP7CX",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF2A10XBC1TF8P93N6P05",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.357Z",
+  "method": "getProductsById",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.358Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFRZWWWX9VRRE6Q5ZD5EJ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFY1HFK844EMFPT87HY88",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:22.365Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEQC4PR4XHR2ZSWA294CZ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YEVXP86JAQY0JFWBFXSB0",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:29.425Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:39.911Z",
+  "method": "getProductsById",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:40.388Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y40TF3A1VABPJSS739K9Y",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y459WZ237ZHN91HN308GF",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:40.403Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEY0EXK6E6BFBQTSJP7CX",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF2A10XBC1TF8P93N6P05",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:40.427Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y88DD6GR8YS4HMXY8P2H1",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y8CRP51JE4W75NZAW7TVN",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T11:58:40.541Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEQC4PR4XHR2ZSWA294CZ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YEVXP86JAQY0JFWBFXSB0",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:05.589Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.453Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YF49Q2YETG47SNJ8YXAJ7",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF8RZWNJNAJC59F7ST33Q",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.680Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFB8YGWRA53TVQ98PM12P",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFGGW7Q2B3S0E7WFNGVD1",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.723Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEY0EXK6E6BFBQTSJP7CX",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF2A10XBC1TF8P93N6P05",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.789Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFJKG6412CFNWF5G3FD5W",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFPZCR9VQ89HCW3EKQ9XC",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.806Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y40TF3A1VABPJSS739K9Y",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y459WZ237ZHN91HN308GF",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.821Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y88DD6GR8YS4HMXY8P2H1",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y8CRP51JE4W75NZAW7TVN",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.846Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFRZWWWX9VRRE6Q5ZD5EJ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFY1HFK844EMFPT87HY88",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.854Z",
+  "method": "getProductsById",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:09.914Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEQC4PR4XHR2ZSWA294CZ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YEVXP86JAQY0JFWBFXSB0",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.440Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:27.447Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KAX39TK328N6VDA81WF7HYSB",
+  "calculated_price": null
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:34.203Z",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:34.340Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFRZWWWX9VRRE6Q5ZD5EJ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFY1HFK844EMFPT87HY88",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:34.353Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFRZWWWX9VRRE6Q5ZD5EJ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFY1HFK844EMFPT87HY88",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFY1HSMNVPFB537GNQNJQ",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.473Z",
+  "method": "getProductsById",
+  "id": "prod_01KBQRGHXCXF08N626S52M9GBM",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KBQRH16PWZD2CAMS8A34C508",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 750000,
+    "raw_calculated_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 750000,
+    "raw_original_amount": {
+      "value": "750000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KBQRH16PBPESQ50VMHR0FSPY",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.524Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y88DD6GR8YS4HMXY8P2H1",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y8CRP51JE4W75NZAW7TVN",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y8CRP8QKSSB2FGVZTW181",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.532Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4Y40TF3A1VABPJSS739K9Y",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4Y459WZ237ZHN91HN308GF",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1000,
+    "raw_calculated_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1000,
+    "raw_original_amount": {
+      "value": "1000",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4Y459WFP5M80PGHK0YDJME",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.711Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEY0EXK6E6BFBQTSJP7CX",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF2A10XBC1TF8P93N6P05",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF2A15BP4506XN66PFV81",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.722Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFB8YGWRA53TVQ98PM12P",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFGGW7Q2B3S0E7WFNGVD1",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFGGWEFZAJV2XYJAQZQYM",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.732Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YFJKG6412CFNWF5G3FD5W",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YFPZCR9VQ89HCW3EKQ9XC",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YFPZC3MR9PR9SX310RCNS",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.761Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YF49Q2YETG47SNJ8YXAJ7",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YF8RZWNJNAJC59F7ST33Q",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YF8RZKPEVSMZKTFK8S4VK",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---
+{
+  "timestamp": "2025-12-24T12:01:37.765Z",
+  "method": "getProductsById",
+  "id": "prod_01KD4YEQC4PR4XHR2ZSWA294CZ",
+  "regionId": "reg_01KB78C7KTE3F0E9N68T3JKWCR",
+  "calculated_price": {
+    "id": "pset_01KD4YEVXP86JAQY0JFWBFXSB0",
+    "is_calculated_price_price_list": false,
+    "is_calculated_price_tax_inclusive": false,
+    "calculated_amount": 1,
+    "raw_calculated_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "is_original_price_price_list": false,
+    "is_original_price_tax_inclusive": false,
+    "original_amount": 1,
+    "raw_original_amount": {
+      "value": "1",
+      "precision": 20
+    },
+    "currency_code": "uzs",
+    "calculated_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    },
+    "original_price": {
+      "id": "price_01KD4YEVXPAJVBTYQKJM8YPWJ4",
+      "price_list_id": null,
+      "price_list_type": null,
+      "min_quantity": null,
+      "max_quantity": null
+    }
+  }
+}
+---

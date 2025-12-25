@@ -614,6 +614,7 @@
   },
   "home": {
     "popular_products": "Ommabop mahsulotlar",
+    "products_loading": "Mahsulotlar yuklanmoqda...",
     "hero_bts_msg": "Do'konlarimizdan olib keting",
     "seo_title": "Toolbox — Professional asboblar va jihozlar",
     "seo_description": "Professionallar va biznes uchun onlayn-gipermarket. Qurilish, ta'mirlash va ishlab chiqarish uchun asl mahsulotlar. Toolbox do'konlaridan olib ketish."
