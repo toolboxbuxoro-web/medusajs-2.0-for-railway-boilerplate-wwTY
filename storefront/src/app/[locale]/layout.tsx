@@ -4,6 +4,15 @@ import { notFound } from 'next/navigation';
 import { locales, type Locale } from '../../i18n';
 import { FavoritesProvider } from "@lib/context/favorites-context"
 
+
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.ico?v=2',
+  },
+}
+
 export default async function LocaleLayout({
   children,
   params: { locale }
