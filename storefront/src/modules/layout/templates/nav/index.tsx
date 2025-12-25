@@ -15,6 +15,7 @@ import MobileMenu from "@modules/layout/components/mobile-menu"
 import CatalogDropdown from "@modules/layout/components/catalog-dropdown"
 import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
 import FavoritesButton from "@modules/layout/components/favorites-button"
+import Headset from "@modules/common/icons/headset"
 import { type Locale } from '../../../../i18n'
 import { getLocalizedField } from "@lib/util/localization"
 
@@ -114,17 +115,27 @@ export default async function Nav({ locale }: NavProps) {
               <div className="hidden md:block">
                 <LanguageSwitcher />
               </div>
+
+              {/* Support - Hidden on mobile */}
+              <LocalizedClientLink
+                href="/customer-service"
+                className="hidden md:flex p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center sm:flex-col sm:gap-1"
+                title={t('support')}
+              >
+                <Headset size="20" className="sm:w-[22px] sm:h-[22px]" />
+                <span className="text-[10px] font-medium hidden sm:block">{t('support')}</span>
+              </LocalizedClientLink>
               
               {/* Favorites - Hidden on mobile */}
               <div className="hidden md:flex items-center justify-center">
-                <FavoritesButton />
+                <FavoritesButton label={t('favorites')} />
               </div>
 
               {/* Cart */}
               <Suspense
                 fallback={
                   <LocalizedClientLink
-                    className="p-1.5 sm:p-2 hover:text-red-600 transition-colors relative"
+                    className="p-1.5 sm:p-2 hover:text-red-600 transition-colors relative flex items-center justify-center sm:flex-col sm:gap-1"
                     href="/cart"
                     data-testid="nav-cart-link"
                     title={t('cart')}
@@ -142,6 +153,7 @@ export default async function Nav({ locale }: NavProps) {
                       <circle cx="7" cy="20" r="1" />
                       <circle cx="17" cy="20" r="1" />
                     </svg>
+                    <span className="text-[10px] font-medium hidden sm:block">{t('cart')}</span>
                   </LocalizedClientLink>
                 }
               >
@@ -151,10 +163,11 @@ export default async function Nav({ locale }: NavProps) {
               {/* Account */}
               <LocalizedClientLink
                 href="/account"
-                className="p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center"
+                className="p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center sm:flex-col sm:gap-1"
                 title={t('account')}
               >
                 <User size="20" className="sm:w-[22px] sm:h-[22px]" />
+                <span className="text-[10px] font-medium hidden sm:block">{t('account')}</span>
               </LocalizedClientLink>
             </div>
           </div>

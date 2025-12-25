@@ -36,33 +36,37 @@ export default function ProductPrice({
     : 0
 
   return (
-    <div className="flex flex-col gap-2 mb-4">
+    <div className="flex flex-col gap-2 mb-6">
       {isOnSale && selectedPrice.original_price && (
-        <div className="text-lg text-gray-500 line-through">
+        <div className="text-base text-gray-400 line-through decoration-gray-400">
           {formatPrice(selectedPrice.original_price)}
         </div>
       )}
-      {isOnSale && discountAmount > 0 && (
-        <div className="inline-block bg-black text-white px-3 py-1 rounded text-sm font-semibold w-fit">
-          Benefit {formatPrice(selectedPrice.original_price || '').replace(formatPrice(selectedPrice.calculated_price || ''), '').trim() || `${Math.round(discountAmount / 100)} P`}
-        </div>
-      )}
-      <div className="flex items-baseline gap-2">
+      
+      <div className="flex items-center gap-3">
         <span
-          className={clx("text-3xl font-bold text-red-600", {
-            "text-red-600": isOnSale,
-          })}
+          className="text-3xl font-extrabold text-red-600 tracking-tight"
           data-testid="product-price"
           data-value={selectedPrice.calculated_price_number}
         >
           {formatPrice(selectedPrice.calculated_price)}
         </span>
-      </div>
-      {isOnSale && selectedPrice.percentage_diff && (
-        <span className="text-sm text-green-600 font-semibold">
+        
+        {isOnSale && selectedPrice.percentage_diff && (
+          <span className="bg-yellow-400 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">
             -{selectedPrice.percentage_diff}%
           </span>
+        )}
+      </div>
+
+      {isOnSale && discountAmount > 0 && (
+        <div className="inline-flex items-center gap-2 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded w-fit">
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>
+          Выгода {formatPrice(convertToLocale({ amount: discountAmount, currency_code: selectedPrice.currency_code }))}
+        </div>
       )}
     </div>
   )
 }
+
+import { convertToLocale } from "@lib/util/money"

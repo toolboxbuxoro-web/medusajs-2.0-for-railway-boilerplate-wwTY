@@ -6,50 +6,26 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Input from "@modules/common/components/input"
 import NativeSelect from "@modules/common/components/native-select"
 import { HttpTypes } from "@medusajs/types"
-
-// --- FAQ Component ---
-const faqItems = [
-  {
-    q: "Где мой заказ?",
-    a: "Статус заказа можно проверить в Личном кабинете. После передачи в BTS вы сможете отслеживать его по трек-номеру на сайте bts.uz.",
-    link: "/account/orders",
-    linkText: "Перейти в заказы",
-  },
-  {
-    q: "Когда я смогу забрать товар?",
-    a: "Срок доставки в пункт BTS обычно составляет 1-3 рабочих дня. Как только заказ прибудет, вам придет SMS от BTS.",
-  },
-  {
-    q: "Где найти адрес пункта выдачи BTS?",
-    a: "Адрес выбранного вами филиала указан в деталях заказа. Полный список всех пунктов BTS доступен на их официальном сайте.",
-    link: "https://bts.uz/filials",
-    linkText: "Все филиалы BTS",
-  },
-  {
-    q: "Как оплатить заказ?",
-    a: "Мы принимаем оплату картами Uzcard и Humo через платежные системы Payme и Click при оформлении на сайте.",
-  },
-  {
-    q: "Можно ли отменить заказ?",
-    a: "Да, если заказ еще не передан в службу доставки. Напишите нам в Telegram с указанием номера заказа.",
-  },
-  {
-    q: "Как вернуть товар?",
-    a: "Вы можете вернуть товар в течение 14 дней, если он не был в использовании и сохранен товарный вид. Внимание: бензоинструмент с ГСМ возврату не подлежит.",
-  },
-  {
-    q: "Где найти гарантийный талон?",
-    a: "Гарантийный талон находится внутри коробки с инструментом. При получении обязательно проверьте наличие печати.",
-  },
-]
+import { useTranslations } from "next-intl"
 
 export function FAQSection() {
+  const t = useTranslations("customer_service")
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const faqItems = [
+    t.raw("faq_items.item1"),
+    t.raw("faq_items.item2"),
+    t.raw("faq_items.item3"),
+    t.raw("faq_items.item4"),
+    t.raw("faq_items.item5"),
+    t.raw("faq_items.item6"),
+    t.raw("faq_items.item7"),
+  ]
 
   return (
     <div className="flex flex-col gap-y-4 w-full max-w-[800px] mx-auto">
       <Heading level="h2" className="text-2xl font-bold mb-4">
-        Часто задаваемые вопросы
+        {t("faq_title")}
       </Heading>
       <div className="flex flex-col gap-y-2">
         {faqItems.map((item, index) => (
@@ -90,6 +66,7 @@ type SupportFormProps = {
 }
 
 export function SupportForm({ customer }: SupportFormProps) {
+  const t = useTranslations("customer_service")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -112,7 +89,7 @@ export function SupportForm({ customer }: SupportFormProps) {
       if (!res.ok) throw new Error("Failed to send")
       setSuccess(true)
     } catch (err) {
-      setError("Не удалось отправить сообщение. Попробуйте позже или напишите в Telegram.")
+      setError(t("send_error"))
     } finally {
       setLoading(false)
     }
@@ -122,18 +99,64 @@ export function SupportForm({ customer }: SupportFormProps) {
     return (
       <div className="p-8 text-center bg-green-50 rounded-xl border border-green-200">
         <Heading level="h3" className="text-green-800 mb-2">
-          Сообщение отправлено!
+          {t("send_success_title")}
         </Heading>
         <Text className="text-green-700">
-          Спасибо! Мы ответим вам в Telegram или перезвоним в ближайшее время.
+          {t("send_success_text")}
         </Text>
         <Button
           variant="secondary"
           className="mt-4"
           onClick={() => setSuccess(false)}
         >
-          Отправить еще одно
+          {t("send_another")}
         </Button>
+      </div>
+    )
+  }
+
+  if (!customer) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-ui-bg-subtle rounded-xl border border-ui-border-base text-center gap-y-4">
+        <div className="bg-ui-bg-base p-4 rounded-full">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-ui-fg-subtle"
+          >
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+        </div>
+        <div>
+          <Heading level="h3" className="text-xl font-bold mb-2">
+            {t("auth_required_title")}
+          </Heading>
+          <Text className="text-ui-fg-subtle text-sm max-w-[300px] mx-auto">
+            {t("auth_required_text")}
+          </Text>
+        </div>
+        <div className="flex flex-col w-full gap-y-2 pt-2">
+          <LocalizedClientLink href="/account/login">
+            <Button variant="primary" className="w-full">
+              {t("login_button")}
+            </Button>
+          </LocalizedClientLink>
+          <Text className="text-xs text-ui-fg-muted">
+            {t("no_account")}{" "}
+            <LocalizedClientLink href="/account/login" className="text-ui-fg-interactive hover:underline">
+              {t("register_link")}
+            </LocalizedClientLink>
+          </Text>
+        </div>
       </div>
     )
   }
@@ -145,38 +168,38 @@ export function SupportForm({ customer }: SupportFormProps) {
     >
       <div className="mb-2">
         <Heading level="h3" className="text-xl font-bold">
-          Напишите нам
+          {t("write_to_us")}
         </Heading>
         <Text className="text-ui-fg-subtle text-sm">
-          Мы быстрее всего отвечаем в Telegram
+          {t("telegram_fast_reply")}
         </Text>
       </div>
 
       <Input 
         name="name" 
-        label="Ваше имя" 
+        label={t("name")} 
         required 
-        defaultValue={customer ? `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim() : ""}
+        defaultValue={`${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim()}
       />
       <Input 
         name="phone" 
-        label="Номер телефона" 
+        label={t("phone")} 
         required 
-        defaultValue={customer?.phone ?? ""} 
+        defaultValue={customer.phone ?? ""} 
       />
 
       <div className="flex flex-col gap-y-1">
-        <label className="text-sm font-medium text-ui-fg-subtle ml-1">Тема обращения</label>
+        <label className="text-sm font-medium text-ui-fg-subtle ml-1">{t("topic")}</label>
         <NativeSelect name="topic" required>
-          <option value="order_status">Статус заказа</option>
-          <option value="return_warranty">Возврат / гарантия</option>
-          <option value="product_query">Вопрос по товару</option>
-          <option value="other">Другое</option>
+          <option value="order_status">{t("topic_order_status")}</option>
+          <option value="return_warranty">{t("topic_return_warranty")}</option>
+          <option value="product_query">{t("topic_product_query")}</option>
+          <option value="other">{t("topic_other")}</option>
         </NativeSelect>
       </div>
 
       <div className="flex flex-col gap-y-1">
-        <label className="text-sm font-medium text-ui-fg-subtle ml-1">Сообщение</label>
+        <label className="text-sm font-medium text-ui-fg-subtle ml-1">{t("message")}</label>
         <textarea
           name="message"
           required
@@ -188,7 +211,7 @@ export function SupportForm({ customer }: SupportFormProps) {
       {error && <Text className="text-red-500 text-xs">{error}</Text>}
 
       <Button type="submit" isLoading={loading} className="w-full">
-        Отправить
+        {t("send")}
       </Button>
     </form>
   )
@@ -196,6 +219,7 @@ export function SupportForm({ customer }: SupportFormProps) {
 
 // --- Contact Grid Component ---
 export function ContactGrid() {
+  const t = useTranslations("customer_service")
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
       <a
@@ -205,9 +229,9 @@ export function ContactGrid() {
         className="flex flex-col p-6 bg-[#0088cc]/10 border border-[#0088cc]/30 rounded-xl hover:bg-[#0088cc]/20 transition-all group"
       >
         <Heading level="h3" className="text-[#0088cc] font-bold mb-1">
-          Telegram
+          {t("telegram_title")}
         </Heading>
-        <Text className="text-sm mb-4">Написать в чат поддержки</Text>
+        <Text className="text-sm mb-4">{t("telegram_subtitle")}</Text>
         <span className="text-sm font-bold text-[#0088cc] group-hover:underline">
           @toolbox01 →
         </span>
@@ -218,10 +242,10 @@ export function ContactGrid() {
         className="flex flex-col p-6 bg-ui-bg-subtle border border-ui-border-base rounded-xl hover:bg-ui-bg-component transition-all"
       >
         <Heading level="h3" className="font-bold mb-1 uppercase text-xs tracking-widest text-ui-fg-subtle">
-          Колл-центр
+          {t("call_center")}
         </Heading>
         <Text className="text-lg font-bold">+998 88 081-11-12</Text>
-        <Text className="text-xs text-ui-fg-muted mt-2">Ежедневно с 9:00 до 18:00</Text>
+        <Text className="text-xs text-ui-fg-muted mt-2">{t("call_center_hours")}</Text>
       </a>
 
       <a
@@ -229,10 +253,10 @@ export function ContactGrid() {
         className="flex flex-col p-6 bg-ui-bg-subtle border border-ui-border-base rounded-xl hover:bg-ui-bg-component transition-all"
       >
         <Heading level="h3" className="font-bold mb-1 uppercase text-xs tracking-widest text-ui-fg-subtle">
-          Сервисный центр
+          {t("service_center")}
         </Heading>
         <Text className="text-lg font-bold">+998 88 182-29-10</Text>
-        <Text className="text-xs text-ui-fg-muted mt-2">По вопросам гарантии и ремонта</Text>
+        <Text className="text-xs text-ui-fg-muted mt-2">{t("service_center_subtitle")}</Text>
       </a>
 
       <div className="flex gap-x-4 p-6 bg-ui-bg-subtle border border-ui-border-base rounded-xl items-center justify-center">
@@ -249,17 +273,18 @@ export function ContactGrid() {
 
 // --- Order CTA Component ---
 export function OrderCTA() {
+  const t = useTranslations("customer_service")
   return (
     <div className="w-full p-8 bg-black text-white rounded-2xl flex flex-col items-center text-center gap-y-4">
       <Heading level="h2" className="text-2xl font-bold">
-        Проверить статус заказа
+        {t("order_status_title")}
       </Heading>
       <Text className="text-white/70 max-w-[400px]">
-        Посмотрите статус и историю ваших покупок в личном кабинете.
+        {t("order_status_subtitle")}
       </Text>
       <LocalizedClientLink href="/account/orders">
         <Button variant="secondary" className="bg-white text-black hover:bg-gray-200 border-none px-8">
-          Мои заказы
+          {t("my_orders")}
         </Button>
       </LocalizedClientLink>
     </div>

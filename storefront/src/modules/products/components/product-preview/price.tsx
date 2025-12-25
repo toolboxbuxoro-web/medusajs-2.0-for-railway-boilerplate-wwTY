@@ -34,18 +34,19 @@ export default function PreviewPrice({
           {formatPrice(price.original_price)}
         </Text>
       )}
-      <Text
+      <span
         className={clx(
-          "text-lg sm:text-xl font-bold",
+          "text-xl sm:text-2xl font-extrabold tracking-tight tabular-nums",
           {
             "text-red-600": showRedPrice,
             "text-gray-900": !showRedPrice,
           }
         )}
+        style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
         data-testid="price"
       >
         {formatPrice(price.calculated_price)}
-      </Text>
+      </span>
       {price.price_type === "sale" && (
         <span className="text-xs font-semibold text-white bg-red-600 px-2 py-0.5 rounded-full">
           СКИДКА

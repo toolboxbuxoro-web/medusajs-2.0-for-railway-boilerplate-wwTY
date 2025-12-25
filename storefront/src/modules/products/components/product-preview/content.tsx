@@ -96,12 +96,13 @@ export default function ProductPreviewContent({
           
           {/* Title */}
           <LocalizedClientLink href={`/products/${product.handle}`}>
-            <Text 
-              className="text-gray-900 text-sm sm:text-base font-semibold line-clamp-2 group-hover:text-red-600 transition-colors min-h-[2.5rem] sm:min-h-[3rem]" 
+            <h3 
+              className="text-gray-800 text-xs sm:text-sm md:text-base font-medium leading-snug line-clamp-3 group-hover:text-red-600 transition-colors" 
+              style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
               data-testid="product-title"
             >
               {getLocalizedField(product, "title", localeStr) || product.title}
-            </Text>
+            </h3>
           </LocalizedClientLink>
           
           {/* Spacer */}

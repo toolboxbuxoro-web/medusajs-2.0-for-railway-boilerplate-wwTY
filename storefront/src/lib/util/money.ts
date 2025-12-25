@@ -8,6 +8,21 @@ type ConvertToLocaleParams = {
   locale?: string
 }
 
+/**
+ * Replace UZS currency code with localized currency symbol
+ */
+const replaceUZSSymbol = (formattedString: string, locale: string): string => {
+  if (!formattedString.includes('UZS')) {
+    return formattedString
+  }
+  
+  // Determine the appropriate currency symbol based on locale
+  const currencySymbol = locale.startsWith('uz') ? "so'm" : "сум"
+  
+  // Replace UZS with the localized symbol
+  return formattedString.replace(/UZS/g, currencySymbol)
+}
+
 export const convertToLocale = ({
   amount,
   currency_code,
@@ -34,12 +49,15 @@ export const convertToLocale = ({
 
     const value = safeAmount / Math.pow(10, fractionDigits || 0)
 
-    return new Intl.NumberFormat(locale, {
+    const formatted = new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currency_code,
       minimumFractionDigits,
       maximumFractionDigits,
     }).format(value)
+    
+    // Replace UZS with localized currency symbol
+    return replaceUZSSymbol(formatted, locale)
   }
 
   return safeAmount.toString()

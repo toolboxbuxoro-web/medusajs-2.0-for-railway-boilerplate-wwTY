@@ -136,6 +136,24 @@ export async function middleware(request: NextRequest) {
   const urlCountryCode = pathParts[1]
   const urlHasCountryCode = countryCode && urlCountryCode === countryCode
 
+  // Check authentication for protected account routes
+  // Allow /account (login page) but protect /account/* (dashboard pages)
+  const isProtectedAccountRoute = request.nextUrl.pathname.includes('/account/') && 
+    !request.nextUrl.pathname.includes('/account/@')
+  
+  if (isProtectedAccountRoute) {
+    const authToken = request.cookies.get('_medusa_jwt')
+    
+    if (!authToken) {
+      // User is not authenticated, redirect to login
+      const loginUrl = new URL(request.nextUrl.origin)
+      loginUrl.pathname = `/${locale}/${countryCode}/account`
+      loginUrl.searchParams.set('returnUrl', request.nextUrl.pathname)
+      
+      return NextResponse.redirect(loginUrl.toString(), 307)
+    }
+  }
+
   // If everything is in place, continue
   if (
     urlHasCountryCode &&

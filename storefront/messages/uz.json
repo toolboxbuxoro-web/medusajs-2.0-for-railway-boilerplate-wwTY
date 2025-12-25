@@ -3,7 +3,7 @@
     "location": "Moskva",
     "stores": "Do'konlar",
     "delivery": "Yetkazib berish va to'lov",
-    "support": "Xizmat va qo'llab-quvvatlash",
+    "support": "Qo'llab-quvvatlash",
     "about": "Biz haqimizda",
     "investors": "Investorlar uchun",
     "phone": "8 800 550-37-70",
@@ -38,7 +38,7 @@
     "collections": "Kolleksiyalar",
     "delivery": "Yetkazib berish",
     "about": "Toolbox ҳақида",
-    "support": "Қўллаб-қувватлаш",
+    "support": "Qo'llab-quvvatlash",
     "stores": "Do'konlar",
     "info": "Ma'lumot",
     "account": "Shaxsiy kabinet",
@@ -496,7 +496,7 @@
     },
     "cta": {
       "store": "Каталогга ўтиш",
-      "support": "Қўллаб-қувватлаш хизмати"
+      "support": "Qo'llab-quvvatlash xizmati"
     }
   },
   "stores_page": {
@@ -536,6 +536,81 @@
       "title": "Bizning do'konlar | Toolbox",
       "description": "Buxorodagi Toolbox do'konlari va buyurtmalarni berish punktlari manzillari. BTS orqali buyurtmalarni olib ketish."
     }
+  },
+  "customer_service": {
+    "seo_title": "Mijozlarni qo'llab-quvvatlash | Toolbox",
+    "seo_description": "Buyurtma berishda yordam, BTS yetkazib berish haqida ma'lumot va Toolbox asboblari uchun kafolat.",
+    "hero_title": "Toolbox qo'llab-quvvatlash markazi",
+    "hero_subtitle": "Biz sizga asbob tanlash, buyurtmani kuzatish yoki kafolat masalalarida yordam berishga tayyormiz.",
+    "order_status_title": "Buyurtma holatini tekshirish",
+    "order_status_subtitle": "Shaxsiy kabinetingizda xaridlar tarixi va holatini ko'ring.",
+    "my_orders": "Mening buyurtmalarim",
+    "faq_title": "Tez-tez so'raladigan savollar",
+    "faq_items": {
+      "item1": {
+        "q": "Mening buyurtmam qayerda?",
+        "a": "Buyurtma holatini Shaxsiy kabinetda tekshirish mumkin. BTSga topshirilgandan so'ng, siz uni bts.uz saytida trek-raqami orqali kuzatishingiz mumkin.",
+        "link": "/account/orders",
+        "linkText": "Buyurtmalarga o'tish"
+      },
+      "item2": {
+        "q": "Mahsulotni qachon olib ketishim mumkin?",
+        "a": "BTS punktiga yetkazib berish muddati odatda 1-3 ish kunini tashkil qiladi. Buyurtma yetib kelishi bilan sizga BTS dan SMS keladi."
+      },
+      "item3": {
+        "q": "BTS tarqatish punkti manzilini qayerdan topsam bo'ladi?",
+        "a": "Siz tanlagan filial manzili buyurtma tafsilotlarida ko'rsatilgan. Barcha BTS punktlarining to'liq ro'yxati ularning rasmiy saytida mavjud.",
+        "link": "https://bts.uz/filials",
+        "linkText": "Barcha BTS filiallari"
+      },
+      "item4": {
+        "q": "Buyurtma uchun qanday to'lov qilish kerak?",
+        "a": "Biz saytda rasmiylashtirishda Payme va Click to'lov tizimlari orqali Uzcard va Humo kartalarini qabul qilamiz."
+      },
+      "item5": {
+        "q": "Buyurtmani bekor qilish mumkinmi?",
+        "a": "Ha, agar buyurtma hali yetkazib berish xizmatiga topshirilmagan bo'lsa. Bizga Telegram orqali buyurtma raqamini ko'rsatgan holda yozing."
+      },
+      "item6": {
+        "q": "Mahsulotni qanday qaytarish mumkin?",
+        "a": "Agar mahsulot ishlatilmagan bo'lsa va tovar ko'rinishi saqlangan bo'lsa, uni 14 kun ichida qaytarishingiz mumkin. Diqqat: yoqilg'i-moylash materiallari bo'lgan benzinli asboblar qaytarib olinmaydi."
+      },
+      "item7": {
+        "q": "Kafolat talonini qayerdan topsam bo'ladi?",
+        "a": "Kafolat taloni asbob qutisining ichida joylashgan. Qabul qilishda muhr borligini albatta tekshiring."
+      }
+    },
+    "contact_title": "Qo'llab-quvvatlash xizmati bilan bog'lanish",
+    "contact_subtitle": "O'zingizga qulay aloqa usulini tanlang. Operatorlarimiz ish vaqtida barcha savollaringizga javob berishga tayyor.",
+    "telegram_title": "Telegram",
+    "telegram_subtitle": "Qo'llab-quvvatlash chatiga yozish",
+    "call_center": "Koll-markaz",
+    "call_center_hours": "Har kuni 9:00 dan 18:00 gacha",
+    "service_center": "Servis markazi",
+    "service_center_subtitle": "Kafolat va ta'mirlash masalalari bo'yicha",
+    "write_to_us": "Bizga yozing",
+    "telegram_fast_reply": "Biz Telegram orqali tezroq javob beramiz",
+    "name": "Ismingiz",
+    "phone": "Telefon raqami",
+    "topic": "Murojaat mavzusi",
+    "topic_order_status": "Buyurtma holati",
+    "topic_return_warranty": "Qaytarish / kafolat",
+    "topic_product_query": "Mahsulot bo'yicha savol",
+    "topic_other": "Boshqa",
+    "message": "Xabar",
+    "send": "Yuborish",
+    "send_success_title": "Xabar yuborildi!",
+    "send_success_text": "Rahmat! Biz sizga Telegram orqali javob beramiz yoki yaqin orada qo'ng'iroq qilamiz.",
+    "send_another": "Yana bir bor yuborish",
+    "send_error": "Xabarni yuborib bo'lmadi. Keyinroq qayta urinib ko'ring yoki Telegram orqali yozing.",
+    "auth_required_title": "Faqat ro'yxatdan o'tgan foydalanuvchilar uchun",
+    "auth_required_text": "Qo'llab-quvvatlash xizmatiga xabar yuborish uchun iltimos akkountingizga kiring yoki ro'yxatdan o'ting.",
+    "login_button": "Akkountga kirish",
+    "no_account": "Akkountingiz yo'qmi?",
+    "register_link": "Ro'yxatdan o'tish",
+    "bts_delivery_title": "BTS Express yetkazib berish haqida",
+    "bts_delivery_text": "Biz BTS-Only modeli bo'yicha ishlaymiz. Bu shuni anglatadiki, yetkazib berish faqat butun O'zbekiston bo'ylab BTS Express xizmatining tarqatish punktlariga (Pickup Points) amalga oshiriladi.\n\nBuyurtmangiz filialga yetib kelgach, BTS'dan rasmiy SMS-xabarnoma olasiz. Buyurtmani olish uchun pasport yoki BTS mobil ilovasi talab qilinadi.",
+    "delivery_details": "Yetkazib berish va muddatlar haqida batafsil →"
   },
   "home": {
     "popular_products": "Ommabop mahsulotlar",

@@ -59,7 +59,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   return (
     <>
       <div
-        className={clx("lg:hidden inset-x-0 bottom-0 fixed", {
+        className={clx("lg:hidden inset-x-0 bottom-0 fixed z-50", {
           "pointer-events-none": !show,
         })}
       >
@@ -87,9 +87,8 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                       </span>
                     )}
                     <span
-                      className={clx("text-xl font-bold", {
-                        "text-red-600": selectedPrice.price_type === "sale",
-                        "text-gray-900": selectedPrice.price_type !== "sale",
+                      className={clx("text-xl font-extrabold tracking-tight", {
+                        "text-gray-900": true,
                       })}
                     >
                       {formatPrice(selectedPrice.calculated_price)}
@@ -103,7 +102,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               <Button
                 onClick={handleAddToCart}
                 disabled={!inStock || !variant || isAdding}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold h-12 rounded-lg"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold h-12 rounded-2xl transition-all"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
