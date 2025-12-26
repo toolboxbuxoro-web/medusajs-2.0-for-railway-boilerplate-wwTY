@@ -78,7 +78,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                       />
                     }
                   >
-                    <ProductActionsWrapper id={product.id} region={region} />
+                    <ProductActionsWrapper product={product} region={region} />
                   </Suspense>
                 </div>
 
@@ -129,7 +129,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                       />
                     }
                   >
-                    <ProductActionsWrapper id={product.id} region={region} />
+                    <ProductActionsWrapper product={product} region={region} />
                   </Suspense>
                   
                   {/* Delivery & Security Info (Uzum style) */}

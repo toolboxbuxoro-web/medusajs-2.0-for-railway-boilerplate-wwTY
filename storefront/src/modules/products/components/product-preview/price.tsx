@@ -3,10 +3,8 @@ import { VariantPrice } from "types/global"
 
 // Форматирует цену: убирает тийины (.00, ,00, или " 00") и заменяет запятые на пробелы
 function formatPrice(priceString: string): string {
-  // Убираем тийины: ,00 или .00 или " 00" (перед валютой или в конце)
   let smoothPrice = priceString.replace(/[.,]00(?=\s|$)/, "")
   smoothPrice = smoothPrice.replace(/\s00(?=\s[A-Z]|$)/, "")
-  // Заменяем разделяющие запятые на пробелы (если они остались в середине числа)
   return smoothPrice.replace(/,/g, " ")
 }
 
@@ -21,38 +19,43 @@ export default function PreviewPrice({
     return null
   }
 
-  // Price is red if: isRed prop is true OR it's a sale price
   const showRedPrice = isRed || price.price_type === "sale"
+  const formattedPrice = formatPrice(price.calculated_price)
+  
+  // Calculate adaptive font size based on price length
+  const priceLength = formattedPrice.length
+  let fontSizeClass = "text-lg sm:text-xl"
+  if (priceLength > 12) {
+    fontSizeClass = "text-sm sm:text-base"
+  } else if (priceLength > 9) {
+    fontSizeClass = "text-base sm:text-lg"
+  }
 
   return (
-    <div className="flex items-baseline gap-2 flex-wrap">
+    <div className="flex items-baseline gap-1.5 flex-wrap">
       {price.price_type === "sale" && (
-        <Text
-          className="text-sm sm:text-base text-gray-400 line-through font-medium"
-          data-testid="original-price"
-        >
+        <span className="text-xs text-gray-400 line-through font-medium truncate max-w-[80px]">
           {formatPrice(price.original_price)}
-        </Text>
+        </span>
       )}
       <span
         className={clx(
-          "text-xl sm:text-2xl font-extrabold tracking-tight tabular-nums",
+          fontSizeClass,
+          "font-bold tracking-tight tabular-nums whitespace-nowrap",
           {
             "text-red-600": showRedPrice,
             "text-gray-900": !showRedPrice,
           }
         )}
-        style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
         data-testid="price"
       >
-        {formatPrice(price.calculated_price)}
+        {formattedPrice}
       </span>
-      {price.price_type === "sale" && (
-        <span className="text-xs font-semibold text-white bg-red-600 px-2 py-0.5 rounded-full">
-          СКИДКА
+      {price.price_type === "sale" && price.percentage_diff && (
+        <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
+          -{price.percentage_diff}%
         </span>
       )}
     </div>
   )
 }
-

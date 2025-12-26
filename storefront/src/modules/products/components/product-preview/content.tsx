@@ -1,15 +1,22 @@
 "use client"
 
-import { Text } from "@medusajs/ui"
+import { useState, useMemo } from "react"
+import { Text, Button } from "@medusajs/ui"
 import { getProductPrice } from "@lib/util/get-product-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
-import ProductPreviewOverlay from "./overlay"
 import { HttpTypes } from "@medusajs/types"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { getLocalizedField } from "@lib/util/localization"
-import { useMemo } from "react"
+import { useFavorites } from "@lib/context/favorites-context"
+import Heart from "@modules/common/icons/heart"
+import Spinner from "@modules/common/icons/spinner"
+import { addToCart } from "@lib/data/cart"
+import { useTranslations } from "next-intl"
+
+import ProductRating from "./rating"
+import InstallmentPrice from "./installment"
 
 export default function ProductPreviewContent({
   product,
@@ -18,34 +25,65 @@ export default function ProductPreviewContent({
   product: HttpTypes.StoreProduct
   isFeatured?: boolean
 }) {
-  const { locale } = useParams()
+  const { locale, countryCode } = useParams()
   const localeStr = String(locale || "ru")
+  const countryCodeStr = String(countryCode || "uz")
+  const router = useRouter()
+  const t = useTranslations("product")
+  const { toggleFavorite, isFavorite } = useFavorites()
+  const [isAdding, setIsAdding] = useState(false)
+
   const { cheapestPrice } = getProductPrice({
     product: product,
   })
 
+  const favorite = isFavorite(product.id)
+
   // Check if product is in stock
   const isInStock = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
-      return true // No variants = assume in stock
+      return true
     }
-    
-    // Check if any variant has stock available
     return product.variants.some((variant: any) => {
-      // If manage_inventory is false, assume in stock
       if (!variant.manage_inventory) return true
-      // If allow_backorder is true, assume in stock
       if (variant.allow_backorder) return true
-      // Otherwise check inventory quantity
       return (variant.inventory_quantity || 0) > 0
     })
   }, [product.variants])
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (product.variants?.length === 1 && product.variants[0].id) {
+      setIsAdding(true)
+      try {
+        await addToCart({
+          variantId: product.variants[0].id,
+          quantity: 1,
+          countryCode: countryCodeStr,
+        })
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setIsAdding(false)
+      }
+    } else {
+      router.push(`/${localeStr}/${countryCodeStr}/products/${product.handle}`)
+    }
+  }
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleFavorite(product.id)
+  }
 
   return (
     <div className="group block h-full">
       <div 
         data-testid="product-wrapper"
-        className={`bg-white border border-gray-200 rounded-xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:border-gray-300 relative ${!isInStock ? 'opacity-80' : ''}`}
+        className={`bg-white rounded-xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-xl relative ${!isInStock ? 'opacity-80' : ''}`}
       >
         {/* Image Container */}
         <div className={`relative overflow-hidden bg-white ${!isInStock ? 'grayscale-[30%]' : ''}`}>
@@ -59,57 +97,83 @@ export default function ProductPreviewContent({
               className="bg-white"
             />
           </LocalizedClientLink>
+
+          {/* Favorite Button - Top Right Absolute */}
+          <button
+            onClick={handleToggleFavorite}
+            className={`absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full shadow-md z-20 transition-all duration-200 ${
+              favorite ? 'bg-red-50 text-red-600' : 'bg-white/80 text-gray-500 hover:text-red-600 hover:bg-white'
+            }`}
+          >
+            <Heart size={20} fill={favorite ? "currentColor" : "none"} />
+          </button>
           
           {!isInStock && (
-            <div className="absolute top-2 left-2 bg-gray-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg pointer-events-none">
+            <div className="absolute top-2 left-2 bg-gray-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg pointer-events-none z-10">
               Нет в наличии
             </div>
           )}
-          
-          {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-          
-          {/* Action Overlay - only show if in stock */}
-          {isInStock && <ProductPreviewOverlay product={product} />}
         </div>
 
         {/* Product Info */}
-        <div className="p-3 sm:p-4 flex-1 flex flex-col">
-          {/* Badges Row */}
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {/* Professional Badge */}
-            {(product.metadata as any)?.professional_level === "профессиональный" && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                PRO
-              </span>
-            )}
+        <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between h-full">
+          <div>
+            {/* Price */}
+            <div className="mb-2 h-7 sm:h-8 flex items-center">
+              {cheapestPrice && (
+                <PreviewPrice price={cheapestPrice} isRed={true} />
+              )}
+            </div>
+
+            {/* Title - Fixed height for 2 lines alignment, line-clamp-2 */}
+            <LocalizedClientLink href={`/products/${product.handle}`} className="block mb-2 group-hover:text-red-600 transition-colors">
+              <h3 
+                className="text-gray-800 text-xs sm:text-sm font-medium leading-[1.3] line-clamp-2 h-[2.6em] overflow-hidden" 
+                style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
+                data-testid="product-title"
+                title={getLocalizedField(product, "title", localeStr) || product.title}
+              >
+                {getLocalizedField(product, "title", localeStr) || product.title}
+              </h3>
+            </LocalizedClientLink>
+
+            {/* Rating */}
+            <div className="h-5 mb-1 flex items-center">
+              <ProductRating 
+                rating={(product.metadata as any)?.rating || 0} 
+                reviewCount={(product.metadata as any)?.reviews_count || 0} 
+              />
+            </div>
+
+            {/* Installment - Conditional based on metadata */}
+            <div className="h-6 mb-2">
+              {cheapestPrice && (product.metadata as any)?.has_installment && (
+                <InstallmentPrice 
+                  amount={cheapestPrice.calculated_price_number} 
+                  currency_code={cheapestPrice.currency_code} 
+                />
+              )}
+            </div>
           </div>
 
-          {/* Price */}
-          <div className="mb-2">
-            {cheapestPrice && (
-              <div className="flex items-baseline gap-2">
-                <PreviewPrice price={cheapestPrice} isRed={true} />
-              </div>
-            )}
-          </div>
-          
-          {/* Title */}
-          <LocalizedClientLink href={`/products/${product.handle}`}>
-            <h3 
-              className="text-gray-800 text-xs sm:text-sm md:text-base font-medium leading-snug line-clamp-3 group-hover:text-red-600 transition-colors" 
-              style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
-              data-testid="product-title"
+          {/* Add to Cart Button - Persistent at bottom */}
+          <div className="mt-auto">
+            <Button
+              onClick={handleAddToCart}
+              disabled={isAdding || !isInStock}
+              className={`w-full h-9 sm:h-10 text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                isInStock 
+                  ? "bg-red-600 hover:bg-red-700 text-white border-0 shadow-sm" 
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed border-0"
+              }`}
             >
-              {getLocalizedField(product, "title", localeStr) || product.title}
-            </h3>
-          </LocalizedClientLink>
-          
-          {/* Spacer */}
-          <div className="flex-1" />
+              {isAdding ? <Spinner /> : (product.variants?.length === 1 ? t("add_to_cart") : t("select"))}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
 
