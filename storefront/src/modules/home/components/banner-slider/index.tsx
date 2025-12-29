@@ -176,7 +176,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
             
             {/* Overlay and content - only if has text content */}
             {slide.hasContent && (
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent flex items-center">
+              <div className="absolute inset-0 flex items-center">
                 <div className="content-container h-full flex items-center py-4 sm:py-6 lg:py-8">
                   <div className="max-w-full sm:max-w-xl lg:max-w-2xl text-white space-y-1 sm:space-y-2 lg:space-y-3 relative z-10">
                     {/* Subtitle badge */}
