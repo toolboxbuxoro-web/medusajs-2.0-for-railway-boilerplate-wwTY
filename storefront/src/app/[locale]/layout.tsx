@@ -9,7 +9,12 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   icons: {
-    icon: '/toolbox-icon.ico?v=3',
+    icon: [
+      { url: '/favicon-16x16.png?v=4', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png?v=4', sizes: '32x32', type: 'image/png' },
+      { url: '/toolbox-icon.ico?v=4', sizes: 'any' },
+    ],
+    apple: '/icon.png?v=4',
   },
 }
 
