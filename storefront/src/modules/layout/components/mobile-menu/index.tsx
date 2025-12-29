@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { getLocalizedField } from "@lib/util/localization"
@@ -17,25 +18,33 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   const iconUrl = category.metadata?.icon_url as string | undefined
   if (iconUrl) {
     return (
-      <img
-        src={iconUrl}
-        alt=""
-        className="w-5 h-5 object-contain rounded bg-gray-50 border border-gray-200 p-0.5"
-      />
+      <div className="w-5 h-5 relative flex-shrink-0">
+        <Image
+          src={iconUrl}
+          alt=""
+          className="object-contain p-0.5"
+          fill
+          sizes="20px"
+        />
+      </div>
     )
   }
   if (imageUrl) {
     return (
-      <img
-        src={imageUrl}
-        alt=""
-        className="w-5 h-5 object-cover rounded bg-gray-50 border border-gray-200"
-      />
+      <div className="w-5 h-5 relative flex-shrink-0">
+        <Image
+          src={imageUrl}
+          alt=""
+          className="object-cover rounded"
+          fill
+          sizes="20px"
+        />
+      </div>
     )
   }
 
   return (
-    <span className="w-5 h-5 flex items-center justify-center text-gray-400">
+    <span className="w-5 h-5 flex items-center justify-center text-gray-400 flex-shrink-0">
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
       </svg>

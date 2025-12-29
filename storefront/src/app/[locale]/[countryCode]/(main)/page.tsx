@@ -37,7 +37,7 @@ export default async function Home({
 
   return (
     <>
-      <div className="content-container px-4 md:px-6 pt-6 sm:pt-8">
+      <div className="content-container px-4 md:px-6 pt-2 sm:pt-4">
         <BannerSlider slides={banners} />
       </div>
 

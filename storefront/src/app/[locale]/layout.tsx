@@ -39,8 +39,8 @@ export default async function LocaleLayout({
   }
   
   return (
-    <html lang={locale} data-mode="light">
-      <body>
+    <html lang={locale} data-mode="light" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <FavoritesProvider>
             <main className="relative">{children}</main>

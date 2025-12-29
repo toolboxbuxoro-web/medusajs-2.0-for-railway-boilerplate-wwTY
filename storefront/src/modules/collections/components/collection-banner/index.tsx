@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 
@@ -31,14 +32,17 @@ export default function CollectionBanner({ collection, locale }: CollectionBanne
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl sm:shadow-2xl mb-6 sm:mb-8 lg:mb-10">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl sm:shadow-2xl mb-2 sm:mb-4 lg:mb-6">
       {/* 3:1 aspect ratio container */}
       <div className="relative w-full" style={{ aspectRatio: "3/1" }}>
         {/* Background image */}
-        <img 
+        <Image 
           src={banner.image_url} 
           alt={banner.title || "Banner"} 
           className="absolute inset-0 w-full h-full object-cover"
+          fill
+          priority
+          sizes="100vw"
         />
         
         {/* Gradient overlay for text readability */}

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 
 // Brand logos from public/images (excluding b2b-sales)
@@ -42,13 +43,14 @@ export default function PartnersBrandBlock() {
                 key={`p1-${index}`} 
                 className="mx-4 sm:mx-8 flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-white shadow-sm flex items-center justify-center p-2"
               >
-                 <img
+                 <Image
                   src={brand.src}
                   alt={brand.alt}
                   width={128}
                   height={128}
                   className="max-w-full max-h-full object-contain block opacity-100"
-                  loading="eager"
+                  quality={80}
+                  sizes="(max-width: 640px) 96px, 128px"
                 />
               </div>
             ))}
@@ -61,13 +63,14 @@ export default function PartnersBrandBlock() {
                 key={`p2-${index}`} 
                 className="mx-4 sm:mx-8 flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-white shadow-sm flex items-center justify-center p-2"
               >
-                <img
+                <Image
                   src={brand.src}
                   alt={brand.alt}
                   width={128}
                   height={128}
                   className="max-w-full max-h-full object-contain block opacity-100"
-                  loading="eager"
+                  quality={80}
+                  sizes="(max-width: 640px) 96px, 128px"
                 />
               </div>
             ))}

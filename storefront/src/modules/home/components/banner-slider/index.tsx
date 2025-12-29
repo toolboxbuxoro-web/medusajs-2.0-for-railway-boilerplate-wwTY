@@ -10,6 +10,8 @@ import type { Banner } from "@lib/data/banners"
 
 import { getLocalizedField } from "@lib/util/localization"
 
+import Image from "next/image"
+
 const AUTOPLAY_INTERVAL = 7000
 
 type Slide = {
@@ -146,7 +148,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
   return (
     <div 
       ref={containerRef}
-      className="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl sm:shadow-2xl shadow-black/10 mb-4 sm:mb-6 lg:mb-10 cursor-grab active:cursor-grabbing select-none"
+      className="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl sm:shadow-2xl shadow-black/10 mb-2 sm:mb-4 lg:mb-6 cursor-grab active:cursor-grabbing select-none"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -166,11 +168,14 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
           >
             {/* Image container - always full coverage */}
             {slide.image_url && (
-              <img
+              <Image
                 src={slide.image_url}
                 alt={slide.title || "Banner"}
                 className="absolute inset-0 w-full h-full object-cover"
                 draggable={false}
+                fill
+                sizes="100vw"
+                priority={index === 0 || index === current}
               />
             )}
             
