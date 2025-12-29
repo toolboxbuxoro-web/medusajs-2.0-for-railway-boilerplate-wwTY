@@ -9,7 +9,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   icons: {
-    icon: '/favicon.ico?v=2',
+    icon: '/toolbox-icon.ico?v=3',
   },
 }
 
