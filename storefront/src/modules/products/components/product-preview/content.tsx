@@ -128,7 +128,7 @@ export default function ProductPreviewContent({
             {/* Title - Fixed height for 3 lines alignment, line-clamp-3 */}
             <LocalizedClientLink href={`/products/${product.handle}`} className="block mb-2 group-hover:text-red-600 transition-colors">
               <h3 
-                className="text-gray-800 text-xs sm:text-sm font-medium leading-[1.3] line-clamp-3 h-[3.9em] overflow-hidden" 
+                className="text-gray-800 text-xs sm:text-sm font-medium leading-[1.4] line-clamp-3 min-h-[4.2em]" 
                 style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
                 data-testid="product-title"
                 title={getLocalizedField(product, "title", localeStr) || product.title}
