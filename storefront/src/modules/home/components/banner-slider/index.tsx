@@ -176,9 +176,12 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
             
             {/* Overlay and content - only if has text content */}
             {slide.hasContent && (
-              <div className="absolute inset-0 flex items-center">
+              <>
+                {/* Gradient overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent z-0" />
+                
                 <div className="content-container h-full flex items-center py-4 sm:py-6 lg:py-8">
-                  <div className="max-w-full sm:max-w-xl lg:max-w-2xl text-white space-y-1 sm:space-y-2 lg:space-y-3 relative z-10">
+                  <div className="max-w-full sm:max-w-xl lg:max-w-2xl text-white space-y-1 sm:space-y-2 lg:space-y-3 relative z-10 px-10 sm:px-16 lg:px-20">
                     {/* Subtitle badge */}
                     {slide.subtitle && (
                       <div className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-[9px] sm:text-[10px] lg:text-xs font-semibold tracking-wide uppercase">
@@ -200,11 +203,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                       </p>
                     )}
 
-                    {/* BTS Micro-copy */}
-                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-red-500 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-sm w-fit shadow-sm">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
-                      <span>{t("hero_bts_msg")}</span>
-                    </div>
+
                     
                     {/* CTA Button */}
                     {slide.cta && (
@@ -221,7 +220,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                     )}
                   </div>
                 </div>
-              </div>
+              </>
             )}
             
             {/* Clickable link for banners without text */}
