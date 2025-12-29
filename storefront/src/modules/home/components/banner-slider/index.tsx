@@ -10,7 +10,7 @@ import type { Banner } from "@lib/data/banners"
 
 import { getLocalizedField } from "@lib/util/localization"
 
-const AUTOPLAY_INTERVAL = 6000
+const AUTOPLAY_INTERVAL = 7000
 
 type Slide = {
   id: string

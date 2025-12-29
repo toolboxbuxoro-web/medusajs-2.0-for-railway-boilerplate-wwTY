@@ -32,15 +32,26 @@ export function getLocalizedField<T extends EntityWithMetadata>(
 
   // 1. Try metadata[`${field}_${locale}`]
   const localizedKey = `${field}_${locale}`
-  const localizedValue = entity.metadata?.[localizedKey]
+  const localizedMetadataValue = entity.metadata?.[localizedKey]
   
   if (
-    localizedValue && 
-    typeof localizedValue === "string" && 
-    localizedValue.trim() !== "" && 
-    localizedValue !== "-"
+    localizedMetadataValue && 
+    typeof localizedMetadataValue === "string" && 
+    localizedMetadataValue.trim() !== "" && 
+    localizedMetadataValue !== "-"
   ) {
-    return localizedValue
+    return localizedMetadataValue
+  }
+
+  // 1.5. Try top-level entity[`${field}_${locale}`] (for objects like Banners)
+  const localizedTopLevelValue = entity[localizedKey]
+  if (
+    localizedTopLevelValue && 
+    typeof localizedTopLevelValue === "string" && 
+    localizedTopLevelValue.trim() !== "" && 
+    localizedTopLevelValue !== "-"
+  ) {
+    return localizedTopLevelValue
   }
 
   // 2. Fallback to the default field on the entity itself
