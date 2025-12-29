@@ -8,10 +8,12 @@ export default function ProductRail({
   collection,
   region,
   locale,
+  isFirst = false,
 }: {
   collection: HttpTypes.StoreCollection
   region: HttpTypes.StoreRegion
   locale: string
+  isFirst?: boolean
 }) {
   const { products } = collection as HttpTypes.StoreCollection & { products: HttpTypes.StoreProduct[] }
 
@@ -22,41 +24,106 @@ export default function ProductRail({
   const totalCount = products.length
   const collectionTitle = getLocalizedField(collection, "title", locale) || collection.title
 
-  return (
-    <div className="mb-10 sm:mb-14">
+  const content = (
+    <div className={`relative ${isFirst ? 'isolate py-10 px-4 sm:px-8 rounded-[2.5rem] overflow-hidden bg-[#004a99]' : 'mb-6 sm:mb-10'}`}>
+      {isFirst && (
+        <>
+          {/* Deep Blue Winter Background Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0059b3] via-[#004a99] to-[#003366] -z-10" />
+          
+          {/* Diagonal Light Streak */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-400/10 to-transparent skew-y-12 scale-150 pointer-events-none -z-10" />
+
+          {/* Large Background Snowflakes */}
+          <div className="absolute -top-10 -right-10 text-white/10 pointer-events-none rotate-12">
+            <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13,2V6.08L16.5,4.06L17.5,5.8L14,7.82V11H17.18L19.2,7.5L20.94,8.5L18.92,12L20.94,15.5L19.2,16.5L17.18,13H14V16.18L17.5,18.2L16.5,19.94L13,17.92V22h-2V17.92l-3.5,2.02l-1-1.74l3.5-2.02V13H6.82l-2.02,3.5l-1.74-1l2.02-3.5l-2.02-3.5l1.74-1l2.02,3.5H10V7.82L6.5,5.8L7.5,4.06L11,6.08V2H13z" />
+            </svg>
+          </div>
+          <div className="absolute -bottom-20 -left-10 text-white/5 pointer-events-none -rotate-12">
+            <svg className="w-80 h-80" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13,2V6.08L16.5,4.06L17.5,5.8L14,7.82V11H17.18L19.2,7.5L20.94,8.5L18.92,12L20.94,15.5L19.2,16.5L17.18,13H14V16.18L17.5,18.2L16.5,19.94L13,17.92V22h-2V17.92l-3.5,2.02l-1-1.74l3.5-2.02V13H6.82l-2.02,3.5l-1.74-1l2.02-3.5l-2.02-3.5l1.74-1l2.02,3.5H10V7.82L6.5,5.8L7.5,4.06L11,6.08V2H13z" />
+            </svg>
+          </div>
+
+          {/* Smaller Floating Snowflakes */}
+          <div className="absolute top-10 left-[20%] text-white/40 animate-pulse pointer-events-none">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13,2V6.08L16.5,4.06L17.5,5.8L14,7.82V11H17.18L19.2,7.5L20.94,8.5L18.92,12L20.94,15.5L19.2,16.5L17.18,13H14V16.18L17.5,18.2L16.5,19.94L13,17.92V22h-2V17.92l-3.5,2.02l-1-1.74l3.5-2.02V13H6.82l-2.02,3.5l-1.74-1l2.02-3.5l-2.02-3.5l1.74-1l2.02,3.5H10V7.82L6.5,5.8L7.5,4.06L11,6.08V2H13z" />
+            </svg>
+          </div>
+          <div className="absolute bottom-20 right-[15%] text-white/30 animate-bounce transition-all duration-1000 pointer-events-none">
+            <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13,2V6.08L16.5,4.06L17.5,5.8L14,7.82V11H17.18L19.2,7.5L20.94,8.5L18.92,12L20.94,15.5L19.2,16.5L17.18,13H14V16.18L17.5,18.2L16.5,19.94L13,17.92V22h-2V17.92l-3.5,2.02l-1-1.74l3.5-2.02V13H6.82l-2.02,3.5l-1.74-1l2.02-3.5l-2.02-3.5l1.74-1l2.02,3.5H10V7.82L6.5,5.8L7.5,4.06L11,6.08V2H13z" />
+            </svg>
+          </div>
+
+          {/* Snow Particles */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+             {[...Array(20)].map((_, i) => (
+               <div 
+                 key={i}
+                 className="absolute rounded-full bg-white animate-pulse"
+                 style={{
+                   width: Math.random() * 4 + 1 + 'px',
+                   height: Math.random() * 4 + 1 + 'px',
+                   top: Math.random() * 100 + '%',
+                   left: Math.random() * 100 + '%',
+                   opacity: Math.random() * 0.5 + 0.2,
+                   animationDelay: Math.random() * 5 + 's',
+                   animationDuration: Math.random() * 3 + 2 + 's'
+                 }}
+               />
+             ))}
+          </div>
+        </>
+      )}
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 ${isFirst ? 'text-white drop-shadow-md' : 'text-gray-900'}`}>
           {collectionTitle}
+          {isFirst && <span className="animate-bounce">❄️</span>}
         </h2>
         
         {/* Right side: View all link + count + arrows */}
         <div className="flex items-center gap-3">
           <LocalizedClientLink 
             href={`/collections/${collection.handle}`}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+            className={`hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+              isFirst 
+              ? 'text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20' 
+              : 'text-gray-600 bg-gray-100 hover:bg-gray-200'
+            }`}
           >
-            <span>Посмотреть все</span>
-            <span className="text-gray-400">({totalCount})</span>
+            <span>{locale === 'ru' ? 'Смотреть все' : 'Barchasini ko\'rish'}</span>
+            <span className={isFirst ? 'text-white/60' : 'text-gray-400'}>({totalCount})</span>
           </LocalizedClientLink>
           
-          {/* Navigation arrows for desktop - controlled by ProductSlider */}
-          <div className="hidden sm:flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
             <button 
               data-slider-prev={collection.id}
-              className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-sm ${
+                isFirst 
+                ? 'bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm' 
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
               aria-label="Предыдущий"
             >
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button 
               data-slider-next={collection.id}
-              className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-sm ${
+                isFirst 
+                ? 'bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm' 
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
               aria-label="Следующий"
             >
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -66,6 +133,29 @@ export default function ProductRail({
       
       {/* Products Slider */}
       <ProductSlider products={products} totalCount={totalCount} collectionId={collection.id} />
+
+      {/* Mobile-only View All Button Below Slider */}
+      <div className="flex justify-center mt-6 sm:hidden">
+        <LocalizedClientLink 
+          href={`/collections/${collection.handle}`}
+          className={`inline-flex items-center justify-center px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm ${
+            isFirst
+            ? 'bg-white text-blue-900 hover:bg-blue-50'
+            : 'border border-red-600 text-red-600 hover:bg-red-50'
+          }`}
+        >
+          <span>{locale === 'ru' ? 'Смотреть все' : 'Barchasini ko\'rish'}</span>
+          <svg className="ml-1.5 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </LocalizedClientLink>
+      </div>
     </div>
   )
+
+  return isFirst ? (
+    <div className="mb-6 sm:mb-10">
+      {content}
+    </div>
+  ) : content
 }

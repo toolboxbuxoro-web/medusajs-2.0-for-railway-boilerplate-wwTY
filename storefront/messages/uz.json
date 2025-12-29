@@ -292,7 +292,7 @@
     "related_products": "O'xshash mahsulotlar",
     "black_friday": "QORA JUMA",
     "easy_return": "Oson qaytarish",
-    "code": "Kod",
+    "easy_return": "Oson qaytarish",
     "warranty": "Kafolat",
     "year": "yil",
     "favorites": "Sevimlilar",
@@ -307,7 +307,19 @@
     "trust_microcopy": "Rasmiy tovar • 14 kun qaytarish",
     "quick_order_microcopy": "15 daqiqa ichida qo'ng'iroq qilamiz",
     "select_variant": "Variantni tanlang",
-    "quick_order": "Tez buyurtma"
+    "quick_order": "Tez buyurtma",
+    "features": "Xususiyatlar",
+    "brand": "Brend",
+    "rating": "Reyting",
+    "share": "Ulashish",
+    "official": "Rasmiy",
+    "quick_order": "Tez buyurtma",
+    "features": "Xususiyatlar",
+    "brand": "Brend",
+    "rating": "Reyting",
+    "share": "Ulashish",
+    "code": "Artikul",
+    "official": "Rasmiy"
   },
   "search": {
     "search": "Qidiruv",
@@ -469,9 +481,18 @@
     "timeline": {
       "title": "Биз қандай ривожландик",
       "steps": {
-        "start": { "year": "2019", "text": "38 м² майдонда старт, электр асбоблар" },
-        "growth": { "year": "2022", "text": "Ассортимент ўсиши ва филиаллар очилиши" },
-        "today": { "year": "Бугун", "text": "Бухорода 3 та дўкон, минглаб мижозлар" }
+        "start": {
+          "year": "2019",
+          "text": "38 м² майдонда старт, электр асбоблар"
+        },
+        "growth": {
+          "year": "2022",
+          "text": "Ассортимент ўсиши ва филиаллар очилиши"
+        },
+        "today": {
+          "year": "Бугун",
+          "text": "Бухорода 3 та дўкон, минглаб мижозлар"
+        }
       }
     },
     "today": {
@@ -480,9 +501,18 @@
       "p2": "Биз учун ҳар бир мижоз ўз вазифасига мос ечим топиши муҳим — кичик таъмирдан тортиб йирик ишлаб чиқаришгача.",
       "p3": "Биз харид қилиш тез ва сервис исталган вақтда мавжуд бўлиши устида ишламоқдамиз.",
       "cards": {
-        "catalog": { "title": "Ассортимент", "text": "Минглаб турдаги асбоблар" },
-        "service": { "title": "Сервис", "text": "Расмий кафолат" },
-        "pickup": { "title": "Олиб кетиш", "text": "BTS пунктлари орқали" }
+        "catalog": {
+          "title": "Ассортимент",
+          "text": "Минглаб турдаги асбоблар"
+        },
+        "service": {
+          "title": "Сервис",
+          "text": "Расмий кафолат"
+        },
+        "pickup": {
+          "title": "Олиб кетиш",
+          "text": "BTS пунктлари орқали"
+        }
       }
     },
     "presence": {
@@ -617,6 +647,12 @@
     "products_loading": "Mahsulotlar yuklanmoqda...",
     "hero_bts_msg": "Do'konlarimizdan olib keting",
     "seo_title": "Toolbox — Professional asboblar va jihozlar",
-    "seo_description": "Professionallar va biznes uchun onlayn-gipermarket. Qurilish, ta'mirlash va ishlab chiqarish uchun asl mahsulotlar. Toolbox do'konlaridan olib ketish."
+    "seo_description": "Professionallar va biznes uchun onlayn-gipermarket. Qurilish, ta'mirlash va ishlab chiqarish uchun asl mahsulotlar. Toolbox do'konlaridan olib ketish.",
+    "view_all_products": "Barcha mahsulotlarni ko'rish",
+    "our_partners": "Bizning hamkorlar"
+  },
+  "b2b": {
+    "seo_title": "Yuridik shaxslar bilan ish | Toolbox",
+    "seo_description": "Toolbox bilan hamkorlik uchun ariza qoldiring. To'liq hujjatlar to'plami, doimiy mijozlar uchun to'lovni kechiktirish."
   }
 }

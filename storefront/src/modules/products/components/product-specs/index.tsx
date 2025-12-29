@@ -56,7 +56,7 @@ const ProductSpecs = ({ product, maxItems = 6 }: ProductSpecsProps) => {
   return (
     <div className="space-y-3">
       {/* Specs List */}
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
         {displayedSpecs.map((spec, idx) => (
           <div key={idx} className="flex items-baseline gap-2 text-sm">
             <span className="text-gray-500 flex-shrink-0">{spec.label}:</span>
