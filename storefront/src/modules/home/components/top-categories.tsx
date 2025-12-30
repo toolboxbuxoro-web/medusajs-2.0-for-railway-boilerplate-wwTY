@@ -10,7 +10,7 @@ export default function TopCategories({
 }) {
   // Map some common handles to specific icons if possible, otherwise use a default
   const getIconForCollection = (handle: string) => {
-    if (handle.includes("shurupoverti") || handle.includes("drill")) {
+    if (handle.includes("drill")) {
       return (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21 7-3-3"/><path d="m11 13 8-8"/><path d="m10 16 7-7"/><path d="M8 20c-4.4 0-6-1.6-6-6s1.6-6 6-6 6 1.6 6 6-1.6 6-6 6Z"/><path d="M12 14c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2Z"/></svg>
       )

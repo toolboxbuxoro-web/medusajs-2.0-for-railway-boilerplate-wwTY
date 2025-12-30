@@ -52,9 +52,6 @@ export default async function Home({
 
   return (
     <>
-      <div className="bg-red-50 text-red-700 text-[10px] p-1 text-center font-mono">
-        DEBUG: {safeCollections.map(c => c.handle).join(' | ')} | REGION: {region?.id} | TIME: {new Date().toLocaleTimeString()}
-      </div>
       <div className="content-container px-4 md:px-6 pt-2 sm:pt-4">
         <BannerSlider slides={banners} />
       </div>

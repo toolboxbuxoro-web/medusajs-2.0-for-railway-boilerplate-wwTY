@@ -18,12 +18,10 @@ export const getCollectionsList = cache(async function (
   if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
     MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
   }
-  console.log(`[Collections Debug] getCollectionsList calling: ${MEDUSA_BACKEND_URL}/store/collections`)
   return sdk.store.collection
     // @ts-ignore
     .list({ limit, offset }, { next: { tags: ["collections"], revalidate: 0 } })
     .then(({ collections }) => {
-      console.log(`[Collections Debug] getCollectionsList FOUND ${collections.length} items: ${collections.map(c => c.handle).join(', ')}`)
       return { collections, count: collections.length }
     })
 })
@@ -39,13 +37,10 @@ export const getCollectionByHandle = cache(async function (
 
 export const getCollectionsWithProducts = cache(
   async (countryCode: string): Promise<HttpTypes.StoreCollection[] | null> => {
-    console.log(`[Collections Debug] getCollectionsWithProducts called for country: ${countryCode}`)
     const { collections } = await getCollectionsList(0, 12)
 
-    console.log('[Collections Debug] Processing collections:', collections?.map(c => ({ title: c.title, handle: c.handle })))
 
     if (!collections || collections.length === 0) {
-      console.log('[Collections Debug] No collections found at all!')
       return []
     }
 
