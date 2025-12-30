@@ -1,4 +1,4 @@
-import { sdk } from "@/lib/config"
+import { sdk } from "@lib/config"
 import { NextResponse } from "next/server"
 
 export const dynamic = 'force-dynamic'
@@ -8,9 +8,9 @@ export async function GET() {
     const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
     const apiKeyPrefix = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY?.slice(0, 8)
     
-    // @ts-ignore
     const { collections } = await sdk.store.collection.list(
       { limit: 100 },
+      // @ts-ignore
       { next: { revalidate: 0 } }
     )
     
