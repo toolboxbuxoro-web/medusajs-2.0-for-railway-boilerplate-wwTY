@@ -25,17 +25,20 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-
-
+        port: "9000",
       },
-      { // Note: needed to serve images from /public folder
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      ...(process.env.NEXT_PUBLIC_BASE_URL ? [{ // Note: needed to serve images from /public folder
         protocol: process.env.NEXT_PUBLIC_BASE_URL?.startsWith('https') ? 'https' : 'http',
-        hostname: process.env.NEXT_PUBLIC_BASE_URL?.replace(/^https?:\/\//, ''),
-      },
-      { // Note: only needed when using local-file for product media
+        hostname: process.env.NEXT_PUBLIC_BASE_URL?.replace(/^https?:\/\//, '').split('/')[0],
+      }] : []),
+      ...(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL && process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL.startsWith('https://') ? [{ // Note: only needed when using local-file for product media
         protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.replace('https://', ''),
-      },
+        hostname: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL.replace('https://', '').split('/')[0],
+      }] : []),
       { // Note: can be removed after deleting demo products
         protocol: "https",
         hostname: "medusa-public-images.s3.eu-west-1.amazonaws.com",

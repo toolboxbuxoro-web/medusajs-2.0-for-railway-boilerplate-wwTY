@@ -109,19 +109,6 @@ const PickupAndReturnsTab = () => {
           </div>
         </div>
         
-        {/* Return Policy */}
-        <div className="flex items-start gap-x-3">
-          <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
-            </svg>
-          </div>
-          <div>
-            <span className="font-semibold text-gray-900">{t("return_policy")}</span>
-            <p className="text-gray-600 mt-1">{t("return_policy_desc")}</p>
-          </div>
-        </div>
-        
         {/* Warranty */}
         <div className="flex items-start gap-x-3">
           <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
@@ -131,7 +118,6 @@ const PickupAndReturnsTab = () => {
           </div>
           <div>
             <span className="font-semibold text-gray-900">{t("warranty_info")}</span>
-            <p className="text-gray-600 mt-1">{t("warranty_info_desc")}</p>
           </div>
         </div>
       </div>
