@@ -74,6 +74,7 @@ export const getProductsList = cache(async function ({
         limit,
         offset,
         region_id: region.id,
+        fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata",
         ...queryParams,
       },
       // @ts-ignore
