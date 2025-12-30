@@ -25,6 +25,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     "is_internal",
     "rank",
     "parent_category_id",
+    "parent_category",
     "metadata",
     "category_children.*",
     "category_children.metadata",
