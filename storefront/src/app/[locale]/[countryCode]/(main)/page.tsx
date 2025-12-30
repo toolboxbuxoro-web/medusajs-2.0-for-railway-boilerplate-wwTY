@@ -30,6 +30,17 @@ export default async function Home({
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
 
+  console.log(`[Homepage Debug] Render start. countryCode: ${countryCode}, locale: ${locale}`)
+  console.log(`[Homepage Debug] Collections count: ${collections?.length || 0}`)
+  if (collections && collections.length > 0) {
+    console.log(`[Homepage Debug] Collections titles: ${collections.map(c => c.title).join(", ")}`)
+    collections.forEach(c => {
+      console.log(`[Homepage Debug] Collection: ${c.title}, Products: ${c.products?.length || 0}`)
+    })
+  } else {
+    console.log(`[Homepage Debug] NO COLLECTIONS RETURNED!`)
+  }
+
   const tHome = await getTranslations({ locale, namespace: 'home' })
   const banners = await listBanners()
 
