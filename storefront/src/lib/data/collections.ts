@@ -14,12 +14,16 @@ export const getCollectionsList = cache(async function (
   offset: number = 0,
   limit: number = 100
 ): Promise<{ collections: HttpTypes.StoreCollection[]; count: number }> {
-  console.log(`[Collections Debug] getCollectionsList called (offset: ${offset}, limit: ${limit})`)
+  let MEDUSA_BACKEND_URL = "http://localhost:9000"
+  if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
+    MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+  }
+  console.log(`[Collections Debug] getCollectionsList calling: ${MEDUSA_BACKEND_URL}/store/collections`)
   return sdk.store.collection
     // @ts-ignore
     .list({ limit, offset }, { next: { tags: ["collections"], revalidate: 0 } })
     .then(({ collections }) => {
-      console.log(`[Collections Debug] getCollectionsList returned ${collections.length} items`)
+      console.log(`[Collections Debug] getCollectionsList FOUND ${collections.length} items: ${collections.map(c => c.handle).join(', ')}`)
       return { collections, count: collections.length }
     })
 })

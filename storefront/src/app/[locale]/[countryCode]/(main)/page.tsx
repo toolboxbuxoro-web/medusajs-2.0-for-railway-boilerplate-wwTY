@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+export const dynamic = 'force-dynamic'
 
 import FeaturedProducts from "@modules/home/components/featured-products"
 import BannerSlider from "@modules/home/components/banner-slider"
@@ -29,7 +30,10 @@ export default async function Home({
 }: Props) {
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
+  
+  const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
+  console.log(`[CONFIG] !!!!!!!! CURRENT BACKEND URL IS: ${MEDUSA_BACKEND_URL} !!!!!!!!`)
   console.log(`[Homepage Debug] Render start. countryCode: ${countryCode}, locale: ${locale}`)
   console.log(`[Homepage Debug] Collections count: ${collections?.length || 0}`)
   if (collections && collections.length > 0) {
