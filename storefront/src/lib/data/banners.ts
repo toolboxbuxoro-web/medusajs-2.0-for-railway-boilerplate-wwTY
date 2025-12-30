@@ -24,18 +24,13 @@ export type Banner = {
 export const listBanners = cache(async function () {
   const url = `${MEDUSA_BACKEND_URL}/store/banners`
   
-  console.log("[Banners] Fetching from:", url)
-  console.log("[Banners] Using API key:", PUBLISHABLE_API_KEY ? `${PUBLISHABLE_API_KEY.slice(0, 10)}...` : "(empty)")
-  
   try {
     const res = await fetch(url, {
       headers: {
         "x-publishable-api-key": PUBLISHABLE_API_KEY,
       },
-      cache: "no-store", // Always fetch fresh data for banners
+      cache: "no-store",
     })
-
-    console.log("[Banners] Response status:", res.status, res.statusText)
 
     if (!res.ok) {
       console.error("[Banners] Failed to fetch:", res.status, res.statusText)
@@ -44,11 +39,6 @@ export const listBanners = cache(async function () {
 
     const json = (await res.json()) as { banners?: Banner[] }
     const banners = Array.isArray(json.banners) ? json.banners : []
-    
-    console.log("[Banners] Received banners count:", banners.length)
-    if (banners.length > 0) {
-      console.log("[Banners] First banner:", JSON.stringify(banners[0]).slice(0, 200))
-    }
     
     return banners
   } catch (error) {

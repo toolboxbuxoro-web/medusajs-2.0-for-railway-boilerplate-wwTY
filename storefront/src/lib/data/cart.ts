@@ -294,7 +294,6 @@ export async function setShippingMethod({
         })
 
         if (resp.ok) {
-          console.log(`[setShippingMethod] Successfully set BTS shipping method for cart ${cartId}`)
           revalidateTag("cart")
           return { success: true }
         } else {
@@ -516,8 +515,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
             console.error(`[setAddresses] BTS fallback failed:`, resp.status, errorData)
             throw new Error(errorData.message || "Failed to set BTS shipping method")
           }
-          
-          console.log(`[setAddresses] Successfully set BTS shipping method via fallback for cart ${cartId}`)
           
           // Invalidate cart cache so Payment component sees the shipping method
           revalidateTag("cart")
