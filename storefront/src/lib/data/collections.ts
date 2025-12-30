@@ -54,11 +54,6 @@ export const getCollectionsWithProducts = cache(
     })
 
     const collectionsWithProducts = await Promise.all(collectionPromises)
-    
-    console.log(`[TRACE] getCollectionsWithProducts: Final output has ${collectionsWithProducts.length} collections.`)
-    collectionsWithProducts.forEach((col: any) => {
-      console.log(`[TRACE]   - Collection "${col.title}": ${col.products?.length || 0} products`)
-    })
 
     return collectionsWithProducts
   }

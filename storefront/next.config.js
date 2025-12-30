@@ -52,6 +52,10 @@ const nextConfig = {
         protocol: "https",
         hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT,
       }] : []),
+      { // Railway S3 bucket for production media
+        protocol: "https",
+        hostname: "bucket-production-0e2a.up.railway.app",
+      },
     ],
   },
   serverRuntimeConfig: {
