@@ -5,6 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 
 export const retrieveCollection = cache(async function (id: string) {
   return sdk.store.collection
+    // @ts-ignore
     .retrieve(id, {}, { next: { tags: ["collections"], revalidate: 0 } })
     .then(({ collection }) => collection)
 })
@@ -15,6 +16,7 @@ export const getCollectionsList = cache(async function (
 ): Promise<{ collections: HttpTypes.StoreCollection[]; count: number }> {
   console.log(`[Collections Debug] getCollectionsList called (offset: ${offset}, limit: ${limit})`)
   return sdk.store.collection
+    // @ts-ignore
     .list({ limit, offset }, { next: { tags: ["collections"], revalidate: 0 } })
     .then(({ collections }) => {
       console.log(`[Collections Debug] getCollectionsList returned ${collections.length} items`)
@@ -26,6 +28,7 @@ export const getCollectionByHandle = cache(async function (
   handle: string
 ): Promise<HttpTypes.StoreCollection> {
   return sdk.store.collection
+    // @ts-ignore
     .list({ handle }, { next: { tags: ["collections"], revalidate: 0 } })
     .then(({ collections }) => collections[0])
 })
@@ -44,6 +47,7 @@ export const getCollectionsWithProducts = cache(
 
     const collectionPromises = collections.map(async (collection) => {
       const { response } = await getProductsList({
+        // @ts-ignore
         queryParams: { collection_id: [collection.id], limit: 12 },
         countryCode,
       })
