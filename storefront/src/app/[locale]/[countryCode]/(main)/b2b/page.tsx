@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { getTranslations } from 'next-intl/server'
 import { generateAlternates } from "@lib/util/seo"
+import { B2BForm } from "@modules/b2b/components/b2b-form"
 
 type Props = {
   params: { countryCode: string; locale: string }
@@ -59,20 +60,6 @@ export default async function B2BPage({ params: { locale } }: Props) {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center text-red-600 mb-4">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="font-bold text-gray-900 mb-2">
-              {isRussian ? 'Отсрочка платежа' : 'To\'lovni kechiktirish'}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {isRussian ? 'Для постоянных клиентов' : 'Doimiy mijozlar uchun'}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center text-red-600 mb-4">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
@@ -91,79 +78,7 @@ export default async function B2BPage({ params: { locale } }: Props) {
             {isRussian ? 'Оставить заявку' : 'Ariza qoldirish'}
           </h2>
           
-          <form className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {isRussian ? 'Название компании' : 'Kompaniya nomi'} <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                placeholder={isRussian ? 'ООО "Компания"' : '"Kompaniya" MChJ'}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {isRussian ? 'Контактное лицо' : 'Aloqa shaxsi'} <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                placeholder={isRussian ? 'Ваше имя' : 'Ismingiz'}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {isRussian ? 'Телефон' : 'Telefon'} <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="tel"
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                placeholder="+998 __ ___ __ __"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {isRussian ? 'Email' : 'Email'} <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                placeholder="company@example.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {isRussian ? 'Комментарий' : 'Izoh'}
-              </label>
-              <textarea
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all resize-none"
-                placeholder={isRussian ? 'Какие товары вас интересуют?' : 'Qaysi mahsulotlar sizni qiziqtiradi?'}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-4 rounded-xl bg-red-600 text-white font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-red-600/25 active:scale-[0.98]"
-            >
-              {isRussian ? 'Отправить заявку' : 'Arizani yuborish'}
-            </button>
-
-            <p className="text-xs text-gray-500 text-center">
-              {isRussian 
-                ? 'Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности' 
-                : 'Tugmani bosish orqali siz maxfiylik siyosatiga rozilik bildirasiz'}
-            </p>
-          </form>
+          <B2BForm isRussian={isRussian} />
         </div>
       </div>
     </div>
