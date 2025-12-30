@@ -17,6 +17,8 @@ export default function ProductRail({
 }) {
   const { products } = collection as HttpTypes.StoreCollection & { products: HttpTypes.StoreProduct[] }
 
+  console.log(`[TRACE] ProductRail for "${collection.title}": Received ${products?.length ?? 'NULL'} products. HasProducts: ${!!products && products.length > 0}`)
+
   if (!products || products.length === 0) {
     return null
   }
