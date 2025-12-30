@@ -45,11 +45,14 @@ export const getCollectionsWithProducts = cache(
     }
 
     const collectionPromises = collections.map(async (collection) => {
+      console.log(`[Collections Debug] Fetching products for collection: ${collection.title} (${collection.id})`)
       const { response } = await getProductsList({
         // @ts-ignore
         queryParams: { collection_id: [collection.id], limit: 12 },
         countryCode,
       })
+
+      console.log(`[Collections Debug] Collection: ${collection.title}, Products found: ${response.products.length}`)
 
       return {
         ...collection,
