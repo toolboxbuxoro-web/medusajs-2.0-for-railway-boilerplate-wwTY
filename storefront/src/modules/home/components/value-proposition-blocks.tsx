@@ -43,8 +43,8 @@ export default function ValuePropositionBlocks({ locale }: ValuePropositionBlock
                 </h3>
                 <p className="hidden sm:block text-gray-600 mb-6">
                   {isRussian 
-                    ? 'Полный пакет документов, НДС, отсрочка платежа для постоянных партнеров.' 
-                    : 'Hujjatlarning to\'liq to\'plami, QQS, doimiy hamkorlar uchun to\'lovni kechiktirish.'}
+                    ? 'Полный пакет документов, НДС для постоянных партнеров.' 
+                    : 'Hujjatlarning to\'liq to\'plami, QQS doimiy hamkorlar uchun.'}
                 </p>
                 <div className="inline-flex items-center text-[10px] sm:text-base text-red-600 font-semibold group-hover:gap-2 transition-all">
                   {isRussian ? 'Оставить заявку' : 'Ariza qoldirish'} 

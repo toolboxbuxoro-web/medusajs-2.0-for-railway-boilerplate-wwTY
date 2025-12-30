@@ -8,7 +8,6 @@ export default async function BusinessCta() {
   const benefits = [
     t('business_benefit_1') || "Wholesale discount system",
     t('business_benefit_2') || "VAT refund",
-    t('business_benefit_3') || "Deferred payment",
     t('business_benefit_4') || "Personal manager",
     t('business_benefit_5') || "Personal account for legal entities",
     t('business_benefit_6') || "Electronic document management",
