@@ -18,10 +18,10 @@ export const getCollectionsList = cache(async function (
   if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
     MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
   }
-  console.log(`[Collections Debug] getCollectionsList calling: ${MEDUSA_BACKEND_URL}/store/collections?_t=${Date.now()}`)
+  console.log(`[Collections Debug] getCollectionsList calling: ${MEDUSA_BACKEND_URL}/store/collections`)
   return sdk.store.collection
     // @ts-ignore
-    .list({ limit, offset, _t: Date.now() }, { next: { tags: ["collections"], revalidate: 0 } })
+    .list({ limit, offset }, { next: { tags: ["collections"], revalidate: 0 } })
     .then(({ collections }) => {
       console.log(`[Collections Debug] getCollectionsList FOUND ${collections.length} items: ${collections.map(c => c.handle).join(', ')}`)
       return { collections, count: collections.length }
