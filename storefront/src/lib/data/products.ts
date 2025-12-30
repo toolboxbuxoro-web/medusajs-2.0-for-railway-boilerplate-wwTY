@@ -65,7 +65,6 @@ export const getProductsList = cache(async function ({
     }
   }
 
-  console.log(`[Products Debug] Fetching products. Region: ${region.id}, Page: ${pageParam}, Offset: ${offset}, Limit: ${limit}, QueryParams:`, JSON.stringify(queryParams))
 
   return sdk.store.product
     .list(
@@ -77,10 +76,9 @@ export const getProductsList = cache(async function ({
         ...queryParams,
       },
       // @ts-ignore
-      { next: { tags: ["products"], revalidate: 0 } }
+      { next: { tags: ["products"], revalidate: 60 } }
     )
     .then(({ products, count }) => {
-      console.log(`[Products Debug] Found ${products.length} products (Total count: ${count})`)
       const nextPage = count > offset + limit ? pageParam + 1 : null
 
       return {

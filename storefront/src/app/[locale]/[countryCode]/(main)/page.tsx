@@ -33,17 +33,6 @@ export default async function Home({
   
   const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
-  console.log(`[CONFIG] !!!!!!!! CURRENT BACKEND URL IS: ${MEDUSA_BACKEND_URL} !!!!!!!!`)
-  console.log(`[Homepage Debug] Render start. countryCode: ${countryCode}, locale: ${locale}`)
-  console.log(`[Homepage Debug] Collections count: ${collections?.length || 0}`)
-  if (collections && collections.length > 0) {
-    console.log(`[Homepage Debug] Collections titles: ${collections.map(c => c.title).join(", ")}`)
-    collections.forEach(c => {
-      console.log(`[Homepage Debug] Collection: ${c.title}, Products: ${c.products?.length || 0}`)
-    })
-  } else {
-    console.log(`[Homepage Debug] NO COLLECTIONS RETURNED!`)
-  }
 
   const tHome = await getTranslations({ locale, namespace: 'home' })
   const banners = await listBanners()
@@ -52,9 +41,6 @@ export default async function Home({
 
   return (
     <>
-      <div className="bg-red-50 text-red-700 text-[10px] p-1 text-center font-mono">
-        DEBUG: {safeCollections.map(c => `${c.handle}(${c.products?.length || 0})`).join(' | ')} | REGION: {region?.id}
-      </div>
       <div className="content-container px-4 md:px-6 pt-2 sm:pt-4">
         <BannerSlider slides={banners} />
       </div>

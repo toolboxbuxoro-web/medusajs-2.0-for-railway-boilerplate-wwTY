@@ -18,9 +18,8 @@ export const getCollectionsList = cache(async function (
   if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
     MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
   }
-  return sdk.store.collection
     // @ts-ignore
-    .list({ limit, offset }, { next: { tags: ["collections"], revalidate: 0 } })
+    .list({ limit, offset }, { next: { tags: ["collections"], revalidate: 60 } })
     .then(({ collections }) => {
       return { collections, count: collections.length }
     })
@@ -45,14 +44,11 @@ export const getCollectionsWithProducts = cache(
     }
 
     const collectionPromises = collections.map(async (collection) => {
-      console.log(`[Collections Debug] Fetching products for collection: ${collection.title} (${collection.id})`)
       const { response } = await getProductsList({
         // @ts-ignore
         queryParams: { collection_id: [collection.id], limit: 12 },
         countryCode,
       })
-
-      console.log(`[Collections Debug] Collection: ${collection.title}, Products found: ${response.products.length}`)
 
       return {
         ...collection,
