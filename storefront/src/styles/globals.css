@@ -570,6 +570,11 @@
   padding-left: 100%; /* Start from right */
 }
 
+.animate-marquee-slow {
+  animation: marquee 40s linear infinite;
+}
+
 .pause {
   animation-play-state: paused;
 }
+
