@@ -33,9 +33,18 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   const [isHovered, setIsHovered] = useState(false)
 
   // Use up to 6 images for the hover preview to keep it snappy
+  // IMPORTANT: Prioritize images[0] over thumbnail, because in Medusa
+  // the thumbnail field is separate and doesn't auto-update when images change
   const displayImages = useMemo(() => {
     const urls = images?.map((img) => img.url).filter(Boolean) || []
-    const uniqueUrls = Array.from(new Set([thumbnail, ...urls])).filter(Boolean) as string[]
+    // If we have images, use them first; only fall back to thumbnail if no images exist
+    const primaryImage = urls.length > 0 ? urls[0] : thumbnail
+    const otherImages = urls.length > 0 ? urls.slice(1) : []
+    // Add thumbnail as fallback only if it's different from primary
+    const allImages = thumbnail && thumbnail !== primaryImage 
+      ? [primaryImage, ...otherImages, thumbnail]
+      : [primaryImage, ...otherImages]
+    const uniqueUrls = Array.from(new Set(allImages)).filter(Boolean) as string[]
     return uniqueUrls.slice(0, 6)
   }, [thumbnail, images])
 

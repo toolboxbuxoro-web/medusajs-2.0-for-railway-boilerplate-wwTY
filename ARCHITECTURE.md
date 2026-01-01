@@ -1,85 +1,88 @@
 # Toolbox Architecture
 
-> **Last Updated**: December 2024
+> **Version**: 2.0  
+> **Last Updated**: January 2026  
+> **Status**: Production
+
+---
 
 ## 1. System Overview
-- **Business Purpose**: A production-ready e-commerce platform for the "Toolbox" hardware brand, specialized for the Uzbekistan market.
-- **Region and Localization**: Optimized for Uzbekistan (UZ). Supports RU and UZ locales. Primary identifier is the phone number.
-- **High-Level Components**: 
-  - **Storefront**: Next.js 14 App Router with i18n support.
-  - **Backend**: Medusa 2.0 (Framework).
-  - **Infrastructure**: PostgreSQL, Redis (Workflows/Jobs/OTP), Meilisearch (Search), Minio (S3 storage).
 
-## 2. Core Domains
-- **Catalog**: Managed in Medusa, synced with MoySklad for inventory. Localized via metadata.
-- **Cart**: Persistent via server-side cookies; includes specialized recovery for completed sessions.
-- **Checkout**: Multi-step flow optimized for mobile. Includes custom delivery calculation and auto-registration.
-- **Orders**: Standard Medusa orders with custom subscribers for regional SMS notifications.
-- **Payments**: Integration with Payme and Click gateways (Uzbekistan).
-- **Delivery**: **BTS-Only** integration. Standard street addresses are disabled. Delivery is strictly to BTS Pickup Points.
-- **Authentication**: Custom OTP-based auth using phone numbers as primary keys.
-- **Integrations**: MoySklad (ERP), Eskiz (SMS), Payme/Click (Payments), BTS (Logistics).
+### 1.1 Business Purpose
+A production-ready e-commerce platform for the **Toolbox** hardware brand, specialized for the Uzbekistan market.
 
-## 3. Critical Business Flows
+### 1.2 Technology Stack
+| Layer | Technology |
+|-------|------------|
+| **Storefront** | Next.js 14 (App Router, React Server Components) |
+| **Backend** | Medusa 2.0 Framework |
+| **Database** | PostgreSQL |
+| **Cache** | Redis (Shared Cache + Workflows/Jobs/OTP) |
+| **Search** | Meilisearch |
+| **Storage** | Minio (S3-compatible) |
+| **SMS** | Eskiz API |
 
-### 3.1 Checkout & Payment
-1. **Cart Creation & Recovery**:
-   - `retrieveCart` checks for `completed_at` timestamp or "already completed" SDK error.
-   - If stale, the cart cookie is cleared, and a new cart is initialized to prevent hydration/state errors.
-2. **Delivery Calculation (BTS Express)**:
-   - **Constraint**: Only BTS Pickup Points are supported. Home delivery addresses are not collected.
-   - Client fetches BTS regions/points via `/store/bts/regions`.
-   - Cost is calculated client-side based on weight and zone (Official BTS Tariff Card 2025).
-   - Fallback: If the shipping option has no fixed price in Medusa, a custom POST to `/store/bts/shipping-method` attaches the calculated price to the cart.
-3. **Payment Initiation**:
-   - `initiatePaymentSession` called for Payme/Click providers.
-   - Results in a `next_step` containing a redirect URL or payment form data.
-4. **Async Confirmation Callbacks**:
-   - Gateway sends POST to `/click/callback` or `/payme/callback`.
-   - Backend verifies signature and amount, then captures the Medusa payment and finalizes the order asynchronously.
-5. **Order Finalization & Side-effects**:
-   - `order.placed` subscriber triggers:
-     - SMS confirmation via Eskiz SMS (`order-sms-handler.ts`).
-     - Email (if enabled).
-     - Implicit stock reservation in Medusa.
+### 1.3 Localization
+- **Locales**: Russian (RU), Uzbek (UZ)
+- **Primary Identifier**: Phone number (not email)
+- **UI Strings**: `storefront/messages/{ru,uz}.json` via `next-intl`
+- **Dynamic Content**: Stored in `metadata` fields with `title_ru`, `title_uz` pattern
 
-### 3.2 OTP Authentication
-1. **Phone-based Flow**:
-   - **Request**: `/store/otp/request` validates phone and sends 6-digit code via Eskiz API.
-   - **Verify**: `/store/otp/verify` checks code against Redis. If valid, an atomic verification flag is set.
-   - **Purpose-specific endpoints**:
-     - `/store/otp/reset-password` — password recovery flow.
-     - `/store/otp/change-password` — change phone number flow.
-     - `/store/otp/send` — generic OTP sending.
-2. **State Management**:
-   - OTP codes, verification flags, and rate limits are stored in Redis using atomic Lua scripts (`lib/otp-store.ts`).
-   - No OTP-related state is kept in application memory.
-3. **Customer Linking (Auto-registration)**:
-   - During checkout, `auto-register` endpoint:
-     - Atomically consumes the verification flag from Redis (one-time use).
-     - Checks for existing customer by email (phone-based `@phone.local`).
-     - Creates `authIdentity` (credentials) and `customer` (profile).
-     - Links authIdentity ↔ customer via `app_metadata.customer_id`.
-     - Sends generated password to user via SMS for future logins.
-4. **Failure Scenarios**:
-   - OTP expiration (configurable, default 15 min).
-   - Rate limiting via Redis atomic counters.
-   - SMS delivery failure blocks auto-registration (guaranteed delivery).
+---
 
-### 3.3 Stock Synchronization (MoySklad)
-1. **Frequency**: Runs as a scheduled Medusa Job every **15 minutes**.
-2. **Direction**: **MoySklad is the source of truth**.
-3. **Process**:
-   - Fetches all inventory counts from MoySklad API in batches of 1000.
-   - Maps MoySklad `code` field to Medusa `sku`.
-   - Updates `stocked_quantity` in Medusa Inventory Module.
-4. **Limitations**:
-   - Synchronous batch processing; large catalogs (10k+) may require splitting into multiple job runs or async tasks.
-   - Risk: SKU mismatch leads to zero stock in Medusa.
+## 2. Architecture Diagram
+
+```mermaid
+graph TD
+    Client["Client Browser"] --> Storefront["Next.js Storefront (App Router)"]
+    Storefront -->|sdk.store.*| Medusa["Medusa 2.x API"]
+    Medusa --> DB[("PostgreSQL")]
+    Medusa --> Cache[("Redis (Shared Cache)")]
+    Medusa --> ThirdParty["Payment Providers (Payme, Click)"]
+    Medusa --> SMS["Eskiz SMS"]
+    Medusa --> ERP["MoySklad ERP"]
+```
+
+---
+
+## 3. Core Domains
+
+### 3.1 Catalog
+- Managed in Medusa, synced with MoySklad for inventory
+- Localized via metadata (`title_ru`, `description_uz`, etc.)
+- Fetched via `getLocalizedField()` utility
+
+### 3.2 Cart
+- Persistent via server-side cookies
+- Includes specialized recovery for completed sessions
+- `retrieveCart` checks for `completed_at` to prevent stale states
+
+### 3.3 Checkout (BTS-Only Delivery)
+> [!IMPORTANT]
+> **Standard street addresses are DISABLED.** Delivery is strictly to BTS Pickup Points.
+
+1. **Address Entry**: Name + Phone only
+2. **OTP Verification**: User must verify phone via SMS
+3. **Auto-Register**: Creates customer account during checkout
+4. **Payment**: Via Payme or Click gateways
+5. **Delivery Cost**: Calculated client-side, paid separately at pickup
+
+### 3.4 Payments
+- **Providers**: Payme, Click (Uzbekistan)
+- **Flow**: Backend-driven order creation
+- **Rule**: Frontend NEVER calls `placeOrder` — backend handles via callbacks
+
+### 3.5 Authentication
+- **Model**: Phone-First with OTP
+- **Technical Email**: `{phone}@phone.local` (internal use only)
+- **OTP Storage**: Redis with atomic Lua scripts
+
+---
 
 ## 4. Backend Architecture
 
 ### 4.1 Custom Modules (`backend/src/modules/`)
+
 | Module | Purpose |
 |--------|---------|
 | `eskiz-sms` | Eskiz SMS notification provider |
@@ -89,79 +92,267 @@
 | `minio-file` | Minio S3 file storage provider |
 | `email-notifications` | Email notification templates |
 
-### 4.2 Custom API Endpoints (`backend/src/api/store/`)
+### 4.2 Custom API Endpoints (`backend/src/api/`)
+
+#### Store Endpoints (`/store/*`)
+
 | Endpoint | Purpose |
 |----------|---------|
-| `/store/otp/*` | OTP request, verify, reset-password, change-password |
+| `/store/otp/request` | Send OTP code via SMS |
+| `/store/otp/verify` | Verify OTP code |
+| `/store/otp/reset-password` | Password recovery flow |
+| `/store/otp/change-password` | Change password (with OTP) |
+| `/store/otp/change-phone` | Change phone number (with OTP) |
+| `/store/otp/send` | Generic OTP sending |
 | `/store/auto-register` | Phone-based customer auto-registration |
-| `/store/bts/*` | BTS Express regions and shipping methods |
+| `/store/bts/regions` | BTS Express regions list |
+| `/store/bts/shipping-method` | Attach shipping price to cart |
 | `/store/banners` | Promotional banners API |
 | `/store/quick-order` | Quick order (buy-in-one-click) |
+| `/store/product-categories` | Custom category fetching |
+| `/store/customer-by-phone` | Customer lookup by phone |
 | `/store/payme` | Payme transaction handling |
 
+#### Other Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/click/callback` | Click payment callback |
+| `/payme/callback` | Payme payment callback |
+| `/health` | Health check |
+
 ### 4.3 Scheduled Jobs (`backend/src/jobs/`)
+
 | Job | Schedule | Purpose |
 |-----|----------|---------|
-| `sync-moysklad-stock` | */15 * * * * | Sync inventory from MoySklad to Medusa |
+| `sync-moysklad-stock` | `*/15 * * * *` (every 15 min) | Sync inventory from MoySklad to Medusa |
 
 ### 4.4 Subscribers (`backend/src/subscribers/`)
+
 | Subscriber | Event | Purpose |
 |------------|-------|---------|
-| `order-placed.ts` | `order.placed` | Trigger SMS notifications |
 | `order-sms-handler.ts` | `order.*` | Format and send order SMS |
 | `auto-translate-product.ts` | `product.created/updated` | Translate to UZ/RU |
 | `auto-translate-category.ts` | `category.created/updated` | Translate to UZ/RU |
 | `auto-translate-collection.ts` | `collection.created/updated` | Translate to UZ/RU |
 | `invite-created.ts` | `invite.created` | Admin invite emails |
+| `storefront-cache-revalidation.ts` | Various | Invalidate Next.js cache |
+
+---
 
 ## 5. Storefront Architecture
 
-### 5.1 Key Libraries (`storefront/src/lib/`)
+### 5.1 Data Layer (`storefront/src/lib/data/`)
+
 | File | Purpose |
 |------|---------|
-| `data/cart.ts` | Cart mutations and retrieval with stale recovery |
-| `data/bts.ts` | BTS Express regions, points, and pricing (Tariff 2025) |
-| `data/customer.ts` | Customer auth, registration, password flows |
-| `data/banners.ts` | Promotional banners fetching |
-| `search-client.ts` | Meilisearch integration |
-| `util/prices.ts` | Price formatting for UZS |
+| `cart.ts` | Cart mutations and retrieval with stale recovery |
+| `customer.ts` | Customer auth, registration, password flows |
+| `bts.ts` | BTS Express regions, points, and pricing (Tariff 2025) |
+| `products.ts` | Product listing and details |
+| `categories.ts` | Category tree fetching |
+| `collections.ts` | Collection fetching |
+| `banners.ts` | Promotional banners |
+| `orders.ts` | Order history |
+| `regions.ts` | Region resolution |
 
-### 5.2 Internationalization
-- **Locales**: `ru`, `uz`
-- **Messages**: `storefront/messages/{ru,uz}.json`
-- **Middleware**: Locale detection and routing
+### 5.2 Key Patterns
 
-### 5.3 E2E Testing
-- **Framework**: Playwright
-- **Location**: `storefront/e2e/`
-- **Config**: `storefront/playwright.config.ts`
+**Data Fetching**:
+- All SDK calls wrapped in `React.cache()` for request memoization
+- Use `revalidateTag()` for cache invalidation
+- Never fetch directly in components — use `lib/data/*`
 
-## 6. External Integrations
-| Integration | Authentication | Purpose |
-|-------------|---------------|---------|
-| **Payme** | Merchant ID + Secret | Payment gateway (Uzbekistan) |
-| **Click** | Service ID + Merchant ID | Payment gateway (Uzbekistan) |
-| **Eskiz SMS** | Bearer Token | SMS notifications (pre-approved templates) |
+**Localization**:
+- `getLocalizedField(metadata, field, locale, fallback)` for dynamic content
+- `useTranslations()` for static UI strings
+
+### 5.3 Caching Strategy
+
+| Data Type | Revalidate | Tag | Cache Type |
+|-----------|------------|-----|------------|
+| Regions | Infinite (Manual) | `regions` | Data Cache |
+| Collections | 3600s (1hr) | `collections` | Data Cache |
+| Products | 300s (5min) | `products` | Data Cache |
+| Banners | 600s (10min) | `banners` | Data Cache |
+| Cart | 0 (Dynamic) | - | No Cache |
+
+---
+
+## 6. OTP Authentication System
+
+### 6.1 OTP Purposes
+
+| Purpose | Used For | TTL |
+|---------|----------|-----|
+| `register` | New account signup | 15 min |
+| `reset_password` | Forgot password flow | 15 min |
+| `change_password` | Change password in account | 15 min |
+| `change_phone` | Change phone number | 15 min |
+| `checkout` | Guest checkout auto-registration | 15 min |
+
+### 6.2 OTP Flow
+
+```
+1. User enters phone → Request OTP
+2. Backend stores code in Redis (TTL: 15 min)
+3. Cooldown key set (TTL: 60 sec)
+4. SMS sent via Eskiz
+5. User enters code → Verify
+6. Backend sets verified flag (TTL: 30 min)
+7. Action performed → Flag consumed atomically
+```
+
+### 6.3 Redis Keys
+
+```
+otp:{phone}:{purpose}              → 6-digit code
+otp_verified:{phone}:{purpose}     → verification flag
+otp_attempts:{phone}               → rate limit counter
+otp_cooldown:{phone}:{purpose}     → cooldown flag
+```
+
+---
+
+## 7. Checkout & Orders Flow
+
+### 7.1 Guest Checkout
+
+1. **Contact Info**: Name + Phone (no address)
+2. **OTP Verification**: 6-digit SMS code
+3. **Auto-Register**: `/store/auto-register` creates customer
+4. **BTS Selection**: Choose pickup point
+5. **Payment**: Redirect to Payme/Click
+6. **Callback**: Backend completes order
+7. **SMS**: Confirmation + credentials sent
+
+### 7.2 Payment Flow (Backend-Driven)
+
+```mermaid
+sequenceDiagram
+    Frontend->>Backend: Initialize payment session
+    Frontend->>PaymentGateway: Redirect/Form
+    PaymentGateway->>Backend: Callback (Perform/Complete)
+    Backend->>Backend: Validate signature & amount
+    Backend->>Backend: completeCartWorkflow()
+    Backend->>SMS: Send confirmation
+    Backend->>Frontend: Redirect to order page
+```
+
+### 7.3 Delivery Model (BTS Postpaid)
+
+> [!IMPORTANT]
+> - **Online Payment** = Product cost ONLY
+> - **Delivery Cost** = Paid separately at pickup
+> - **Shipping total** is NEVER included in payment gateway amount
+
+---
+
+## 8. External Integrations
+
+| Integration | Auth | Purpose |
+|-------------|------|---------|
+| **Payme** | Merchant ID + Secret | Payment gateway |
+| **Click** | Service ID + Merchant ID | Payment gateway |
+| **Eskiz SMS** | Bearer Token | SMS (OTP, order notifications) |
 | **MoySklad** | Bearer Token | ERP stock synchronization |
 | **BTS Delivery** | Zone-based pricing | Regional logistics |
 
-## 7. Known Risks & Constraints
-- **Address Data**: Standard `shipping_address` fields (address_1, city) are not collected. UI must rely on `metadata.bts_delivery`. Re-enabling address fields requires significant refactoring.
-- **Custom Shipping Prices**: The `bts/shipping-method` workaround bypasses standard weight-based pricing modules, making it sensitive to framework updates.
-- **Email Dependency**: Many Medusa features require an email. The system uses `<phone>@phone.local` as a shim; this must be consistent across all modules.
-- **SMS Delivery**: Auto-registration fails if SMS cannot be delivered (by design — credentials must reach user).
+---
 
-## 8. Architectural Principles
-- **What must NOT be broken**:
-  - Phone-as-ID logic: Never allow duplicate customers with different emails for the same phone.
-  - BTS-Only Delivery: Never expose standard address inputs in checkout or profile.
-  - Stock integrity: Medusa must always follow MoySklad's counts.
-  - OTP atomicity: All OTP operations must use Redis atomic scripts.
-- **Preferred Patterns**:
-  - Use `lib/data` server actions for all mutations.
-  - Keep regional business logic in custom Medusa Modules.
-  - Use `metadata` for localized fields rather than schema changes.
-- **Anti-patterns to avoid**:
-  - Hardcoding secrets (always use `process.env`).
-  - Storing sensitive state in in-memory Maps (use Redis for production scalability).
-  - Mixing Locale and CountryCode in cart ID logic.
+## 9. Architectural Invariants
+
+### MUST NOT be broken:
+
+1. **Phone-as-ID**: No duplicate customers with different emails for same phone
+2. **BTS-Only Delivery**: Never expose standard address inputs in checkout
+3. **Stock Integrity**: Medusa always follows MoySklad counts
+4. **OTP Atomicity**: All OTP operations use Redis atomic scripts
+5. **Redis Cache**: Must be active — in-memory cache is PROHIBITED
+6. **Backend Checkout**: Frontend `placeOrder` is BANNED for production
+
+### Preferred Patterns:
+
+- Use `lib/data` server actions for all mutations
+- Keep regional business logic in custom Medusa Modules
+- Use `metadata` for localized fields (no schema changes)
+- All SDK queries must request `+metadata`
+
+### Anti-patterns:
+
+- Hardcoding secrets (use `process.env`)
+- Storing state in in-memory Maps (use Redis)
+- Mixing Locale and CountryCode in cart ID logic
+
+---
+
+## 10. Known Risks & Constraints
+
+| Risk | Mitigation |
+|------|------------|
+| **No Address Fields** | UI relies on `metadata.bts_delivery` |
+| **Custom Shipping Prices** | `bts/shipping-method` workaround — sensitive to updates |
+| **Phone-Email Shim** | `<phone>@phone.local` must be consistent |
+| **SMS Delivery Failure** | Auto-registration fails by design (credentials must reach user) |
+| **Large Catalog Sync** | 10k+ products may require job splitting |
+
+---
+
+## 11. Directory Structure
+
+```
+medusajs-2.0-for-railway-boilerplate/
+├── backend/
+│   ├── src/
+│   │   ├── api/           # Custom API routes
+│   │   ├── jobs/          # Scheduled jobs
+│   │   ├── lib/           # Shared utilities
+│   │   ├── modules/       # Custom modules
+│   │   ├── subscribers/   # Event handlers
+│   │   └── workflows/     # Medusa workflows
+│   └── medusa-config.ts
+├── storefront/
+│   ├── src/
+│   │   ├── app/           # Next.js App Router pages
+│   │   ├── lib/           # Data layer, utilities
+│   │   ├── modules/       # UI components
+│   │   └── middleware.ts  # Locale/auth middleware
+│   └── messages/          # i18n translations
+├── docs/                  # Additional documentation
+└── ARCHITECTURE.md        # This file
+```
+
+---
+
+## 12. Development Setup
+
+```bash
+# Backend
+cd backend
+npm install
+npm run dev
+
+# Storefront  
+cd storefront
+npm install
+npm run dev
+```
+
+**Environment Variables**: See `.env.example` in each directory.
+
+---
+
+## 13. Quick Reference
+
+### Key Files
+
+| Purpose | Path |
+|---------|------|
+| Backend config | `backend/medusa-config.ts` |
+| Stock sync job | `backend/src/jobs/sync-moysklad-stock.ts` |
+| OTP routes | `backend/src/api/store/otp/` |
+| Cart logic | `storefront/src/lib/data/cart.ts` |
+| Customer auth | `storefront/src/lib/data/customer.ts` |
+| BTS pricing | `storefront/src/lib/data/bts.ts` |
+| Translations RU | `storefront/messages/ru.json` |
+| Translations UZ | `storefront/messages/uz.json` |

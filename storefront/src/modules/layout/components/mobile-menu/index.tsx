@@ -7,6 +7,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { HttpTypes } from "@medusajs/types"
 import { getLocalizedField } from "@lib/util/localization"
 import { useTranslations } from "next-intl"
+import MobileLanguageSwitcher from "@modules/common/components/language-switcher/mobile"
 
 type MobileMenuProps = {
   categories: HttpTypes.StoreProductCategory[]
@@ -242,6 +243,14 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
                 {t("support")}
               </LocalizedClientLink>
             </div>
+          </div>
+
+          {/* Language Switcher */}
+          <div className="p-4 border-t border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              {t("language")}
+            </h3>
+            <MobileLanguageSwitcher />
           </div>
 
           {/* Contact */}

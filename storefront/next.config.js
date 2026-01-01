@@ -59,6 +59,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "bucket-production-0e2a.up.railway.app",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
   serverRuntimeConfig: {

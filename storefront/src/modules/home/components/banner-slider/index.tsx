@@ -37,7 +37,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
 
   const slides: Slide[] = useMemo(() => {
     if (!serverSlides?.length) return []
-    
+
     return serverSlides.map((b) => {
       const currentLocale = locale as string
       const title = getLocalizedField(b as any, "title", currentLocale) || ""
@@ -186,24 +186,24 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent z-0" />
                 
                 <div className="content-container h-full flex items-center py-4 sm:py-6 lg:py-8">
-                  <div className="max-w-full sm:max-w-xl lg:max-w-2xl text-white space-y-1 sm:space-y-2 lg:space-y-3 relative z-10 px-10 sm:px-16 lg:px-20">
+                  <div className="max-w-[70%] sm:max-w-xl lg:max-w-2xl text-white space-y-0.5 sm:space-y-2 lg:space-y-3 relative z-10 px-3 sm:px-16 lg:px-20">
                     {/* Subtitle badge */}
                     {slide.subtitle && (
-                      <div className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-[9px] sm:text-[10px] lg:text-xs font-semibold tracking-wide uppercase">
+                      <div className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1 bg-white/20 backdrop-blur-sm rounded-full text-[7px] sm:text-[10px] lg:text-xs font-semibold tracking-wide uppercase">
                         {slide.subtitle}
                       </div>
                     )}
                     
                     {/* Title */}
                     {slide.title && (
-                      <h3 className="text-lg sm:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight drop-shadow-lg">
+                      <h3 className="text-sm sm:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight drop-shadow-lg">
                         {slide.title}
                       </h3>
                     )}
                     
                     {/* Description */}
                     {slide.description && (
-                      <p className="text-xs sm:text-sm lg:text-base text-white/90 leading-relaxed max-w-lg drop-shadow-md line-clamp-2">
+                      <p className="text-[10px] sm:text-sm lg:text-base text-white/90 leading-snug sm:leading-relaxed max-w-lg drop-shadow-md line-clamp-2">
                         {slide.description}
                       </p>
                     )}
@@ -215,7 +215,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                       <div className="pt-1 sm:pt-2">
                         <LocalizedClientLink 
                           href={slide.href} 
-                          className="group inline-flex items-center gap-1.5 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 lg:py-2.5 rounded-full bg-white text-red-600 font-bold text-[10px] sm:text-xs lg:text-sm uppercase tracking-wide shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                          className="group inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-5 lg:px-6 py-1 sm:py-2 lg:py-2.5 rounded-full bg-white text-red-600 font-bold text-[8px] sm:text-xs lg:text-sm uppercase tracking-wide shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <span>{slide.cta}</span>

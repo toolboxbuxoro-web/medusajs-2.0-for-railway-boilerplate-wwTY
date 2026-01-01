@@ -102,26 +102,64 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
   // Touch swipe handling
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
+  const touchStartY = useRef(0)
+  const touchEndY = useRef(0)
+  const isTouchOnInteractive = useRef(false)
+  const hasMoved = useRef(false)
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Check if touch started on an interactive element (button, link, etc.)
+    const target = e.target as HTMLElement
+    const interactiveElement = target.closest('button, a, [role="button"], [data-interactive]')
+    isTouchOnInteractive.current = !!interactiveElement
+    
     touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    touchEndX.current = e.touches[0].clientX
+    touchEndY.current = e.touches[0].clientY
+    hasMoved.current = false
   }, [])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    // Skip if touch started on interactive element
+    if (isTouchOnInteractive.current) return
+    
     touchEndX.current = e.touches[0].clientX
+    touchEndY.current = e.touches[0].clientY
+    
+    // Check if finger has moved significantly (more than 10px)
+    const diffX = Math.abs(touchStartX.current - touchEndX.current)
+    const diffY = Math.abs(touchStartY.current - touchEndY.current)
+    
+    if (diffX > 10 || diffY > 10) {
+      hasMoved.current = true
+    }
   }, [])
 
   const handleTouchEnd = useCallback(() => {
-    const diff = touchStartX.current - touchEndX.current
+    // Skip swipe if touch started on interactive element or didn't move
+    if (isTouchOnInteractive.current || !hasMoved.current) {
+      isTouchOnInteractive.current = false
+      hasMoved.current = false
+      return
+    }
+    
+    const diffX = touchStartX.current - touchEndX.current
+    const diffY = Math.abs(touchStartY.current - touchEndY.current)
     const threshold = 50 // minimum swipe distance
     
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0 && canScrollRight) {
+    // Only trigger horizontal swipe if horizontal movement > vertical movement
+    // This prevents swipe on vertical scrolling gestures
+    if (Math.abs(diffX) > threshold && Math.abs(diffX) > diffY) {
+      if (diffX > 0 && canScrollRight) {
         scroll("right")
-      } else if (diff < 0 && canScrollLeft) {
+      } else if (diffX < 0 && canScrollLeft) {
         scroll("left")
       }
     }
+    
+    isTouchOnInteractive.current = false
+    hasMoved.current = false
   }, [canScrollLeft, canScrollRight, scroll])
 
   if (displayProducts.length === 0) {
