@@ -1,0 +1,35 @@
+import { useMutation } from '@tanstack/react-query';
+import { useCartStore } from '../store/cart-store';
+import { useCartQueueStore } from '../store/cart-queue.store';
+import { cartQueueService } from '../services/cart-queue.service';
+import { Cart } from '../types/cart';
+
+export function useUpdateCartItem() {
+  const { cart, setCart } = useCartStore();
+  const { enqueue } = useCartQueueStore();
+
+  return useMutation({
+    mutationFn: async ({ lineItemId, quantity }: { lineItemId: string; quantity: number }) => {
+      enqueue({ type: 'update', lineItemId, quantity });
+      return cartQueueService.flush();
+    },
+
+    onMutate: async ({ lineItemId, quantity }) => {
+      if (!cart) return;
+
+      const optimisticCart: Cart = {
+        ...cart,
+        items: cart.items.map((i) =>
+          i.id === lineItemId ? { ...i, quantity } : i
+        ),
+      };
+
+      setCart(optimisticCart);
+      return { previousCart: cart };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previousCart) setCart(ctx.previousCart);
+    },
+  });
+}

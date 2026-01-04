@@ -72,13 +72,13 @@ const medusaConfig = {
     disable: SHOULD_DISABLE_ADMIN,
   },
   modules: [
-    {
+    ...(REDIS_URL ? [{
       key: Modules.CACHE,
       resolve: "@medusajs/cache-redis",
       options: {
         redisUrl: REDIS_URL,
       },
-    },
+    }] : []),
     {
       key: "moysklad",
       resolve: "./src/modules/moysklad",
