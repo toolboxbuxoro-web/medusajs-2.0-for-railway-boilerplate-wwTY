@@ -13,15 +13,26 @@ const queryClient = new QueryClient({
   },
 });
 
+import { useEffect } from 'react';
+import { useAuthStore } from '../store/auth-store';
+
 export default function RootLayout() {
+  const restoreSession = useAuthStore(state => state.restoreSession);
+
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="catalog/[category]" options={{ headerShown: true }} />
-        <Stack.Screen name="product/[id]" options={{ headerShown: true }} />
-        <Stack.Screen name="checkout" options={{ headerShown: true }} />
+        <Stack.Screen name="catalog/[collectionId]" options={{ headerShown: true }} />
+        <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="search" options={{ headerShown: false }} />
+        <Stack.Screen name="checkout" options={{ headerShown: true, title: 'Оформление' }} />
+        <Stack.Screen name="checkout-success" options={{ headerShown: false }} />
       </Stack>
     </QueryClientProvider>
   );
