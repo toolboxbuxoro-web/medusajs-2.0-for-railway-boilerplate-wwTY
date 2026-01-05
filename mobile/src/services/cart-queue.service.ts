@@ -1,4 +1,4 @@
-import { AppState } from 'react-native';
+import { AppState, Alert } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { cartService } from '../services/cart.service';
 import { useCartStore } from '../store/cart-store';
@@ -33,7 +33,7 @@ class CartQueueService {
     const next = queueStore.peek();
 
     if (!next) {
-      console.log('[CartQueue] Queue empty.');
+      // Queue is empty - no logging needed to avoid spam
       return;
     }
 
@@ -64,10 +64,32 @@ class CartQueueService {
 
       // Recursive call to process next item in queue
       this.flush();
-    } catch (error) {
+    } catch (error: any) {
        console.error('[CartQueue] Flush failed:', error);
+       
+       const errorMessage = error?.message || '';
+       const isInventoryError = errorMessage.includes('insufficient_inventory');
+       const isNotFoundError = errorMessage.includes('not_found');
+
+       if (isInventoryError || isNotFoundError) {
+         console.warn(`[CartQueue] Poison pill detected (${isInventoryError ? 'inventory' : 'not_found'}). Removing from queue.`);
+         queueStore.dequeue();
+         
+         if (isInventoryError) {
+           Alert.alert(
+             "Недостаточно товара",
+             "Один из товаров в очереди закончился на складе и был удален из очереди."
+           );
+         }
+         
+         // Try to continue with rest of queue
+         this.isFlushing = false;
+         this.flush();
+         return;
+       }
+
        this.isFlushing = false;
-       // We keep it in the queue for next retry
+       // We keep it in the queue for next retry for other types of errors (network, etc)
     }
   }
 }

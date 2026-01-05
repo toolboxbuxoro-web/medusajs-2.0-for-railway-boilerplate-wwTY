@@ -6,49 +6,39 @@ import { HomeSection, HomeBanner } from '../../types/mobile';
  * Empty placeholders for now, containing zero networking logic.
  */
 
-const BannerSliderSection = ({ banners }: { banners: HomeBanner[] }) => (
-  <View className="mb-4">
-    <Text className="text-gray-400 text-xs uppercase px-4 mb-2">Banner Slider Placeholder</Text>
-    {/* Real logic goes here */}
-  </View>
-);
-
-const CategoryChipsSection = ({ dataSource }: { dataSource: string }) => (
-  <View className="mb-4">
-    <Text className="text-gray-400 text-xs uppercase px-4 mb-2">Category Chips Placeholder</Text>
-    {/* Real logic goes here */}
-  </View>
-);
-
-const ProductRailSection = ({ collectionId, title }: { collectionId: string, title: { ru: string, uz: string } }) => (
-  <View className="mb-4">
-    <Text className="text-gray-400 text-xs uppercase px-4 mb-2">{title.ru} Rail Placeholder</Text>
-    {/* Real logic goes here */}
-  </View>
-);
+import { BannerSlider } from './BannerSlider';
+import { CategoryChips } from './CategoryChips';
+import { ProductRail } from './ProductRail';
 
 interface SectionRendererProps {
   section: HomeSection;
+  index: number;
 }
 
-/**
- * Generic Section Renderer
- * This component MUST NOT fetch data.
- * It is safe against unknown or unsupported section types.
- */
-export function SectionRenderer({ section }: SectionRendererProps) {
+export function SectionRenderer({ section, index }: SectionRendererProps) {
+  const commonProps = {
+    id: section.id,
+    position: index,
+    experiment: (section as any)._experiment,
+  };
+
   switch (section.type) {
     case 'banner_slider':
-      return <BannerSliderSection banners={section.data} />;
+      return <BannerSlider banners={section.data} {...commonProps} />;
 
     case 'category_chips':
-      return <CategoryChipsSection dataSource={section.data_source} />;
+      return <CategoryChips {...commonProps} />;
 
     case 'product_rail':
-      return <ProductRailSection collectionId={section.collection_id} title={section.title} />;
+      return (
+        <ProductRail 
+          collectionId={section.collection_id} 
+          title={section.title.ru} 
+          {...commonProps}
+        />
+      );
 
     default:
-      // Unsupported types return null and never throw.
       return null;
   }
 }

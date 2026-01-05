@@ -1,9 +1,11 @@
 import { View, Text, Pressable, FlatList, ActivityIndicator } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../../hooks/useCart';
 import { LineItem } from '../../types/cart';
+import { track } from '../../lib/analytics/track';
 
 export default function CartScreen() {
   const router = useRouter();
@@ -14,7 +16,15 @@ export default function CartScreen() {
   };
 
   const handleCheckout = () => {
-    router.push('/checkout');
+    try {
+      track('checkout_start', { 
+        total: cart?.total || 0,
+        item_count: cart?.items.length || 0 
+      });
+      router.push('/checkout');
+    } catch (err) {
+      console.error('[Cart] Navigation error:', err);
+    }
   };
 
   const handleIncrease = (item: LineItem) => {
@@ -58,7 +68,7 @@ export default function CartScreen() {
   const totalQuantity = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <Stack.Screen 
         options={{
           headerTitle: "Корзина",
@@ -84,11 +94,11 @@ export default function CartScreen() {
             contentContainerClassName="p-4"
             renderItem={({ item }) => (
               <View className="bg-white rounded-2xl p-4 mb-3 flex-row shadow-sm">
-                <View className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden mr-3">
+                <View className="w-24 bg-gray-100 rounded-xl overflow-hidden mr-3" style={{ aspectRatio: 1 }}>
                   <Image
                     source={{ uri: item.thumbnail }}
                     style={{ width: '100%', height: '100%' }}
-                    contentFit="cover"
+                    contentFit="contain"
                     transition={200}
                   />
                 </View>
@@ -100,7 +110,7 @@ export default function CartScreen() {
                   >
                     {item.title}
                   </Text>
-                  <Text className="text-blue-600 text-lg font-bold mb-2">
+                  <Text className="text-primary text-lg font-bold mb-2">
                     {formatPrice(item.unit_price)}
                   </Text>
 
@@ -145,7 +155,7 @@ export default function CartScreen() {
               </View>
               <View className="flex-row justify-between">
                 <Text className="text-gray-900 text-lg font-bold">Итого</Text>
-                <Text className="text-blue-600 text-xl font-bold">
+                <Text className="text-primary text-xl font-bold">
                   {formatPrice(cart.total)}
                 </Text>
               </View>
@@ -154,22 +164,32 @@ export default function CartScreen() {
             <Pressable
               onPress={handleCheckout}
               disabled={isEmpty || loading}
-              className={`rounded-xl py-4 items-center justify-center ${
-                (isEmpty || loading) ? 'bg-gray-300' : 'bg-blue-600 active:bg-blue-700'
+              className={`rounded-xl py-4 px-6 items-center justify-center flex-row shadow-lg ${
+                (isEmpty || loading) ? 'bg-gray-300' : 'bg-primary active:bg-red-700'
               }`}
+              style={{
+                shadowColor: '#DC2626',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
+              }}
             >
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-white text-base font-bold">
-                  Оформить заказ
-                </Text>
+                <>
+                  <Text className="text-white text-lg font-black tracking-wide">
+                    Оформить заказ
+                  </Text>
+                  <Ionicons name="arrow-forward" size={22} color="white" style={{ marginLeft: 8 }} />
+                </>
               )}
             </Pressable>
           </View>
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

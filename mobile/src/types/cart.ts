@@ -40,7 +40,8 @@ export interface Order {
   total: number;
   currency_code: string;
   created_at: string;
-  // Add other order fields as needed
+  status: string;
+  items: LineItem[];
 }
 
 export interface StoreCompleteCartRes {

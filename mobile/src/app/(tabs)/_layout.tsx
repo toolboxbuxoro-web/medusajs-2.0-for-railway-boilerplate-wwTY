@@ -5,14 +5,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#DC2626', // Toolbox Red
-        tabBarInactiveTintColor: '#9CA3AF', // Gray 400
+        tabBarActiveTintColor: '#DC2626', // Toolbox Red for active state
+        tabBarInactiveTintColor: '#1F2937', // Dark gray for inactive
         tabBarStyle: {
-          backgroundColor: '#111827', // Graphite Black
-          borderTopColor: '#1F2937', // Darker border
-          paddingTop: 8,
-          height: 80, // Taller touch targets for mobile
-          paddingBottom: 24, // Extra padding for safe area
+          backgroundColor: '#FFFFFF', // White background
+          borderTopColor: '#E5E7EB', // Light gray border
+          paddingTop: 6,
+          height: 84, // Increased to fill safe area
+          paddingBottom: 32, // More padding for safe area
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -37,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: 'Каталог',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid-outline" size={24} color={color} />
+            <Ionicons name="search-outline" size={24} color={color} />
           ),
         }}
       />
@@ -47,6 +47,24 @@ export default function TabLayout() {
           title: 'Корзина',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="cart-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Избранное',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="heart-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="account"
+        options={{
+          title: 'Профиль',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-outline" size={24} color={color} />
           ),
         }}
       />

@@ -24,13 +24,39 @@ class ProductService {
   }
 
   async getProducts(queryParams?: string): Promise<Product[]> {
-    const endpoint = queryParams ? `/store/products?${queryParams}` : '/store/products';
+    // Medusa 2.0 requires region_id for pricing
+    // Uzbekistan Region ID from API
+    const REGION_ID = 'reg_01KAY0QXWMQSDRYZRGRCKE0GAN';
+    
+    // Storefront pattern for Medusa 2.0 pricing and inventory
+    const fields = '*variants.calculated_price,+variants.inventory_quantity,+metadata,+images';
+    
+    const params = new URLSearchParams(queryParams || '');
+    params.set('fields', fields);
+    params.set('region_id', REGION_ID);
+    
+    const endpoint = `/store/products?${params.toString()}`;
     const data = await this.request<StoreProductsRes>(endpoint);
+    
+    if (data.products.length > 0 && __DEV__) {
+        const p = data.products[0];
+        console.log('[ProductService] Check:', {
+            title: p.title,
+            variantId: p.variants?.[0]?.id,
+            hasPrice: !!p.variants?.[0]?.calculated_price,
+            amount: p.variants?.[0]?.calculated_price?.calculated_amount,
+            inventory: p.variants?.[0]?.inventory_quantity
+        });
+    }
+
     return data.products;
   }
 
   async getProduct(id: string): Promise<Product> {
-    const data = await this.request<StoreProductRes>(`/store/products/${id}`);
+    const REGION_ID = 'reg_01KAY0QXWMQSDRYZRGRCKE0GAN';
+    const fields = '*variants.calculated_price,+variants.inventory_quantity,+metadata,+images';
+    const endpoint = `/store/products/${id}?region_id=${REGION_ID}&fields=${fields}`;
+    const data = await this.request<StoreProductRes>(endpoint);
     return data.product;
   }
 }

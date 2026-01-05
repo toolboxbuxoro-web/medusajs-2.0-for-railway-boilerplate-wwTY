@@ -25,7 +25,9 @@ class CartService {
   }
 
   async createCart(regionId?: string): Promise<Cart> {
-    const body = regionId ? { region_id: regionId } : {};
+    // Default to Uzbekistan region for consistency
+    const DEFAULT_REGION_ID = 'reg_01KAY0QXWMQSDRYZRGRCKE0GAN';
+    const body = { region_id: regionId || DEFAULT_REGION_ID };
     const data = await this.request<StoreCartResponse>('/store/carts', {
       method: 'POST',
       body: JSON.stringify(body),

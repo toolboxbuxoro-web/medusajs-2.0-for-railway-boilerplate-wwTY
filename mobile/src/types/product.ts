@@ -14,6 +14,12 @@ export interface ProductVariant {
     amount: number;
     currency_code: string;
   }[];
+  calculated_price?: {
+    calculated_amount: number;
+    original_amount: number;
+    currency_code: string;
+    is_calculated_price_tax_inclusive: boolean;
+  };
   options: {
     option_id: string;
     value: string;

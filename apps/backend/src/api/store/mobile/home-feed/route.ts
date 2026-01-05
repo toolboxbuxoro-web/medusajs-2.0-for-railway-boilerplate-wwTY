@@ -13,6 +13,12 @@ import {
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const remoteQuery = req.scope.resolve(ContainerRegistrationKeys.REMOTE_QUERY)
 
+  // 0. Resolve Active Experiment (Backend-Driven)
+  // This helps serve different UX variants to different users without client logic.
+  // We prioritize the x-experiment header, which could be set by a gateway or hash logic.
+  const rawHeader = req.headers["x-experiment"] as string
+  const activeExperiment = rawHeader ? rawHeader.trim().toLowerCase() : "control"
+
   try {
     // 1. Fetch Store Metadata (Banners)
     const storeQuery = remoteQueryObjectFromString({
@@ -56,14 +62,25 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const { rows: collectionsRows } = await remoteQuery(collectionQuery)
     const collections = Array.isArray(collectionsRows) ? collectionsRows : []
 
-    // 4. Construct Sections
-    const sections: any[] = []
+    // 4. Construct Sections with CMS Control
+    // This endpoint is MOBILE-ONLY. DO NOT reuse for web storefront.
+    const candidateSections: any[] = []
 
     // -- Section: Banner Slider --
-    if (mobileBanners.length > 0) {
-      sections.push({
+    // Global visibility and order can be controlled via store.metadata.mobile_sections.hero
+    const heroMeta = parsedMeta?.mobile_sections?.hero || {}
+    const isHeroEnabled = heroMeta.mobile_enabled !== false
+    
+    // Experiment check
+    const heroExp = heroMeta.mobile_experiment
+    const matchesHeroExp = !heroExp || heroExp === activeExperiment
+
+    if (isHeroEnabled && matchesHeroExp && mobileBanners.length > 0) {
+      candidateSections.push({
         id: "hero",
         type: "banner_slider",
+        mobile_order: Number(heroMeta.mobile_order) || 0,
+        _experiment: heroExp ? { name: heroExp, variant: activeExperiment } : null,
         data: mobileBanners.map((b: any) => ({
           id: b.id,
           image: b.image_url,
@@ -74,39 +91,61 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // -- Section: Category Chips --
-    if (categories.length > 0) {
-      sections.push({
+    // Global visibility and order can be controlled via store.metadata.mobile_sections.categories
+    const categoryMeta = parsedMeta?.mobile_sections?.categories || {}
+    const isCategoryEnabled = categoryMeta.mobile_enabled !== false
+
+    // Experiment check
+    const catExp = categoryMeta.mobile_experiment
+    const matchesCatExp = !catExp || catExp === activeExperiment
+
+    if (isCategoryEnabled && matchesCatExp && categories.length > 0) {
+      candidateSections.push({
         id: "categories",
         type: "category_chips",
+        mobile_order: Number(categoryMeta.mobile_order) || 0,
+        _experiment: catExp ? { name: catExp, variant: activeExperiment } : null,
         data_source: "/store/product-categories?parent_id=null"
       })
     }
 
     // -- Section: Product Rails (Collections) --
-    const mobileCollections = collections.filter((c: any) => c.metadata?.mobile_home === true)
+    // Visibility: metadata.mobile_home must be true (backward-compat) AND mobile_enabled must not be false
+    // Experiment: metadata.mobile_experiment must match activeExperiment if present
+    // Order: metadata.mobile_order
+    collections.forEach((c: any) => {
+      const isMobileHome = c.metadata?.mobile_home === true
+      const isEnabled = c.metadata?.mobile_enabled !== false
+      
+      const colExp = c.metadata?.mobile_experiment
+      const matchesColExp = !colExp || colExp === activeExperiment
 
-    // Stable Sorting
-    mobileCollections.sort((a: any, b: any) => {
-      const orderA = a.metadata?.mobile_order
-      const orderB = b.metadata?.mobile_order
-
-      if (orderA == null && orderB == null) return 0
-      if (orderA == null) return 1
-      if (orderB == null) return -1
-      return Number(orderA) - Number(orderB)
+      if (isMobileHome && isEnabled && matchesColExp) {
+        candidateSections.push({
+          id: `collection_${c.handle || c.id}`,
+          type: "product_rail",
+          collection_id: c.id,
+          mobile_order: Number(c.metadata?.mobile_order) || 0,
+          _experiment: colExp ? { name: colExp, variant: activeExperiment } : null,
+          title: {
+            ru: c.metadata?.title_ru || c.title,
+            uz: c.metadata?.title_uz || c.title
+          }
+        })
+      }
     })
 
-    mobileCollections.forEach((c: any) => {
-      sections.push({
-        id: `collection_${c.handle || c.id}`,
-        type: "product_rail",
-        collection_id: c.id,
-        title: {
-          ru: c.metadata?.title_ru || c.title,
-          uz: c.metadata?.title_uz || c.title
+    // 5. Stable Sort by mobile_order
+    // Treat missing mobile_order as 0. Maintain original order for same-order sections.
+    const sections = candidateSections
+      .map((s, idx) => ({ ...s, originalIndex: idx }))
+      .sort((a, b) => {
+        if (a.mobile_order !== b.mobile_order) {
+          return a.mobile_order - b.mobile_order
         }
+        return a.originalIndex - b.originalIndex
       })
-    })
+      .map(({ mobile_order, originalIndex, ...section }) => section)
 
     res.json({ sections })
   } catch (error: any) {

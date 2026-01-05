@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useCartStore } from '../store/cart-store';
 import { useCartQueueStore } from '../store/cart-queue.store';
 import { cartQueueService } from '../services/cart-queue.service';
-import { Cart } from '../types/cart';
+import { track } from '../lib/analytics/track';
 
 export function useAddToCart() {
   const { cart, setCart } = useCartStore();
@@ -11,6 +11,7 @@ export function useAddToCart() {
   return useMutation({
     // We use a dummy mutationFn because the actual work is done via the queue
     mutationFn: async ({ variantId, quantity }: { variantId: string; quantity: number }) => {
+      track('add_to_cart', { product_id: variantId, quantity });
       enqueue({ type: 'add', variantId, quantity });
       return cartQueueService.flush();
     },
