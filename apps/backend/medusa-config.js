@@ -35,7 +35,7 @@ import {
   ESKIZ_EMAIL,
   ESKIZ_PASSWORD,
   ESKIZ_FROM
-} from '../src/lib/constants';
+} from './src/lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
