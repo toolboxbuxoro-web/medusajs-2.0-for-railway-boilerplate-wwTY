@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
 // Trigger restart
 import {
@@ -239,6 +238,8 @@ const medusaConfig = {
   ]
 };
 
-// Explicitly type the export to avoid TypeScript inference issues
+// Explicitly type the exported config to avoid TS2742 ("inferred type of 'default' cannot be named") in CI builds
 /** @type {import('@medusajs/types').ConfigModule} */
-export default defineConfig(medusaConfig);
+const config = defineConfig(medusaConfig);
+
+export default config;
