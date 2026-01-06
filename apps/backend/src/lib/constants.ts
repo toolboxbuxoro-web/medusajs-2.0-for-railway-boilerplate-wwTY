@@ -17,10 +17,13 @@ export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY
 /**
  * Database URL for Postgres instance used by the backend
  */
-export const DATABASE_URL = assertValue(
+// Workaround for Railway build time where env vars might be missing
+const isBuild = process.env.npm_lifecycle_event === 'build' || process.env.npm_lifecycle_event === 'build:server'
+export const DATABASE_URL = process.env.DATABASE_URL || (isBuild ? 'postgres://localhost:5432/medusa-build' : undefined) || assertValue(
   process.env.DATABASE_URL,
   'Environment variable for DATABASE_URL is not set',
 )
+
 
 /**
  * (optional) Redis URL for Redis instance used by the backend
