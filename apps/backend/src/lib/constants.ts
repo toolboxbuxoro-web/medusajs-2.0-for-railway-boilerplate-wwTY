@@ -53,7 +53,7 @@ export const STORE_URL = process.env.STORE_URL || 'http://localhost:8000';
 /**
  * JWT Secret used for signing JWT tokens
  */
-export const JWT_SECRET = assertValue(
+export const JWT_SECRET = process.env.JWT_SECRET || (isBuild ? 'jwt_secret_for_build_only' : undefined) || assertValue(
   process.env.JWT_SECRET,
   'Environment variable for JWT_SECRET is not set',
 )
@@ -61,7 +61,7 @@ export const JWT_SECRET = assertValue(
 /**
  * Cookie secret used for signing cookies
  */
-export const COOKIE_SECRET = assertValue(
+export const COOKIE_SECRET = process.env.COOKIE_SECRET || (isBuild ? 'cookie_secret_for_build_only' : undefined) || assertValue(
   process.env.COOKIE_SECRET,
   'Environment variable for COOKIE_SECRET is not set',
 )
