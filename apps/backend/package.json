@@ -73,11 +73,6 @@
     "typescript": "^5.7.2",
     "vite": "^5.4.11"
   },
-  "pnpm": {
-    "overrides": {
-      "next": "$next"
-    }
-  },
   "packageManager": "pnpm@9.10.0",
   "engines": {
     "node": "22.x",
