@@ -10,6 +10,18 @@ const requiredEnvs = [
 ]
 
 function checkEnvVariables() {
+  // Skip env check during build in CI/Railway environments
+  // Variables will be validated at runtime when the app starts
+  const isBuildTime = process.argv.includes('build') || 
+                      process.env.NEXT_PHASE === 'phase-production-build' ||
+                      process.env.CI === 'true' ||
+                      process.env.RAILWAY_ENVIRONMENT !== undefined
+  
+  if (isBuildTime) {
+    console.log(c.dim('⚠️  Skipping environment variable check during build (will be validated at runtime)'))
+    return
+  }
+
   const missingEnvs = requiredEnvs.filter(function (env) {
     return !process.env[env.key]
   })
