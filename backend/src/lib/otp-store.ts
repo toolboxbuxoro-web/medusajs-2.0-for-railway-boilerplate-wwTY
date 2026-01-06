@@ -3,11 +3,13 @@ import Redis from "ioredis"
 import { 
   REDIS_URL, 
   OTP_RATE_LIMIT_PER_HOUR, 
+  OTP_TTL_SECONDS,
+  OTP_MAX_ATTEMPTS
 } from "./constants"
 
 /**
  * OTP State Keys (Redis):
- * - otp:{phone}:{purpose}              -> stores the 6-digit OTP code (TTL 15 min)
+ * - otp:{phone}:{purpose}              -> stores the 6-digit OTP code (TTL 5 min)
  * - otp_verified:{phone}:{purpose}     -> boolean flag indicating phone is verified (TTL 30 min)
  * - otp_attempts:{phone}               -> counter for rate limiting OTP requests (TTL 15 min)
  * - otp_cooldown:{phone}:{purpose}     -> flag to prevent repeated SMS (TTL 60 sec)
@@ -17,8 +19,9 @@ const KEY_PREFIX_OTP = "otp:"
 const KEY_PREFIX_VERIFIED = "otp_verified:"
 const KEY_PREFIX_ATTEMPTS = "otp_attempts:"
 const KEY_PREFIX_COOLDOWN = "otp_cooldown:"
+const KEY_PREFIX_VERIFY_ATTEMPTS = "otp_verify_attempts:"
 
-const TTL_OTP = 15 * 60 // 15 minutes
+const TTL_OTP = OTP_TTL_SECONDS || 300 // Default 5 minutes
 const TTL_VERIFIED = 30 * 60 // 30 minutes
 const TTL_ATTEMPTS = 15 * 60 // 15 minutes
 const TTL_COOLDOWN = 60 // 60 seconds
@@ -77,19 +80,27 @@ export async function otpStoreVerify(phone: string, code: string, purpose: strin
   const r = getRedis()
   const otpKey = `${KEY_PREFIX_OTP}${phone}:${purpose}`
   const verifiedKey = `${KEY_PREFIX_VERIFIED}${phone}:${purpose}`
+  const attemptKey = `${KEY_PREFIX_VERIFY_ATTEMPTS}${phone}:${purpose}`
 
   const luaScript = `
     local storedCode = redis.call('GET', KEYS[1])
+    if not storedCode then return 0 end
+
     if storedCode == ARGV[1] then
-      redis.call('DEL', KEYS[1])
+      redis.call('DEL', KEYS[1], KEYS[3])
       redis.call('SET', KEYS[2], 'true', 'EX', ARGV[2])
       return 1
     else
+      local attempts = redis.call('INCR', KEYS[3])
+      redis.call('EXPIRE', KEYS[3], 600) -- 10 min TTL for attempts
+      if attempts >= tonumber(ARGV[3]) then
+        redis.call('DEL', KEYS[1], KEYS[3])
+      end
       return 0
     end
   `
 
-  const result = await r.eval(luaScript, 2, otpKey, verifiedKey, code, TTL_VERIFIED)
+  const result = await r.eval(luaScript, 3, otpKey, verifiedKey, attemptKey, code, TTL_VERIFIED, OTP_MAX_ATTEMPTS)
   return result === 1
 }
 

@@ -15,6 +15,7 @@ type Banner = {
   subtitle_uz?: string
   description_uz?: string
   cta_uz?: string
+  device?: "mobile" | "web" | "all"
 }
 
 type WidgetProps = {
@@ -59,6 +60,7 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
   const [subtitleUz, setSubtitleUz] = useState<string>("")
   const [descriptionUz, setDescriptionUz] = useState<string>("")
   const [ctaUz, setCtaUz] = useState<string>("")
+  const [device, setDevice] = useState<"mobile" | "web" | "all">("all")
 
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
@@ -173,6 +175,7 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
         subtitle_uz: subtitleUz || undefined,
         description_uz: descriptionUz || undefined,
         cta_uz: ctaUz || undefined,
+        device,
       }
 
       const nextBanners = [...banners, next]
@@ -189,6 +192,7 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
       setSubtitleUz("")
       setDescriptionUz("")
       setCtaUz("")
+      setDevice("all")
     } catch (e) {
       setMessage({ type: "error", text: "Ошибка добавления баннера" })
       setIsSaving(false)
@@ -280,8 +284,18 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
                   ) : null}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#111827" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#111827", display: "flex", alignItems: "center", gap: "6px" }}>
                     {b.title || "(без заголовка)"}
+                    <span style={{
+                      padding: "2px 6px",
+                      fontSize: "10px",
+                      borderRadius: "4px",
+                      fontWeight: 500,
+                      background: b.device === "mobile" ? "#dbeafe" : b.device === "web" ? "#fef3c7" : "#dcfce7",
+                      color: b.device === "mobile" ? "#1d4ed8" : b.device === "web" ? "#92400e" : "#166534"
+                    }}>
+                      {b.device === "mobile" ? "📱 Mobile" : b.device === "web" ? "🌐 Web" : "🌍 All"}
+                    </span>
                   </div>
                   <div style={{ fontSize: "12px", color: "#6b7280" }}>
                     href: <code>{b.href || "/"}</code> • file_id: <code>{b.file_id || "-"}</code>
@@ -320,6 +334,18 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
               placeholder="Ссылка (href), например /store"
               style={{ padding: "8px 10px", border: "1px solid #d1d5db", borderRadius: "8px" }}
             />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>Устройство:</span>
+              <select
+                value={device}
+                onChange={(e) => setDevice(e.target.value as "mobile" | "web" | "all")}
+                style={{ padding: "8px 10px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "13px" }}
+              >
+                <option value="all">🌍 Все устройства</option>
+                <option value="mobile">📱 Только мобильные</option>
+                <option value="web">🌐 Только веб</option>
+              </select>
+            </div>
             <input
               type="text"
               value={title}
