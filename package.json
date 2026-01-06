@@ -8,7 +8,8 @@
     "typecheck": "turbo run typecheck",
     "mobile:start": "cd apps/mobile && npx expo start",
     "mobile:ios": "cd apps/mobile && npx expo run:ios",
-    "mobile:android": "cd apps/mobile && npx expo run:android"
+    "mobile:android": "cd apps/mobile && npx expo run:android",
+    "start": "cd apps/backend && pnpm start"
   },
   "devDependencies": {
     "turbo": "^2.3.3",
