@@ -24,6 +24,45 @@ interface MoySkladAssortmentResponse {
   rows: MoySkladProduct[]
 }
 
+interface MoySkladStockByStore {
+  meta: {
+    href: string
+    type: string
+    mediaType: string
+  }
+  code: string
+  article?: string
+  name: string
+  stockByStore: Array<{
+    meta: {
+      href: string
+      type: string
+      mediaType: string
+    }
+    name: string
+    stock: number
+    reserve: number
+    inTransit: number
+  }>
+}
+
+interface MoySkladStockByStoreResponse {
+  meta: {
+    size: number
+    limit: number
+    offset: number
+  }
+  rows: MoySkladStockByStore[]
+}
+
+// Warehouse IDs to sync stock from
+const WAREHOUSE_IDS = [
+  'b58e534f-b91d-11ee-0a80-0107003c27c9', // Склад Toolbox 4
+  '742f8e44-ed82-11ed-0a80-00cb009f538f', // Toolbox 1 Рай.Маг
+  '5b25bcb2-d1d8-11ed-0a80-0e1e0028a95d', // Toolbox 2 Дон Бозори
+  '815df250-bce8-11ee-0a80-0f0b001b27f6', // Toolbox 4 Бетонка
+]
+
 export default class MoySkladService {
   protected logger_: Logger
   protected token_: string
@@ -45,6 +84,7 @@ export default class MoySkladService {
     return {
       "Authorization": `Bearer ${this.token_}`,
       "Accept": "application/json;charset=utf-8",
+      "Accept-Encoding": "gzip",
       "Content-Type": "application/json"
     }
   }
@@ -86,6 +126,7 @@ export default class MoySkladService {
   /**
    * Retrieve all products with stock in bulk (with pagination)
    * Returns a Map of code => quantity for efficient lookup
+   * Only includes stock from configured warehouses
    */
   async retrieveAllStock(): Promise<Map<string, number>> {
     if (!this.token_) {
@@ -99,10 +140,11 @@ export default class MoySkladService {
     let totalProducts = 0
 
     this.logger_.info("Starting bulk stock retrieval from MoySklad...")
+    this.logger_.info(`Filtering by ${WAREHOUSE_IDS.length} warehouses`)
 
     try {
       do {
-        const url = `${this.baseUrl_}/entity/assortment?limit=${batchSize}&offset=${offset}`
+        const url = `${this.baseUrl_}/report/stock/bystore?limit=${batchSize}&offset=${offset}`
         
         const response = await fetch(url, {
           headers: this.getHeaders()
@@ -112,12 +154,24 @@ export default class MoySkladService {
           throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
         }
 
-        const data: MoySkladAssortmentResponse = await response.json()
+        const data: MoySkladStockByStoreResponse = await response.json()
         totalProducts = data.meta.size
 
         for (const product of data.rows) {
           if (product.code) {
-            stockMap.set(product.code, product.quantity || 0)
+            // Sum stock from selected warehouses only
+            let totalStock = 0
+            
+            for (const storeStock of product.stockByStore) {
+              // Extract store ID from meta.href
+              const storeId = storeStock.meta.href.split('/').pop()
+              
+              if (storeId && WAREHOUSE_IDS.includes(storeId)) {
+                totalStock += storeStock.stock || 0
+              }
+            }
+            
+            stockMap.set(product.code, totalStock)
           }
         }
 
@@ -166,6 +220,37 @@ export default class MoySkladService {
 
     } catch (error) {
       this.logger_.error("Failed to get product count from MoySklad", error)
+      throw error
+    }
+  }
+
+  /**
+   * Retrieve all stores (warehouses)
+   */
+  async retrieveStores(): Promise<{ id: string; name: string }[]> {
+    if (!this.token_) {
+      throw new Error("MOYSKLAD_TOKEN is not configured")
+    }
+
+    const url = `${this.baseUrl_}/entity/store`
+    
+    try {
+      const response = await fetch(url, {
+        headers: this.getHeaders()
+      })
+
+      if (!response.ok) {
+        throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.rows.map((store: any) => ({
+        id: store.id,
+        name: store.name
+      }))
+
+    } catch (error) {
+      this.logger_.error("Failed to retrieve stores from MoySklad", error)
       throw error
     }
   }
