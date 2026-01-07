@@ -61,29 +61,31 @@ export function verifyClickCompleteSignature(params: {
 }
 
 /**
- * Convert Click amount string in sums (format N or N.NN) into minor units (tiyin) as bigint.
- * This is used only for internal validation; signature verification must use the original string.
+ * Parse Click amount string in sums (format N or N.NN) into a comparable bigint.
+ * IMPORTANT: Medusa stores amounts in SUMS. Click sends amounts in SUMS.
+ * No conversion needed - we just parse the integer part.
  */
 export function parseUzsAmountToTiyin(amount: string): bigint | null {
   const norm = normalizeString(amount).replace(",", ".")
   if (!norm) return null
   if (!/^\d+(\.\d+)?$/.test(norm)) return null
 
-  const [i, f = ""] = norm.split(".")
-  const frac2 = (f + "00").slice(0, 2)
-
+  // Just take the integer part (sums)
+  const [intPart] = norm.split(".")
+  
   try {
-    return BigInt(i) * 100n + BigInt(frac2)
+    return BigInt(intPart)
   } catch {
     return null
   }
 }
 
-export function formatTiyinToUzsAmount(amountTiyin: number): string {
-  // Medusa amounts are in minor units; Click expects sums with 2 decimals.
-  const v = Math.round(Number(amountTiyin))
-  const sums = v / 100
-  return sums.toFixed(2)
+export function formatTiyinToUzsAmount(amountSums: number): string {
+  // IMPORTANT: Despite the name, Medusa 2.0 stores amounts in SUMS (standard units), NOT tiyins.
+  // Click expects sums with 2 decimals. We just format the number, no division needed.
+  // (Payme multiplies by 100 because Payme API expects tiyins, but Click expects sums)
+  const v = Math.round(Number(amountSums))
+  return v.toFixed(2)
 }
 
 
