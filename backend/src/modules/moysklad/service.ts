@@ -134,60 +134,55 @@ export default class MoySkladService {
     }
 
     const stockMap = new Map<string, number>()
-    const batchSize = 1000
-    let offset = 0
-    let totalFetched = 0
-    let totalProducts = 0
-
+    
     this.logger_.info("Starting bulk stock retrieval from MoySklad...")
     this.logger_.info(`Filtering by ${WAREHOUSE_IDS.length} warehouses`)
 
     try {
-      do {
-        const url = `${this.baseUrl_}/report/stock/bystore?limit=${batchSize}&offset=${offset}`
+      // Fetch stock for each warehouse and sum them up
+      for (const warehouseId of WAREHOUSE_IDS) {
+        this.logger_.info(`Fetching stock from warehouse ${warehouseId}...`)
         
-        const response = await fetch(url, {
-          headers: this.getHeaders()
-        })
+        const batchSize = 1000
+        let offset = 0
+        let totalFetched = 0
+        let totalProducts = 0
 
-        if (!response.ok) {
-          throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
-        }
+        do {
+          const url = `${this.baseUrl_}/entity/assortment?limit=${batchSize}&offset=${offset}&stockStore=https://api.moysklad.ru/api/remap/1.2/entity/store/${warehouseId}`
+          
+          const response = await fetch(url, {
+            headers: this.getHeaders()
+          })
 
-        const data: MoySkladStockByStoreResponse = await response.json()
-        totalProducts = data.meta.size
-
-        for (const product of data.rows) {
-          if (product.code) {
-            // Sum stock from selected warehouses only
-            let totalStock = 0
-            
-            for (const storeStock of product.stockByStore) {
-              // Extract store ID from meta.href
-              const storeId = storeStock.meta.href.split('/').pop()
-              
-              if (storeId && WAREHOUSE_IDS.includes(storeId)) {
-                totalStock += storeStock.stock || 0
-              }
-            }
-            
-            stockMap.set(product.code, totalStock)
+          if (!response.ok) {
+            throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
           }
-        }
 
-        totalFetched += data.rows.length
-        offset += batchSize
+          const data: MoySkladAssortmentResponse = await response.json()
+          totalProducts = data.meta.size
 
-        this.logger_.info(`Fetched ${totalFetched}/${totalProducts} products from MoySklad...`)
+          for (const product of data.rows) {
+            if (product.code) {
+              const currentStock = stockMap.get(product.code) || 0
+              stockMap.set(product.code, currentStock + (product.stock || 0))
+            }
+          }
 
-        // Small delay to avoid rate limiting
-        if (offset < totalProducts) {
-          await new Promise(resolve => setTimeout(resolve, 100))
-        }
+          totalFetched += data.rows.length
+          offset += batchSize
 
-      } while (offset < totalProducts)
+          // Small delay to avoid rate limiting
+          if (offset < totalProducts) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+          }
 
-      this.logger_.info(`Successfully retrieved stock for ${stockMap.size} products from MoySklad`)
+        } while (offset < totalProducts)
+        
+        this.logger_.info(`Fetched ${totalFetched} products from warehouse ${warehouseId}`)
+      }
+
+      this.logger_.info(`Successfully retrieved stock for ${stockMap.size} unique products from ${WAREHOUSE_IDS.length} warehouses`)
       return stockMap
 
     } catch (error) {
