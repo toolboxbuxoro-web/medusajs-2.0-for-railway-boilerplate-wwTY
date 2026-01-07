@@ -143,7 +143,7 @@ export class EskizNotificationService extends AbstractNotificationProviderServic
     if (!resp.ok) {
       const text = await resp.text().catch(() => "")
       this.logger_.error(`[Eskiz] sms/send failed: ${resp.status} ${text}`)
-      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Eskiz sms send failed (${resp.status})`)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Eskiz sms send failed (${resp.status}): ${text}`)
     }
 
     this.logger_.info(`Successfully sent SMS to ${toPhone} via Eskiz`)

@@ -63,6 +63,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         has_eskiz_email: !!process.env.ESKIZ_EMAIL,
         has_eskiz_password: !!process.env.ESKIZ_PASSWORD,
         has_eskiz_from: !!process.env.ESKIZ_FROM,
+        eskiz_from_value: process.env.ESKIZ_FROM || '4546 (default)',
         sms_provider: "eskiz", // hardcoded as per config
         node_env: process.env.NODE_ENV,
         error_details: error.message
