@@ -173,6 +173,12 @@ const medusaConfig = {
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
           }] : []),
+          // Manual payment provider (P0 - auto-authorizes for testing)
+          {
+            resolve: './src/modules/payment-manual',
+            id: 'manual',
+            options: {},
+          },
           ...(PAYME_ID && PAYME_KEY ? [{
             resolve: './src/modules/payment-payme',
             id: 'payme',
