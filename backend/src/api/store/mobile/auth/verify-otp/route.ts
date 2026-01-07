@@ -18,7 +18,7 @@ function generatePassword(): string {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
   const { phone, code, cart_id } = (req.body || {}) as Body
-  const purpose = "mobile_auth"
+  const purpose = "checkout"
 
   if (!phone || !code) {
     return res.status(400).json({ error: "phone_and_code_required" })

@@ -10,7 +10,7 @@ type Body = {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
   const { phone } = (req.body || {}) as Body
-  const purpose = "mobile_auth"
+  const purpose = "checkout"
 
   if (!phone) {
     return res.status(400).json({ error: "phone_required" })
@@ -36,7 +36,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const code = generateOtpCode()
   await otpStoreSet(normalized, code, purpose)
 
-  const message = `Kod podtverzhdeniya dlya vhoda v prilozhenie Toolbox: ${code}`
+  // Align with web template approved by Eskiz
+  const message = `Kod podtverzhdeniya dlya oformleniya zakaza na sajte toolbox-tools.uz: ${code}`
 
   try {
     const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
@@ -50,7 +51,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     })
 
-    logger.info(`[Mobile Auth] OTP sent to ${normalized}`)
+    logger.info(`[Mobile Auth] OTP sent to ${normalized} (using web template)`)
     return res.json({ success: true })
   } catch (error: any) {
     logger.error(`[Mobile Auth] Failed to send SMS: ${error.message}`)
