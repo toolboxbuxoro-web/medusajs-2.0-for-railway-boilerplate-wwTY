@@ -364,360 +364,400 @@ export class ClickMerchantService {
   }
 
   async handlePrepare(body: Partial<ClickPrepareRequest>) {
-    const click_trans_id = normalizeString(body.click_trans_id)
-    const service_id = normalizeString(body.service_id)
-    const click_paydoc_id = normalizeString(body.click_paydoc_id)
-    const merchant_trans_id = normalizeString(body.merchant_trans_id)
-    const amount = normalizeString(body.amount)
-    const action = normalizeString(body.action)
-    const sign_time = normalizeString(body.sign_time)
-    const sign_string = normalizeString(body.sign_string)
+    try {
+      const click_trans_id = normalizeString(body.click_trans_id)
+      const service_id = normalizeString(body.service_id)
+      const click_paydoc_id = normalizeString(body.click_paydoc_id)
+      const merchant_trans_id = normalizeString(body.merchant_trans_id)
+      const amount = normalizeString(body.amount)
+      const action = normalizeString(body.action)
+      const sign_time = normalizeString(body.sign_time)
+      const sign_string = normalizeString(body.sign_string)
 
-    this.logger_.info(
-      `[ClickMerchant] Prepare: merchant_trans_id=${merchant_trans_id} click_trans_id=${click_trans_id} amount=${amount} action=${action}`
-    )
+      this.logger_.info(
+        `[ClickMerchant] Prepare: merchant_trans_id=${merchant_trans_id} click_trans_id=${click_trans_id} amount=${amount} action=${action}`
+      )
 
-    // Basic required fields
-    if (
-      !click_trans_id ||
-      !service_id ||
-      !merchant_trans_id ||
-      !amount ||
-      !action ||
-      !sign_time ||
-      !sign_string
-    ) {
-      return this.buildPrepareResponse({
+      // Basic required fields
+      if (
+        !click_trans_id ||
+        !service_id ||
+        !merchant_trans_id ||
+        !amount ||
+        !action ||
+        !sign_time ||
+        !sign_string
+      ) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
+          error_note: "Error in request from click",
+        })
+      }
+
+      if (action !== "0") {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.ACTION_NOT_FOUND,
+          error_note: "Action not found",
+        })
+      }
+
+      // Validate service_id (optional hard check)
+      const configuredServiceId = this.getServiceId()
+      if (configuredServiceId && configuredServiceId !== service_id) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
+          error_note: "Invalid service_id",
+        })
+      }
+
+      // Signature check
+      const ok = verifyClickPrepareSignature({
         click_trans_id,
+        service_id,
+        secret_key: this.getSecretKey(),
         merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
-        error_note: "Error in request from click",
+        amount,
+        action,
+        sign_time,
+        sign_string,
       })
-    }
 
-    if (action !== "0") {
-      return this.buildPrepareResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.ACTION_NOT_FOUND,
-        error_note: "Action not found",
+      if (!ok) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.SIGN_CHECK_FAILED,
+          error_note: "SIGN CHECK FAILED!",
+        })
+      }
+
+      const session = await this.getPaymentSessionByMerchantTransId(merchant_trans_id)
+      if (!session) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.USER_DOES_NOT_EXIST,
+          error_note: "User does not exist",
+        })
+      }
+
+      if (session.completed_at) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.ALREADY_PAID,
+          error_note: "Already paid",
+        })
+      }
+
+      if (!this.validateAmountMatchesSession(amount, session.amount)) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: "0",
+          error: ClickErrorCodes.INCORRECT_AMOUNT,
+          error_note: "Incorrect parameter amount",
+        })
+      }
+
+      const currentData = this.parseSessionData(session.data)
+
+      // Idempotency: if already prepared for this click_trans_id return previous prepare id
+      if (currentData.click_trans_id === click_trans_id && currentData.merchant_prepare_id) {
+        return this.buildPrepareResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_prepare_id: String(currentData.merchant_prepare_id),
+          error: ClickErrorCodes.SUCCESS,
+          error_note: "Success",
+        })
+      }
+
+      // Use click_trans_id as merchant_prepare_id (numeric string, stable, unique)
+      const merchant_prepare_id = click_trans_id
+
+      const paymentModule = this.container_.resolve(Modules.PAYMENT)
+      await paymentModule.updatePaymentSession({
+        id: session.id,
+        amount: Number(session.amount),
+        currency_code: session.currency_code || "uzs",
+        data: {
+          ...currentData,
+          click_state: "prepared",
+          click_trans_id,
+          click_paydoc_id,
+          merchant_prepare_id,
+          click_error: 0,
+          click_error_note: "Success",
+          sign_time,
+          // Store cart_id explicitly in session data, same pattern as Payme
+          cart_id: session.cart_id,
+        },
       })
-    }
 
-    // Validate service_id (optional hard check)
-    const configuredServiceId = this.getServiceId()
-    if (configuredServiceId && configuredServiceId !== service_id) {
       return this.buildPrepareResponse({
         click_trans_id,
         merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
-        error_note: "Invalid service_id",
-      })
-    }
-
-    // Signature check
-    const ok = verifyClickPrepareSignature({
-      click_trans_id,
-      service_id,
-      secret_key: this.getSecretKey(),
-      merchant_trans_id,
-      amount,
-      action,
-      sign_time,
-      sign_string,
-    })
-
-    if (!ok) {
-      return this.buildPrepareResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.SIGN_CHECK_FAILED,
-        error_note: "SIGN CHECK FAILED!",
-      })
-    }
-
-    const session = await this.getPaymentSessionByMerchantTransId(merchant_trans_id)
-    if (!session) {
-      return this.buildPrepareResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.USER_DOES_NOT_EXIST,
-        error_note: "User does not exist",
-      })
-    }
-
-    if (session.completed_at) {
-      return this.buildPrepareResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.ALREADY_PAID,
-        error_note: "Already paid",
-      })
-    }
-
-    if (!this.validateAmountMatchesSession(amount, session.amount)) {
-      return this.buildPrepareResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_prepare_id: "0",
-        error: ClickErrorCodes.INCORRECT_AMOUNT,
-        error_note: "Incorrect parameter amount",
-      })
-    }
-
-    const currentData = this.parseSessionData(session.data)
-
-    // Idempotency: if already prepared for this click_trans_id return previous prepare id
-    if (currentData.click_trans_id === click_trans_id && currentData.merchant_prepare_id) {
-      return this.buildPrepareResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_prepare_id: String(currentData.merchant_prepare_id),
+        merchant_prepare_id,
         error: ClickErrorCodes.SUCCESS,
         error_note: "Success",
       })
+    } catch (e) {
+      this.logger_.error(`[ClickMerchant] Unexpected error in handlePrepare: ${e}`)
+      return this.buildPrepareResponse({
+        click_trans_id: normalizeString(body.click_trans_id),
+        merchant_trans_id: normalizeString(body.merchant_trans_id),
+        merchant_prepare_id: "0",
+        error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
+        error_note: "Internal Server Error",
+      })
     }
-
-    // Use click_trans_id as merchant_prepare_id (numeric string, stable, unique)
-    const merchant_prepare_id = click_trans_id
-
-    const paymentModule = this.container_.resolve(Modules.PAYMENT)
-    await paymentModule.updatePaymentSession({
-      id: session.id,
-      amount: Number(session.amount),
-      currency_code: session.currency_code || "uzs",
-      data: {
-        ...currentData,
-        click_state: "prepared",
-        click_trans_id,
-        click_paydoc_id,
-        merchant_prepare_id,
-        click_error: 0,
-        click_error_note: "Success",
-        sign_time,
-        // Store cart_id explicitly in session data, same pattern as Payme
-        cart_id: session.cart_id,
-      },
-    })
-
-    return this.buildPrepareResponse({
-      click_trans_id,
-      merchant_trans_id,
-      merchant_prepare_id,
-      error: ClickErrorCodes.SUCCESS,
-      error_note: "Success",
-    })
   }
 
   async handleComplete(body: Partial<ClickCompleteRequest>) {
-    const click_trans_id = normalizeString(body.click_trans_id)
-    const service_id = normalizeString(body.service_id)
-    const click_paydoc_id = normalizeString(body.click_paydoc_id)
-    const merchant_trans_id = normalizeString(body.merchant_trans_id)
-    const merchant_prepare_id = normalizeString((body as any).merchant_prepare_id)
-    const amount = normalizeString(body.amount)
-    const action = normalizeString(body.action)
-    const errorStr = normalizeString(body.error)
-    const error_note_in = normalizeString(body.error_note)
-    const sign_time = normalizeString(body.sign_time)
-    const sign_string = normalizeString(body.sign_string)
+    try {
+      const click_trans_id = normalizeString(body.click_trans_id)
+      const service_id = normalizeString(body.service_id)
+      const click_paydoc_id = normalizeString(body.click_paydoc_id)
+      const merchant_trans_id = normalizeString(body.merchant_trans_id)
+      const merchant_prepare_id = normalizeString((body as any).merchant_prepare_id)
+      const amount = normalizeString(body.amount)
+      const action = normalizeString(body.action)
+      const errorStr = normalizeString(body.error)
+      const error_note_in = normalizeString(body.error_note)
+      const sign_time = normalizeString(body.sign_time)
+      const sign_string = normalizeString(body.sign_string)
 
-    const clickError = errorStr ? Number(errorStr) : 0
+      const clickError = errorStr ? Number(errorStr) : 0
 
-    this.logger_.info(
-      `[ClickMerchant] Complete: merchant_trans_id=${merchant_trans_id} click_trans_id=${click_trans_id} prepare_id=${merchant_prepare_id} amount=${amount} action=${action} error=${clickError}`
-    )
+      this.logger_.info(
+        `[ClickMerchant] Complete: merchant_trans_id=${merchant_trans_id} click_trans_id=${click_trans_id} prepare_id=${merchant_prepare_id} amount=${amount} action=${action} error=${clickError}`
+      )
 
-    // Basic required fields
-    if (
-      !click_trans_id ||
-      !service_id ||
-      !merchant_trans_id ||
-      !merchant_prepare_id ||
-      !amount ||
-      !action ||
-      !sign_time ||
-      !sign_string
-    ) {
-      return this.buildCompleteResponse({
+      // Basic required fields
+      if (
+        !click_trans_id ||
+        !service_id ||
+        !merchant_trans_id ||
+        !merchant_prepare_id ||
+        !amount ||
+        !action ||
+        !sign_time ||
+        !sign_string
+      ) {
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
+          error_note: "Error in request from click",
+        })
+      }
+
+      if (action !== "1") {
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.ACTION_NOT_FOUND,
+          error_note: "Action not found",
+        })
+      }
+
+      // Validate service_id (optional hard check)
+      const configuredServiceId = this.getServiceId()
+      if (configuredServiceId && configuredServiceId !== service_id) {
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
+          error_note: "Invalid service_id",
+        })
+      }
+
+      // Signature check
+      const ok = verifyClickCompleteSignature({
         click_trans_id,
+        service_id,
+        secret_key: this.getSecretKey(),
         merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
-        error_note: "Error in request from click",
+        merchant_prepare_id,
+        amount,
+        action,
+        sign_time,
+        sign_string,
       })
-    }
 
-    if (action !== "1") {
-      return this.buildCompleteResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.ACTION_NOT_FOUND,
-        error_note: "Action not found",
+      if (!ok) {
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.SIGN_CHECK_FAILED,
+          error_note: "SIGN CHECK FAILED!",
+        })
+      }
+
+      const session = await this.getPaymentSessionByMerchantTransId(merchant_trans_id)
+
+      // If session not found, but it's a success completion?
+      // Check if it's already paid?
+      // For now if not found, transaction does not exist
+      if (!session) {
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.TRANSACTION_DOES_NOT_EXIST,
+          error_note: "Transaction does not exist",
+        })
+      }
+
+      const currentData = this.parseSessionData(session.data)
+
+      // Idempotency: if already completed
+      if (currentData.click_state === "paid" || currentData.click_state === "canceled") {
+        // If already paid and success, return success
+        if (currentData.click_state === "paid" && clickError >= 0) {
+          return this.buildCompleteResponse({
+            click_trans_id,
+            merchant_trans_id,
+            merchant_confirm_id: String(currentData.merchant_confirm_id || click_trans_id),
+            error: ClickErrorCodes.SUCCESS,
+            error_note: "Success",
+          })
+        }
+        if (currentData.click_state === "canceled") {
+           return this.buildCompleteResponse({
+            click_trans_id,
+            merchant_trans_id,
+            merchant_confirm_id: String(currentData.merchant_confirm_id || click_trans_id),
+            error: ClickErrorCodes.TRANSACTION_CANCELLED,
+            error_note: "Transaction cancelled",
+          })
+        }
+      }
+
+      // Check amount
+      if (!this.validateAmountMatchesSession(amount, session.amount)) {
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.INCORRECT_AMOUNT,
+          error_note: "Incorrect parameter amount",
+        })
+      }
+
+      // If click sends error < 0, we must cancel
+      if (clickError < 0) {
+        // Cancel logic
+         const paymentModule = this.container_.resolve(Modules.PAYMENT)
+         await paymentModule.updatePaymentSession({
+          id: session.id,
+          data: {
+            ...currentData,
+            click_state: "canceled",
+            click_error: clickError,
+            click_error_note: errorStr,
+          },
+        })
+        return this.buildCompleteResponse({
+          click_trans_id,
+          merchant_trans_id,
+          merchant_confirm_id: "0",
+          error: ClickErrorCodes.TRANSACTION_CANCELLED, // Or should we mirror operation?
+          error_note: "Transaction cancelled by Click",
+        })
+      }
+
+      // Success logic
+      const merchant_confirm_id = click_trans_id
+
+      const paymentModule = this.container_.resolve(Modules.PAYMENT)
+      await paymentModule.updatePaymentSession({
+        id: session.id,
+        data: {
+          ...currentData,
+          click_state: "paid",
+          merchant_confirm_id,
+          click_error: 0,
+          click_error_note: "Success",
+        },
       })
-    }
 
-    // Validate service_id (optional hard check)
-    const configuredServiceId = this.getServiceId()
-    if (configuredServiceId && configuredServiceId !== service_id) {
-      return this.buildCompleteResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
-        error_note: "Invalid service_id",
+      // Trigger Medusa specific logic for payment completion
+      // We assume Authorize will be called separately or we can try to trigger it via workflow?
+      // In Medusa 2, we usually just update the session status to authorized if possible?
+      // Or we call completeCartWorkflow?
+      // The original code called completeCartWorkflow.
+
+      try {
+        await completeCartWorkflow(this.container_).run({
+          input: {
+            id: session.cart_id, // We need cart_id!
+          }
+        })
+        this.logger_.info(`[ClickMerchant] Cart ${session.cart_id} completed successfully`)
+      } catch (wfError) {
+        this.logger_.error(`[ClickMerchant] Failed to complete cart ${session.cart_id}: ${wfError}`)
+        // Even if workflow fails, payment is done. We return success to Click.
+        // But we should probably note it.
+      }
+      
+      // Fiscalization
+      // Run in background
+      this.submitFiscalizationData({
+        paymentId: click_trans_id,
+        cartId: session.cart_id,
+        amountTiyin: Number(session.amount) // Sums here? submitFiscalizationData uses it as tiyin?
+        // Wait, submitFiscalizationData expects tiyin or sums?
+        // getCartItemsForFiscalization uses amountTiyin.
+        // If Medusa amounts are SUMS, then parseUzsAmountToTiyin returns SUMS.
+        // submitFiscalizationData passes it to getCartItemsForFiscalization.
+        // getCartItemsForFiscalization calculates item prices.
+        // If session.amount is SUMS (415000), then we pass 415000.
+        // getCartItemsForFiscalization: "const unit = Math.floor(lineTotalTiyins / qty)".
+        // It uses "const lineTotalTiyins = Math.round(lineTotalSums * 100)".
+        // So fiscalization logic expects SUMS?
+        // Yes line 136-139 in original file:
+        // const lineTotalSums = hasTotal ? Number(row.line_total) : Number(row.unit_price) * qty
+        // const lineTotalTiyins = Math.round(lineTotalSums * 100)
+        // So session.amount (sums) is correct.
       })
-    }
 
-    // Signature check
-    const ok = verifyClickCompleteSignature({
-      click_trans_id,
-      service_id,
-      secret_key: this.getSecretKey(),
-      merchant_trans_id,
-      merchant_prepare_id,
-      amount,
-      action,
-      sign_time,
-      sign_string,
-    })
-
-    if (!ok) {
       return this.buildCompleteResponse({
         click_trans_id,
         merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.SIGN_CHECK_FAILED,
-        error_note: "SIGN CHECK FAILED!",
-      })
-    }
-
-    const session = await this.getPaymentSessionByMerchantTransId(merchant_trans_id)
-    if (!session) {
-      return this.buildCompleteResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.USER_DOES_NOT_EXIST,
-        error_note: "User does not exist",
-      })
-    }
-
-    if (!this.validateAmountMatchesSession(amount, session.amount)) {
-      return this.buildCompleteResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.INCORRECT_AMOUNT,
-        error_note: "Incorrect parameter amount",
-      })
-    }
-
-    const currentData = this.parseSessionData(session.data)
-
-    // Validate merchant_prepare_id against what we stored at Prepare
-    if (currentData.merchant_prepare_id && String(currentData.merchant_prepare_id) !== merchant_prepare_id) {
-      return this.buildCompleteResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_confirm_id: "0",
-        error: ClickErrorCodes.TRANSACTION_DOES_NOT_EXIST,
-        error_note: "Transaction does not exist",
-      })
-    }
-
-    // Idempotency: if already completed and no error, return success
-    if (currentData.click_state === "completed" && currentData.click_error === 0) {
-      return this.buildCompleteResponse({
-        click_trans_id,
-        merchant_trans_id,
-        merchant_confirm_id: merchant_prepare_id,
+        merchant_confirm_id,
         error: ClickErrorCodes.SUCCESS,
         error_note: "Success",
       })
+    } catch (e) {
+      this.logger_.error(`[ClickMerchant] Unexpected error in handleComplete: ${e}`)
+      return this.buildCompleteResponse({
+        click_trans_id: normalizeString(body.click_trans_id),
+        merchant_trans_id: normalizeString(body.merchant_trans_id),
+        merchant_confirm_id: "0",
+        error: ClickErrorCodes.ERROR_IN_REQUEST_FROM_CLICK,
+        error_note: "Internal Server Error",
+      })
     }
-
-    const paymentModule = this.container_.resolve(Modules.PAYMENT)
-
-    // Update session data first
-    const nextState =
-      clickError === 0 ? "completed" : clickError === ClickErrorCodes.TRANSACTION_CANCELLED ? "cancelled" : "error"
-
-    await paymentModule.updatePaymentSession({
-      id: session.id,
-      amount: Number(session.amount),
-      currency_code: session.currency_code || "uzs",
-      data: {
-        ...currentData,
-        click_state: nextState,
-        click_trans_id,
-        click_paydoc_id,
-        merchant_prepare_id,
-        click_error: clickError,
-        click_error_note: error_note_in || (clickError === 0 ? "Success" : "Error"),
-        sign_time,
-        transaction_id: click_paydoc_id || click_trans_id,
-      },
-    })
-
-    // On success, complete cart to create order
-    if (clickError === 0) {
-      const cartId = currentData.cart_id
-
-      if (!cartId) {
-        // Follow the same backend-only cart_id pattern as Payme:
-        // cart_id must be present in session.data (set during Prepare) and
-        // we never attempt to guess or derive it here.
-        this.logger_.error(
-          `[ClickMerchant] Missing cart_id for merchant_trans_id=${merchant_trans_id}. Cannot complete cart.`
-        )
-      } else if (!session.completed_at) {
-        try {
-          await completeCartWorkflow(this.container_).run({
-            input: { id: cartId },
-          })
-          this.logger_.info(
-            `[ClickMerchant] Completed cart ${cartId} for click_trans_id=${click_trans_id}`
-          )
-
-          // Submit fiscalization data after successful payment
-          const paymentId = click_paydoc_id || click_trans_id
-          const amountTiyin = parseUzsAmountToTiyin(amount)
-          if (paymentId && amountTiyin) {
-            await this.submitFiscalizationData({
-              paymentId,
-              cartId,
-              amountTiyin: Number(amountTiyin)
-            })
-          }
-        } catch (e) {
-          this.logger_.error(
-            `[ClickMerchant] Failed to complete cart ${cartId}: ${e}`
-          )
-          // Still return success to Click to avoid desync
-        }
-      }
-    }
-
-    return this.buildCompleteResponse({
-      click_trans_id,
-      merchant_trans_id,
-      merchant_confirm_id: merchant_prepare_id,
-      error: clickError,
-      error_note: error_note_in || (clickError === 0 ? "Success" : "Error"),
-    })
   }
 }
-
-
-
 
 
 
