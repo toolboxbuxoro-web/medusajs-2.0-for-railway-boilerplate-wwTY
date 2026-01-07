@@ -54,6 +54,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     if (existingCustomers.length > 0) {
       customer = existingCustomers[0]
       
+      // Update phone/name if missing (fix legacy data)
+      if (!customer.phone || !customer.first_name) {
+        customer = await customerModule.updateCustomers(customer.id, {
+          phone: customer.phone || `+${normalized}`,
+          first_name: customer.first_name || "Покупатель",
+        })
+        logger.info(`[Mobile Auth] Updated legacy customer ${customer.id} with phone/name`)
+      }
+      
       // Resolve existing auth identity
       const identities = await authModule.listAuthIdentities({
         provider_identities: {
