@@ -16,15 +16,28 @@ function parseIncomingParams(req: MedusaRequest): Record<string, any> {
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const clickMerchant = new ClickMerchantService({
-    logger: req.scope.resolve("logger"),
-    container: req.scope,
-  })
+  try {
+    const clickMerchant = new ClickMerchantService({
+      logger: req.scope.resolve("logger"),
+      container: req.scope,
+    })
 
-  const params = parseIncomingParams(req)
-  const result = await clickMerchant.handleComplete(params)
+    const params = parseIncomingParams(req)
+    const result = await clickMerchant.handleComplete(params)
 
-  res.json(result)
+    return res.json(result)
+  } catch (e) {
+    console.error("[Click Complete] Fatal error:", e)
+    // Always return a valid Click-spec JSON to avoid error -8
+    const body = (req as any).body || {}
+    return res.json({
+      click_trans_id: Number(body.click_trans_id) || 0,
+      merchant_trans_id: String(body.merchant_trans_id || ""),
+      merchant_confirm_id: 0,
+      error: -8,
+      error_note: "Internal Server Error",
+    })
+  }
 }
 
 

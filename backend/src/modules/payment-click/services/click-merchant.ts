@@ -328,9 +328,9 @@ export class ClickMerchantService {
     error_note: string
   }) {
     return {
-      click_trans_id: input.click_trans_id,
+      click_trans_id: Number(input.click_trans_id) || 0,
       merchant_trans_id: input.merchant_trans_id,
-      merchant_prepare_id: input.merchant_prepare_id,
+      merchant_prepare_id: parseInt(input.merchant_prepare_id, 10) || 0,
       error: input.error,
       error_note: input.error_note,
     }
@@ -345,9 +345,9 @@ export class ClickMerchantService {
   }) {
     // docs.click.uz/click-api-error mentions merchant_confirm_id for Complete response
     return {
-      click_trans_id: input.click_trans_id,
+      click_trans_id: Number(input.click_trans_id) || 0,
       merchant_trans_id: input.merchant_trans_id,
-      merchant_confirm_id: input.merchant_confirm_id,
+      merchant_confirm_id: parseInt(input.merchant_confirm_id, 10) || 0,
       error: input.error,
       error_note: input.error_note,
     }
