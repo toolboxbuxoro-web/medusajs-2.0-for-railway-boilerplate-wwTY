@@ -668,6 +668,8 @@ export class ClickMerchantService {
          const paymentModule = this.container_.resolve(Modules.PAYMENT)
          await paymentModule.updatePaymentSession({
           id: session.id,
+          amount: Number(session.amount),
+          currency_code: session.currency_code || "uzs",
           data: {
             ...currentData,
             click_state: "canceled",
@@ -690,6 +692,8 @@ export class ClickMerchantService {
       const paymentModule = this.container_.resolve(Modules.PAYMENT)
       await paymentModule.updatePaymentSession({
         id: session.id,
+        amount: Number(session.amount),
+        currency_code: session.currency_code || "uzs",
         data: {
           ...currentData,
           click_state: "paid",
