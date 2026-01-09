@@ -20,63 +20,7 @@ export default async function orderSmsHandler({
 
     logger.info(`[order-sms-handler] Processing order ${orderId}, order.metadata: ${JSON.stringify(order.metadata || {})}`)
 
-    // 2. Identify if this is a new customer/quick order and get the password
-    let isQuickOrder = order.metadata?.is_quick_order
-    let tmpPassword = order.metadata?.tmp_generated_password as string
-
-    // If not in order.metadata, try to fetch from cart via DB query
-    if (!tmpPassword) {
-      try {
-        const pgConnection = container.resolve("__pg_connection__")
-        
-        const queries = [
-          {
-            name: "order.cart_id direct",
-            sql: `SELECT c.metadata FROM cart c 
-                  JOIN "order" o ON o.cart_id = c.id 
-                  WHERE o.id = $1`
-          },
-          {
-            name: "via payment_collection",
-            sql: `SELECT c.metadata FROM cart c 
-                  JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
-                  JOIN "order" o ON o.payment_collection_id = cpc.payment_collection_id
-                  WHERE o.id = $1`
-          },
-          {
-            name: "by email match",
-            sql: `SELECT c.metadata FROM cart c 
-                  JOIN "order" o ON o.email = c.email
-                  WHERE o.id = $1
-                  ORDER BY c.created_at DESC LIMIT 1`
-          }
-        ]
-
-        for (const { name, sql } of queries) {
-          try {
-            const result = await pgConnection.raw(sql, [orderId])
-            const rows = result?.rows || result || []
-            const cartMetadata = rows?.[0]?.metadata
-            
-            if (cartMetadata) {
-              const meta = typeof cartMetadata === 'string' ? JSON.parse(cartMetadata) : cartMetadata
-              if (meta?.tmp_generated_password) {
-                tmpPassword = meta.tmp_generated_password
-                isQuickOrder = meta.is_quick_order || isQuickOrder
-                logger.info(`[order-sms-handler] Found password via database (${name})`)
-                break
-              }
-            }
-          } catch (e: any) {
-            // Silently fail as we have multiple query approaches
-          }
-        }
-      } catch (e: any) {
-        logger.error(`[order-sms-handler] Error querying DB for cart metadata: ${e.message}`)
-      }
-    }
-
-    // 3. Robust Phone Resolution Logic
+    // 2. Robust Phone Resolution Logic
     // Fallback priority: 
     // 1) Shipping address (best for delivery)
     // 2) Order metadata (special cases like quick order)
@@ -89,39 +33,22 @@ export default async function orderSmsHandler({
 
     const normalized = rawPhone.replace(/\D/g, "")
     
-    logger.info(`[order-sms-handler] Resolution: phone=${normalized}, isQuickOrder=${!!isQuickOrder}, hasPassword=${!!tmpPassword}`)
-
+    logger.info(`[order-sms-handler] Resolution: phone=${normalized}`)
 
     if (!normalized) {
       logger.warn(`[order-sms-handler] Skip SMS: No phone number resolved for order ${orderId}`)
       return
     }
 
-    // 4. Send Credentials SMS (Username/Password)
-    if (tmpPassword) {
-      try {
-        const smsMessage = `Dannye dlya vhoda na sajt toolbox-tools.uz: Login: +${normalized}, Parol: ${tmpPassword}`
-        
-        await notificationModule.createNotifications({
-          to: normalized,
-          channel: "sms",
-          template: "quick-order-credentials",
-          data: { message: smsMessage }
-        })
-        logger.info(`[order-sms-handler] Successfully sent credentials SMS to +${normalized}`)
-      } catch (e: any) {
-        logger.error(`[order-sms-handler] Failed to send credentials SMS: ${e.message}`)
-      }
-    }
-
-    // 5. Send Order Confirmation SMS
+    // 3. Send Order Confirmation SMS
     try {
       // Use summary total or fallback to raw total
       const total = Number(order.summary?.current_order_total || order.total || 0)
       const totalFormatted = new Intl.NumberFormat("ru-RU").format(total)
       
       const orderDisplayId = order.display_id || orderId.slice(-8)
-      const smsMessage = `Vash zakaz #${orderDisplayId} na sajte toolbox-tools.uz uspeshno oformlen. Summa: ${totalFormatted} UZS`
+      // Platform-agnostic message
+      const smsMessage = `Vash zakaz #${orderDisplayId} v Toolbox prinyat. Summa: ${totalFormatted} UZS`
       
       await notificationModule.createNotifications({
         to: normalized,

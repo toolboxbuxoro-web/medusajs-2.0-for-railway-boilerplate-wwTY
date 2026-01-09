@@ -138,9 +138,16 @@ export async function middleware(request: NextRequest) {
 
   // Check authentication for protected account routes
   // Allow /account (login page) but protect /account/* (dashboard pages)
-  const isProtectedAccountRoute = request.nextUrl.pathname.includes('/account/') && 
+  const isProtectedAccountRoute = request.nextUrl.pathname.includes('/account/') &&
     !request.nextUrl.pathname.includes('/account/@')
-  
+
+  // Hardening: Redirect /login to /account (as login is now handled there)
+  if (request.nextUrl.pathname.endsWith('/login')) {
+    const url = new URL(request.nextUrl)
+    url.pathname = url.pathname.replace(/\/login$/, "/account")
+    return NextResponse.redirect(url, 307)
+  }
+    
   if (isProtectedAccountRoute) {
     const authToken = request.cookies.get('_medusa_jwt')
     

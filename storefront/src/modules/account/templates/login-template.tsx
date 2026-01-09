@@ -1,20 +1,11 @@
 "use client"
 
-import { useState } from "react"
 import { useTranslations } from "next-intl"
 
-import Register from "@modules/account/components/register"
-import Login from "@modules/account/components/login"
-import ForgotPassword from "@modules/account/components/forgot-password"
-
-export enum LOGIN_VIEW {
-  SIGN_IN = "sign-in",
-  REGISTER = "register",
-  FORGOT_PASSWORD = "forgot-password",
-}
+import LoginOtp from "@modules/account/components/login-otp"
 
 const LoginTemplate = () => {
-  const [currentView, setCurrentView] = useState("sign-in")
+  // Default to OTP login (faster, password-free)
   const t = useTranslations("account")
 
   return (
@@ -38,11 +29,7 @@ const LoginTemplate = () => {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 backdrop-blur-sm">
-          {currentView === LOGIN_VIEW.SIGN_IN && <Login setCurrentView={setCurrentView} />}
-          {currentView === LOGIN_VIEW.REGISTER && <Register setCurrentView={setCurrentView} />}
-          {currentView === LOGIN_VIEW.FORGOT_PASSWORD && (
-            <ForgotPassword setCurrentView={setCurrentView} />
-          )}
+          <LoginOtp />
         </div>
 
         {/* Trust badges */}

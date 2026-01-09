@@ -8,7 +8,7 @@ import { redirect } from "next/navigation"
 import { cache } from "react"
 import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
 
-type OtpPurpose = "register" | "reset_password" | "change_password" | "checkout" | "change_phone"
+type OtpPurpose = "register" | "checkout" | "change_phone"
 
 function normalizeUzPhone(input: string): string | null {
   if (!input) return null
@@ -79,6 +79,25 @@ export const getCustomer = cache(async function () {
     .catch(() => null)
 })
 
+/**
+ * OTP Login: Set JWT token received from /store/mobile/auth/verify-otp
+ * This is a server action that sets the httpOnly cookie and returns success/error
+ */
+export async function loginWithOtpToken(token: string): Promise<string> {
+  if (!token) {
+    return "invalid_token"
+  }
+
+  try {
+    setAuthToken(token)
+    revalidateTag("customer")
+    return "success"
+  } catch (error: any) {
+    console.error("[loginWithOtpToken] Error setting auth token:", error)
+    return "error_occurred"
+  }
+}
+
 export const updateCustomer = cache(async function (
   body: HttpTypes.StoreUpdateCustomer
 ) {
@@ -91,157 +110,7 @@ export const updateCustomer = cache(async function (
   return updateRes
 })
 
-export async function signup(_currentState: unknown, formData: FormData) {
-  const phone = formData.get("phone") as string
-  const password = formData.get("password") as string
-  const otpCode = (formData.get("otp_code") as string) || ""
-  const first_name = formData.get("first_name") as string
-  const last_name = formData.get("last_name") as string
 
-  const normalizedPhone = normalizeUzPhone(phone)
-  if (!normalizedPhone) {
-    return "invalid_phone"
-  }
-
-  const technicalEmail = `${normalizedPhone}@phone.local`
-
-  try {
-    // Step 1: send OTP if not provided
-    if (!otpCode) {
-      await otpRequest(normalizedPhone, "register")
-      return "otp_sent_info"
-    }
-
-    // Step 2: verify OTP
-    const verified = await otpVerify(normalizedPhone, "register", otpCode)
-    if (!verified) {
-      return "invalid_code"
-    }
-
-    const token = await sdk.auth.register("customer", "emailpass", {
-      email: technicalEmail,
-      password: password,
-    })
-
-    const customHeaders = { authorization: `Bearer ${token}` }
-    
-    const { customer: createdCustomer } = await sdk.store.customer.create(
-      { 
-        email: technicalEmail,
-        first_name,
-        last_name,
-        phone: `+${normalizedPhone}`
-      },
-      {},
-      customHeaders
-    )
-
-    const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: technicalEmail,
-      password,
-    })
-
-    setAuthToken(typeof loginToken === 'string' ? loginToken : loginToken.location)
-
-    revalidateTag("customer")
-    return createdCustomer
-  } catch (error: any) {
-    return mapBackendError(error)
-  }
-}
-
-export async function requestPasswordResetOtp(_currentState: unknown, formData: FormData) {
-  const phone = (formData.get("phone") as string) || ""
-  const normalized = normalizeUzPhone(phone)
-  if (!normalized) return "invalid_phone"
-  try {
-    await otpRequest(normalized, "reset_password")
-    return "otp_sent"
-  } catch (e: any) {
-    return mapBackendError(e)
-  }
-}
-
-export async function resetPasswordWithOtp(_currentState: unknown, formData: FormData) {
-  const phone = (formData.get("phone") as string) || ""
-  const code = (formData.get("otp_code") as string) || ""
-  const newPassword = (formData.get("new_password") as string) || ""
-  const normalized = normalizeUzPhone(phone)
-  
-  if (!normalized) return "invalid_phone"
-  if (!code || !newPassword) return "code_and_password_required"
-
-  try {
-    const resp = await fetch(`${backendBaseUrl()}/store/otp/reset-password`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-      },
-      body: JSON.stringify({ phone: normalized, code, new_password: newPassword }),
-      cache: "no-store",
-    })
-
-    if (!resp.ok) {
-      const errorJson = await resp.json().catch(() => ({}))
-      return mapBackendError(errorJson.error || "password_reset_failed")
-    }
-
-    return "success.password_reset"
-  } catch (e: any) {
-    return mapBackendError(e)
-  }
-}
-
-export async function forgotPassword(_currentState: unknown, formData: FormData) {
-  const code = (formData.get("otp_code") as string) || ""
-  if (!code) {
-    return requestPasswordResetOtp(_currentState, formData)
-  }
-  return resetPasswordWithOtp(_currentState, formData)
-}
-
-export async function changePasswordWithOtp(_currentState: any, formData: FormData) {
-  const phone = (formData.get("phone") as string) || ""
-  const code = (formData.get("otp_code") as string) || ""
-  const oldPassword = (formData.get("old_password") as string) || ""
-  const newPassword = (formData.get("new_password") as string) || ""
-
-  const normalized = normalizeUzPhone(phone)
-  if (!normalized) return "invalid_phone"
-
-  try {
-    // If no code, just send OTP
-    if (!code) {
-      await otpRequest(normalized, "change_password")
-      return "otp_sent"
-    }
-
-    const resp = await fetch(`${backendBaseUrl()}/store/otp/change-password`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-      },
-      body: JSON.stringify({
-        phone: normalized,
-        code,
-        old_password: oldPassword,
-        new_password: newPassword,
-      }),
-      cache: "no-store",
-    })
-
-    if (!resp.ok) {
-      const errorJson = await resp.json().catch(() => ({}))
-      return mapBackendError(errorJson.error || "password_change_failed")
-    }
-
-    return "success.password_changed"
-  } catch (e: any) {
-    return mapBackendError(e)
-  }
-}
 
 export async function changePhoneWithOtp(_currentState: any, formData: FormData) {
   const phone = (formData.get("phone") as string) || ""
@@ -282,67 +151,7 @@ export async function changePhoneWithOtp(_currentState: any, formData: FormData)
   }
 }
 
-export async function login(_currentState: unknown, formData: FormData) {
-  const phone = formData.get("phone") as string
-  const password = formData.get("password") as string
 
-  // Normalize phone and convert to email format
-  const normalized = normalizeUzPhone(phone)
-  
-  if (!normalized) {
-    return "invalid_phone"
-  }
-  
-  const technicalEmail = `${normalized}@phone.local`
-  const formattedPhone = `+${normalized}`
-
-  // Try to find customer by phone to get their actual email
-  let emailToUse = technicalEmail
-  try {
-    const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
-    const response = await fetch(`${backendUrl}/store/customer-by-phone?phone=${encodeURIComponent(formattedPhone)}`, {
-      headers: {
-        "Content-Type": "application/json",
-        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-      },
-      cache: "no-store"
-    })
-    if (response.ok) {
-      const data = await response.json()
-      if (data.found && data.email) {
-        emailToUse = data.email
-      }
-    }
-  } catch (e: any) {
-    // Fallback to technical email is handled by default
-  }
-
-  try {
-    await sdk.auth
-      .login("customer", "emailpass", { email: emailToUse, password })
-      .then((token) => {
-        setAuthToken(typeof token === 'string' ? token : token.location)
-        revalidateTag("customer")
-      })
-  } catch (error: any) {
-    // Fallback: if we used stored email and it failed, try technical email
-    if (emailToUse !== technicalEmail) {
-      try {
-        await sdk.auth
-          .login("customer", "emailpass", { email: technicalEmail, password })
-          .then((token) => {
-            setAuthToken(typeof token === 'string' ? token : token.location)
-            revalidateTag("customer")
-          })
-        return // Success on fallback
-      } catch (fallbackError: any) {
-        // Fallback also failed
-      }
-    }
-    
-    return "invalid_credentials"
-  }
-}
 
 export async function signout(countryCode: string) {
   await sdk.auth.logout()
