@@ -36,21 +36,21 @@ const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
-            {t('delivery_method') || "Способ доставки"}
+            {t('delivery_method')}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle mb-4">
-            BTS Pickup (Склад)
+            BTS Pickup
           </Text>
 
           <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
-            {t('bts_delivery_point') || "Пункт выдачи BTS"}
+            {t('bts_delivery_point')}
           </Text>
           <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 mb-2">
             <Text className="text-sm font-bold text-gray-900 mb-1">
-              {btsDelivery.region || "Регион не указан"}
+              {btsDelivery.region || t('region_not_specified')}
             </Text>
             <Text className="text-xs text-gray-600 font-medium">
-              {btsDelivery.point || "Пункт не указан"}
+              {btsDelivery.point || t('point_not_specified')}
             </Text>
             {btsDelivery.point_address && (
               <Text className="text-xs text-gray-400 mt-1 italic">
@@ -64,7 +64,7 @@ const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
           className="flex flex-col"
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('recipient') || "Получатель"}</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('recipient')}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.first_name} {order.shipping_address?.last_name}
           </Text>

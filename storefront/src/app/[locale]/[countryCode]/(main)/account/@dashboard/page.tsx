@@ -10,7 +10,12 @@ export const metadata: Metadata = {
   description: "Overview of your account activity.",
 }
 
-export default async function OverviewTemplate() {
+export default async function OverviewTemplate({
+  params,
+}: {
+  params: { locale: string }
+}) {
+  const { locale } = params
   const customer = await getCustomer().catch(() => null)
   const orders = (await listOrders().catch(() => null)) || null
 
@@ -18,5 +23,5 @@ export default async function OverviewTemplate() {
     notFound()
   }
 
-  return <Overview customer={customer} orders={orders} />
+  return <Overview customer={customer} orders={orders} locale={locale} />
 }

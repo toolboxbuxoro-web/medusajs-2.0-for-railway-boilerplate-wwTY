@@ -87,7 +87,8 @@
     "order_placed": "Buyurtma berildi",
     "order_number": "Buyurtma raqami",
     "total_amount": "Jami summa",
-    "no_recent_orders": "Oxirgi buyurtmalar topilmadi",
+    "no_recent_orders": "Hali buyurtmalaringiz yo'q",
+    "start_shopping": "Xaridni boshlash",
     "orders_description": "Oldingi buyurtmalaringiz va ularning holatini ko'ring. Kerak bo'lsa, buyurtmalaringiz uchun qaytarish yoki almashtirish yaratishingiz mumkin.",
     "profile_description": "Profil ma'lumotlaringizni, jumladan ismingiz, elektron pochtangiz va telefon raqamingizni ko'ring va yangilang. Shuningdek, to'lov manzilingizni yangilashingiz mumkin.",
     "shipping_addresses": "Yetkazib berish manzillari",
@@ -107,6 +108,8 @@
     "remove": "O'chirish",
     "edit_address": "Manzilni tahrirlash",
     "no_billing_address": "To'lov manzili yo'q",
+    "bts_delivery_title": "BTS orqali yetkazib berish",
+    "bts_delivery_desc": "Yetkazib berish faqat BTS tarqatish punktlari orqali amalga oshiriladi. Yetkazib berish manzilini kiritish talab qilinmaydi — buyurtma berishda o'zingizga qulay punktni tanlaysiz.",
     "terms_agreement_start": "Hisob yaratish orqali siz ",
     "privacy_policy": "Maxfiylik siyosati",
     "and": " va ",
@@ -378,7 +381,12 @@
     "shipping": "Yetkazib berish",
     "taxes": "Soliqlar",
     "total": "Jami",
-    "order_number": "Buyurtma raqami:"
+    "order_number": "Buyurtma raqami:",
+    "delivery_method": "Yetkazib berish usuli",
+    "bts_delivery_point": "BTS tarqatish punkti",
+    "region_not_specified": "Viloyat ko'rsatilmagan",
+    "point_not_specified": "Punkt ko'rsatilmagan",
+    "recipient": "Qabul qiluvchi"
   },
   "order_confirmed": {
     "title": "Rahmat!",

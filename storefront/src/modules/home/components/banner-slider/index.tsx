@@ -157,8 +157,8 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
     >
-      {/* 3:1 aspect ratio container */}
-      <div className="relative w-full" style={{ paddingBottom: "33.33%" }}>
+      {/* Responsive aspect ratio: 2:1 on mobile, 3:1 on larger screens */}
+      <div className="relative w-full aspect-[2/1] sm:aspect-[2.5/1] lg:aspect-[3/1]">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
@@ -185,8 +185,8 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                 {/* Gradient overlay for better text readability */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent z-0" />
                 
-                <div className="content-container h-full flex items-center py-4 sm:py-6 lg:py-8">
-                  <div className="max-w-[70%] sm:max-w-xl lg:max-w-2xl text-white space-y-0.5 sm:space-y-2 lg:space-y-3 relative z-10 px-3 sm:px-16 lg:px-20">
+                <div className="content-container h-full flex items-center py-3 sm:py-6 lg:py-8">
+                  <div className="max-w-[85%] sm:max-w-xl lg:max-w-2xl text-white space-y-1 sm:space-y-2 lg:space-y-3 relative z-10 px-4 sm:px-16 lg:px-20">
                     {/* Subtitle badge */}
                     {slide.subtitle && (
                       <div className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1 bg-white/20 backdrop-blur-sm rounded-full text-[7px] sm:text-[10px] lg:text-xs font-semibold tracking-wide uppercase">
@@ -194,16 +194,14 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
                       </div>
                     )}
                     
-                    {/* Title */}
                     {slide.title && (
-                      <h3 className="text-sm sm:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight drop-shadow-lg">
+                      <h3 className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-bold leading-snug drop-shadow-lg">
                         {slide.title}
                       </h3>
                     )}
                     
-                    {/* Description */}
                     {slide.description && (
-                      <p className="text-[10px] sm:text-sm lg:text-base text-white/90 leading-snug sm:leading-relaxed max-w-lg drop-shadow-md line-clamp-2">
+                      <p className="text-xs sm:text-sm lg:text-base text-white/90 leading-snug sm:leading-relaxed max-w-lg drop-shadow-md line-clamp-2 sm:line-clamp-3">
                         {slide.description}
                       </p>
                     )}

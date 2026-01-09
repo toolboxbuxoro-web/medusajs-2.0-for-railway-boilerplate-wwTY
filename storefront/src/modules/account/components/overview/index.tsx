@@ -8,11 +8,12 @@ import { HttpTypes } from "@medusajs/types"
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
   orders: HttpTypes.StoreOrder[] | null
+  locale?: string
 }
 
 import { getTranslations } from 'next-intl/server'
 
-const Overview = async ({ customer, orders }: OverviewProps) => {
+const Overview = async ({ customer, orders, locale }: OverviewProps) => {
   const t = await getTranslations('account')
 
   return (
@@ -84,7 +85,7 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
                         <div className="flex flex-col">
                           <span className="text-gray-500 text-xs uppercase tracking-wider mb-1">{t('order_placed')}</span>
                           <span className="font-medium text-gray-900" data-testid="order-created-date">
-                            {new Date(order.created_at).toLocaleDateString()}
+                            {new Date(order.created_at).toLocaleDateString(locale || 'ru')}
                           </span>
                         </div>
                         <div className="flex flex-col">
@@ -146,7 +147,7 @@ const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
     count++
   }
 
-  return (count / 3) * 100
+  return Math.round((count / 3) * 100)
 }
 
 export default Overview

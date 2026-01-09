@@ -33,8 +33,8 @@ export default function CollectionBanner({ collection, locale }: CollectionBanne
 
   return (
     <div className="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl sm:shadow-2xl mb-2 sm:mb-4 lg:mb-6">
-      {/* 3:1 aspect ratio container */}
-      <div className="relative w-full" style={{ aspectRatio: "3/1" }}>
+      {/* Responsive aspect ratio: 2:1 on mobile, 3:1 on larger screens */}
+      <div className="relative w-full aspect-[2/1] sm:aspect-[2.5/1] lg:aspect-[3/1]">
         {/* Background image */}
         <Image 
           src={banner.image_url} 
@@ -51,18 +51,16 @@ export default function CollectionBanner({ collection, locale }: CollectionBanne
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
           <div className="content-container h-full flex items-center py-4 sm:py-6 lg:py-8">
-            <div className="max-w-full sm:max-w-xl lg:max-w-2xl text-white space-y-2 sm:space-y-3 lg:space-y-4">
+            <div className="max-w-[85%] sm:max-w-xl lg:max-w-2xl text-white space-y-1.5 sm:space-y-3 lg:space-y-4">
               
-              {/* Title */}
               {banner.title && (
-                <h2 className="text-xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight drop-shadow-lg">
+                <h2 className="text-lg sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-snug drop-shadow-lg">
                   {banner.title}
                 </h2>
               )}
               
-              {/* Description */}
               {banner.description && (
-                <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-white/95 leading-relaxed max-w-xl drop-shadow-md line-clamp-2 sm:line-clamp-3">
+                <p className="text-[11px] sm:text-sm lg:text-base xl:text-lg text-white/95 leading-snug sm:leading-relaxed max-w-xl drop-shadow-md line-clamp-2 sm:line-clamp-3">
                   {banner.description}
                 </p>
               )}

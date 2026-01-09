@@ -43,11 +43,9 @@ export default async function Addresses({
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-1">Доставка через BTS</h3>
+              <h3 className="font-semibold text-lg mb-1">{t('bts_delivery_title')}</h3>
               <p className="text-gray-600">
-                Доставка осуществляется только через пункты выдачи BTS. 
-                <br />
-                Адрес доставки вводить не требуется — вы выберете удобный пункт при оформлении заказа.
+                {t('bts_delivery_desc')}
               </p>
             </div>
         </div>

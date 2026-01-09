@@ -40,7 +40,7 @@ const OrderDetails = async ({ order, showStatus, locale }: OrderDetailsProps) =>
       <Text className="mt-2">
         {t('order_date')}
         <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
+          {new Date(order.created_at).toLocaleDateString(locale || 'ru')}
         </span>
       </Text>
       <Text className="mt-2 text-ui-fg-interactive">
