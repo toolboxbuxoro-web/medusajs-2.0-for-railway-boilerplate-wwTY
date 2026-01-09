@@ -3,7 +3,6 @@ import { getTranslations } from 'next-intl/server'
 
 import ProfilePhone from "@modules/account//components/profile-phone"
 import ProfileName from "@modules/account/components/profile-name"
-import ProfilePassword from "@modules/account/components/profile-password"
 
 import { notFound } from "next/navigation"
 import { listRegions } from "@lib/data/regions"
@@ -35,8 +34,6 @@ export default async function Profile() {
         <ProfileName customer={customer} />
         <Divider />
         <ProfilePhone customer={customer} />
-        <Divider />
-        <ProfilePassword customer={customer} />
       </div>
     </div>
   )
