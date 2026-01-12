@@ -17,6 +17,10 @@ function generatePassword(): string {
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
+  
+  // DEPRECATED: This endpoint is legacy. Use /store/mobile/auth/verify-otp for OTP-based auth.
+  logger.warn(`[auto-register] DEPRECATED endpoint called. Prefer /store/mobile/auth/verify-otp for OTP auth.`)
+  
   const { phone, first_name, last_name, cart_id } = (req.body || {}) as Body
   const purpose = "checkout" // auto-register is currently linked to checkout flow
 

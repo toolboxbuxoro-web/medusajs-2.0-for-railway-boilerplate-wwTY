@@ -216,6 +216,10 @@ const medusaConfig = {
           ].filter(Boolean) : [console.log("❌ Click providers NOT added: Missing CLICK_MERCHANT_ID/CLICK_SERVICE_ID/CLICK_SECRET_KEY") && undefined].filter(Boolean)),
         ],
       },
+    },
+    {
+      key: "reviews",
+      resolve: "./src/modules/reviews",
     }
   ],
   plugins: [

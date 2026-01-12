@@ -13,6 +13,11 @@ function generatePassword(): string {
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
+  
+  // DEPRECATED: This endpoint creates accounts without OTP verification.
+  // Prefer OTP login (/store/mobile/auth/verify-otp) + cart binding instead.
+  logger.warn(`[quick-order] DEPRECATED endpoint called. Use OTP auth + cart binding instead.`)
+  
   const { phone, first_name } = (req.body || {}) as Body
 
   if (!phone) {

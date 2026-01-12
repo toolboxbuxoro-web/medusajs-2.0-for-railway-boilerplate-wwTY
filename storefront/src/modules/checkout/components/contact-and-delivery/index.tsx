@@ -278,7 +278,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       return
     }
     
-    // Guests must verify phone before proceeding
+    // Guests must login via OTP before proceeding
     if (!isLoggedIn && !otpVerified) {
       setError(tAccount("otp_please_verify"))
       return
@@ -344,38 +344,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         })
       }
 
-      // Auto-register guest user (if phone was verified)
-      console.log("[Checkout] isLoggedIn:", isLoggedIn, "otpVerified:", otpVerified)
-      if (!isLoggedIn && otpVerified) {
-        try {
-          console.log("[Checkout] Calling auto-register for phone:", phone)
-          const resp = await fetch(`${backendUrl}/store/auto-register`, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "x-publishable-api-key": publishableKey 
-            },
-            body: JSON.stringify({ 
-              phone, 
-              first_name: firstName, 
-              last_name: lastName,
-              cart_id: cart!.id
-            })
-          })
-          const data = await resp.json().catch(() => ({}))
-          console.log("[Checkout] Auto-register response:", resp.status, data)
-          if (resp.ok) {
-            console.log("[Checkout] Auto-registered guest user successfully")
-          } else {
-            console.error("[Checkout] Auto-register failed:", data.error || data.message)
-          }
-        } catch (e) {
-          console.error("[Checkout] Auto-register network error:", e)
-          // Continue anyway - they can still checkout as guest
-        }
-      } else {
-        console.log("[Checkout] Skipping auto-register: isLoggedIn=", isLoggedIn, "otpVerified=", otpVerified)
-      }
+      // Auto-register removed. OTP Login is now enforced above.
+      console.log("[Checkout] Address submitted. isLoggedIn:", isLoggedIn, "otpVerified:", otpVerified)
 
       // Navigate to payment step
       router.push(pathname + "?step=payment", { scroll: false })
@@ -447,7 +417,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 data-testid="shipping-phone-input"
               />
 
-              {/* OTP Verification for guests */}
+                data-testid="shipping-phone-input"
+              />
+
+              {/* OTP Login for guests */}
               {!isLoggedIn && phone.length >= 9 && (
                 <div className="space-y-3">
                   {!otpVerified ? (
@@ -461,16 +434,16 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                             try {
                               const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
                               const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-                              const resp = await fetch(`${backendUrl}/store/otp/request`, {
+                              const resp = await fetch(`${backendUrl}/store/mobile/auth/request-otp`, {
                                 method: "POST",
                                 headers: { 
                                   "Content-Type": "application/json",
                                   "x-publishable-api-key": publishableKey
                                 },
-                                body: JSON.stringify({ phone, purpose: "checkout" })
+                                body: JSON.stringify({ phone })
                               })
                               const data = await resp.json()
-                              if (resp.ok) {
+                              if (resp.ok && data.success) {
                                 setOtpSent(true)
                                 setResendTimer(60)
                               } else {
@@ -482,12 +455,12 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                             setOtpLoading(false)
                           }}
                           disabled={otpLoading}
-                          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                          className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 shadow-md"
                         >
                           {otpLoading ? tAccount("otp_sending") : tAccount("otp_get_code")}
                         </button>
                       ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-3 animation-fade-in">
                           <div className="flex gap-2">
                             <input
                               type="text"
@@ -496,7 +469,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                               placeholder={tAccount("otp_enter_code")}
                               value={otpCode}
                               onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-center text-xl tracking-widest font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-center text-xl tracking-widest font-mono focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                              data-testid="checkout-otp-input"
                             />
                             <button
                               type="button"
@@ -506,7 +480,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                 try {
                                   const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
                                   const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-                                  const resp = await fetch(`${backendUrl}/store/otp/verify`, {
+                                  const resp = await fetch(`${backendUrl}/store/mobile/auth/verify-otp`, {
                                     method: "POST",
                                     headers: { 
                                       "Content-Type": "application/json",
@@ -515,8 +489,17 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                     body: JSON.stringify({ phone, code: otpCode })
                                   })
                                   const data = await resp.json()
-                                  if (resp.ok && data.verified) {
-                                    setOtpVerified(true)
+                                  
+                                  if (resp.ok && data.token) {
+                                    const { loginWithOtpToken } = await import("@lib/data/customer")
+                                    const result = await loginWithOtpToken(data.token)
+                                    
+                                    if (result === "success") {
+                                       setOtpVerified(true)
+                                       router.refresh()
+                                    } else {
+                                       setOtpError("Login failed")
+                                    }
                                   } else {
                                     setOtpError(data.error || "Invalid code")
                                   }
@@ -526,7 +509,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                 setOtpLoading(false)
                               }}
                                 disabled={otpLoading || otpCode.length < 6}
-                                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 shadow-md"
+                                data-testid="checkout-verify-otp-button"
                             >
                               {otpLoading ? "..." : "✓"}
                             </button>

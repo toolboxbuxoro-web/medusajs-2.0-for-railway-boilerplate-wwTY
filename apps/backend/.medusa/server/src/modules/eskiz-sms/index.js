@@ -1,0 +1,8 @@
+"use strict";
+const service_1 = require("./service");
+const services = [service_1.EskizNotificationService];
+const providerExport = {
+    services,
+};
+module.exports = providerExport;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbW9kdWxlcy9lc2tpei1zbXMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUNBLHVDQUFvRDtBQUVwRCxNQUFNLFFBQVEsR0FBRyxDQUFDLGtDQUF3QixDQUFDLENBQUE7QUFFM0MsTUFBTSxjQUFjLEdBQTBCO0lBQzVDLFFBQVE7Q0FDVCxDQUFBO0FBR0QsaUJBQVMsY0FBYyxDQUFBIn0=

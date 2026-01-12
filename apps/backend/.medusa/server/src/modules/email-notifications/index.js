@@ -1,0 +1,8 @@
+"use strict";
+const resend_1 = require("./services/resend");
+const services = [resend_1.ResendNotificationService];
+const providerExport = {
+    services,
+};
+module.exports = providerExport;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbW9kdWxlcy9lbWFpbC1ub3RpZmljYXRpb25zL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFDQSw4Q0FBNkQ7QUFFN0QsTUFBTSxRQUFRLEdBQUcsQ0FBQyxrQ0FBeUIsQ0FBQyxDQUFBO0FBRTVDLE1BQU0sY0FBYyxHQUEwQjtJQUM1QyxRQUFRO0NBQ1QsQ0FBQTtBQUdELGlCQUFTLGNBQWMsQ0FBQSJ9

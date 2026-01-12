@@ -1,0 +1,23 @@
+"use strict";
+const fs = require('fs');
+const { execSync } = require('child_process');
+const path = require('path');
+const MEDUSA_SERVER_PATH = path.join(process.cwd(), '.medusa', 'server');
+// Check if .medusa/server exists - if not, build process failed
+if (!fs.existsSync(MEDUSA_SERVER_PATH)) {
+    throw new Error('.medusa/server directory not found. This indicates the Medusa build process failed. Please check for build errors.');
+}
+// Copy pnpm-lock.yaml
+fs.copyFileSync(path.join(process.cwd(), 'pnpm-lock.yaml'), path.join(MEDUSA_SERVER_PATH, 'pnpm-lock.yaml'));
+// Copy .env if it exists
+const envPath = path.join(process.cwd(), '.env');
+if (fs.existsSync(envPath)) {
+    fs.copyFileSync(envPath, path.join(MEDUSA_SERVER_PATH, '.env'));
+}
+// Install dependencies
+console.log('Installing dependencies in .medusa/server...');
+execSync('pnpm i --prod --frozen-lockfile', {
+    cwd: MEDUSA_SERVER_PATH,
+    stdio: 'inherit'
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicG9zdEJ1aWxkLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL3NjcmlwdHMvcG9zdEJ1aWxkLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSxNQUFNLEVBQUUsR0FBRyxPQUFPLENBQUMsSUFBSSxDQUFDLENBQUM7QUFDekIsTUFBTSxFQUFFLFFBQVEsRUFBRSxHQUFHLE9BQU8sQ0FBQyxlQUFlLENBQUMsQ0FBQztBQUM5QyxNQUFNLElBQUksR0FBRyxPQUFPLENBQUMsTUFBTSxDQUFDLENBQUM7QUFFN0IsTUFBTSxrQkFBa0IsR0FBRyxJQUFJLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxHQUFHLEVBQUUsRUFBRSxTQUFTLEVBQUUsUUFBUSxDQUFDLENBQUM7QUFFekUsZ0VBQWdFO0FBQ2hFLElBQUksQ0FBQyxFQUFFLENBQUMsVUFBVSxDQUFDLGtCQUFrQixDQUFDLEVBQUUsQ0FBQztJQUN2QyxNQUFNLElBQUksS0FBSyxDQUFDLG9IQUFvSCxDQUFDLENBQUM7QUFDeEksQ0FBQztBQUVELHNCQUFzQjtBQUN0QixFQUFFLENBQUMsWUFBWSxDQUNiLElBQUksQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDLEdBQUcsRUFBRSxFQUFFLGdCQUFnQixDQUFDLEVBQzFDLElBQUksQ0FBQyxJQUFJLENBQUMsa0JBQWtCLEVBQUUsZ0JBQWdCLENBQUMsQ0FDaEQsQ0FBQztBQUVGLHlCQUF5QjtBQUN6QixNQUFNLE9BQU8sR0FBRyxJQUFJLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxHQUFHLEVBQUUsRUFBRSxNQUFNLENBQUMsQ0FBQztBQUNqRCxJQUFJLEVBQUUsQ0FBQyxVQUFVLENBQUMsT0FBTyxDQUFDLEVBQUUsQ0FBQztJQUMzQixFQUFFLENBQUMsWUFBWSxDQUNiLE9BQU8sRUFDUCxJQUFJLENBQUMsSUFBSSxDQUFDLGtCQUFrQixFQUFFLE1BQU0sQ0FBQyxDQUN0QyxDQUFDO0FBQ0osQ0FBQztBQUVELHVCQUF1QjtBQUN2QixPQUFPLENBQUMsR0FBRyxDQUFDLDhDQUE4QyxDQUFDLENBQUM7QUFDNUQsUUFBUSxDQUFDLGlDQUFpQyxFQUFFO0lBQzFDLEdBQUcsRUFBRSxrQkFBa0I7SUFDdkIsS0FBSyxFQUFFLFNBQVM7Q0FDakIsQ0FBQyxDQUFDIn0=

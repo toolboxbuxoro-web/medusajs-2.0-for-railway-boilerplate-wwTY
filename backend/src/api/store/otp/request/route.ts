@@ -9,20 +9,26 @@ type Body = {
   purpose?: "register" | "reset_password" | "change_password" | "checkout"
 }
 
-// Eskiz-approved SMS templates for each purpose
+// ═══════════════════════════════════════════════════════════════════════════
+// ESKIZ-APPROVED SMS TEMPLATE (SOURCE OF TRUTH)
+// ═══════════════════════════════════════════════════════════════════════════
+// All OTP messages MUST use this exact text. It's platform-agnostic and approved.
+//
+// For OTP Login / Checkout:
+//   "Код для входа в приложение Toolbox: {code}. Не передавайте код никому."
+//
+// For Change Phone:
+//   "Код для подтверждения нового номера в Toolbox: {code}."
+// ═══════════════════════════════════════════════════════════════════════════
+
 function getOtpMessage(code: string, purpose?: string): string {
-  switch (purpose) {
-    case "register":
-      return `Kod podtverzhdeniya dlya registracii na sajte toolbox-tools.uz: ${code}`
-    case "reset_password":
-      return `Kod dlya vosstanovleniya parolya na sajte toolbox-tools.uz: ${code}`
-    case "change_password":
-      return `Kod dlya izmeneniya nomera telefona na sajte toolbox-tools.uz: ${code}`
-    case "checkout":
-    default:
-      return `Kod podtverzhdeniya dlya oformleniya zakaza na sajte toolbox-tools.uz: ${code}`
+  if (purpose === "change_phone") {
+    return `Код для подтверждения нового номера в Toolbox: ${code}.`
   }
+  // Default: login, checkout, auth, register, reset_password - all use the same approved text
+  return `Код для входа в приложение Toolbox: ${code}. Не передавайте код никому.`
 }
+
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")

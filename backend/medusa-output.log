@@ -1,0 +1,4042 @@
+ WARN  Unsupported engine: wanted: {"node":"22.x"} (current: {"node":"v21.6.2","pnpm":"9.10.0"})
+
+> medusa-2.0-boilerplate-backend@0.0.2 dev /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend
+> medusa develop
+
+[Config] Eskiz SMS: ENABLED (your-eskiz-email@example.com)
+❌ Payme provider NOT added: Missing ID or KEY
+❌ Click providers NOT added: Missing CLICK_MERCHANT_ID/CLICK_SERVICE_ID/CLICK_SECRET_KEY
+[32minfo[39m:    Watching filesystem to reload dev server on file change
+[Config] Eskiz SMS: ENABLED (your-eskiz-email@example.com)
+❌ Payme provider NOT added: Missing ID or KEY
+❌ Click providers NOT added: Missing CLICK_MERCHANT_ID/CLICK_SERVICE_ID/CLICK_SECRET_KEY
+[32minfo[39m:    No link to load from /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+draft-order@2.10.2_m32em44am5fyd5ifiw2fkjijlq/node_modules/@medusajs/draft-order/.medusa/server/src/links. skipped.
+[32minfo[39m:    No link to load from /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/links. skipped.
+[32minfo[39m:    Locking module: Using "in-memory" as default.
+[32minfo[39m:    Connection to Redis in module 'event-bus-redis' established
+[32minfo[39m:    Connection to Redis in module 'cache-redis' established
+[32minfo[39m:    Connection to Redis in module 'workflow-engine-redis' established
+[32minfo[39m:    Connection to Redis PubSub in module 'workflow-engine-redis' established
+[33mwarn[39m:    MOYSKLAD_TOKEN is not set in environment variables. MoySklad integration will not work.
+[32minfo[39m:    No workflow to load from /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+draft-order@2.10.2_m32em44am5fyd5ifiw2fkjijlq/node_modules/@medusajs/draft-order/.medusa/server/src/workflows. skipped.
+[32minfo[39m:    No subscriber to load from /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+draft-order@2.10.2_m32em44am5fyd5ifiw2fkjijlq/node_modules/@medusajs/draft-order/.medusa/server/src/subscribers. skipped.
+(node:51934) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[32minfo[39m:    No job to load from /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+medusa@2.10.2_53nu72u752dnr7jsrfujdqysjy/node_modules/@medusajs/medusa/dist/jobs. skipped.
+[32minfo[39m:    No job to load from /Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+draft-order@2.10.2_m32em44am5fyd5ifiw2fkjijlq/node_modules/@medusajs/draft-order/.medusa/server/src/jobs. skipped.
+- Creating server
+Error: listen EADDRINUSE: address already in use :::9000
+    at Server.setupListenHandle [as _listen2] (node:net:1893:16)
+    at listenInCluster (node:net:1941:12)
+    at Server.listen (node:net:2029:7)
+    at internalStart (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+medusa@2.10.2_53nu72u752dnr7jsrfujdqysjy/node_modules/@medusajs/medusa/src/commands/start.ts:223:15)
+    at async start (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+medusa@2.10.2_53nu72u752dnr7jsrfujdqysjy/node_modules/@medusajs/medusa/src/commands/start.ts:305:5) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 9000
+}
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+ ELIFECYCLE  Command failed.
+t=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 21.892 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 13.279 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 134.139 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 128.945 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 87.245 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 152.564 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 2.540 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.700 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 50.002 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 65.840 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 24.764 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 87.227 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.656 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 2.373 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 29.803 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 31.094 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 23.885 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 25.776 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 18.507 ms
+[32mhttp[39m:    GET /store/collections?limit=12&offset=0 ← - (200) - 27.961 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 21.110 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 1.926 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.974 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/banners ← - (200) - 15.659 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 15.851 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 15.642 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 30.628 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 44.536 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 4.816 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 2.265 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 43.501 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 48.251 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&order=created_at ← - (200) - 900.442 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 219.714 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 2.461 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.332 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 38.904 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 40.633 ms
+[32mhttp[39m:    GET /store/products?handle=t-shirt&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 100.083 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 652.270 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8QGPX4FZCVT0VCB0D&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 658.076 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 30.616 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 3.883 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 95.829 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 114.441 ms
+[32mhttp[39m:    GET /store/products?handle=sweatshirt&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 342.460 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 190.374 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 193.053 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 89.563 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 155.841 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 10.872 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.881 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 80.272 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 81.635 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&order=created_at ← - (200) - 320.380 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 6.356 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 1.100 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 79.144 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 85.845 ms
+[32mhttp[39m:    GET /store/products?handle=shorts&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 282.844 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8HZEQNNDDE6T2ZNTM&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 532.991 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 530.684 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories ← - (400) - 9.064 ms
+[Custom Categories API] Request received {
+  query: { fields: '+category_children,+is_internal,+metadata' },
+  url: '/store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+is_internal",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata ← - (200) - 60.182 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 25.263 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 23.438 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 29.024 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?handle=pants ← - (400) - 2.030 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 1.365 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 4.859 ms
+[Custom Categories API] Request received {
+  query: { handle: [ 'pants' ], fields: '+category_children,+metadata' },
+  url: '/store/product-categories?handle%5B0%5D=pants&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {
+          "handle": [
+            "pants"
+          ]
+        },
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 1,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTXMKECFKPSHWNQMRZJ',
+    name: 'Pants',
+    handle: 'pants',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?handle%5B0%5D=pants&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 40.704 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 37.553 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 55.051 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&category_id%5B0%5D=pcat_01KEBSWVTXMKECFKPSHWNQMRZJ&order=created_at ← - (200) - 345.608 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?handle=shirts ← - (400) - 23.232 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 70.149 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 118.863 ms
+[Custom Categories API] Request received {
+  query: { handle: [ 'shirts' ], fields: '+category_children,+metadata' },
+  url: '/store/product-categories?handle%5B0%5D=shirts&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {
+          "handle": [
+            "shirts"
+          ]
+        },
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 4.413 ms
+[Custom Categories API] Success: {
+  count: 1,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?handle%5B0%5D=shirts&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 63.994 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 1.462 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 33.202 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 63.089 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&category_id%5B0%5D=pcat_01KEBSWVTWEXMX6ZE2PTHK186W&order=created_at ← - (200) - 250.594 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories ← - (400) - 1.201 ms
+[Custom Categories API] Request received {
+  query: { fields: '+category_children,+is_internal,+metadata' },
+  url: '/store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+is_internal",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata ← - (200) - 14.007 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/products ← http://localhost:8000/ (400) - 23.539 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/products ← http://localhost:8000/ (400) - 38.987 ms
+[32mhttp[39m:    OPTIONS /store/products ← http://localhost:8000/ (204) - 11.690 ms
+[32mhttp[39m:    GET /store/products ← http://localhost:8000/ (200) - 271.303 ms
+[32mhttp[39m:    OPTIONS /store/regions ← http://localhost:8000/ (204) - 3.702 ms
+[32mhttp[39m:    GET /store/regions ← http://localhost:8000/ (200) - 83.615 ms
+[32mhttp[39m:    OPTIONS /store/carts ← http://localhost:8000/ (204) - 0.816 ms
+[32mhttp[39m:    POST /store/carts ← http://localhost:8000/ (200) - 484.621 ms
+[32mhttp[39m:    OPTIONS /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW/line-items ← http://localhost:8000/ (204) - 0.640 ms
+[32minfo[39m:    Processing cart.created which has 0 subscribers
+[32mhttp[39m:    POST /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW/line-items ← http://localhost:8000/ (200) - 256.364 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 41.399 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 41.109 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 3.275 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.647 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 75.259 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 20.819 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 22.162 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 69.817 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 47.716 ms
+[32mhttp[39m:    GET /store/products?limit=2&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 112.385 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 99.636 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 148.628 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 6.626 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 178.519 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 31.947 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 2.472 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 0.173 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (200) - 5.897 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 4.861 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 2.060 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE6787W1D6B7XSGQ4PQWQ6C:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 263.899 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 1.399 ms
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (429) - 47.541 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 19.374 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE683ZG0RXX69W1XWBSBDBE:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 290.738 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 12.008 ms
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (429) - 103.773 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 5.076 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE6B7QV8K9YVAE3TKFT8SC4:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 258.370 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 283.411 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 195.320 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 6.691 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 684.568 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 13.342 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 21.876 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 3.016 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 85.909 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 35.465 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 16.415 ms
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (429) - 81.312 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 11.375 ms
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (429) - 52.300 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 15.089 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE6DB89ZE3RMVKZ91HE34PB:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 320.175 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 42.080 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE6EH71DNW7FJ0TQ7BTCP57:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 1471.047 ms
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[32mhttp[39m:    OPTIONS /store/mobile/auth/verify-otp ← http://localhost:8000/ (204) - 10.349 ms
+[32mhttp[39m:    POST /store/mobile/auth/verify-otp ← http://localhost:8000/ (401) - 95.338 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 487.692 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 1297.459 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 15.105 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 282.167 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 46.016 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 10.046 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 0.332 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 51.481 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 7.915 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 4.853 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE6PC5WWMZPB9C6730PRG88:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 362.537 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/verify-otp ← http://localhost:8000/ (204) - 3.506 ms
+[32minfo[39m:    [Mobile Auth] User 998901234567 logged in successfully
+[32mhttp[39m:    POST /store/mobile/auth/verify-otp ← http://localhost:8000/ (200) - 58.981 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 379.008 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 180.372 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 27.776 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 204.634 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 17.170 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 9.284 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 0.344 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 221.150 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 53.120 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?handle=pants ← - (400) - 35.084 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 294.864 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 188.660 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.627 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 2.714 ms
+[Custom Categories API] Request received {
+  query: { handle: [ 'pants' ], fields: '+category_children,+metadata' },
+  url: '/store/product-categories?handle%5B0%5D=pants&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {
+          "handle": [
+            "pants"
+          ]
+        },
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 213.761 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 360.483 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 1.008 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 335.649 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 362.858 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 1.836 ms
+[Custom Categories API] Success: {
+  count: 1,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTXMKECFKPSHWNQMRZJ',
+    name: 'Pants',
+    handle: 'pants',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?handle%5B0%5D=pants&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 242.733 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 267.477 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 209.368 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 287.531 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 227.729 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 89.209 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 81.652 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories ← - (400) - 1.088 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 312.279 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 265.902 ms
+[Custom Categories API] Request received {
+  query: { fields: '+category_children,+is_internal,+metadata' },
+  url: '/store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+is_internal",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata ← - (200) - 44.129 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 490.116 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&category_id%5B0%5D=pcat_01KEBSWVTXMKECFKPSHWNQMRZJ&order=created_at ← - (200) - 479.493 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 556.954 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 507.578 ms
+[32mhttp[39m:    GET /store/products?handle=shorts&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 805.067 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 42.646 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 567.944 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 68.309 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 81.580 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 29.604 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 302.857 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 325.529 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8HZEQNNDDE6T2ZNTM&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 510.366 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 526.203 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 590.609 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 565.364 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 726.479 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 105.269 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 119.811 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 788.650 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 124.185 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 44.792 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 16.970 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 0.273 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 36.163 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 13.167 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 277.226 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 309.028 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?handle=pants ← - (400) - 11.056 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 74.925 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 179.454 ms
+[Custom Categories API] Request received {
+  query: { handle: [ 'pants' ], fields: '+category_children,+metadata' },
+  url: '/store/product-categories?handle%5B0%5D=pants&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {
+          "handle": [
+            "pants"
+          ]
+        },
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 121.743 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 3.079 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 163.200 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.754 ms
+[Custom Categories API] Success: {
+  count: 1,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTXMKECFKPSHWNQMRZJ',
+    name: 'Pants',
+    handle: 'pants',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?handle%5B0%5D=pants&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 194.441 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 1.857 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.547 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 239.819 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 78.033 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 43.108 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 50.462 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 40.201 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 439.637 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 134.141 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 58.362 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 144.926 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 52.641 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 483.038 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 63.210 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 34.716 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.730 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.305 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 261.581 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories ← - (400) - 1.607 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 38.688 ms
+[32mhttp[39m:    GET /store/products?handle=shorts&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 369.527 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&category_id%5B0%5D=pcat_01KEBSWVTXMKECFKPSHWNQMRZJ&order=created_at ← - (200) - 301.774 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 93.081 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 121.883 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 93.189 ms
+[Custom Categories API] Request received {
+  query: { fields: '+category_children,+is_internal,+metadata' },
+  url: '/store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+is_internal",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?fields=%2Bcategory_children%2C%2Bis_internal%2C%2Bmetadata ← - (200) - 104.106 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 221.410 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 408.501 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 402.196 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 469.772 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 536.331 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8HZEQNNDDE6T2ZNTM&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 911.902 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 949.491 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 1022.239 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 159.124 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 992.888 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 72.259 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 984.406 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 191.207 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 317.028 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 19.587 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE65P9YQHX27QPJTGVQ38HW ← - (200) - 309.251 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 29.986 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 118.181 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 136.236 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 151.836 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (200) - 224.313 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 8.218 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.992 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 49.595 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 54.702 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 132.663 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 387.635 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 162.204 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 150.250 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 166.253 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 7.173 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 1.710 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (200) - 57.941 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 39.565 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 32.735 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 66.144 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 298.622 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 365.778 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 214.889 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 212.975 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 19.566 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.982 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 81.137 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 77.424 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 227.708 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 282.923 ms
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+[32mhttp[39m:    GET /store/regions ← - (200) - 55.013 ms
+[32mhttp[39m:    GET /store/customers/me ← - (200) - 48.238 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 44.993 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 48.318 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 13.672 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.771 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 32.414 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (200) - 42.060 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 34.801 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE65P9YQHX27QPJTGVQ38HW?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 96.299 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 207.008 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 53.686 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 70.333 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 54.667 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 18.932 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 10.231 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.948 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 25.110 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 27.224 ms
+[32mhttp[39m:    GET /store/customer-by-phone?phone=%2B998901234567 ← - (200) - 119.832 ms
+[32minfo[39m:    Invalid email or password
+[32mhttp[39m:    POST /auth/customer/emailpass ← - (401) - 427.387 ms
+[32mhttp[39m:    GET /store/customer-by-phone?phone=%2B998901234567 ← - (200) - 200.891 ms
+[32minfo[39m:    Invalid email or password
+[32mhttp[39m:    POST /auth/customer/emailpass ← - (401) - 445.561 ms
+[32mhttp[39m:    GET /store/customer-by-phone?phone=%2B998901234567 ← - (200) - 162.468 ms
+[32minfo[39m:    Invalid email or password
+[32mhttp[39m:    POST /auth/customer/emailpass ← - (401) - 289.153 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 141.715 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 149.181 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 152.807 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 11.902 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 14.064 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.698 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 39.083 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 34.826 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 15.582 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEE92QTGS809DVR3TAAE70PB:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 553.791 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 146.104 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 283.570 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 23.704 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 2.848 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 89.962 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 140.377 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&order=created_at ← - (200) - 510.991 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 493.262 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 1309.556 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 1624.912 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 174.129 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 488.550 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 29.551 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.824 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 86.899 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 82.693 ms
+[32mhttp[39m:    GET /store/products?limit=100&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&order=created_at ← - (200) - 863.851 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 1071.099 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 1260.714 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 257.943 ms
+[32mhttp[39m:    POST /store/carts ← - (200) - 1319.325 ms
+[32minfo[39m:    Processing cart.updated which has 0 subscribers
+[32mhttp[39m:    POST /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9/line-items ← - (200) - 1598.045 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 53.920 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 39.671 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 20.649 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 6.057 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 367.682 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 117.861 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 114.969 ms
+[32mhttp[39m:    GET /store/products?handle=sweatshirt&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 800.697 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 229.004 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 890.997 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 288.222 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 148.216 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 7.941 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 18.292 ms
+[32mhttp[39m:    GET /store/products?limit=2&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 134.138 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 306.196 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 750.377 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 12.916 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE976SXK71CY9SP10MJXDV9 ← - (200) - 693.107 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 58.674 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 0.618 ms
+[32mhttp[39m:    OPTIONS /store/bts ← http://localhost:8000/ (204) - 0.129 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 322.080 ms
+[32mhttp[39m:    GET /store/bts ← http://localhost:8000/ (304) - 23.211 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 27.711 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEEADDHA1PCE4JH2ZHEQ3YRP:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 4699.600 ms
+[32mhttp[39m:    OPTIONS /store/mobile/auth/request-otp ← http://localhost:8000/ (204) - 4.447 ms
+[31merror[39m:   [Eskiz] auth/login failed: 401 {"message":"Неверный Email или пароль"}
+[31merror[39m:   [Mobile Auth] Failed to send SMS: Failed to send notification with id noti_01KEEAFJ27GXYVYQ6QKQZJPF9F:
+Eskiz login failed (401)
+[32mhttp[39m:    POST /store/mobile/auth/request-otp ← http://localhost:8000/ (500) - 206.343 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 77.867 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.751 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 378.477 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 108.817 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 139.359 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 180.327 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 182.490 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 144.709 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 895.714 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 893.267 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.804 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.903 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 8.683 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 27.353 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 73.302 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 34.957 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 136.716 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 51.371 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 80.407 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 162.388 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 100.384 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE976SXK71CY9SP10MJXDV9 ← - (200) - 135.608 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 20.033 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 56.018 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 54.962 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 20.042 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 81.562 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 3.475 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.731 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 18.300 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 18.118 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 288.399 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 101.971 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 422.549 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 38.541 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 325.026 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 386.907 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 1.676 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 1.762 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 1.416 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 448.625 ms
+[32mhttp[39m:    GET /store/regions ← - (200) - 161.097 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 71.587 ms
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0 ← - (400) - 0.821 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 115.654 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 91.310 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 72.139 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 117.066 ms
+[32mhttp[39m:    GET /store/collections?limit=6&offset=0 ← - (200) - 167.005 ms
+[32mhttp[39m:    GET /store/orders?limit=10&offset=0 ← - (401) - 189.931 ms
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[Custom Categories API] Request received {
+  query: { limit: '100', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 100,
+        "skip": 0
+      }
+    }
+  }
+}
+[32minfo[39m:    Publishable API key required in the request header: x-publishable-api-key. You can manage your keys in settings in the dashboard.
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0 ← - (400) - 0.842 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 236.846 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=100&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 275.330 ms
+[Custom Categories API] Request received {
+  query: { limit: '6', offset: '0', fields: '+category_children,+metadata' },
+  url: '/store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata'
+}
+[Custom Categories API] Query object: {
+  "__value": {
+    "product_category": {
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "handle",
+        "is_active",
+        "is_internal",
+        "rank",
+        "parent_category_id",
+        "parent_category",
+        "metadata",
+        "+category_children",
+        "+metadata"
+      ],
+      "isServiceAccess": false,
+      "category_children": {
+        "fields": [
+          "*",
+          "metadata"
+        ]
+      },
+      "__args": {
+        "filters": {},
+        "take": 6,
+        "skip": 0
+      }
+    }
+  }
+}
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 148.383 ms
+[Custom Categories API] Success: {
+  count: 4,
+  hasMetadata: 'no',
+  firstCategory: {
+    id: 'pcat_01KEBSWVTWEXMX6ZE2PTHK186W',
+    name: 'Shirts',
+    handle: 'shirts',
+    metadata: null
+  }
+}
+[32mhttp[39m:    GET /store/product-categories?limit=6&offset=0&fields=%2Bcategory_children%2C%2Bmetadata ← - (200) - 37.444 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 683.972 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 102.707 ms
+[32mhttp[39m:    GET /store/products?limit=12&offset=0&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata&is_giftcard=false ← - (200) - 514.125 ms
+[32mhttp[39m:    GET /store/carts/cart_01KEE976SXK71CY9SP10MJXDV9?fields=%2Aregion%2C%2Aitems%2C%2Aitems.variant%2C%2Aitems.variant.product%2C%2Ashipping_address%2C%2Abilling_address%2C%2Ashipping_methods%2C%2Apayment_collection%2C%2Apayment_collection.payment_sessions ← - (200) - 107.346 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 430.131 ms
+[32mhttp[39m:    GET /store/customers/me ← - (401) - 11.635 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 120.079 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 61.195 ms
+[32mhttp[39m:    GET /store/products?id%5B0%5D=prod_01KEBSWVV8GNB1714HRRM53NTB&region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2&fields=%2Avariants.calculated_price%2C%2Bvariants.inventory_quantity%2C%2Bmetadata ← - (200) - 83.953 ms
+[32mhttp[39m:    GET /store/shipping-options?cart_id=cart_01KEE976SXK71CY9SP10MJXDV9 ← - (200) - 93.725 ms
+[32mhttp[39m:    GET /store/payment-providers?region_id=reg_01KEBSWVMYG9HF1MZ3Q47124X2 ← - (200) - 10.031 ms
+[32minfo[39m:    🔄 Starting MoySklad stock sync job...
+[32minfo[39m:    Fetching stock from MoySklad API...
+[31merror[39m:   ❌ MoySklad sync failed after 0.0s
+[31merror[39m:   MOYSKLAD_TOKEN is not configured
+Error: MOYSKLAD_TOKEN is not configured
+    at MoySkladService.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/moysklad/service.ts:133:13)
+    at Proxy.retrieveAllStock (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/local-workflow.ts:131:27)
+    at syncMoySkladStockJob (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/jobs/sync-moysklad-stock.ts:24:49)
+    at Object.<anonymous> (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/jobs/job-loader.ts:95:29)
+    at Object.invoke (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+workflows-sdk@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._7plovj73usc23lmfe6xl3eib3e/node_modules/@medusajs/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts:91:67)
+    at DistributedTransaction.handler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/workflow/workflow-manager.ts:214:43)
+    at stepHandler (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1106:32)
+    at TransactionOrchestrator.executeSyncStep (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:1126:12)
+    at TransactionOrchestrator.executeNext (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+orchestration@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@mikro-orm+core@6._hn46qqb2p6u573jr46lkwsxxb4/node_modules/@medusajs/orchestration/src/transaction/transaction-orchestrator.ts:951:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+ ELIFECYCLE  Command failed.

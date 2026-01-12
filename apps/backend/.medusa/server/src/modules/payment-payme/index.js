@@ -1,0 +1,8 @@
+"use strict";
+const payme_1 = require("./services/payme");
+const services = [payme_1.PaymePaymentProviderService];
+const providerExport = {
+    services,
+};
+module.exports = providerExport;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbW9kdWxlcy9wYXltZW50LXBheW1lL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSw0Q0FBOEQ7QUFHOUQsTUFBTSxRQUFRLEdBQUcsQ0FBQyxtQ0FBMkIsQ0FBQyxDQUFBO0FBRTlDLE1BQU0sY0FBYyxHQUEwQjtJQUM1QyxRQUFRO0NBQ1QsQ0FBQTtBQU9ELGlCQUFTLGNBQWMsQ0FBQSJ9

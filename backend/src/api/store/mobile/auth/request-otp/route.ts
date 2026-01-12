@@ -36,8 +36,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const code = generateOtpCode()
   await otpStoreSet(normalized, code, purpose)
 
-  // Align with web template approved by Eskiz
-  const message = `Kod podtverzhdeniya dlya oformleniya zakaza na sajte toolbox-tools.uz: ${code}`
+  // ESKIZ-APPROVED SMS TEXT (Cyrillic, platform-agnostic)
+  const message = `Код для входа в приложение Toolbox: ${code}. Не передавайте код никому.`
 
   try {
     const notificationModule = req.scope.resolve(Modules.NOTIFICATION)

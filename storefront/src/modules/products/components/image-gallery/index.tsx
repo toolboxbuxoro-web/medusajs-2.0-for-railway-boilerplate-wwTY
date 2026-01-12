@@ -363,7 +363,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Main Image */}
-            <div className="relative w-full max-w-6xl aspect-square mb-6">
+            <div className="relative w-full h-full max-h-[80vh] flex-1 min-h-0 mb-6">
               <Image
                 src={images[lightboxIndex].url}
                 alt={`Product image ${lightboxIndex + 1}`}

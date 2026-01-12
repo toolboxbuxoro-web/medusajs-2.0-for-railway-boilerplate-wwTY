@@ -47,8 +47,8 @@ export default async function orderSmsHandler({
       const totalFormatted = new Intl.NumberFormat("ru-RU").format(total)
       
       const orderDisplayId = order.display_id || orderId.slice(-8)
-      // Platform-agnostic message
-      const smsMessage = `Vash zakaz #${orderDisplayId} v Toolbox prinyat. Summa: ${totalFormatted} UZS`
+      // ESKIZ-APPROVED SMS TEXT (Cyrillic)
+      const smsMessage = `Ваш заказ №${orderDisplayId} в Toolbox принят. Сумма: ${totalFormatted} сум.`
       
       await notificationModule.createNotifications({
         to: normalized,

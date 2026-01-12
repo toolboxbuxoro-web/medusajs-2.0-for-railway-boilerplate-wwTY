@@ -1,0 +1,8 @@
+"use strict";
+const click_1 = require("./services/click");
+const services = [click_1.ClickPaymentProviderService, click_1.ClickPayByCardProviderService];
+const providerExport = {
+    services,
+};
+module.exports = providerExport;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbW9kdWxlcy9wYXltZW50LWNsaWNrL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSw0Q0FBNkY7QUFHN0YsTUFBTSxRQUFRLEdBQUcsQ0FBQyxtQ0FBMkIsRUFBRSxxQ0FBNkIsQ0FBQyxDQUFBO0FBRTdFLE1BQU0sY0FBYyxHQUEwQjtJQUM1QyxRQUFRO0NBQ1QsQ0FBQTtBQUdELGlCQUFTLGNBQWMsQ0FBQSJ9

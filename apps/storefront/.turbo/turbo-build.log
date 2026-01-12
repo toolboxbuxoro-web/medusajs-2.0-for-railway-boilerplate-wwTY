@@ -1,0 +1,76 @@
+
+
+> medusa-next@1.0.3 build /Users/nematiskandarov/Desktop/Toolbox-projects/site v4/medusajs-2.0-for-railway-boilerplate-wwTY/apps/storefront
+> npm run wait && npm run launcher build
+
+
+> medusa-next@1.0.3 wait
+> await-backend
+
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 0 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 5 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 10 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 15 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 20 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 25 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 30 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 35 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 40 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 45 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 50 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 55 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 60 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 65 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 70 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 75 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 80 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 85 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 90 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 95 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 100 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 105 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 110 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 115 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 120 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 125 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 130 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 135 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 140 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 145 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 150 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 155 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 160 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 165 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 170 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 175 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 180 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 185 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 190 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 195 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 200 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 205 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 210 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 215 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 220 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 225 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 230 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 235 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 240 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 245 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 250 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 255 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 260 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 265 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 270 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 275 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 280 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 285 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 290 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 295 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 300 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 305 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 310 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 315 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 320 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 325 seconds
+Waiting for a medusajs backend to be available on http://localhost:9000/key-exchange... Elapsed time: 330 seconds
