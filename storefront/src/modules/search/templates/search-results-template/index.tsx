@@ -12,6 +12,8 @@ type SearchResultsTemplateProps = {
   sortBy?: SortOptions
   page?: string
   countryCode: string
+  facets?: Record<string, Record<string, number>>
+  totalHits?: number
 }
 
 const SearchResultsTemplate = ({
@@ -20,6 +22,8 @@ const SearchResultsTemplate = ({
   sortBy,
   page,
   countryCode,
+  facets,
+  totalHits,
 }: SearchResultsTemplateProps) => {
   const pageNumber = page ? parseInt(page) : 1
 
@@ -29,7 +33,7 @@ const SearchResultsTemplate = ({
         <div className="flex flex-col items-start">
           <Text className="text-ui-fg-muted">Search Results for:</Text>
           <Heading>
-            {decodeURI(query)} ({ids.length})
+            {decodeURI(query)} ({totalHits || ids.length})
           </Heading>
         </div>
         <LocalizedClientLink
@@ -42,7 +46,11 @@ const SearchResultsTemplate = ({
       <div className="flex flex-col small:flex-row small:items-start p-6">
         {ids.length > 0 ? (
           <>
-            <RefinementList sortBy={sortBy || "created_at"} search />
+            <RefinementList 
+               sortBy={sortBy || "created_at"} 
+               search 
+               facets={facets} 
+            />
             <div className="content-container">
               <PaginatedProducts
                 productsIds={ids}

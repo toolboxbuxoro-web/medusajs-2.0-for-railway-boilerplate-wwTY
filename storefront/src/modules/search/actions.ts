@@ -1,6 +1,6 @@
 "use server"
 
-import { SEARCH_INDEX_NAME, searchClient } from "@lib/search-client"
+const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
 interface Hits {
   readonly objectID?: string
@@ -12,19 +12,26 @@ interface Hits {
  * Uses MeiliSearch or Algolia to search for a query
  * @param {string} query - search query
  */
-export async function search(query: string) {
-  // MeiliSearch
-  const queries = [{ params: { query }, indexName: SEARCH_INDEX_NAME }]
-  const { results } = (await searchClient.search(queries)) as Record<
-    string,
-    any
-  >
-  const { hits } = results[0] as { hits: Hits[] }
+export async function search(query: string, sortBy?: string, filters?: any) {
+  const url = new URL(`${MEDUSA_BACKEND_URL}/store/search`)
+  url.searchParams.set("q", query)
+  if (sortBy) {
+    url.searchParams.set("sort", sortBy)
+  }
+  
+  if (filters) {
+    Object.keys(filters).forEach(key => {
+      url.searchParams.set(key, filters[key])
+    })
+  }
 
-  // In case you want to use Algolia instead of MeiliSearch, uncomment the following lines and delete the above lines.
+  const res = await fetch(url.toString(), {
+    cache: "no-store"
+  })
 
-  // const index = searchClient.initIndex(SEARCH_INDEX_NAME)
-  // const { hits } = (await index.search(query)) as { hits: Hits[] }
+  if (!res.ok) {
+    throw new Error("Failed to fetch search results")
+  }
 
-  return hits
+  return await res.json()
 }

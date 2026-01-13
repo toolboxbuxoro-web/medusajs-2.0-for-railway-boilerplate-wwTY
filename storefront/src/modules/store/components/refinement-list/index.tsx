@@ -3,16 +3,18 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslations } from 'next-intl'
+import { clx } from "@medusajs/ui"
 
 import SortProducts, { SortOptions } from "./sort-products"
 
 type RefinementListProps = {
   sortBy: SortOptions
   search?: boolean
+  facets?: Record<string, Record<string, number>>
   'data-testid'?: string
 }
 
-const RefinementList = ({ sortBy, 'data-testid': dataTestId }: RefinementListProps) => {
+const RefinementList = ({ sortBy, facets, 'data-testid': dataTestId }: RefinementListProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -67,6 +69,52 @@ const RefinementList = ({ sortBy, 'data-testid': dataTestId }: RefinementListPro
           setQueryParams={setQueryParams} 
           data-testid={dataTestId} 
         />
+
+        {facets && facets["categories.title"] && Object.keys(facets["categories.title"]).length > 0 && (
+          <div className="mt-8">
+            <h4 className="txt-compact-small-plus text-ui-fg-muted uppercase mb-4">Категории</h4>
+            <div className="flex flex-col gap-2">
+              {Object.entries(facets["categories.title"]).map(([title, count]) => (
+                <button
+                  key={title}
+                  onClick={() => setQueryParams("category_title", title)}
+                  className={clx(
+                    "txt-compact-small text-left hover:text-ui-fg-base transition-colors",
+                    {
+                      "font-bold text-ui-fg-base": searchParams.get("category_title") === title,
+                      "text-ui-fg-subtle": searchParams.get("category_title") !== title,
+                    }
+                  )}
+                >
+                  {title} ({count})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {facets && facets["metadata.brand"] && Object.keys(facets["metadata.brand"]).length > 0 && (
+          <div className="mt-8">
+            <h4 className="txt-compact-small-plus text-ui-fg-muted uppercase mb-4">Бренды</h4>
+            <div className="flex flex-col gap-2">
+              {Object.entries(facets["metadata.brand"]).map(([brand, count]) => (
+                <button
+                  key={brand}
+                  onClick={() => setQueryParams("brand", brand)}
+                  className={clx(
+                    "txt-compact-small text-left hover:text-ui-fg-base transition-colors",
+                    {
+                      "font-bold text-ui-fg-base": searchParams.get("brand") === brand,
+                      "text-ui-fg-subtle": searchParams.get("brand") !== brand,
+                    }
+                  )}
+                >
+                  {brand} ({count})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
   )

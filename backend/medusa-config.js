@@ -234,11 +234,62 @@ const medusaConfig = {
           products: {
             type: 'products',
             enabled: true,
-            fields: ['id', 'title', 'description', 'handle', 'variant_sku', 'thumbnail'],
+            fields: ['id', 'title', 'subtitle', 'description', 'handle', 'variant_sku', 'thumbnail', 'metadata', 'categories'],
             indexSettings: {
-              searchableAttributes: ['title', 'description', 'variant_sku'],
-              displayedAttributes: ['id', 'handle', 'title', 'description', 'variant_sku', 'thumbnail'],
-              filterableAttributes: ['id', 'handle'],
+              searchableAttributes: [
+                'title',
+                'subtitle',
+                'description',
+                'variant_sku',
+                'categories.title',
+                'metadata.brand'
+              ],
+              displayedAttributes: [
+                'id',
+                'handle',
+                'title',
+                'subtitle',
+                'description',
+                'variant_sku',
+                'thumbnail',
+                'categories',
+                'metadata'
+              ],
+              filterableAttributes: [
+                'id',
+                'handle',
+                'categories.id',
+                'categories.title',
+                'metadata.brand',
+                'metadata.in_stock'
+              ],
+              sortableAttributes: [
+                'created_at',
+                'metadata.sales_count',
+                'metadata.rating_avg'
+              ],
+              rankingRules: [
+                'words',
+                'typo',
+                'proximity',
+                'attribute',
+                'exactness',
+                'desc(metadata.sales_count)',
+                'desc(metadata.rating_avg)'
+              ],
+              typoTolerance: {
+                enabled: true,
+                minWordSizeForTypos: {
+                  oneTypo: 4,
+                  twoTypos: 7
+                }
+              },
+              synonyms: {
+                "дрель": ["дриль", "бур"],
+                "болгарка": ["ушм"],
+                "перфоратор": ["hammer drill"],
+                "шуруповерт": ["screwdriver"]
+              }
             },
             primaryKey: 'id',
           }
