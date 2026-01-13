@@ -15,7 +15,7 @@ export interface ReviewDTO {
 export interface CreateReviewDTO {
   product_id: string
   customer_id: string
-  order_id: string
+  order_id?: string  // Made optional for flexibility
   rating: number
   comment?: string | null
   status?: "pending" | "approved" | "rejected"
