@@ -32,19 +32,17 @@ export default async function SearchPage({ params, searchParams }: Params) {
   }
 
   // If query exists, show search results
+  // Phase 3: Web Search Client Rewrite - Simplification
+  // Ignore SortOptions and Filters for now.
   try {
-    const results = await search(query, searchParams.sortBy, {
-      category_id: searchParams.category_id,
-      category_title: searchParams.category_title,
-      brand: searchParams.brand,
-      min_price: searchParams.min_price,
-      max_price: searchParams.max_price,
-    }).catch(err => {
+    // Only pass query. 
+    // Backend now handles normalization and "Search ONLY by product.title, product.metadata.brand" internally via Meili config.
+    const results = await search(query).catch(err => {
       console.error("[Search] Action failed:", err)
-      return null
+      return { hits: [], estimatedTotalHits: 0 }
     })
 
-    const { hits = [], facetDistribution = {}, estimatedTotalHits = 0 } = results || {}
+    const { hits = [], estimatedTotalHits = 0 } = results || {}
 
     const ids = (hits || [])
       .map((h: any) => h.id)
@@ -54,10 +52,11 @@ export default async function SearchPage({ params, searchParams }: Params) {
       <SearchResultsTemplate
         query={query}
         ids={ids}
-        sortBy={searchParams.sortBy}
+        // Disable sorting/facets for stability (Phase 0)
+        sortBy={undefined} 
         page={searchParams.page}
         countryCode={params.countryCode}
-        facets={facetDistribution}
+        facets={{}} 
         totalHits={estimatedTotalHits}
       />
     )

@@ -48,11 +48,12 @@ const SearchResultsTemplate = ({
         {ids.length > 0 ? (
           <>
             <Suspense fallback={<div className="w-full small:w-[250px]" />}>
-              <RefinementList 
+              {/* Phase 0: Facets temporarily disabled for stability */}
+              {/* <RefinementList 
                  sortBy={sortBy || "created_at"} 
                  search 
                  facets={facets} 
-              />
+              /> */}
             </Suspense>
             <div className="content-container">
               <PaginatedProducts
