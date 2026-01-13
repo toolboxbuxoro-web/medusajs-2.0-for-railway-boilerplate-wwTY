@@ -13,13 +13,12 @@ interface Hits {
  * Uses MeiliSearch or Algolia to search for a query
  * @param {string} query - search query
  */
-// Phase 3: Web Search Client Rewrite - Simple Proxy
-// "Web must be a thin client"
-export async function search(query: string, sortBy?: string, filters?: any) {
-  // Ignore filters/sort for now (Phase 0: Disable non-essential features)
+// Phase 5: Infinite Search
+export async function search(query: string, offset: number = 0) {
   const url = new URL(`${MEDUSA_BACKEND_URL}/store/search`)
   url.searchParams.set("q", query)
-  url.searchParams.set("limit", "20")
+  url.searchParams.set("limit", "24") // Balanced grid size
+  url.searchParams.set("offset", offset.toString())
 
   // Using centralized header management (P0 fix from previous task)
   const headers = getMedusaHeaders()

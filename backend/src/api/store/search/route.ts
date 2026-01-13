@@ -13,67 +13,71 @@ export const GET = async (
     const limitNum = Math.min(parseInt(limit) || 20, 100)
     const offsetNum = parseInt(offset) || 0
 
-    // 1. If query is empty, return empty results immediately (don't waste Meili req)
-    if (!query) {
-      return res.json({
-        hits: [],
-        estimatedTotalHits: 0,
-        query: "",
-        limit: limitNum,
-        offset: offsetNum,
-        processingTimeMs: 0
+    const fetchMeili = async (searchParams: any) => {
+      const response = await fetch(`${MEILISEARCH_HOST}/indexes/products/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${MEILISEARCH_ADMIN_KEY}`,
+        },
+        body: JSON.stringify(searchParams),
       })
+      if (!response.ok) return null
+      return response.json()
     }
 
-    // 2. Search Meilisearch (Products Index)
-    const searchBody = {
-      q: query,
+    let mode: 'search' | 'recommendation' | 'fallback' = 'search'
+    let searchBody: any = {
       limit: limitNum,
       offset: offsetNum,
-      attributesToRetrieve: [
-        'id', 
-        'title', 
-        'handle', 
-        'thumbnail', 
-        'status',
-        'metadata', 
-        'variants' // Needed if we display implementation details
-      ],
+      attributesToRetrieve: ['id', 'title', 'handle', 'thumbnail', 'status', 'metadata', 'variants'],
       attributesToHighlight: ['title'],
       highlightPreTag: '<mark>',
       highlightPostTag: '</mark>',
       showRankingScore: true,
-      // Minimal filtering (can be expanded later, but keep simple for now)
-      filter: []
     }
 
-    const response = await fetch(`${MEILISEARCH_HOST}/indexes/products/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MEILISEARCH_ADMIN_KEY}`,
-      },
-      body: JSON.stringify(searchBody),
-    })
+    // 1. Recommendation Mode (Empty query)
+    if (!query) {
+      mode = 'recommendation'
+      searchBody.q = ""
+      searchBody.sort = ["metadata.sales_count:desc", "created_at:desc"] // Popular & New
+    } else {
+      // 2. Search Mode
+      mode = 'search'
+      searchBody.q = query
+    }
 
-    if (!response.ok) {
-      // Log error but return empty results to client for stability
-      console.error(`[Search API] MeiliSearch error: ${response.status}`)
+    let results = await fetchMeili(searchBody)
+
+    // 3. Fallback Mode (If search hits are 0)
+    if (mode === 'search' && (!results || results.hits.length === 0)) {
+      mode = 'fallback'
+      // Re-fetch recommendations as fallback
+      const fallbackBody = {
+        ...searchBody,
+        q: "",
+        sort: ["metadata.sales_count:desc", "created_at:desc"],
+        offset: offsetNum // Keep offset for infinite scroll in fallback
+      }
+      results = await fetchMeili(fallbackBody)
+    }
+
+    if (!results) {
       return res.json({
         hits: [],
         estimatedTotalHits: 0,
         query: query,
-        error: "Search provider error" // Optional debug info
+        mode: mode,
+        error: "Search provider error"
       })
     }
 
-    const results = await response.json()
-    
-    // 3. Return Standard Response
     res.json({
       hits: results.hits || [],
       estimatedTotalHits: results.estimatedTotalHits || 0,
       query: query,
+      mode: mode,
       limit: limitNum,
       offset: offsetNum,
       processingTimeMs: results.processingTimeMs
@@ -81,11 +85,11 @@ export const GET = async (
 
   } catch (error) {
     console.error('[Search API] Critical error:', error)
-    // Always return 200 OK with empty results to prevent UI crash
     res.json({
       hits: [],
       estimatedTotalHits: 0,
       query: req.query.q || "",
+      mode: 'recommendation', // Safe default
       error: "Internal server error"
     })
   }
