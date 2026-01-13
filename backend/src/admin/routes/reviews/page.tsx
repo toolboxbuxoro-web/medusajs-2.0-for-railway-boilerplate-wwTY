@@ -1,5 +1,5 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { ChatBubbleLeftRight, CheckCircle, XCircle, ChevronDown, ChevronUp, ArrowUpRightOnSquare } from "@medusajs/icons"
+import { ChatBubbleLeftRight, CheckCircle, XCircle, ChevronDownMini, ChevronUpMini, ArrowUpRightOnBox } from "@medusajs/icons"
 import { 
   Container, 
   Heading, 
@@ -187,7 +187,7 @@ const ReviewsPage = () => {
             <Table.Row>
               <Table.Cell colSpan={7} className="text-center py-20">
                 <div className="flex flex-col items-center gap-y-2 opacity-50">
-                  <ChatBubbleLeftRight size={40} />
+                  <ChatBubbleLeftRight className="w-10 h-10" />
                   <Text>Отзывов не найдено</Text>
                 </div>
               </Table.Cell>
