@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Text, clx } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -42,6 +42,11 @@ export default function SearchAutocomplete({
   const [popular, setPopular] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  
+  // Extract base path for localized navigation (e.g., /ru/uz)
+  const pathParts = pathname.split('/')
+  const basePath = pathParts.length >= 3 ? `/${pathParts[1]}/${pathParts[2]}` : ''
 
   useEffect(() => {
     const fetchPopular = async () => {
@@ -87,7 +92,7 @@ export default function SearchAutocomplete({
             <button
               key={q}
               onClick={() => {
-                router.push(`/search?q=${encodeURIComponent(q)}`)
+                router.push(`${basePath}/search?q=${encodeURIComponent(q)}`)
                 onClose()
               }}
               className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
@@ -136,7 +141,7 @@ export default function SearchAutocomplete({
                   <li key={brand}>
                     <button
                       onClick={() => {
-                        router.push(`/search?q=${encodeURIComponent(brand)}`)
+                        router.push(`${basePath}/search?q=${encodeURIComponent(brand)}`)
                         onClose()
                       }}
                       className="text-sm font-medium hover:text-primary transition-colors block py-0.5 text-left w-full"
@@ -174,7 +179,7 @@ export default function SearchAutocomplete({
             ))}
             <button
                onClick={() => {
-                  router.push(`/search?q=${encodeURIComponent(query)}`)
+                  router.push(`${basePath}/search?q=${encodeURIComponent(query)}`)
                   onClose()
                }}
                className="w-full text-center py-2 text-sm font-bold text-primary hover:bg-primary/5 rounded-lg transition-colors mt-2 border border-primary/20"
