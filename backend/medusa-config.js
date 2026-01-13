@@ -281,15 +281,37 @@ const medusaConfig = {
               typoTolerance: {
                 enabled: true,
                 minWordSizeForTypos: {
-                  oneTypo: 4,
-                  twoTypos: 7
+                  oneTypo: 3,
+                  twoTypos: 6
                 }
               },
               synonyms: {
-                "дрель": ["дриль", "бур"],
-                "болгарка": ["ушм"],
-                "перфоратор": ["hammer drill"],
-                "шуруповерт": ["screwdriver"]
+                // Brand synonyms (Uzum/WB level)
+                "number": ["number one", "№1", "num", "numberone"],
+                "number one": ["number", "№1", "num"],
+                "№1": ["number one", "number"],
+                "num": ["number", "number one"],
+
+                // Tool synonyms
+                "дрель": ["дриль", "бур", "drill"],
+                "болгарка": ["ушм", "угловая шлифмашина", "grinder"],
+                "перфоратор": ["hammer drill", "перф"],
+                "шуруповерт": ["screwdriver", "шурик", "винтоверт"],
+                "лобзик": ["jigsaw", "электролобзик"],
+                "пила": ["saw", "циркулярка", "дисковая пила"],
+                "фрезер": ["router", "фреза"],
+                "рубанок": ["planer", "электрорубанок"],
+
+                // Brand aliases
+                "интерскол": ["interskol", "interskola"],
+                "макита": ["makita", "makitа"],
+                "бош": ["bosch", "bosh"],
+                "деволт": ["dewalt", "девальт"],
+                "милуоки": ["milwaukee"],
+                "хитачи": ["hitachi", "hikoki"],
+                "метабо": ["metabo"],
+                "стэнли": ["stanley", "стенли"],
+                "блэк энд декер": ["black decker", "black&decker"]
               }
             },
             primaryKey: 'id',
