@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { useAuth } from "@lib/context/auth-context"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 export type OrderState = "loading" | "loaded" | "error"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
-const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
 export function useOrder(id: string) {
   const [state, setState] = useState<OrderState>("loading")
@@ -23,7 +23,7 @@ export function useOrder(id: string) {
     try {
       const resp = await fetch(`${BACKEND_URL}/store/orders/${id}?fields=*items,+items.thumbnail,+shipping_address`, {
         headers: {
-          "x-publishable-api-key": PUBLISHABLE_KEY,
+          ...getMedusaHeaders(),
         },
         credentials: "include",
       })

@@ -1,5 +1,6 @@
 import { sdk } from "@lib/config"
 import { cache } from "react"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
@@ -9,9 +10,7 @@ async function fetchAllCategories() {
   
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getMedusaHeaders(),
     // @ts-ignore - Next.js specific fetch options
     next: { tags: ["categories"], revalidate: 60 }
   })

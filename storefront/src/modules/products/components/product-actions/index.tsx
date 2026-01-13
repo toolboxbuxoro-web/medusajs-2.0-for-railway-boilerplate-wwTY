@@ -203,12 +203,12 @@ export default function ProductActions({
 
         {isOnSale && (
           <div className="bg-gradient-to-r from-red-600 to-red-500 text-white p-3 rounded-lg mb-4">
-            <div className="text-sm font-medium mb-1">Скидка до {selectedPrice?.percentage_diff}%</div>
+            <div className="text-sm font-medium mb-1">{t('black_friday')} {selectedPrice?.percentage_diff}%</div>
             {selectedPrice?.original_price && (
                   <div className="flex items-center gap-2">
                 <span className="text-xs line-through opacity-75">{selectedPrice.original_price}</span>
                 <span className="text-xs bg-white/20 px-2 py-0.5 rounded">
-                  Выгода {formatPrice(convertToLocale({ amount: (selectedPrice.original_price_number || 0) - (selectedPrice.calculated_price_number || 0), currency_code: selectedPrice.currency_code }))}
+                  {t('your_benefit')} {formatPrice(convertToLocale({ amount: (selectedPrice.original_price_number || 0) - (selectedPrice.calculated_price_number || 0), currency_code: selectedPrice.currency_code }))}
                 </span>
               </div>
             )}
@@ -231,7 +231,7 @@ export default function ProductActions({
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span className="text-sm font-medium">Нет в наличии</span>
+              <span className="text-sm font-medium">{t('out_of_stock')}</span>
             </div>
           )}
         </div>

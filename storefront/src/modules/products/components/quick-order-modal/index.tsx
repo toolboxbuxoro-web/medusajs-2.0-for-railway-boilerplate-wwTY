@@ -35,12 +35,12 @@ export default function QuickOrderModal({
     setError(null)
     
     if (!phone) {
-      setError("Введите номер телефона")
+      setError(t("error_phone_required"))
       return
     }
 
     if (!variant?.id) {
-      setError("Выберите вариант товара")
+      setError(t("error_variant_required"))
       return
     }
 
@@ -55,19 +55,19 @@ export default function QuickOrderModal({
       })
 
       if (!addResult.success) {
-        throw new Error(addResult.error || "Ошибка добавления товара")
+        throw new Error(addResult.error || t("error_add_to_cart"))
       }
 
       // 2. Submit quick order via server action with cart ID
       const result = await submitQuickOrder({
         phone,
-        firstName: name || "Покупатель",
+        firstName: name || t("default_buyer_name"),
         countryCode,
         cartId: addResult.cartId, // Pass cart ID directly from the result
       })
 
       if (!result.success) {
-        throw new Error(result.error || "Ошибка оформления заказа")
+        throw new Error(result.error || t("error_submit_order"))
       }
       
       // Redirect to checkout to complete payment
@@ -75,14 +75,14 @@ export default function QuickOrderModal({
       
       onClose()
     } catch (err: any) {
-      setError(err.message || "Ошибка оформления заказа")
+      setError(err.message || t("error_submit_order"))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -112,7 +112,7 @@ export default function QuickOrderModal({
           {/* Phone */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Телефон <span className="text-red-500">*</span>
+              {t("phone")} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -134,7 +134,7 @@ export default function QuickOrderModal({
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Имя
+              {t("name")}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -146,7 +146,7 @@ export default function QuickOrderModal({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ваше имя"
+                placeholder={t("name_placeholder")}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
@@ -161,7 +161,7 @@ export default function QuickOrderModal({
 
           {/* Info */}
           <p className="text-xs text-gray-500 text-center">
-            После оформления вы получите SMS с данными для входа в личный кабинет
+            {t("quick_order_helper")}
           </p>
 
           {/* Submit */}
@@ -176,10 +176,10 @@ export default function QuickOrderModal({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Оформляем...
+                {t("ordering")}
               </span>
             ) : (
-              "Заказать"
+              t("order_button")
             )}
           </button>
         </form>

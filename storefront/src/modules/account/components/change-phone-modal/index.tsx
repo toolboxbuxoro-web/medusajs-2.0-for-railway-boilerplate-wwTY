@@ -8,6 +8,7 @@ import { Button, clx } from "@medusajs/ui"
 import { useAuth } from "@lib/context/auth-context"
 import { useTranslations } from "next-intl"
 import ErrorMessage from "@modules/checkout/components/error-message"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 type ChangePhoneModalProps = {
   customer: HttpTypes.StoreCustomer
@@ -51,7 +52,6 @@ const ChangePhoneModal: React.FC<ChangePhoneModalProps> = ({
   const backendUrl = (
     process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
   ).replace(/\/$/, "")
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
   const handleRequestOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -72,10 +72,7 @@ const ChangePhoneModal: React.FC<ChangePhoneModalProps> = ({
     try {
       const resp = await fetch(`${backendUrl}/store/otp/request`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key": publishableKey,
-        },
+        headers: getMedusaHeaders(),
         body: JSON.stringify({ phone: normalized, purpose: "change_phone" }),
       })
 
@@ -107,10 +104,7 @@ const ChangePhoneModal: React.FC<ChangePhoneModalProps> = ({
     try {
       const resp = await fetch(`${backendUrl}/store/otp/change-phone`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key": publishableKey,
-        },
+        headers: getMedusaHeaders(),
         body: JSON.stringify({ phone: normalized, code: otpCode.trim() }),
       })
 

@@ -53,10 +53,9 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
               ratingAvg={metadata.rating_avg} 
               ratingCount={metadata.rating_count} 
             />
-            {/* Brand in header */}
             {metadata.brand && (
               <span className="text-gray-400 text-sm">
-                Бренд: <span className="text-red-600 font-bold hover:underline cursor-pointer">{metadata.brand}</span>
+                {t('brand')}: <span className="text-red-600 font-bold hover:underline cursor-pointer">{metadata.brand}</span>
               </span>
             )}
           </div>
@@ -90,7 +89,7 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
             <div className="flex flex-col gap-1">
               <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('code')}</span>
               <span className="text-gray-900 font-bold text-base">
-                {(product.metadata as any)?.code || product.id.slice(0, 8)}
+                {(product.metadata as any)?.code || product.handle}
               </span>
             </div>
 

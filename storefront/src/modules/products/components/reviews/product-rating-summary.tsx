@@ -1,5 +1,8 @@
+"use client"
+
 import { Heading, Text, clx } from "@medusajs/ui"
 import React from "react"
+import { useTranslations } from "next-intl"
 
 interface ProductRatingSummaryProps {
   averageRating: number
@@ -12,7 +15,15 @@ const ProductRatingSummary: React.FC<ProductRatingSummaryProps> = ({
   count,
   distribution,
 }) => {
+  const t = useTranslations("product")
   const ratings = [5, 4, 3, 2, 1]
+
+  // Pluralization for reviews count
+  const getReviewsText = (count: number) => {
+    if (count === 1) return t("review_single")
+    if (count > 1 && count < 5) return t("reviews_few")
+    return t("reviews_many")
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-8 py-6 border-b border-gray-100">
@@ -33,7 +44,7 @@ const ProductRatingSummary: React.FC<ProductRatingSummaryProps> = ({
           ))}
         </div>
         <Text className="text-gray-500 text-sm">
-          {count} {count === 1 ? "отзыв" : count > 1 && count < 5 ? "отзыва" : "отзывов"}
+          {count} {getReviewsText(count)}
         </Text>
       </div>
 

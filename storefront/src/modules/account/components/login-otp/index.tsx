@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { useAuth } from "@lib/context/auth-context"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 
 
@@ -53,7 +54,6 @@ const LoginOtp = ({ onSuccess }: { onSuccess?: () => void }) => {
   const backendUrl = (
     process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
   ).replace(/\/$/, "")
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
   /**
    * Step 1: Request OTP
@@ -71,10 +71,7 @@ const LoginOtp = ({ onSuccess }: { onSuccess?: () => void }) => {
     try {
       const resp = await fetch(`${backendUrl}/store/mobile/auth/request-otp`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key": publishableKey,
-        },
+        headers: getMedusaHeaders(),
         body: JSON.stringify({ phone: normalized }),
       })
 
@@ -109,10 +106,7 @@ const LoginOtp = ({ onSuccess }: { onSuccess?: () => void }) => {
     try {
       const resp = await fetch(`${backendUrl}/store/mobile/auth/verify-otp`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key": publishableKey,
-        },
+        headers: getMedusaHeaders(),
         body: JSON.stringify({ phone: normalized, code: otpCode.trim() }),
       })
 

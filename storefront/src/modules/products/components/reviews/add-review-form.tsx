@@ -5,6 +5,7 @@ import { createReview, checkCanReview } from "@lib/data/review.service"
 import { Review } from "@lib/data/review.types"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
 import StarIcon from "@modules/common/icons/star"
+import { useTranslations } from "next-intl"
 
 interface AddReviewFormProps {
   productId: string
@@ -19,6 +20,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   isLoggedIn,
   onLoginClick,
 }) => {
+  const t = useTranslations("product")
   const [rating, setRating] = useState(0)
   const [hover, setHover] = useState(0)
   const [comment, setComment] = useState("")
@@ -50,7 +52,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (rating === 0) {
-      setError("Пожалуйста, выберите оценку")
+      setError(t("select_rating"))
       return
     }
 
@@ -69,7 +71,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
       setComment("")
       setRating(0)
     } catch (err: any) {
-      setError(err.message || "Ошибка при отправке отзыва")
+      setError(err.message || t("review_error"))
     } finally {
       setIsSubmitting(false)
     }
@@ -78,14 +80,14 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   if (!isLoggedIn) {
     return (
       <div className="bg-gray-50 rounded-3xl p-8 text-center mt-12 border border-dashed border-gray-200">
-        <Heading level="h2" className="text-gray-900 mb-4">Напишите свой отзыв</Heading>
-        <Text className="text-gray-500 mb-6">Только авторизованные покупатели могут оставлять отзывы</Text>
+        <Heading level="h2" className="text-gray-900 mb-4">{t("write_review")}</Heading>
+        <Text className="text-gray-500 mb-6">{t("only_buyers_can_review")}</Text>
         <Button 
           variant="primary" 
           className="bg-gray-900 rounded-2xl px-8 h-12"
           onClick={onLoginClick}
         >
-          Войти или зарегистрироваться
+          {t("login_or_register")}
         </Button>
       </div>
     )
@@ -96,9 +98,9 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   if (canReview === false && !success) {
     return (
       <div className="bg-gray-50 rounded-3xl p-8 text-center mt-12 border border-gray-200">
-        <Heading level="h2" className="text-gray-900 mb-2">Напишите свой отзыв</Heading>
+        <Heading level="h2" className="text-gray-900 mb-2">{t("write_review")}</Heading>
         <Text className="text-red-500 font-medium text-sm">
-          {error || "Отзыв можно оставить только после покупки этого товара"}
+          {error || t("only_after_purchase")}
         </Text>
       </div>
     )
@@ -110,21 +112,21 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
         <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
           ✓
         </div>
-        <Heading level="h2" className="text-gray-900 mb-2">Отзыв отправлен!</Heading>
-        <Text className="text-gray-600">Благодарим за ваше мнение. Отзыв появится после модерации.</Text>
+        <Heading level="h2" className="text-gray-900 mb-2">{t("review_sent")}</Heading>
+        <Text className="text-gray-600">{t("review_sent_text")}</Text>
       </div>
     )
   }
 
   return (
     <div className="mt-12 p-8 bg-gray-50 rounded-[40px] border border-gray-100">
-      <Heading level="h2" className="text-2xl font-bold text-gray-900 mb-2">Оставить отзыв</Heading>
-      <Text className="text-gray-500 mb-8">Поделитесь вашим опытом использования товара</Text>
+      <Heading level="h2" className="text-2xl font-bold text-gray-900 mb-2">{t("leave_review")}</Heading>
+      <Text className="text-gray-500 mb-8">{t("share_experience")}</Text>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Star Selection */}
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Ваша оценка *</label>
+          <label className="text-sm font-semibold text-gray-700">{t("your_rating")} *</label>
           <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -146,7 +148,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
             ))}
             {rating > 0 && (
               <span className="ml-2 text-sm font-bold text-gray-900">
-                {rating === 5 ? "Отлично" : rating === 4 ? "Хорошо" : rating === 3 ? "Нормально" : rating === 2 ? "Плохо" : "Ужасно"}
+                {rating === 5 ? t("rating_excellent") : rating === 4 ? t("rating_good") : rating === 3 ? t("rating_normal") : rating === 2 ? t("rating_bad") : t("rating_terrible")}
               </span>
             )}
           </div>
@@ -154,13 +156,13 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
 
         {/* Comment Field */}
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">Комментарий</label>
+          <label className="text-sm font-semibold text-gray-700">{t("comment")}</label>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
             className="w-full rounded-2xl border border-gray-200 p-4 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all placeholder:text-gray-400 text-[15px]"
-            placeholder="Что вам понравилось? Есть ли недостатки?"
+            placeholder={t("comment_placeholder")}
           />
         </div>
 
@@ -171,7 +173,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
           disabled={isSubmitting || rating === 0}
           className="w-full md:w-auto px-12 h-14 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold text-lg shadow-xl shadow-gray-200 disabled:opacity-50 disabled:shadow-none transition-all"
         >
-          {isSubmitting ? "Отправка..." : "Отправить отзыв"}
+          {isSubmitting ? t("submitting") : t("submit_review")}
         </Button>
       </form>
     </div>

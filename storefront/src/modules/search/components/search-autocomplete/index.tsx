@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Text, clx } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
@@ -51,7 +52,9 @@ export default function SearchAutocomplete({
   useEffect(() => {
     const fetchPopular = async () => {
       try {
-        const res = await fetch(`${MEDUSA_BACKEND_URL}/store/search/popular`)
+        const res = await fetch(`${MEDUSA_BACKEND_URL}/store/search/popular`, {
+          headers: getMedusaHeaders(),
+        })
         const data: PopularResponse = await res.json()
         setPopular(data.queries)
       } catch (e) {
@@ -70,7 +73,9 @@ export default function SearchAutocomplete({
     const timer = setTimeout(async () => {
       setLoading(true)
       try {
-        const res = await fetch(`${MEDUSA_BACKEND_URL}/store/search/suggestions?q=${encodeURIComponent(query)}`)
+        const res = await fetch(`${MEDUSA_BACKEND_URL}/store/search/suggestions?q=${encodeURIComponent(query)}`, {
+          headers: getMedusaHeaders(),
+        })
         const data: SuggestionsResponse = await res.json()
         setSuggestions(data)
       } catch (e) {

@@ -8,6 +8,7 @@ import AddReviewForm from "./add-review-form"
 import AuthModal from "@modules/account/components/auth-modal"
 import { useAuth } from "@lib/context/auth-context"
 import { Review } from "@lib/data/review.types"
+import { useTranslations } from "next-intl"
 
 type ReviewsSectionProps = {
   productId: string
@@ -18,6 +19,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   productId, 
   locale
 }) => {
+  const t = useTranslations("product")
   const { authStatus } = useAuth()
   const isLoggedIn = authStatus === "authorized"
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -40,7 +42,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
   return (
     <div className="pt-16 mt-16 border-t border-gray-100 max-w-[1000px] mx-auto" id="reviews">
-      <h2 className="text-3xl font-bold text-gray-900 mb-8">Отзывы о товаре</h2>
+      <h2 className="text-3xl font-bold text-gray-900 mb-8">{t("reviews_title")}</h2>
       
       {/* Summary Block */}
       {!isLoading && (

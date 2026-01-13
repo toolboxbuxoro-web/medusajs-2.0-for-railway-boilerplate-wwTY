@@ -1,4 +1,5 @@
 "use server"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
@@ -26,6 +27,7 @@ export async function search(query: string, sortBy?: string, filters?: any) {
   }
 
   const res = await fetch(url.toString(), {
+    headers: getMedusaHeaders(),
     cache: "no-store"
   })
 

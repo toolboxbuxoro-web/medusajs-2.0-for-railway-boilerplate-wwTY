@@ -1,11 +1,10 @@
 import { cache } from "react"
+import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
 
 let MEDUSA_BACKEND_URL = "http://localhost:9000"
 if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
   MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 }
-
-const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
 export type Banner = {
   id: string
@@ -26,9 +25,7 @@ export const listBanners = cache(async function () {
   
   try {
     const res = await fetch(url, {
-      headers: {
-        "x-publishable-api-key": PUBLISHABLE_API_KEY,
-      },
+      headers: getMedusaHeaders(),
       cache: "no-store",
     })
 
