@@ -1,5 +1,6 @@
 import { Heading, Text } from "@medusajs/ui"
 import Link from "next/link"
+import { Suspense } from "react"
 
 import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -46,11 +47,13 @@ const SearchResultsTemplate = ({
       <div className="flex flex-col small:flex-row small:items-start p-6">
         {ids.length > 0 ? (
           <>
-            <RefinementList 
-               sortBy={sortBy || "created_at"} 
-               search 
-               facets={facets} 
-            />
+            <Suspense fallback={<div className="w-full small:w-[250px]" />}>
+              <RefinementList 
+                 sortBy={sortBy || "created_at"} 
+                 search 
+                 facets={facets} 
+              />
+            </Suspense>
             <div className="content-container">
               <PaginatedProducts
                 productsIds={ids}
