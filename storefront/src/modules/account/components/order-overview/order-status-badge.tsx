@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react"
 import { useParams } from "next/navigation"
 import { getOrderStatus } from "@lib/util/order-status"

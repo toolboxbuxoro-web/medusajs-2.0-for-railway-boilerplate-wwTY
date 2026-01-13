@@ -43,7 +43,6 @@ export const POST = async (
     const review = await reviewsModuleService.createReviews({
       product_id,
       customer_id: customerId,
-      customer_name: customerName,
       rating,
       text,
     })

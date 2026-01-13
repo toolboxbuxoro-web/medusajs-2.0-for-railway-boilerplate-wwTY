@@ -1,5 +1,4 @@
 import { Review, CreateReviewPayload, CanReviewResponse } from "./review.types"
-import { getAuthHeaders } from "./cookies"
 
 function backendBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
@@ -35,9 +34,9 @@ export const checkCanReview = async (productId: string): Promise<CanReviewRespon
   const resp = await fetch(`${backendBaseUrl()}/store/products/${productId}/can-review`, {
     headers: {
       "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-      ...getAuthHeaders(),
     },
     cache: "no-store",
+    credentials: "include", // Send cookies for auth
   })
 
   if (!resp.ok) {
