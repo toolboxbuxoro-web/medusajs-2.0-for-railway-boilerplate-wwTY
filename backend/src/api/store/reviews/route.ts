@@ -2,7 +2,7 @@ import {
   AuthenticatedMedusaRequest, 
   MedusaResponse 
 } from "@medusajs/framework/http"
-import { IReviewModuleService } from "../../../../modules/reviews/types"
+import { IReviewModuleService } from "../../../modules/reviews/types"
 
 export const POST = async (
   req: AuthenticatedMedusaRequest,

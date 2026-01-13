@@ -52,7 +52,7 @@ export default async function orderSmsHandler({
       const orderDisplayId = order.display_id || orderId.slice(-8)
       
       const smsMessage = ORDER_CONFIRMATION_TEXT
-        .replace("{orderId}", orderDisplayId)
+        .replace("{orderId}", String(orderDisplayId))
         .replace("{sum}", totalFormatted)
       
       await notificationModule.createNotifications({

@@ -142,9 +142,3 @@ export const config = defineWidgetConfig({
 })
 
 export default ReviewProductWidget
-
-export const config = defineWidgetConfig({
-  zone: "product.details.after",
-})
-
-export default ReviewProductWidget
