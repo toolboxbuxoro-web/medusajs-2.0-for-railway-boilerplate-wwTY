@@ -273,9 +273,8 @@ const medusaConfig = {
                 'typo',
                 'proximity',
                 'attribute',
-                'exactness',
-                'desc(metadata.sales_count)',
-                'desc(metadata.rating_avg)'
+                'sort',
+                'exactness'
               ],
               typoTolerance: {
                 enabled: true,
