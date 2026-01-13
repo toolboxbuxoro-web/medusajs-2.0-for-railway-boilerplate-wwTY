@@ -59,26 +59,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
     const { rows, metadata } = await remoteQuery(queryObject)
 
-    console.log("[Custom Categories API] Success:", {
-      count: rows?.length,
-      hasMetadata: rows?.[0]?.metadata ? "yes" : "no",
-      firstCategory: rows?.[0] ? {
-        id: rows[0].id,
-        name: rows[0].name,
-        handle: rows[0].handle,
-        metadata: rows[0].metadata,
-      } : null,
-    })
-
-    res.json({
+    return res.json({
       product_categories: rows || [],
       count: metadata?.count || rows?.length || 0,
       offset: Number(offset),
       limit: Number(limit),
     })
   } catch (error) {
-    console.error("[Custom Categories API] Error fetching categories:", error)
-    res.status(500).json({
+    console.error("[Custom Categories API] Error during remoteQuery:", error)
+    // Return empty results instead of crashing the storefront
+    return res.json({
+      product_categories: [],
+      count: 0,
+      offset: Number(offset),
+      limit: Number(limit),
       error: "Failed to fetch categories",
       message: error.message,
     })

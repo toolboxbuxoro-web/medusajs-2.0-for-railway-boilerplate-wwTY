@@ -67,12 +67,18 @@ export const getCategoriesList = cache(async function (
   } catch (error) {
     console.error('[Categories] Error in getCategoriesList:', error)
     // Fallback to SDK
-    return sdk.store.category.list(
-      // @ts-ignore
-      { limit, offset, fields: "+category_children,+metadata" },
-      // @ts-ignore - Next.js specific fetch options
-      { next: { tags: ["categories"], revalidate: 60 } }
-    )
+    try {
+      const response = await sdk.store.category.list(
+        // @ts-ignore
+        { limit, offset, fields: "+category_children,+metadata" },
+        // @ts-ignore - Next.js specific fetch options
+        { next: { tags: ["categories"], revalidate: 60 } }
+      )
+      return response
+    } catch (sdkError) {
+      console.error('[Categories] SDK fallback failed:', sdkError)
+      return { product_categories: [], count: 0, offset, limit }
+    }
   }
 })
 
@@ -82,16 +88,18 @@ export const getCategoryByHandle = cache(async function (
   try {
     return await fetchCategoriesWithMetadata({ handle: categoryHandle })
   } catch (error: any) {
-    console.error("[Categories] Error fetching category by handle:", categoryHandle, error?.message)
+    console.error("[Categories] Custom API Error:", categoryHandle, error?.message)
     // Fallback to SDK
     try {
-      return await sdk.store.category.list(
+      const response = await sdk.store.category.list(
         // @ts-ignore
         { handle: categoryHandle, fields: "+category_children,+metadata" },
         // @ts-ignore - Next.js specific fetch options
         { next: { tags: ["categories"], revalidate: 60 } }
       )
+      return response
     } catch (sdkError) {
+      console.error("[Categories] SDK fallback failed for handle:", categoryHandle, sdkError)
       return { product_categories: [] }
     }
   }

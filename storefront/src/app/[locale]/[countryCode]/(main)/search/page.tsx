@@ -39,9 +39,12 @@ export default async function SearchPage({ params, searchParams }: Params) {
       brand: searchParams.brand,
       min_price: searchParams.min_price,
       max_price: searchParams.max_price,
+    }).catch(err => {
+      console.error("[Search] Action failed:", err)
+      return null
     })
 
-    const { hits = [], facetDistribution, estimatedTotalHits } = results || {}
+    const { hits = [], facetDistribution = {}, estimatedTotalHits = 0 } = results || {}
 
     const ids = (hits || [])
       .map((h: any) => h.id)
@@ -59,11 +62,11 @@ export default async function SearchPage({ params, searchParams }: Params) {
       />
     )
   } catch (error) {
-    console.error("Search error:", error)
+    console.error("[Search] Page crash:", error)
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
-        <h2 className="text-xl font-bold mb-2">Ошибка поиска</h2>
-        <p className="text-gray-500">Не удалось выполнить поиск. Попробуйте позже.</p>
+        <h2 className="text-xl font-bold mb-2">Поиск временно недоступен</h2>
+        <p className="text-gray-500">Пожалуйста, попробуйте обновить страницу или зайти позже.</p>
       </div>
     )
   }
