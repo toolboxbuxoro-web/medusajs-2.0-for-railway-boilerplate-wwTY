@@ -3,21 +3,9 @@ import { cache } from "react"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
-// Helper function to fetch categories with metadata using direct HTTP
-async function fetchCategoriesWithMetadata(params: Record<string, any> = {}) {
-  const queryParams = new URLSearchParams()
-  
-  Object.entries(params).forEach(([key, value]) => {
-    if (Array.isArray(value)) {
-      value.forEach(v => queryParams.append(key, v))
-    } else if (value !== undefined && value !== null) {
-      queryParams.append(key, String(value))
-    }
-  })
-
-  const url = `${BACKEND_URL}/store/product-categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  
-  console.log('[Categories] Fetching from:', url)
+// Cached fetch of ALL categories (single source of truth)
+async function fetchAllCategories() {
+  const url = `${BACKEND_URL}/store/product-categories?limit=500`
   
   const response = await fetch(url, {
     method: 'GET',
@@ -32,38 +20,24 @@ async function fetchCategoriesWithMetadata(params: Record<string, any> = {}) {
     throw new Error(`Failed to fetch categories: ${response.statusText}`)
   }
 
-  const data = await response.json()
-  console.log('[Categories] Response:', { 
-    count: data.product_categories?.length,
-    hasMetadata: data.product_categories?.[0]?.metadata ? 'yes' : 'no'
-  })
-  
-  return data
+  return await response.json()
 }
 
-export const listCategories = cache(async function () {
-  try {
-    const { product_categories } = await fetchCategoriesWithMetadata()
-    return product_categories
-  } catch (error) {
-    console.error('[Categories] Error in listCategories:', error)
-    // Fallback to SDK if custom endpoint fails
-    return sdk.store.category
-      .list(
-        { fields: "+category_children,+is_internal,+metadata" },
-        // @ts-ignore - Next.js specific fetch options
-        { next: { tags: ["categories"], revalidate: 60 } }
-      )
-      .then(({ product_categories }) => product_categories)
-  }
-})
-
+// Main cached function to get all categories
 export const getCategoriesList = cache(async function (
   offset: number = 0,
   limit: number = 100
 ) {
   try {
-    return await fetchCategoriesWithMetadata({ limit, offset })
+    const data = await fetchAllCategories()
+    // Apply offset/limit locally if needed
+    const sliced = data.product_categories?.slice(offset, offset + limit) || []
+    return {
+      product_categories: sliced,
+      count: data.product_categories?.length || 0,
+      offset,
+      limit
+    }
   } catch (error) {
     console.error('[Categories] Error in getCategoriesList:', error)
     // Fallback to SDK
@@ -82,25 +56,51 @@ export const getCategoriesList = cache(async function (
   }
 })
 
+// Alias for backward compatibility
+export const listCategories = cache(async function () {
+  const { product_categories } = await getCategoriesList(0, 500)
+  return product_categories || []
+})
+
+/**
+ * Get category by handle using LOCAL LOOKUP (Uzum/WB approach)
+ * Does NOT make a separate backend request with ?handle= (which Medusa 2.0 doesn't support)
+ */
 export const getCategoryByHandle = cache(async function (
   categoryHandle: string[]
 ) {
   try {
-    return await fetchCategoriesWithMetadata({ handle: categoryHandle })
-  } catch (error: any) {
-    console.error("[Categories] Custom API Error:", categoryHandle, error?.message)
-    // Fallback to SDK
-    try {
-      const response = await sdk.store.category.list(
-        // @ts-ignore
-        { handle: categoryHandle, fields: "+category_children,+metadata" },
-        // @ts-ignore - Next.js specific fetch options
-        { next: { tags: ["categories"], revalidate: 60 } }
-      )
-      return response
-    } catch (sdkError) {
-      console.error("[Categories] SDK fallback failed for handle:", categoryHandle, sdkError)
+    // Fetch all categories (cached)
+    const { product_categories } = await getCategoriesList(0, 500)
+    
+    if (!product_categories || product_categories.length === 0) {
       return { product_categories: [] }
     }
+
+    // Build category chain from handle path
+    // e.g. ['parent-handle', 'child-handle'] -> find parent, then find child under parent
+    const categories: any[] = []
+    let currentCategories = product_categories
+
+    for (const handle of categoryHandle) {
+      const found = currentCategories.find((c: any) => c.handle === handle)
+      if (found) {
+        categories.push(found)
+        currentCategories = found.category_children || []
+      } else {
+        // Handle not found in hierarchy - try flat search
+        const flatFound = product_categories.find((c: any) => c.handle === handle)
+        if (flatFound) {
+          categories.push(flatFound)
+          currentCategories = flatFound.category_children || []
+        }
+      }
+    }
+
+    return { product_categories: categories }
+  } catch (error: any) {
+    console.error("[Categories] Error in getCategoryByHandle:", error?.message)
+    return { product_categories: [] }
   }
 })
+
