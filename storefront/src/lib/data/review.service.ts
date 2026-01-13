@@ -56,8 +56,8 @@ export const createReview = async (payload: CreateReviewPayload): Promise<Review
     headers: {
       "Content-Type": "application/json",
       "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-      ...getAuthHeaders(),
     },
+    credentials: "include", // Send cookies for auth
     body: JSON.stringify(data),
     cache: "no-store",
   })

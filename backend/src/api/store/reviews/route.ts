@@ -44,7 +44,7 @@ export const POST = async (
       product_id,
       customer_id: customerId,
       rating,
-      text,
+      comment: text,
     })
 
     res.status(201).json({ review })
