@@ -52,9 +52,9 @@ const ExpandableComment = ({ text }: { text: string }) => {
           className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover text-xs font-medium flex items-center gap-x-1 w-fit"
         >
           {isExpanded ? (
-            <><ChevronUp size={12} /> Свернуть</>
+            <><ChevronUpMini /> Свернуть</>
           ) : (
-            <><ChevronDown size={12} /> Показать полностью</>
+            <><ChevronDownMini /> Показать полностью</>
           )}
         </button>
       )}
@@ -222,7 +222,7 @@ const ReviewsPage = () => {
                       className="truncate font-medium hover:text-ui-fg-interactive flex items-center gap-x-1"
                     >
                       {review.product?.title || "Неизвестный товар"}
-                      <ArrowUpRightOnSquare size={12} className="shrink-0" />
+                      <ArrowUpRightOnBox className="shrink-0" />
                     </a>
                     <span className="text-[10px] text-ui-fg-subtle truncate uppercase tracking-tighter">
                       ID: {review.product_id.split('_').pop()}
@@ -276,7 +276,7 @@ const ReviewsPage = () => {
                       onClick={() => handleUpdateStatus(review.id, "approved")}
                       className="text-green-600 hover:text-green-700 bg-green-50 border-green-200"
                     >
-                      <CheckCircle className="mr-1" size={16} /> Одобрить
+                      <CheckCircle className="mr-1" /> Одобрить
                     </Button>
                     <Button 
                       variant="secondary" 
@@ -284,7 +284,7 @@ const ReviewsPage = () => {
                       onClick={() => setRejectingReview(review)}
                       className="text-red-600 hover:text-red-700 bg-red-50 border-red-200"
                     >
-                      <XCircle className="mr-1" size={16} /> Отклонить
+                      <XCircle className="mr-1" /> Отклонить
                     </Button>
                   </div>
                 )}
