@@ -14,6 +14,8 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { getLocalizedField } from "@lib/util/localization"
 import { useTranslations } from "next-intl"
 
+import ReviewsSection from "@modules/products/components/reviews"
+
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
@@ -85,6 +87,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 {/* Tabs below specs on mobile */}
                 <div className="pb-16">
                   <ProductTabs product={product} />
+                  
+                  {/* Reviews on mobile - full width */}
+                  <ReviewsSection 
+                    productId={product.id} 
+                    locale={locale} 
+                  />
                 </div>
               </div>
             </div>
@@ -110,6 +118,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   <ProductInfo product={product} variant="details" />
                   <div className="mt-12">
                      <ProductTabs product={product} />
+                  </div>
+                  
+                  {/* Reviews on desktop - constrained width */}
+                  <div className="mt-12">
+                    <ReviewsSection 
+                      productId={product.id} 
+                      locale={locale} 
+                    />
                   </div>
                 </div>
               </div>

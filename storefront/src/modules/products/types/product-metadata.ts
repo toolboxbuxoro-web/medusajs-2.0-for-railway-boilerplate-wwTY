@@ -37,6 +37,10 @@ export interface ProductMetadata {
   title_uz?: string
   description_uz?: string
   
+  // Aggregated Ratings
+  rating_avg: number
+  rating_count: number
+
   // System (DO NOT RENDER)
   mxik_code?: string
   package_code?: string
@@ -58,6 +62,8 @@ export const EMPTY_PRODUCT_METADATA: ProductMetadata = {
   seo_title: "",
   seo_description: "",
   seo_keywords: [],
+  rating_avg: 0,
+  rating_count: 0,
 }
 
 // ============================================================================
@@ -96,6 +102,10 @@ export function parseProductMetadata(raw: unknown): ProductMetadata {
     // Localization
     title_uz: getString(data, "title_uz", undefined),
     description_uz: getString(data, "description_uz", undefined),
+
+    // Aggregated Ratings
+    rating_avg: getNumber(data, "rating_avg", 0),
+    rating_count: getNumber(data, "rating_count", 0),
 
     // System
     mxik_code: getString(data, "mxik_code", undefined),
@@ -155,4 +165,16 @@ function getProfessionalLevel(data: Record<string, unknown>): ProfessionalLevel 
     return "профессиональный"
   }
   return "бытовой"
+}
+
+function getNumber(data: Record<string, unknown>, key: string, defaultValue: number): number {
+  const value = data[key]
+  if (typeof value === "number") {
+    return value
+  }
+  if (typeof value === "string") {
+    const parsed = parseFloat(value)
+    return isNaN(parsed) ? defaultValue : parsed
+  }
+  return defaultValue
 }

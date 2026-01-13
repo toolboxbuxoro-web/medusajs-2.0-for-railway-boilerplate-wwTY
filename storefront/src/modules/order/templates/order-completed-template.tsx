@@ -114,7 +114,7 @@ export default async function OrderCompletedTemplate({
             </Heading>
             <Items items={order.items} />
             <div className="mt-8 pt-8 border-t border-gray-100">
-              <CartTotals totals={order} />
+              <CartTotals totals={order} locale={locale} />
             </div>
           </div>
 

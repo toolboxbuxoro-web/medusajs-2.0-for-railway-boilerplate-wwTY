@@ -417,9 +417,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 data-testid="shipping-phone-input"
               />
 
-                data-testid="shipping-phone-input"
-              />
-
               {/* OTP Login for guests */}
               {!isLoggedIn && phone.length >= 9 && (
                 <div className="space-y-3">
@@ -656,7 +653,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                         <span className="text-lg font-bold text-gray-900">
                           {convertToLocale({
                             amount: estimatedCost,
-                            currency_code: cart?.currency_code || "UZS",
+                            currency_code: cart?.currency_code,
                           })}
                         </span>
                       </div>

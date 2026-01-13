@@ -347,7 +347,7 @@ const ShippingAddress = ({
                                 <span className="text-lg font-bold text-gray-900">
                                     {convertToLocale({
                                         amount: estimatedBtsCost,
-                                        currency_code: cart?.currency_code || "UZS"
+                                        currency_code: cart?.currency_code
                                     })}
                                 </span>
                             </div>

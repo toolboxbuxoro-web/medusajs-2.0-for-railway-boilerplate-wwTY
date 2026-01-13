@@ -14,7 +14,7 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import QuickOrderModal from "../quick-order-modal"
 import { addToCart } from "@lib/data/cart"
-import { getCustomer } from "@lib/data/customer"
+import { useAuth } from "@lib/context/auth-context"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { convertToLocale } from "@lib/util/money"
@@ -136,12 +136,12 @@ export default function ProductActions({
     }
   }
 
+  const { authStatus } = useAuth()
+
   const handleQuickOrder = async () => {
     setIsQuickOrdering(true)
     try {
-      const customer = await getCustomer()
-      
-      if (customer) {
+      if (authStatus === "authorized") {
         // Logged in user: Add to cart and redirect to checkout (Buy Now behavior)
         if (!selectedVariant?.id) return
 

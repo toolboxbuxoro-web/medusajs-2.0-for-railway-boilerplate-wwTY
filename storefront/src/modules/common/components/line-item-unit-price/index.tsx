@@ -25,7 +25,7 @@ const LineItemUnitPrice = ({
     original_price_number: 0,
     calculated_price_number: 0,
     percentage_diff: 0,
-    currency_code: customCurrencyCode || "UZS"
+    currency_code: customCurrencyCode
   }
   
   const {

@@ -80,6 +80,13 @@ export const getCustomer = cache(async function () {
 })
 
 /**
+ * Client-friendly session verification
+ */
+export async function verifySession(): Promise<HttpTypes.StoreCustomer | null> {
+  return await getCustomer()
+}
+
+/**
  * OTP Login: Set JWT token received from /store/mobile/auth/verify-otp
  * This is a server action that sets the httpOnly cookie and returns success/error
  */

@@ -1,5 +1,7 @@
 import { getCustomer } from "@lib/data/customer"
 import AccountLayout from "@modules/account/templates/account-layout"
+import { AuthProvider } from "@lib/context/auth-context"
+import AccountGatedWrapper from "@modules/account/components/account-gated-wrapper"
 
 export default async function AccountPageLayout({
   dashboard,
@@ -11,8 +13,10 @@ export default async function AccountPageLayout({
   const customer = await getCustomer().catch(() => null)
 
   return (
-    <AccountLayout customer={customer}>
-      {customer ? dashboard : login}
-    </AccountLayout>
+    <AuthProvider initialCustomer={customer}>
+      <AccountLayout>
+        <AccountGatedWrapper dashboard={dashboard} login={login} />
+      </AccountLayout>
+    </AuthProvider>
   )
 }

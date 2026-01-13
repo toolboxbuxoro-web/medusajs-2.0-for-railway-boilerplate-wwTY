@@ -1,13 +1,14 @@
-import { Button } from "@medusajs/ui"
 import { useMemo } from "react"
 import { useTranslations } from 'next-intl'
-
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { useParams } from "next/navigation"
 import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
+import OrderStatusBadge from "../order-overview/order-status-badge"
+import { getOrderDisplayDate, formatOrderDateShort } from "@lib/util/date"
+import ChevronDown from "@modules/common/icons/chevron-down"
 
 type OrderCardProps = {
   order: HttpTypes.StoreOrder
@@ -18,76 +19,68 @@ const OrderCard = ({ order }: OrderCardProps) => {
   const { locale } = useParams()
   const localeStr = String(locale || "ru")
   
-  const numberOfLines = useMemo(() => {
-    return (
-      order.items?.reduce((acc, item) => {
-        return acc + item.quantity
-      }, 0) ?? 0
-    )
-  }, [order])
+  const getItemsSummary = () => {
+    if (!order.items || order.items.length === 0) return ""
+    
+    // Use localized title
+    const mainItem = getLocalizedLineItemTitle(order.items[0], localeStr)
+    const extraCount = order.items.length - 1
+    
+    if (extraCount <= 0) return mainItem
 
-  const numberOfProducts = useMemo(() => {
-    return order.items?.length ?? 0
-  }, [order])
+    if (localeStr === "uz") {
+      return `${mainItem} + ${extraCount} ta mahsulot`
+    }
+    
+    // Russian pluralization (simplistic for 1, 2, 5 rule, but matching mobile's 1 vs others)
+    const suffix = extraCount === 1 ? "товар" : "товара"
+    return `${mainItem} + ${extraCount} ${suffix}`
+  }
 
   return (
-    <div className="bg-white flex flex-col" data-testid="order-card">
-      <div className="uppercase text-large-semi mb-1">
-        #<span data-testid="order-display-id">{order.display_id}</span>
-      </div>
-      <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ui-fg-base">
-        <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toLocaleDateString(localeStr)}
-        </span>
-        <span className="px-2" data-testid="order-amount">
-          {convertToLocale({
-            amount: order.total,
-            currency_code: order.currency_code,
-          })}
-        </span>
-        <span className="pl-2">{`${numberOfLines} ${
-          numberOfLines > 1 ? t('items') : t('item')
-        }`}</span>
-      </div>
-      <div className="grid grid-cols-2 small:grid-cols-4 gap-4 my-4">
-        {order.items?.slice(0, 3).map((i) => {
-          return (
-            <div
-              key={i.id}
-              className="flex flex-col gap-y-2"
-              data-testid="order-item"
-            >
-              <Thumbnail thumbnail={i.thumbnail} images={[]} size="full" />
-              <div className="flex items-center text-small-regular text-ui-fg-base">
-                <span
-                  className="text-ui-fg-base font-semibold"
-                  data-testid="item-title"
-                >
-                  {getLocalizedLineItemTitle(i as any, localeStr)}
-                </span>
-                <span className="ml-2">x</span>
-                <span data-testid="item-quantity">{i.quantity}</span>
-              </div>
-            </div>
-          )
-        })}
-        {numberOfProducts > 4 && (
-          <div className="w-full h-full flex flex-col items-center justify-center">
-            <span className="text-small-regular text-ui-fg-base">
-              + {numberOfLines - 4}
+    <LocalizedClientLink
+      href={`/account/orders/details/${order.id}`}
+      className="group block no-underline"
+    >
+      <div 
+        className="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all duration-300 shadow-sm" 
+        data-testid="order-card"
+      >
+        <div className="flex flex-col">
+          {/* Header: ID and Status */}
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-base font-bold text-gray-900">
+              {t('order_number') || "Заказ"} №{order.display_id}
             </span>
-            <span className="text-small-regular text-ui-fg-base">{t('more')}</span>
+            <OrderStatusBadge order={order} />
           </div>
-        )}
+
+          {/* Date */}
+          <span className="text-[13px] text-gray-500 mb-3">
+            {formatOrderDateShort(getOrderDisplayDate(order), localeStr as any)}
+          </span>
+
+          {/* Items Summary */}
+          <span className="text-sm text-gray-700 mb-4 line-clamp-1">
+            {getItemsSummary()}
+          </span>
+
+          {/* Footer: Amount */}
+          <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+            <span className="text-[13px] text-gray-500">
+              {t('total_amount') || "Сумма заказа"}
+            </span>
+            <span className="text-base font-bold text-gray-900" data-testid="order-amount">
+              {convertToLocale({
+                amount: order.total,
+                currency_code: order.currency_code,
+                locale: localeStr
+              })}
+            </span>
+          </div>
+        </div>
       </div>
-      <div className="flex justify-end">
-        <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
-          <Button data-testid="order-details-link" variant="secondary">
-            {t('see_details')}
-          </Button>
-        </LocalizedClientLink>
-      </div>
-    </div>
+    </LocalizedClientLink>
   )
 }
 

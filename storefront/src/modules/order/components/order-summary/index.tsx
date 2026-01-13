@@ -7,7 +7,7 @@ type OrderSummaryProps = {
 
 import { useTranslations } from 'next-intl'
 
-const OrderSummary = ({ order }: OrderSummaryProps) => {
+const OrderSummary = ({ order, locale }: { order: HttpTypes.StoreOrder, locale?: string }) => {
   const t = useTranslations('order')
 
   const getAmount = (amount?: number | null) => {
@@ -18,6 +18,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
     return convertToLocale({
       amount,
       currency_code: order.currency_code,
+      locale: locale || 'ru'
     })
   }
 

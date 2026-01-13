@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import ErrorMessage from "@modules/checkout/components/error-message"
+import { useAuth } from "@lib/context/auth-context"
 
 
 
@@ -22,8 +23,9 @@ function normalizeUzPhone(input: string): string | null {
  * - POST /store/mobile/auth/request-otp
  * - POST /store/mobile/auth/verify-otp
  */
-const LoginOtp = () => {
+const LoginOtp = ({ onSuccess }: { onSuccess?: () => void }) => {
   const router = useRouter()
+  const { refreshSession } = useAuth()
   const t = useTranslations("account")
   const te = useTranslations("errors")
 
@@ -122,9 +124,14 @@ const LoginOtp = () => {
         const result = await loginWithOtpToken(data.token)
         
         if (result === "success") {
-          // Redirect to account page
-          router.push("/account")
-          router.refresh()
+          await refreshSession()
+          if (onSuccess) {
+             onSuccess()
+          } else {
+            // Redirect to account page
+            router.push("/account")
+            router.refresh()
+          }
         } else {
           setError(result || te("error_occurred"))
         }

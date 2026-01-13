@@ -42,13 +42,18 @@ export default async function orderSmsHandler({
 
     // 3. Send Order Confirmation SMS
     try {
+      const { ORDER_CONFIRMATION_TEXT } = await import("../modules/eskiz-sms/sms-texts.js")
+      
       // Use summary total or fallback to raw total
       const total = Number(order.summary?.current_order_total || order.total || 0)
-      const totalFormatted = new Intl.NumberFormat("ru-RU").format(total)
+      // FORMAT: 1 250 000 (space separated thousands)
+      const totalFormatted = new Intl.NumberFormat("ru-RU").format(total).replace(/\u00A0/g, " ")
       
       const orderDisplayId = order.display_id || orderId.slice(-8)
-      // ESKIZ-APPROVED SMS TEXT (Cyrillic)
-      const smsMessage = `Ваш заказ №${orderDisplayId} в Toolbox принят. Сумма: ${totalFormatted} сум.`
+      
+      const smsMessage = ORDER_CONFIRMATION_TEXT
+        .replace("{orderId}", orderDisplayId)
+        .replace("{sum}", totalFormatted)
       
       await notificationModule.createNotifications({
         to: normalized,

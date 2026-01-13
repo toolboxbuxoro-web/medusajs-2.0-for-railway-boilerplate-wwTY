@@ -1,5 +1,8 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
+import { useParams } from "next/navigation"
+
 import { XMark } from "@medusajs/icons"
 import React from "react"
 
@@ -11,38 +14,61 @@ import ShippingDetails from "@modules/order/components/shipping-details"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 
+import OrderDetailsSkeleton from "@modules/order/components/order-details-skeleton"
+import OrderDetailsErrorState from "@modules/order/components/order-details-error-state"
+import { useOrder } from "@lib/hooks/use-order"
+
 type OrderDetailsTemplateProps = {
-  order: HttpTypes.StoreOrder
+  // order is now fetched internally by id from params
 }
 
-import { useTranslations } from 'next-intl'
-
-const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
-  order,
-}) => {
+const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = () => {
   const t = useTranslations('order')
+  const { id, locale } = useParams()
+  const localeStr = String(locale || "ru")
+  const orderId = String(id || "")
   
+  const { order, state, retry } = useOrder(orderId)
+
+  // 1. Loading State
+  if (state === "loading") {
+    return <OrderDetailsSkeleton />
+  }
+
+  // 2. Error State
+  if (state === "error" || !order) {
+    return <OrderDetailsErrorState onRetry={retry} />
+  }
+
+  // 3. Success State
   return (
     <div className="flex flex-col justify-center gap-y-4">
-      <div className="flex gap-2 justify-between items-center">
-        <h1 className="text-2xl-semi">{t('order_details')}</h1>
+      <div className="flex gap-2 justify-between items-center pr-2">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          {t('order_details')} №{order.display_id}
+        </h1>
         <LocalizedClientLink
           href="/account/orders"
-          className="flex gap-2 items-center text-ui-fg-subtle hover:text-ui-fg-base"
+          className="flex gap-2 items-center text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
           data-testid="back-to-overview-button"
         >
-          <XMark /> {t('back_to_overview')}
+          <XMark className="w-5 h-5" /> 
+          <span className="hidden sm:inline">{t('back_to_overview')}</span>
+          <span className="sm:hidden">Назад</span>
         </LocalizedClientLink>
       </div>
+
       <div
-        className="flex flex-col gap-4 h-full bg-white w-full"
+        className="flex flex-col gap-6 h-full bg-white w-full border border-gray-100 rounded-2xl p-6 shadow-sm"
         data-testid="order-details-container"
       >
-        <OrderDetails order={order} showStatus />
-        <Items items={order.items} />
-        <ShippingDetails order={order} />
-        <OrderSummary order={order} />
-        <Help />
+        <OrderDetails order={order} showStatus locale={localeStr} />
+        <Items items={order.items || []} />
+        <ShippingDetails order={order} locale={localeStr} />
+        <OrderSummary order={order} locale={localeStr} />
+        <div className="pt-6 border-t border-gray-50">
+          <Help />
+        </div>
       </div>
     </div>
   )

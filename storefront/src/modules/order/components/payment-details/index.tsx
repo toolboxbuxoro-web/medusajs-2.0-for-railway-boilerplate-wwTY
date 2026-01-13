@@ -10,6 +10,7 @@ type PaymentDetailsProps = {
   locale?: string
 }
 
+import { formatOrderDate } from "@lib/util/date"
 import { getTranslations } from "next-intl/server"
 
 const PaymentDetails = async ({ order, locale }: PaymentDetailsProps) => {
@@ -47,7 +48,7 @@ const PaymentDetails = async ({ order, locale }: PaymentDetailsProps) => {
                   {isStripe(payment.provider_id) && payment.data?.card_last4
                     ? `**** **** **** ${payment.data.card_last4}`
                     : t('paid_at', {
-                        date: new Date(payment.created_at ?? "").toLocaleString()
+                        date: formatOrderDate(payment.created_at ?? "", (locale as any) || 'ru')
                       })}
                 </Text>
               </div>

@@ -89,10 +89,8 @@ const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
                 ({convertToLocale({
                   amount: order.shipping_methods?.[0]?.total ?? 0,
                   currency_code: order.currency_code,
-                })
-                  .replace(/,/g, "")
-                  .replace(/\./g, ",")}
-                )
+                  locale: locale || 'ru'
+                })})
               </>
             )}
           </Text>

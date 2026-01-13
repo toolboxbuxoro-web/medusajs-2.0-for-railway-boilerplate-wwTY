@@ -142,7 +142,14 @@
     "otp_login_description": "Войдите по номеру телефона",
 
     "login_with_otp": "Войти по SMS",
-    "or": "или"
+    "or": "или",
+    "login_by_phone": "Войти по номеру",
+    "get_access_to_orders": "Получить доступ к заказам",
+    "user": "Пользователь",
+    "change_phone": "Смена номера",
+    "change_phone_description": "Введите новый номер телефона. Мы отправим на него код подтверждения.",
+    "phone_already_used": "Этот номер уже используется",
+    "confirm": "Подтвердить"
   },
   "cart": {
     "your_cart": "Корзина покупок",

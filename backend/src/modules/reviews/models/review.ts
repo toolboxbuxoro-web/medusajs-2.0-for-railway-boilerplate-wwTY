@@ -4,11 +4,15 @@ export const Review = model.define("review", {
   id: model.id().primaryKey(),
   product_id: model.text(),
   customer_id: model.text(),
-  author_device: model.text().nullable(),
+  order_id: model.text(),
   rating: model.number(),
   comment: model.text().nullable(),
+  rejection_reason: model.text().nullable(),
+  status: model.enum(["pending", "approved", "rejected"]).default("pending"),
 })
 .indexes([
   { on: ["product_id"] },
-  { on: ["product_id", "customer_id"], unique: true }
+  { on: ["status"] },
+  { on: ["created_at"] },
+  { on: ["product_id", "customer_id"], unique: true },
 ])

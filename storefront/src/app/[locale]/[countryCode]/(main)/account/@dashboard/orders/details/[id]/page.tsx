@@ -39,11 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function OrderDetailPage({ params }: Props) {
-  const order = await getOrder(params.id).catch(() => null)
-
-  if (!order) {
-    notFound()
-  }
-
-  return <OrderDetailsTemplate order={order} />
+  // Client-side state machine in OrderDetailsTemplate handles fetching
+  return <OrderDetailsTemplate />
 }

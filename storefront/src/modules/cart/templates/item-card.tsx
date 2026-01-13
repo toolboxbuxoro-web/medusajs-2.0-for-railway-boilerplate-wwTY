@@ -124,14 +124,14 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
                   <div className="text-xs text-gray-400 line-through">
                     {convertToLocale({
                       amount: originalPrice * quantity,
-                      currency_code: currencyCode || item.cart?.currency_code || "UZS",
+                      currency_code: currencyCode || item.cart?.currency_code,
                     })}
                   </div>
                 )}
                 <div className="text-base sm:text-lg font-bold text-red-600">
                   {convertToLocale({
                     amount: finalPrice * quantity,
-                    currency_code: currencyCode || item.cart?.currency_code || "UZS",
+                    currency_code: currencyCode || item.cart?.currency_code,
                   })}
                 </div>
               </div>
@@ -197,14 +197,14 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
                   <div className="text-sm text-gray-500 line-through mb-1">
                     {convertToLocale({
                       amount: originalPrice * quantity,
-                      currency_code: currencyCode || item.cart?.currency_code || "UZS",
+                      currency_code: currencyCode || item.cart?.currency_code,
                     })}
                   </div>
                 )}
                 <div className="text-xl font-bold text-red-600">
                   {convertToLocale({
                     amount: finalPrice * quantity,
-                    currency_code: currencyCode || item.cart?.currency_code || "UZS",
+                    currency_code: currencyCode || item.cart?.currency_code,
                   })}
                 </div>
                 {discount > 0 && (

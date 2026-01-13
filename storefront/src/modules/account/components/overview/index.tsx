@@ -4,6 +4,8 @@ import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import OrderStatusBadge from "../order-overview/order-status-badge"
+import { getOrderDisplayDate, formatOrderDateShort } from "@lib/util/date"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -19,48 +21,12 @@ const Overview = async ({ customer, orders, locale }: OverviewProps) => {
   return (
     <div data-testid="overview-page-wrapper" className="animate-fade-in">
       <div className="flex flex-col gap-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1" data-testid="welcome-message" data-value={customer?.first_name}>
-              {t('hello')}, {customer?.first_name}
-            </h1>
-            <p className="text-sm text-gray-500">
-              {customer?.email?.endsWith("@phone.local") ? (
-                <>
-                  {t('phone')}: <span className="font-semibold text-gray-900" data-testid="customer-phone" data-value={customer?.phone}>{customer?.phone}</span>
-                </>
-              ) : (
-                <>
-                  {t('signed_in_as')} <span className="font-semibold text-gray-900" data-testid="customer-email" data-value={customer?.email}>{customer?.email}</span>
-                </>
-              )}
-            </p>
-          </div>
+        <div className="pb-2 border-b border-gray-100">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {t('overview')}
+          </h1>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {/* Profile Completion Card */}
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-            <div className="flex flex-col gap-y-2">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">{t('profile_completion')}</h3>
-              <div className="flex items-baseline gap-x-2">
-                <span className="text-3xl sm:text-4xl font-bold text-red-600" data-testid="customer-profile-completion" data-value={getProfileCompletion(customer)}>
-                  {getProfileCompletion(customer)}%
-                </span>
-                <span className="text-sm text-gray-500">{t('completed')}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                <div 
-                  className="bg-red-600 h-1.5 rounded-full transition-all duration-500" 
-                  style={{ width: `${getProfileCompletion(customer)}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
 
         {/* Recent Orders Section */}
         <div className="flex flex-col gap-y-4">
@@ -82,10 +48,10 @@ const Overview = async ({ customer, orders, locale }: OverviewProps) => {
                   <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 hover:border-red-200 hover:shadow-md transition-all duration-200 group-hover:-translate-y-0.5" data-testid="order-wrapper" data-value={order.id}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-2 text-sm">
-                        <div className="flex flex-col">
+                         <div className="flex flex-col">
                           <span className="text-gray-500 text-xs uppercase tracking-wider mb-1">{t('order_placed')}</span>
-                          <span className="font-medium text-gray-900" data-testid="order-created-date">
-                            {new Date(order.created_at).toLocaleDateString(locale || 'ru')}
+                          <span className="font-medium text-gray-900" data-testid="order-created-date" data-value={order.created_at}>
+                            {formatOrderDateShort(getOrderDisplayDate(order), (locale as any) || 'ru')}
                           </span>
                         </div>
                         <div className="flex flex-col">
@@ -100,11 +66,13 @@ const Overview = async ({ customer, orders, locale }: OverviewProps) => {
                             {convertToLocale({
                               amount: order.total,
                               currency_code: order.currency_code,
+                              locale: locale
                             })}
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center justify-end gap-x-4">
+                        <OrderStatusBadge order={order} />
                         <div className="p-2 rounded-full bg-gray-50 text-gray-400 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
                           <ChevronDown className="-rotate-90 w-5 h-5" />
                         </div>
@@ -128,26 +96,5 @@ const Overview = async ({ customer, orders, locale }: OverviewProps) => {
   )
 }
 
-const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
-  let count = 0
-
-  if (!customer) {
-    return 0
-  }
-
-  if (customer.email && !customer.email.endsWith("@phone.local")) {
-    count++
-  }
-
-  if (customer.first_name && customer.last_name) {
-    count++
-  }
-
-  if (customer.phone) {
-    count++
-  }
-
-  return Math.round((count / 3) * 100)
-}
 
 export default Overview

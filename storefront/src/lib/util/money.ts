@@ -9,18 +9,25 @@ type ConvertToLocaleParams = {
 }
 
 /**
- * Replace UZS currency code with localized currency symbol
+ * Formats a money amount with localized currency symbols.
+ * 1:1 migration from Mobile.
+ * 
+ * @param amount - The amount to format (in major units, e.g., 1250000)
+ * @param locale - The locale to use for formatting ('ru' or 'uz')
+ * @returns Formatted string (e.g., "1 250 000 сум" or "1 250 000 so'm")
  */
-const replaceUZSSymbol = (formattedString: string, locale: string): string => {
-  if (!formattedString.includes('UZS')) {
-    return formattedString
-  }
+export function formatMoney(amount: number, locale: 'ru' | 'uz' = 'ru'): string {
+  if (amount === undefined || amount === null) return '0'
+
+  // Use ru-RU to get space separators
+  const formatted = new Intl.NumberFormat('ru-RU', {
+    maximumFractionDigits: 0,
+  }).format(amount)
   
-  // Determine the appropriate currency symbol based on locale
-  const currencySymbol = locale.startsWith('uz') ? "so'm" : "сум"
+  // Replace narrow non-breaking space with regular space
+  const cleanFormatted = formatted.replace(/\s/g, ' ')
   
-  // Replace UZS with the localized symbol
-  return formattedString.replace(/UZS/g, currencySymbol)
+  return locale === 'uz' ? `${cleanFormatted} so'm` : `${cleanFormatted} сум`
 }
 
 export const convertToLocale = ({
@@ -28,37 +35,28 @@ export const convertToLocale = ({
   currency_code,
   minimumFractionDigits,
   maximumFractionDigits,
-  locale = "ru-RU",
+  locale = "ru",
 }: ConvertToLocaleParams) => {
-  // Handle NaN, null, or undefined amounts
   const safeAmount = (amount === null || amount === undefined || isNaN(amount)) ? 0 : amount
   
-  if (currency_code && !isEmpty(currency_code)) {
-    const formatter = new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: currency_code,
-    })
+  // Medusa stores amounts in subunits.
+  // We need to determine how many decimals the currency has.
+  const isUZS = currency_code?.toUpperCase() === 'UZS'
+  
+  // For UZS we traditionally treat as 0 decimals in this project's subunit storage
+  const fractionDigits = isUZS ? 0 : 2
+  const value = safeAmount / Math.pow(10, fractionDigits)
 
-    // Get the default fraction digits for the currency to convert cents to units
-    // Medusa stores amounts in the smallest currency unit (e.g., cents)
-    const { maximumFractionDigits: defaultFractionDigits } =
-      formatter.resolvedOptions()
-
-    // Special case for UZS to treat as 0 decimals since we store main units
-    const fractionDigits = currency_code.toUpperCase() === 'UZS' ? 0 : defaultFractionDigits
-
-    const value = safeAmount / Math.pow(10, fractionDigits || 0)
-
-    const formatted = new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: currency_code,
-      minimumFractionDigits,
-      maximumFractionDigits,
-    }).format(value)
-    
-    // Replace UZS with localized currency symbol
-    return replaceUZSSymbol(formatted, locale)
+  if (isUZS) {
+    const l = locale.startsWith('uz') ? 'uz' : 'ru'
+    return formatMoney(value, l)
   }
 
-  return safeAmount.toString()
+  // Fallback for non-UZS currencies
+  return new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : 'uz-UZ', {
+    style: "currency",
+    currency: currency_code,
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(value)
 }

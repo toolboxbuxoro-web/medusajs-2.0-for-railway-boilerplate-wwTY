@@ -14,56 +14,50 @@ type MyInformationProps = {
 }
 
 import { useTranslations } from 'next-intl'
-import { changePhoneWithOtp } from "@lib/data/customer"
+import ChangePhoneModal from "../change-phone-modal"
 
 const ProfilePhone: React.FC<MyInformationProps> = ({ customer }) => {
-  const [successState, setSuccessState] = React.useState(false)
+  const [isModalOpen, setIsModalOpen] = React.useState(false)
   const t = useTranslations('account')
-  const te = useTranslations('errors')
-
-  const [state, formAction] = useFormState<any, FormData>(changePhoneWithOtp, null)
-
-  const clearState = () => {
-    setSuccessState(false)
-  }
-
-  useEffect(() => {
-    if (typeof state === "string" && state.startsWith("success.")) {
-      setSuccessState(true)
-    }
-  }, [state])
-
-  const errorMessage = typeof state === "string" && !state.startsWith("success.") ? state : undefined
 
   return (
-    <form action={formAction} className="w-full">
-      <AccountInfo
-        label={t('phone')}
-        currentInfo={`${customer.phone}`}
-        isSuccess={successState}
-        isError={!!errorMessage}
-        errorMessage={errorMessage}
-        clearState={clearState}
-        data-testid="account-phone-editor"
-      >
-        <div className="grid grid-cols-1 gap-y-4">
-          <Input
-            label={t('phone')}
-            name="phone"
-            type="tel"
-            required
-            defaultValue={customer.phone ?? ""}
-            data-testid="phone-input"
-          />
-          <Input
-            label={t('sms_code')}
-            name="otp_code"
-            type="text"
-            data-testid="otp-code-input"
-          />
+    <div className="w-full">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-y-1">
+          <span className="text-sm text-gray-500 uppercase tracking-wider font-medium">
+            {t('phone')}
+          </span>
+          <span className="text-xl font-bold text-gray-900">
+            {customer.phone}
+          </span>
         </div>
-      </AccountInfo>
-    </form>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900 group"
+          title={t('edit') || "Редактировать"}
+        >
+          <svg
+            className="w-5 h-5 transition-transform group-hover:scale-110"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <ChangePhoneModal
+        customer={customer}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </div>
   )
 }
 

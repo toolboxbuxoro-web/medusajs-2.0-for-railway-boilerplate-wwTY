@@ -18,7 +18,7 @@ type LineItemPriceProps = {
 
 const LineItemPrice = ({ item, style = "default", currencyCode: customCurrencyCode }: LineItemPriceProps) => {
   const prices = getPricesForVariant(item.variant) ?? {
-    currency_code: customCurrencyCode || "UZS",
+    currency_code: customCurrencyCode,
     calculated_price_number: 0,
     original_price_number: 0
   }

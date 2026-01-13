@@ -36,8 +36,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const code = generateOtpCode()
   await otpStoreSet(normalized, code, purpose)
 
-  // ESKIZ-APPROVED SMS TEXT (Cyrillic, platform-agnostic)
-  const message = `Код для входа в приложение Toolbox: ${code}. Не передавайте код никому.`
+  const { OTP_LOGIN_TEXT } = await import("../../../../../modules/eskiz-sms/sms-texts.js")
+  const message = OTP_LOGIN_TEXT.replace("{code}", code)
 
   try {
     const notificationModule = req.scope.resolve(Modules.NOTIFICATION)

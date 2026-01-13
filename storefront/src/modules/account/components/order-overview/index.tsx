@@ -1,25 +1,17 @@
-"use client"
-
-import { Button } from "@medusajs/ui"
 import { useTranslations } from 'next-intl'
-
 import OrderCard from "../order-card"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
+import PackageIcon from "@modules/common/icons/package" // Assuming there's a package icon or similiar
 
 const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
   const t = useTranslations('account')
   
   if (orders?.length) {
     return (
-      <div className="flex flex-col gap-y-8 w-full">
+      <div className="flex flex-col gap-y-4 w-full">
         {orders.map((o) => (
-          <div
-            key={o.id}
-            className="border-b border-gray-200 pb-6 last:pb-0 last:border-none"
-          >
-            <OrderCard order={o} />
-          </div>
+          <OrderCard key={o.id} order={o} />
         ))}
       </div>
     )
@@ -27,22 +19,25 @@ const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
 
   return (
     <div
-      className="w-full flex flex-col items-center gap-y-4"
+      className="w-full flex flex-col items-center justify-center py-20 px-4 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200"
       data-testid="no-orders-container"
     >
-      <h2 className="text-large-semi">{t('no_orders_title')}</h2>
-      <p className="text-base-regular">
-        {t('no_orders_message')}
-      </p>
-      <div className="mt-4">
-        <LocalizedClientLink 
-          href="/store" 
-          className="inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
-          data-testid="continue-shopping-button"
-        >
-          {t('continue_shopping')}
-        </LocalizedClientLink>
+      <div className="w-20 h-20 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-6">
+        <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
       </div>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">{t('no_orders_title') || "Заказов пока нет"}</h2>
+      <p className="text-gray-500 text-center max-w-[300px] mb-8">
+        {t('no_orders_message') || "Как только вы что-то купите, информация о заказе появится здесь."}
+      </p>
+      <LocalizedClientLink 
+        href="/store" 
+        className="inline-flex items-center justify-center px-8 py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-md hover:shadow-lg active:scale-95"
+        data-testid="continue-shopping-button"
+      >
+        {t('continue_shopping') || "Перейти к покупкам"}
+      </LocalizedClientLink>
     </div>
   )
 }

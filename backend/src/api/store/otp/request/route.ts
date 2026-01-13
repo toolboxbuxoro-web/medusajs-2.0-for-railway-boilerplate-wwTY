@@ -4,29 +4,19 @@ import { normalizeUzPhone } from "../../../../lib/phone"
 import { generateOtpCode, otpRateLimitCheck, otpStoreSet, otpCooldownCheck } from "../../../../lib/otp-store"
 import { findCustomerByPhone } from "../_shared"
 
+import { OTP_LOGIN_TEXT, CHANGE_PHONE_TEXT } from "../../../../modules/eskiz-sms/sms-texts.js"
+
 type Body = {
   phone: string
-  purpose?: "register" | "reset_password" | "change_password" | "checkout"
+  purpose?: "register" | "checkout" | "change_phone"
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ESKIZ-APPROVED SMS TEMPLATE (SOURCE OF TRUTH)
-// ═══════════════════════════════════════════════════════════════════════════
-// All OTP messages MUST use this exact text. It's platform-agnostic and approved.
-//
-// For OTP Login / Checkout:
-//   "Код для входа в приложение Toolbox: {code}. Не передавайте код никому."
-//
-// For Change Phone:
-//   "Код для подтверждения нового номера в Toolbox: {code}."
-// ═══════════════════════════════════════════════════════════════════════════
 
 function getOtpMessage(code: string, purpose?: string): string {
   if (purpose === "change_phone") {
-    return `Код для подтверждения нового номера в Toolbox: ${code}.`
+    return CHANGE_PHONE_TEXT.replace("{code}", code)
   }
-  // Default: login, checkout, auth, register, reset_password - all use the same approved text
-  return `Код для входа в приложение Toolbox: ${code}. Не передавайте код никому.`
+  // Default: login, checkout, auth, register - all use the same approved text
+  return OTP_LOGIN_TEXT.replace("{code}", code)
 }
 
 

@@ -1,23 +1,25 @@
+"use client"
+
 import React from "react"
-import { getTranslations } from 'next-intl/server'
+import { useTranslations } from 'next-intl'
 
 import UnderlineLink from "@modules/common/components/interactive-link"
 
 import AccountNav from "../components/account-nav"
-import { HttpTypes } from "@medusajs/types"
+import ProfileHeader from "../components/profile-header"
+import { useAuth } from "@lib/context/auth-context"
 
 interface AccountLayoutProps {
-  customer: HttpTypes.StoreCustomer | null
   children: React.ReactNode
 }
 
-const AccountLayout: React.FC<AccountLayoutProps> = async ({
-  customer,
+const AccountLayout: React.FC<AccountLayoutProps> = ({
   children,
 }) => {
-  const t = await getTranslations('account')
+  const t = useTranslations('account')
+  const { customer, authStatus } = useAuth()
 
-  if (!customer) {
+  if (authStatus !== "authorized") {
     return (
       <div className="flex-1" data-testid="account-page">
         {children}
@@ -29,23 +31,19 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
     <div className="flex-1 py-4 sm:py-8 lg:py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" data-testid="account-page">
       <div className="content-container">
         <div className="max-w-5xl mx-auto">
-          {/* Mobile Nav - Horizontal scroll */}
-          <div className="lg:hidden mb-4 -mx-4 px-4">
-            <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
-              <AccountNav customer={customer} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4 lg:gap-6">
-            {/* Desktop Nav - Sidebar */}
-            <div className="hidden lg:block">
-              <div className="sticky top-24 bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <AccountNav customer={customer} />
+          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 lg:gap-8">
+            {/* Desktop & Mobile Sidebar-like area */}
+            <div className="flex flex-col gap-y-4">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <ProfileHeader onLoginPress={() => {}} />
+                <div className="p-4 lg:p-5">
+                  <AccountNav customer={customer} />
+                </div>
               </div>
             </div>
             
             {/* Main Content */}
-            <div className="flex-1 bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8 shadow-sm">
+            <div className="flex-1 bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-10 shadow-sm min-h-[500px]">
               {children}
             </div>
           </div>

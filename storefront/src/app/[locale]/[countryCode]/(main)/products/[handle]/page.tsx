@@ -95,8 +95,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+import { getCustomer } from "@lib/data/customer"
+
 export default async function ProductPage({ params }: Props) {
   const region = await getRegion(params.countryCode)
+  const customer = await getCustomer()
 
   if (!region) {
     notFound()
