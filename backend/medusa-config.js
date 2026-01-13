@@ -261,12 +261,14 @@ const medusaConfig = {
                 'categories.id',
                 'categories.title',
                 'metadata.brand',
-                'metadata.in_stock'
+                'metadata.in_stock',
+                'metadata.price'
               ],
               sortableAttributes: [
                 'created_at',
                 'metadata.sales_count',
-                'metadata.rating_avg'
+                'metadata.rating_avg',
+                'metadata.price'
               ],
               rankingRules: [
                 'words',

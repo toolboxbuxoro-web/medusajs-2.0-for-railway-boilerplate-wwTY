@@ -37,7 +37,7 @@ export const GET = async (
     q: q as string || '',
     filter: filterArray.length > 0 ? filterArray.join(' AND ') : undefined,
     sort: sort ? [sort as string] : undefined,
-    facets: ['categories.title', 'metadata.brand', 'metadata.price'],
+    facets: ['categories.title', 'metadata.brand'],
     attributesToHighlight: ['title', 'description'],
     highlightPreTag: '<mark>',
     highlightPostTag: '</mark>',
