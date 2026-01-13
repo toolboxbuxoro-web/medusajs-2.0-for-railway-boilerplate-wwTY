@@ -212,7 +212,7 @@ const ReviewsPage = () => {
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-md bg-ui-bg-subtle border border-ui-border-base flex items-center justify-center">
-                      <ChatBubbleLeftRight size={16} className="text-ui-fg-muted" />
+                      <ChatBubbleLeftRight className="text-ui-fg-muted" />
                     </div>
                   )}
                   <div className="flex flex-col truncate">
