@@ -9,7 +9,7 @@ import { MEILISEARCH_HOST, MEILISEARCH_ADMIN_KEY } from "../lib/constants.js"
  * This ensures that our rich metadata and flattened fields are 
  * correctly sent to the search engine.
  */
-export async function searchIndexer({
+export default async function searchIndexer({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
@@ -22,6 +22,7 @@ export async function searchIndexer({
   try {
     // Dynamic import to handle ESM-only package in CommonJS context
     const { MeiliSearch } = await import("meilisearch")
+
     // 1. Fetch the product with all necessary relations
     const [product] = await productService.listProducts(
       { id: data.id },
