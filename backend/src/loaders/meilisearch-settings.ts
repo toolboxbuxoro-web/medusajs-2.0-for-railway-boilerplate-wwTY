@@ -1,5 +1,3 @@
-import { MeiliSearch } from "meilisearch"
-
 /**
  * Explicitly ensures that the products index in Meilisearch
  * has the correct searchableAttributes configuration.
@@ -16,6 +14,9 @@ export async function ensureProductSearchSchema() {
   }
 
   try {
+    // Dynamic import to handle ESM-only package in CommonJS context
+    const { MeiliSearch } = await import("meilisearch")
+
     const client = new MeiliSearch({
       host: process.env.MEILISEARCH_HOST,
       apiKey: process.env.MEILISEARCH_ADMIN_KEY,
