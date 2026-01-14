@@ -30,7 +30,7 @@ export const GET = async (
     let searchBody: any = {
       limit: limitNum,
       offset: offsetNum,
-      attributesToRetrieve: ['id', 'title', 'handle', 'thumbnail', 'status', 'metadata', 'variants'],
+      attributesToRetrieve: ['id', 'title', 'handle', 'thumbnail', 'status', 'metadata', 'variants', 'brand', 'title_uz', 'seo_keywords'],
       attributesToHighlight: ['title'],
       highlightPreTag: '<mark>',
       highlightPostTag: '</mark>',

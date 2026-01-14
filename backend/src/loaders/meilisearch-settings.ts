@@ -25,18 +25,32 @@ export async function ensureProductSearchSchema() {
     const index = client.index("products")
 
     // Update searchableAttributes with proper priority order
+    // NOTE: We use flattened names (brand, title_uz, etc.) provided by our transformer
     await index.updateSettings({
       searchableAttributes: [
         "title",                    // Primary product name (RU/EN)
-        "metadata.brand",           // Brand name (e.g., "Number One")
-        "metadata.title_uz",        // Uzbek translation
+        "brand",                    // Flattened brand name (e.g., "Number One")
+        "title_uz",                 // Flattened Uzbek translation
         "subtitle",
-        "metadata.seo_keywords",    // SEO keywords
+        "seo_keywords",             // Flattened SEO keywords
         "handle",                   // URL slug
         "description",
         "variant_sku",
         "categories.title"
       ],
+      filterableAttributes: [
+        "categories.id",
+        "brand",
+        "in_stock",
+        "price"
+      ],
+      sortableAttributes: [
+        "created_at",
+        "updated_at",
+        "price",
+        "sales_count",
+        "rating_avg"
+      ]
     })
 
     console.log("[Meilisearch] ✅ products searchableAttributes ensured")

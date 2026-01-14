@@ -233,7 +233,7 @@ const medusaConfig = {
         settings: {
           products: {
             type: 'products',
-            enabled: true,
+            enabled: false, // We use custom subscriber for products for rich metadata indexing
             fields: ['id', 'title', 'subtitle', 'description', 'handle', 'variant_sku', 'thumbnail', 'metadata', 'categories'],
             indexSettings: {
               searchableAttributes: [
