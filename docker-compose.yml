@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,11 +24,24 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.3
+    container_name: medusa-meilisearch
+    environment:
+      MEILI_MASTER_KEY: masterKey
+      MEILI_NO_ANALYTICS: true
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+
 volumes:
   postgres_data:
+  meilisearch_data:
+
 

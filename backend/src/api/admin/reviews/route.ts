@@ -13,7 +13,7 @@ export async function GET(
   if (status) filter.status = status
   if (product_id) filter.product_id = product_id
 
-  // Use Query to get reviews with related product and customer info
+  // Get reviews (without relations - Review model doesn't have links to Product/Customer)
   const { data: reviews, metadata: { count } } = await query.graph({
     entity: "review",
     fields: [
@@ -25,11 +25,6 @@ export async function GET(
       "product_id",
       "customer_id",
       "order_id",
-      "product.title",
-      "product.thumbnail",
-      "customer.phone",
-      "customer.first_name",
-      "customer.last_name"
     ],
     filters: filter,
     pagination: {
@@ -39,10 +34,50 @@ export async function GET(
     },
   })
 
+  // Enrich reviews with product and customer data
+  const productService = req.scope.resolve(Modules.PRODUCT)
+  const customerService = req.scope.resolve(Modules.CUSTOMER)
+
+  const enrichedReviews = await Promise.all(
+    reviews.map(async (review: any) => {
+      let product = null
+      let customer = null
+
+      try {
+        if (review.product_id) {
+          const products = await productService.listProducts({ id: [review.product_id] })
+          product = products[0] || null
+        }
+      } catch (e) {
+        // Product might be deleted
+      }
+
+      try {
+        if (review.customer_id) {
+          const customers = await customerService.listCustomers({ id: [review.customer_id] })
+          customer = customers[0] || null
+        }
+      } catch (e) {
+        // Customer might be deleted
+      }
+
+      return {
+        ...review,
+        product: product ? { title: product.title, thumbnail: product.thumbnail } : null,
+        customer: customer ? { 
+          first_name: customer.first_name, 
+          last_name: customer.last_name,
+          phone: customer.phone 
+        } : null,
+      }
+    })
+  )
+
   res.json({
-    reviews,
+    reviews: enrichedReviews,
     count,
     limit: parseInt(limit),
     offset: parseInt(offset),
   })
 }
+
