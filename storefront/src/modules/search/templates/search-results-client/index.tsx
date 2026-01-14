@@ -42,7 +42,7 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
   return (
     <div className="flex flex-col w-full min-h-screen">
       {/* Search Header */}
-      <div className="flex items-center justify-between border-b w-full py-6 px-8 small:px-14 bg-white sticky top-[64px] z-10">
+      <div className="flex items-center justify-between border-b w-full py-6 px-8 small:px-14 bg-white sticky top-[64px] z-40">
         <div className="flex flex-col items-start gap-y-1">
           <Text className="text-ui-fg-muted text-xs uppercase tracking-widest font-bold">
             {mode === "recommendation" ? "Рекомендации" : "Результаты поиска"}
@@ -51,9 +51,11 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
             <Heading className="text-xl">
               {mode === "recommendation" ? "Для вас" : (mode === "fallback" ? `Поиск: ${query}` : decodeURI(query))}
             </Heading>
-            <span className="text-ui-fg-muted text-sm font-medium">
-                ({totalHits})
-            </span>
+            {mode !== "fallback" && (
+              <span className="text-ui-fg-muted text-sm font-medium">
+                  ({totalHits})
+              </span>
+            )}
           </div>
         </div>
         

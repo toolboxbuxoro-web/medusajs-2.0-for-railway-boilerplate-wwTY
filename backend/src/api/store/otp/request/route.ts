@@ -4,7 +4,7 @@ import { normalizeUzPhone } from "../../../../lib/phone"
 import { generateOtpCode, otpRateLimitCheck, otpStoreSet, otpCooldownCheck } from "../../../../lib/otp-store"
 import { findCustomerByPhone } from "../_shared"
 
-import { OTP_LOGIN_TEXT, CHANGE_PHONE_TEXT } from "../../../../modules/eskiz-sms/sms-texts.js"
+import { OTP_LOGIN_TEXT, CHANGE_PHONE_TEXT } from "../../../../modules/eskiz-sms/sms-texts"
 
 type Body = {
   phone: string

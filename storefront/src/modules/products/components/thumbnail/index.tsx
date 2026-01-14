@@ -136,8 +136,11 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
           )}
         </>
       ) : (
-        <div className="w-full h-full absolute inset-0 flex items-center justify-center">
-          <PlaceholderImage size={size === "small" ? 16 : 24} />
+        <div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center bg-gray-50/50">
+          <div className="p-4 rounded-3xl bg-white shadow-sm border border-gray-100 mb-2">
+            <PlaceholderImage size={32} color="#9ca3af" />
+          </div>
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Фото скоро появится</span>
         </div>
       )}
     </Container>
