@@ -238,11 +238,14 @@ const medusaConfig = {
             indexSettings: {
               searchableAttributes: [
                 'title',
+                'metadata.brand',
+                'metadata.title_uz',
                 'subtitle',
+                'metadata.seo_keywords',
+                'handle',
                 'description',
                 'variant_sku',
-                'categories.title',
-                'metadata.brand'
+                'categories.title'
               ],
               displayedAttributes: [
                 'id',
