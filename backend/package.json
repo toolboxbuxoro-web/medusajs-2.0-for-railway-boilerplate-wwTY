@@ -21,7 +21,7 @@
     "verify:payme:fiscal": "medusa exec ./src/scripts/verify-payme-fiscalization.ts",
     "create:admin:cli": "medusa user -e ${MEDUSA_ADMIN_EMAIL:-admin@toolbox.com} -p ${MEDUSA_ADMIN_PASSWORD:-admin123456}",
     "ib": "init-backend",
-    "start": "init-backend && cd .medusa/server && medusa start --verbose",
+    "start": "init-backend && cd .medusa/server && medusa db:migrate && medusa start --verbose",
     "dev": "medusa develop",
     "email:dev": "email dev --dir=./src/modules/email-notifications/templates --port=3002"
   },
