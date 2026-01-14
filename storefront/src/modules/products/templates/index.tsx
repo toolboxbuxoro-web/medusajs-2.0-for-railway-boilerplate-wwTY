@@ -152,18 +152,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                     <ProductActionsWrapper product={product} region={region} />
                   </Suspense>
                   
-                  {/* Delivery & Security Info (Uzum style) */}
-                  <div className="mt-6 pt-6 border-t border-gray-50 space-y-4">
-                    <div className="flex items-start gap-3">
-                       <div className="w-5 h-5 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                       </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{tHero('free_shipping')}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{t('delivery_subtitle')}</p>
-                       </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
