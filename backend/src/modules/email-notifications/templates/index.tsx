@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { MedusaError } from '@medusajs/framework/utils'
-import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user'
-import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed'
+import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user.js'
+import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed.js'
 
 export const EmailTemplates = {
   INVITE_USER,

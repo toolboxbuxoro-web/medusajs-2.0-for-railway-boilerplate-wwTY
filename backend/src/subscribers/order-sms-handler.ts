@@ -42,7 +42,7 @@ export default async function orderSmsHandler({
 
     // 3. Send Order Confirmation SMS
     try {
-      const { ORDER_CONFIRMATION_TEXT } = await import("../modules/eskiz-sms/sms-texts")
+      const { ORDER_CONFIRMATION_TEXT } = await import("../modules/eskiz-sms/sms-texts.js")
       
       // Use summary total or fallback to raw total
       const total = Number(order.summary?.current_order_total || order.total || 0)

@@ -1,5 +1,5 @@
 import type { ModuleProviderExports } from "@medusajs/framework/types"
-import { EskizNotificationService } from "./service"
+import { EskizNotificationService } from "./service.js"
 
 const services = [EskizNotificationService]
 

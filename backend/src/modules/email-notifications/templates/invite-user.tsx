@@ -1,5 +1,5 @@
 import { Button, Link, Section, Text, Img, Hr } from '@react-email/components'
-import { Base } from './base'
+import { Base } from './base.js'
 
 /**
  * The key for the InviteUserEmail template, used to identify it

@@ -8,7 +8,7 @@ import {
   WebhookActionResult,
 } from "@medusajs/framework/types"
 import crypto from "crypto"
-import { formatTiyinToUzsAmount, normalizeString } from "./click-utils"
+import { formatTiyinToUzsAmount, normalizeString } from "./click-utils.js"
 
 type Options = {
   merchant_id: string

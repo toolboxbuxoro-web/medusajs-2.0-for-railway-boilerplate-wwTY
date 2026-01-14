@@ -1,5 +1,5 @@
 import { MedusaService, ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { Review } from "./models/review"
+import { Review } from "./models/review.js"
 import { IEventBusModuleService, MedusaContainer, IProductModuleService } from "@medusajs/framework/types"
 
 class ReviewsService extends MedusaService({

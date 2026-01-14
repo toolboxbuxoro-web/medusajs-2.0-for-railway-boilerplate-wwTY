@@ -1,4 +1,4 @@
-import { ClickPaymentProviderService, ClickPayByCardProviderService } from "./services/click"
+import { ClickPaymentProviderService, ClickPayByCardProviderService } from "./services/click.js"
 import type { ModuleProviderExports } from "@medusajs/framework/types"
 
 const services = [ClickPaymentProviderService, ClickPayByCardProviderService]

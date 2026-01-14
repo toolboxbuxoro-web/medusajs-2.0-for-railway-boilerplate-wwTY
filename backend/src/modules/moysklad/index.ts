@@ -1,6 +1,6 @@
-import MoySkladService from "./service"
+import MoySkladService from "./service.js"
 import { Module } from "@medusajs/framework/utils"
-import { MOYSKLAD_MODULE } from "./constants"
+import { MOYSKLAD_MODULE } from "./constants.js"
 
 const moduleExport = Module(MOYSKLAD_MODULE, {
   service: MoySkladService,
