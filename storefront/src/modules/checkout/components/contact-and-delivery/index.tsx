@@ -188,24 +188,11 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
   // Initialize form with customer data (for logged-in) or localStorage/cart data (for guests)
   useEffect(() => {
-    // 1. For logged-in users: prioritize customer profile data
+    // 1. For logged-in users: prioritize customer profile data for phone/name
     if (isLoggedIn && customer) {
-      // Phone from customer profile
-      if (customer.phone) {
-        setPhone(customer.phone)
-      }
-      // Name from customer profile (if exists)
-      if (customer.first_name) {
-        setFirstName(customer.first_name)
-      }
-      if (customer.last_name) {
-        setLastName(customer.last_name)
-      }
-      console.log("[ContactAndDelivery] Pre-filled from customer profile:", { 
-        phone: customer.phone, 
-        firstName: customer.first_name, 
-        lastName: customer.last_name 
-      })
+      if (customer.phone) setPhone(customer.phone)
+      if (customer.first_name) setFirstName(customer.first_name)
+      if (customer.last_name) setLastName(customer.last_name)
     } else {
       // 2. For guests: try localStorage first (for OTP flow persistence)
       const saved = localStorage.getItem("checkout_form_data")
@@ -215,45 +202,49 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
           if (p) setPhone(p)
           if (fn) setFirstName(fn)
           if (ln) setLastName(ln)
-          console.log("[ContactAndDelivery] Restored from localStorage:", { p, fn, ln })
-        } catch (e) {
-          console.error("Failed to parse checkout_form_data")
-        }
-      } else if (cart) {
-        // 3. Fallback to cart data
-        if (cart.shipping_address) {
-          setPhone(cart.shipping_address.phone || "")
-          setFirstName(cart.shipping_address.first_name || "")
-          setLastName(cart.shipping_address.last_name || "")
+        } catch (e) {}
+      } else if (cart?.shipping_address) {
+        setPhone(cart.shipping_address.phone || "")
+        setFirstName(cart.shipping_address.first_name || "")
+        setLastName(cart.shipping_address.last_name || "")
+      }
+    }
+
+    // BTS Selection Logic: Prioritize LocalStorage (Top Bar) -> Then Cart Metadata
+    let regionId = ""
+    let pointId = ""
+
+    // Try LocalStorage first
+    try {
+      const savedRegion = localStorage.getItem('bts_selected_region')
+      const savedPoint = localStorage.getItem('bts_selected_point')
+      if (savedRegion) {
+        const region = JSON.parse(savedRegion)
+        if (region?.id) regionId = region.id
+      }
+      if (savedPoint) {
+        const point = JSON.parse(savedPoint)
+        if (point?.id) pointId = point.id
+      }
+    } catch (e) {
+      console.error("Failed to parse saved BTS selection", e)
+    }
+
+    // If no LocalStorage, try Cart Metadata
+    if (!regionId && cart) {
+      const btsDelivery = (cart.metadata?.bts_delivery as any) 
+      if (btsDelivery?.region_id) {
+        regionId = btsDelivery.region_id
+        if (btsDelivery.point_id) {
+          pointId = btsDelivery.point_id
         }
       }
     }
 
-    if (cart) {
-      const btsDelivery = (cart.metadata?.bts_delivery as any) 
-      if (btsDelivery?.region_id) {
-        setSelectedRegionId(btsDelivery.region_id)
-        if (btsDelivery.point_id) {
-          setSelectedPointId(btsDelivery.point_id)
-        }
-      } else {
-        // Fallback to localStorage (from Top Bar City Selector)
-        try {
-          const savedRegion = localStorage.getItem('bts_selected_region')
-          const savedPoint = localStorage.getItem('bts_selected_point')
-          if (savedRegion) {
-            const region = JSON.parse(savedRegion)
-            if (region?.id) setSelectedRegionId(region.id)
-          }
-          if (savedPoint) {
-            const point = JSON.parse(savedPoint)
-            if (point?.id) setSelectedPointId(point.id)
-          }
-        } catch (e) {
-          console.error("Failed to parse saved BTS selection", e)
-        }
-      }
-    }
+    // Apply selection
+    if (regionId) setSelectedRegionId(regionId)
+    if (pointId) setSelectedPointId(pointId)
+
   }, [cart, customer, isLoggedIn])
 
   // Save to localStorage whenever fields change
