@@ -85,9 +85,15 @@ export function useInfiniteSearch(initialQuery: string = "") {
   }, [state.query, fetchData])
 
   const loadMore = useCallback(() => {
+    // Prevent loading more if:
+    // 1. Aleady loading
+    // 2. No more items
+    // 3. We haven't loaded the first page yet (items.length === 0 && status === 'idle') - let the useEffect handle that
     if (state.status === "loading" || !state.hasMore) return
+    if (state.items.length === 0 && state.status === "idle") return 
+
     fetchData(state.query, state.page + 1, false)
-  }, [state.query, state.page, state.status, state.hasMore, fetchData])
+  }, [state.query, state.page, state.status, state.hasMore, state.items.length, fetchData])
 
   const setQuery = useCallback((newQuery: string) => {
     setState(prev => ({ ...prev, query: newQuery }))
