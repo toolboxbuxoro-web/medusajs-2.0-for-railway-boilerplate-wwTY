@@ -33,6 +33,7 @@ export default function SearchGrid({ items, status, hasMore, loadMore }: SearchG
 
   return (
     <div className="flex flex-col gap-y-8 w-full p-6">
+      <div className="text-xs text-red-500 font-bold">DEBUG: Items Len: {items?.length}, Status: {status}, Hits: {items?.[0]?.title}</div>
       <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-4 gap-y-8">
         {items.map((product) => (
           <div key={product.id}>
