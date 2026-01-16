@@ -30,13 +30,13 @@ export async function search(query: string, offset: number = 0) {
     })
 
     if (!res.ok) {
-        // "No silent failures" - but the backend is guaranteed to return 200 OK.
-        // If we get here, it's a network/Vercel issue.
         console.error(`[Search Action] Network error: ${res.status}`)
         return { hits: [], estimatedTotalHits: 0, mode: "search" }
     }
 
-    return await res.json()
+    const data = await res.json()
+    console.log(`[Search Action] Query: ${query}, Hits received: ${data.hits?.length}, Total: ${data.estimatedTotalHits}`) // DEBUG log
+    return data
   } catch (err) {
     console.error(`[Search Action] Fetch failed: ${err}`)
     return { hits: [], estimatedTotalHits: 0, mode: "search" }
