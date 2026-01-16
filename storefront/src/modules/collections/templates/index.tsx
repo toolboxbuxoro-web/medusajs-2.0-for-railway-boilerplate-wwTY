@@ -27,27 +27,37 @@ export default function CollectionTemplate({
   const { locale } = useParams()
   const localeStr = String(locale || "ru")
 
-  return (
-    <div className="flex flex-col small:flex-row small:items-start py-6 content-container">
-      <RefinementList sortBy={sort} />
-      <div className="w-full">
-        {/* Collection Banner */}
-        <CollectionBanner collection={collection} locale={localeStr} />
-        
-        <div className="mb-8 text-2xl-semi">
-          <h1>
-            {getLocalizedField(collection, "title", localeStr)}
-          </h1>
+    const metadata = collection.metadata as Record<string, any> | undefined
+    const isColored = Boolean(metadata?.colored_background)
+    const bgColor = (metadata?.background_color as string) || "#ffffff"
+    const textColor = (metadata?.text_color as string) || "#111827"
+
+    return (
+        <div 
+          className="w-full"
+          style={isColored ? { backgroundColor: bgColor, color: textColor, minHeight: '100vh' } : undefined}
+        >
+          <div className="flex flex-col small:flex-row small:items-start py-6 content-container">
+            <RefinementList sortBy={sort} />
+            <div className="w-full">
+              {/* Collection Banner */}
+              <CollectionBanner collection={collection} locale={localeStr} />
+              
+              <div className="mb-8 text-2xl-semi">
+                <h1 style={isColored ? { color: textColor } : undefined}>
+                  {getLocalizedField(collection, "title", localeStr)}
+                </h1>
+              </div>
+              <Suspense fallback={<SkeletonProductGrid />}>
+                <PaginatedProducts
+                  sortBy={sort}
+                  page={pageNumber}
+                  collectionId={collection.id}
+                  countryCode={countryCode}
+                />
+              </Suspense>
+            </div>
+          </div>
         </div>
-        <Suspense fallback={<SkeletonProductGrid />}>
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            collectionId={collection.id}
-            countryCode={countryCode}
-          />
-        </Suspense>
-      </div>
-    </div>
-  )
+    )
 }
