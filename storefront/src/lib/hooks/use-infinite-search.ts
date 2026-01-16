@@ -28,7 +28,6 @@ export function useInfiniteSearch(initialQuery: string = "") {
   })
 
   const loadingRef = useRef(false)
-  const abortControllerRef = useRef<AbortController | null>(null)
 
   const fetchData = useCallback(async (query: string, page: number, isNewSearch: boolean) => {
     if (loadingRef.current) return
@@ -54,7 +53,8 @@ export function useInfiniteSearch(initialQuery: string = "") {
         if (prev.query !== query && isNewSearch) return prev
 
         const newItems = isNewSearch ? hits : [...prev.items, ...hits]
-        const hasMore = newItems.length < estimatedTotalHits
+        // Stop loading if: no new hits returned OR we have all items
+        const hasMore = hits.length > 0 && newItems.length < estimatedTotalHits
 
         return {
           ...prev,
@@ -68,7 +68,7 @@ export function useInfiniteSearch(initialQuery: string = "") {
       })
     } catch (error) {
       console.error("[useInfiniteSearch] Error:", error)
-      setState(prev => ({ ...prev, status: "error" }))
+      setState(prev => ({ ...prev, status: "error", hasMore: false }))
     } finally {
       loadingRef.current = false
     }
@@ -81,7 +81,8 @@ export function useInfiniteSearch(initialQuery: string = "") {
     }, 300)
 
     return () => clearTimeout(delayDebounceFn)
-  }, [state.query])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.query, fetchData])
 
   const loadMore = useCallback(() => {
     if (state.status === "loading" || !state.hasMore) return

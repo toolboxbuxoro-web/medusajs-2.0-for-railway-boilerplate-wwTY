@@ -11,6 +11,7 @@ import { getLocalizedField } from "@lib/util/localization"
 type CatalogDropdownProps = {
   categories: HttpTypes.StoreProductCategory[]
   locale: string
+  isUnified?: boolean
 }
 
 // Category icons - Premium set
@@ -67,7 +68,7 @@ const CategoryIcon = ({ category }: { category: HttpTypes.StoreProductCategory }
   )
 }
 
-export default function CatalogDropdown({ categories, locale }: CatalogDropdownProps) {
+export default function CatalogDropdown({ categories, locale, isUnified = false }: CatalogDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState<HttpTypes.StoreProductCategory | null>(null)
   const [isMobile, setIsMobile] = useState(false)
@@ -130,10 +131,14 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center justify-center gap-2 px-4 h-9 sm:h-10 lg:h-11 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap select-none relative z-[101] ${
+        className={`group flex items-center justify-center gap-2 px-4 h-10 lg:h-11 transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] font-semibold text-sm lg:text-base whitespace-nowrap select-none relative z-[101] ${
+          isUnified 
+            ? "rounded-none border-r border-red-700" 
+            : "rounded-lg"
+        } ${
           isOpen 
             ? "bg-gray-900 text-white shadow-inner" 
-            : "bg-red-600 text-white hover:bg-red-700 hover:shadow-md hover:scale-[1.02] active:scale-95"
+            : "bg-red-600 text-white hover:bg-red-700"
         }`}
         aria-expanded={isOpen}
       >
@@ -156,22 +161,22 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
 
       {/* Backdrop Overlay - Starts BELOW header to keep header clickable/visible */}
       <div 
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] transition-opacity duration-300 ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
         onClick={handleClose}
-        style={{ top: 'var(--header-height, 0px)' }}
+        style={{ top: '100px' }}
       />
 
       {/* Mega Menu Container - Positioned below header */}
       <div 
-        className={`fixed left-0 right-0 bottom-0 z-[100] bg-white border-t border-gray-100 shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] overflow-hidden ${
+        className={`fixed left-0 right-0 bottom-0 z-[1001] bg-white border-t border-gray-100 shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] overflow-hidden ${
           isOpen 
             ? "translate-y-0 opacity-100 visible" 
             : "-translate-y-4 opacity-0 invisible pointer-events-none"
         }`}
         // Dynamic top position matching header height
-        style={{ top: 'var(--header-height, 0px)' }}
+        style={{ top: '100px' }}
       >
         {/* Inner Content - Full height relative to container */}
         <div className="absolute inset-0 bg-white">
@@ -355,10 +360,10 @@ export default function CatalogDropdown({ categories, locale }: CatalogDropdownP
         {!isMobile && (
           <button
              onClick={handleClose}
-             className="absolute top-20 right-8 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg border border-gray-100 text-gray-500 hover:text-red-600 hover:border-red-200 hover:shadow-xl hover:rotate-90 transition-all duration-300 z-50 group"
+             className="absolute top-6 right-8 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg border border-gray-100 text-gray-500 hover:text-red-600 hover:border-red-200 hover:shadow-xl hover:scale-110 transition-all duration-200 z-50"
              title="Закрыть меню"
           >
-             <XMark className="w-6 h-6 m-auto" />
+             <XMark className="w-5 h-5" />
           </button>
         )}
       </div>

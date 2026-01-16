@@ -12,7 +12,7 @@ export const retrieveOrder = cache(async function (id: string) {
   return sdk.store.order
     .retrieve(
       id,
-      { fields: "*payment_collections.payments" },
+      { fields: "*payment_collections.payments,+metadata" },
       { next: { tags: ["order"] }, ...getAuthHeaders() }
     )
     .then(({ order }) => order)
@@ -24,7 +24,7 @@ export const listOrders = cache(async function (
   offset: number = 0
 ) {
   return sdk.store.order
-    .list({ limit, offset }, { next: { tags: ["order"] }, ...getAuthHeaders() })
+    .list({ limit, offset, fields: "+metadata" }, { next: { tags: ["order"] }, ...getAuthHeaders() })
     .then(async ({ orders }) => {
       if (!orders?.length) {
         return orders

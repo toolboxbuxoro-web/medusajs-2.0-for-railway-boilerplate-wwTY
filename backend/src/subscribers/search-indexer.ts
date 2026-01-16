@@ -1,28 +1,25 @@
-import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
+import { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { IProductModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { transformProductToSearchDocument } from "../lib/search-transformer.js"
-import { MEILISEARCH_HOST, MEILISEARCH_ADMIN_KEY } from "../lib/constants.js"
+import { transformProductToSearchDocument } from "../lib/search-transformer"
+import { MEILISEARCH_HOST, MEILISEARCH_ADMIN_KEY } from "../lib/constants"
 
 /**
- * Subscriber that handles manual product indexing in Meilisearch.
- * This ensures that our rich metadata and flattened fields are 
- * correctly sent to the search engine.
+ * Subscriber that handles automatic product indexing in Meilisearch.
+ * Triggered on product.created and product.updated events.
  */
 export default async function searchIndexer({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
   if (!MEILISEARCH_HOST || !MEILISEARCH_ADMIN_KEY) {
+    console.log("[SearchIndexer] Skipping - Meilisearch not configured")
     return
   }
 
   const productService: IProductModuleService = container.resolve(Modules.PRODUCT)
 
   try {
-    // Dynamic import to handle ESM-only package in CommonJS context
-    const { MeiliSearch } = await import("meilisearch")
-
     // 1. Fetch the product with all necessary relations
     const [product] = await productService.listProducts(
       { id: data.id },
@@ -33,25 +30,31 @@ export default async function searchIndexer({
     )
 
     if (!product) {
-      console.warn(`[SearchIndexer] Product ${data.id} not found for indexing`)
+      console.warn(`[SearchIndexer] Product ${data.id} not found`)
       return
     }
 
     // 2. Transform to search document
     const document = transformProductToSearchDocument(product)
 
-    // 3. Push to Meilisearch
-    const client = new MeiliSearch({
-      host: MEILISEARCH_HOST,
-      apiKey: MEILISEARCH_ADMIN_KEY,
+    // 3. Push to Meilisearch via fetch (more reliable than SDK in subscribers)
+    const response = await fetch(`${MEILISEARCH_HOST}/indexes/products/documents`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${MEILISEARCH_ADMIN_KEY}`,
+      },
+      body: JSON.stringify([document]),
     })
 
-    const index = client.index("products")
-    await index.addDocuments([document])
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Meilisearch error: ${response.status} - ${error}`)
+    }
 
-    console.log(`[SearchIndexer] ✅ Indexed product ${product.id} ("${product.title}")`)
+    console.log(`[SearchIndexer] ✅ Indexed "${product.title}" (${product.id})`)
   } catch (error: any) {
-    console.error(`[SearchIndexer] ❌ Failed to index product ${data.id}:`, error.message)
+    console.error(`[SearchIndexer] ❌ Failed to index ${data.id}:`, error.message)
   }
 }
 

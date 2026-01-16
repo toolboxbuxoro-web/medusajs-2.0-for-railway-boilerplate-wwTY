@@ -22,7 +22,12 @@
     "info": "Информация",
     "language": "Язык",
     "home": "Главная",
-    "orders": "Заказы"
+    "orders": "Заказы",
+    "about": "О компании",
+    "select_city": "Выберите город",
+    "select_delivery_point": "Выберите пункт выдачи",
+    "region": "Регион",
+    "pickup_point": "Пункт выдачи"
   },
   "hero": {
     "brand": "ИНТЕРСКОЛ",
@@ -270,7 +275,13 @@
     "recipient": "Получатель",
     "contact_email": "Электронная почта",
     "bts_delivery_point": "Пункт выдачи BTS",
-    "select_shipping_method": "Выберите способ доставки"
+    "select_shipping_method": "Выберите способ доставки",
+    "login_to_track": "Войдите, чтобы отслеживать заказ",
+    "step_contact": "Контакты",
+    "step_delivery": "Доставка",
+    "step_payment": "Оплата",
+    "verified_success": "Номер подтверждён ✓",
+    "enter_your_details": "Введите данные получателя"
   },
   "product": {
     "product_info": "Информация о товаре",
@@ -323,6 +334,7 @@
     "select_variant": "Выберите вариант",
     "quick_order_btn": "Быстрый заказ",
     "features_list": "Особенности",
+    "features": "Характеристики",
     "brand_name": "Бренд",
     "brand": "Бренд",
     "rating_score": "Рейтинг",

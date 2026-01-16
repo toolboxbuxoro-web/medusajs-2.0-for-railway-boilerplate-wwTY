@@ -1,4 +1,4 @@
-import ManualPaymentProviderService from "./services/manual.js"
+import ManualPaymentProviderService from "./services/manual"
 import type { ModuleProviderExports } from "@medusajs/framework/types"
 
 const services = [ManualPaymentProviderService]

@@ -1,5 +1,5 @@
 import type { ModuleProviderExports } from '@medusajs/framework/types'
-import MinioFileProviderService from './service.js'
+import MinioFileProviderService from './service'
 
 const services = [MinioFileProviderService]
 

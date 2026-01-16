@@ -80,6 +80,10 @@ const LoginOtp = ({ onSuccess }: { onSuccess?: () => void }) => {
       if (resp.ok && data.success) {
         setStep(2)
         setResendTimer(60)
+        // In development mode, auto-fill the OTP code
+        if (data.dev_code) {
+          setOtpCode(data.dev_code)
+        }
       } else {
         setError(data.error || te("failed_to_send_otp"))
       }

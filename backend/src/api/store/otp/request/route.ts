@@ -4,7 +4,7 @@ import { normalizeUzPhone } from "../../../../lib/phone"
 import { generateOtpCode, otpRateLimitCheck, otpStoreSet, otpCooldownCheck } from "../../../../lib/otp-store"
 import { findCustomerByPhone } from "../_shared"
 
-import { OTP_LOGIN_TEXT, CHANGE_PHONE_TEXT } from "../../../../modules/eskiz-sms/sms-texts.js"
+import { OTP_LOGIN_TEXT, CHANGE_PHONE_TEXT, OTP_CHECKOUT_TEXT } from "../../../../modules/eskiz-sms/sms-texts.js"
 
 type Body = {
   phone: string
@@ -15,7 +15,10 @@ function getOtpMessage(code: string, purpose?: string): string {
   if (purpose === "change_phone") {
     return CHANGE_PHONE_TEXT.replace("{code}", code)
   }
-  // Default: login, checkout, auth, register - all use the same approved text
+  if (purpose === "checkout") {
+    return OTP_CHECKOUT_TEXT.replace("{code}", code)
+  }
+  // Default: login, auth, register - all use the same approved text
   return OTP_LOGIN_TEXT.replace("{code}", code)
 }
 

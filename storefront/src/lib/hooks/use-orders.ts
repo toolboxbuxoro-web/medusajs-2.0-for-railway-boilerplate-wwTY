@@ -3,11 +3,9 @@
 import { useState, useEffect, useCallback } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { useAuth } from "@lib/context/auth-context"
-import { getMedusaHeaders } from "@lib/util/get-medusa-headers"
+import { listOrders } from "@lib/data/orders"
 
 export type OrdersState = "loading" | "empty" | "loaded" | "error"
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
 export function useOrders() {
   const [state, setState] = useState<OrdersState>("loading")
@@ -28,19 +26,16 @@ export function useOrders() {
     }
 
     try {
-      const resp = await fetch(`${BACKEND_URL}/store/orders?limit=50`, {
-        headers: {
-          ...getMedusaHeaders(),
-        },
-        credentials: "include",
-      })
-
-      if (!resp.ok) {
-        throw new Error("Failed to fetch orders")
+      // Use server action which properly handles auth headers via cookies
+      const ordersData = await listOrders(50, 0)
+      
+      if (!ordersData || !Array.isArray(ordersData)) {
+        setState("empty")
+        setOrders([])
+        return
       }
 
-      const data = await resp.json()
-      const sortedOrders = [...(data.orders || [])].sort(
+      const sortedOrders = [...ordersData].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
       setOrders(sortedOrders)

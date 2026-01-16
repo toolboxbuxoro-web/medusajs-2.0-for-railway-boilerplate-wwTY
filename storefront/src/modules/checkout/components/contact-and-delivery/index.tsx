@@ -186,15 +186,50 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     fetchBtsData()
   }, [])
 
-  // Initialize form with cart data
+  // Initialize form with customer data (for logged-in) or localStorage/cart data (for guests)
   useEffect(() => {
-    if (cart) {
-      if (cart.shipping_address) {
-        setPhone(cart.shipping_address.phone || "")
-        setFirstName(cart.shipping_address.first_name || "")
-        setLastName(cart.shipping_address.last_name || "")
+    // 1. For logged-in users: prioritize customer profile data
+    if (isLoggedIn && customer) {
+      // Phone from customer profile
+      if (customer.phone) {
+        setPhone(customer.phone)
       }
+      // Name from customer profile (if exists)
+      if (customer.first_name) {
+        setFirstName(customer.first_name)
+      }
+      if (customer.last_name) {
+        setLastName(customer.last_name)
+      }
+      console.log("[ContactAndDelivery] Pre-filled from customer profile:", { 
+        phone: customer.phone, 
+        firstName: customer.first_name, 
+        lastName: customer.last_name 
+      })
+    } else {
+      // 2. For guests: try localStorage first (for OTP flow persistence)
+      const saved = localStorage.getItem("checkout_form_data")
+      if (saved) {
+        try {
+          const { phone: p, firstName: fn, lastName: ln } = JSON.parse(saved)
+          if (p) setPhone(p)
+          if (fn) setFirstName(fn)
+          if (ln) setLastName(ln)
+          console.log("[ContactAndDelivery] Restored from localStorage:", { p, fn, ln })
+        } catch (e) {
+          console.error("Failed to parse checkout_form_data")
+        }
+      } else if (cart) {
+        // 3. Fallback to cart data
+        if (cart.shipping_address) {
+          setPhone(cart.shipping_address.phone || "")
+          setFirstName(cart.shipping_address.first_name || "")
+          setLastName(cart.shipping_address.last_name || "")
+        }
+      }
+    }
 
+    if (cart) {
       const btsDelivery = (cart.metadata?.bts_delivery as any) 
       if (btsDelivery?.region_id) {
         setSelectedRegionId(btsDelivery.region_id)
@@ -203,7 +238,14 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         }
       }
     }
-  }, [cart])
+  }, [cart, customer, isLoggedIn])
+
+  // Save to localStorage whenever fields change
+  useEffect(() => {
+    if (phone || firstName || lastName) {
+      localStorage.setItem("checkout_form_data", JSON.stringify({ phone, firstName, lastName }))
+    }
+  }, [phone, firstName, lastName])
 
   // Calculate cart weight
   const cartWeight = useMemo(() => {
@@ -355,6 +397,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       setError(err.message || "An error occurred")
     } finally {
       setIsLoading(false)
+      // Clear localStorage on success (when step changes to payment)
+      if (!error) {
+        localStorage.removeItem("checkout_form_data")
+      }
     }
   }
 
@@ -395,9 +441,57 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
       {isOpen ? (
         <form onSubmit={handleSubmit} className="pb-4">
+          {/* Step Progress Indicator */}
+          <div className="flex items-center justify-between mb-6 px-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">1</div>
+              <span className="text-sm font-medium text-blue-600">{t("step_contact")}</span>
+            </div>
+            <div className="flex-1 h-0.5 bg-gray-200 mx-2" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-bold">2</div>
+              <span className="text-sm font-medium text-gray-500">{t("step_delivery")}</span>
+            </div>
+            <div className="flex-1 h-0.5 bg-gray-200 mx-2" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-bold">3</div>
+              <span className="text-sm font-medium text-gray-500">{t("step_payment")}</span>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-y-6">
-            {/* Contact Information */}
-            <div className="grid grid-cols-1 gap-4">
+            {/* Recipient Details Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-gray-600 text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span className="font-medium">{t("enter_your_details")}</span>
+              </div>
+              
+              {/* Name fields FIRST */}
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label={t("first_name")}
+                  name="firstName"
+                  autoComplete="given-name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  data-testid="shipping-first-name-input"
+                />
+                <Input
+                  label={t("last_name")}
+                  name="lastName"
+                  autoComplete="family-name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  data-testid="shipping-last-name-input"
+                />
+              </div>
+
+              {/* Phone input SECOND */}
               <PhoneInput
                 label={t("phone")}
                 name="phone"
@@ -413,13 +507,25 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   }
                 }}
                 required
-                disabled={otpVerified}
+                disabled={otpVerified || isLoggedIn}
                 data-testid="shipping-phone-input"
               />
 
-              {/* OTP Login for guests */}
+              {/* OTP Login for guests - with explanation */}
               {!isLoggedIn && phone.length >= 9 && (
                 <div className="space-y-3">
+                  {/* Explanation text */}
+                  {!otpVerified && (
+                    <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-sm text-blue-700">
+                        {t("login_to_track")}
+                      </p>
+                    </div>
+                  )}
+                  
                   {!otpVerified ? (
                     <>
                       {!otpSent ? (
@@ -536,35 +642,25 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       )}
                     </>
                   ) : (
-                    <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-xl">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-3 rounded-xl border border-green-200">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      <span className="font-medium">{tAccount("otp_phone_verified")}</span>
+                      <span className="font-semibold">{t("verified_success")}</span>
                     </div>
                   )}
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label={t("first_name")}
-                  name="firstName"
-                  autoComplete="given-name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                  data-testid="shipping-first-name-input"
-                />
-                <Input
-                  label={t("last_name")}
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  data-testid="shipping-last-name-input"
-                />
-              </div>
+
+              {/* Logged in indicator */}
+              {isLoggedIn && (
+                <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-3 rounded-xl border border-green-200">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-semibold">{t("verified_success")}</span>
+                </div>
+              )}
             </div>
 
             {/* Delivery Type Info */}
@@ -653,7 +749,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                         <span className="text-lg font-bold text-gray-900">
                           {convertToLocale({
                             amount: estimatedCost,
-                            currency_code: cart?.currency_code,
+                            currency_code: cart?.currency_code || "uzs",
                           })}
                         </span>
                       </div>
@@ -675,7 +771,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || (!isLoggedIn && !otpVerified)}
             className="mt-8 w-full h-12 rounded-xl text-base font-bold shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="submit-address-button"
           >
@@ -723,7 +819,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
               </div>
 
               <div className="space-y-4">
-                {cart.metadata?.bts_delivery && (
+                {(cart.metadata?.bts_delivery as { region?: string; point?: string } | undefined) && (
                   <div>
                     <Text className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">
                       {t("bts_delivery_point") as string}
@@ -732,11 +828,11 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                         <Text className="text-sm font-bold text-gray-900">
-                          {String((cart.metadata.bts_delivery as any).region)}
+                          {String((cart.metadata?.bts_delivery as { region?: string })?.region || "")}
                         </Text>
                       </div>
                       <Text className="text-xs text-gray-500 font-medium line-clamp-2">
-                        {String((cart.metadata.bts_delivery as any).point)}
+                        {String((cart.metadata?.bts_delivery as { point?: string })?.point || "")}
                       </Text>
                     </div>
                   </div>

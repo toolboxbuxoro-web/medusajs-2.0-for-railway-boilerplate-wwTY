@@ -1,4 +1,4 @@
-import { PaymePaymentProviderService } from "./services/payme.js"
+import { PaymePaymentProviderService } from "./services/payme"
 import type { ModuleProviderExports } from "@medusajs/framework/types"
 
 const services = [PaymePaymentProviderService]

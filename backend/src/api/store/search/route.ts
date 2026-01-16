@@ -50,8 +50,8 @@ export const GET = async (
 
     let results = await fetchMeili(searchBody)
 
-    // 3. Fallback Mode (If search hits are 0)
-    if (mode === 'search' && (!results || results.hits.length === 0)) {
+    // 3. Fallback Mode (If search hits are 0 AND it's the first page)
+    if (mode === 'search' && (!results || results.hits.length === 0) && offsetNum === 0) {
       mode = 'fallback'
       // Re-fetch recommendations as fallback
       const fallbackBody = {
@@ -89,7 +89,7 @@ export const GET = async (
       hits: [],
       estimatedTotalHits: 0,
       query: req.query.q || "",
-      mode: 'recommendation', // Safe default
+      mode: 'search', // Don't use 'recommendation' in errors - could cause loops
       error: "Internal server error"
     })
   }

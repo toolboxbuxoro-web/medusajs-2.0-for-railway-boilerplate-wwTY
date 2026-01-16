@@ -18,6 +18,7 @@ import FavoritesButton from "@modules/layout/components/favorites-button"
 import Headset from "@modules/common/icons/headset"
 import { type Locale } from '../../../../i18n'
 import { getLocalizedField } from "@lib/util/localization"
+import TopBar from "@modules/layout/components/top-bar"
 
 type NavProps = {
   locale: string
@@ -30,12 +31,21 @@ export default async function Nav({ locale }: NavProps) {
   
   const t = await getTranslations({locale, namespace: 'nav'})
 
+
   return (
     <ScrollAwareNav>
       <div className="relative bg-white border-b border-gray-200">
-        {/* Main Header - Fixed */}
-        <header className="bg-white fixed w-full top-0 z-[100] border-b border-gray-200 shadow-sm transition-all duration-300 navbar-header">
-          <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-2 sm:gap-3 lg:gap-6 transition-all duration-300 navbar-header-content relative">
+        {/* Top Info Bar - Fixed at very top */}
+        <div className="hidden md:block fixed w-full top-0 z-[102]">
+          <TopBar />
+        </div>
+        
+        {/* Main Header - Fixed, position controlled by CSS variable */}
+        <header 
+          className="bg-white fixed w-full z-[100] border-b border-gray-200 shadow-sm transition-all duration-200 navbar-header top-0 md:top-[var(--topbar-height,36px)]"
+        >
+          <div className="flex flex-col w-full">
+            <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-2 sm:gap-3 lg:gap-6 transition-all duration-300 navbar-header-content relative">
             {/* Left section: Mobile Menu + Logo (desktop) */}
             <div className="flex items-center gap-2 sm:gap-3 sm:flex-shrink-0">
               {/* Mobile Menu Button */}
@@ -78,22 +88,27 @@ export default async function Nav({ locale }: NavProps) {
               </LocalizedClientLink>
             </div>
 
-            {/* Search Bar & Catalog - Hidden on mobile, visible on sm+ */}
-            <div className="hidden sm:flex items-center gap-2 flex-1 max-w-md md:max-w-xl lg:max-w-2xl navbar-search">
-              <CatalogDropdown categories={mainCategories} locale={locale} />
+            {/* Search Bar with Catalog - Separated design */}
+            <div className="hidden sm:flex items-center gap-3 flex-1 max-w-md md:max-w-xl lg:max-w-2xl navbar-search">
+              {/* Catalog Button - Standalone */}
+              <CatalogDropdown categories={mainCategories} locale={locale} isUnified={false} />
+              
+              {/* Search Input - Separate with red border */}
               <form action="/search" method="get" className="relative flex-1">
-                <input
-                  type="search"
-                  name="q"
-                  placeholder={t('search_placeholder')}
-                  className="w-full h-9 sm:h-10 lg:h-11 px-3 sm:px-4 pr-10 sm:pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-xs sm:text-sm lg:text-base transition-all duration-300"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 text-gray-500 hover:text-gray-700"
-                >
-                  <Search size="18" className="sm:w-5 sm:h-5" />
-                </button>
+                <div className="flex w-full rounded-xl overflow-hidden border-2 border-red-500 bg-white shadow-sm hover:shadow-md hover:border-red-600 transition-all duration-300">
+                  <input
+                    type="search"
+                    name="q"
+                    placeholder={t('search_placeholder')}
+                    className="w-full h-10 lg:h-11 px-4 border-none focus:outline-none focus:ring-0 text-sm lg:text-base bg-transparent"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 bg-red-600 hover:bg-red-700 text-white transition-colors"
+                  >
+                    <Search size="20" />
+                  </button>
+                </div>
               </form>
             </div>
 
@@ -102,29 +117,12 @@ export default async function Nav({ locale }: NavProps) {
               {/* Delivery Link - Desktop */}
 
 
-              {/* Search icon for mobile */}
-              <LocalizedClientLink
-                href="/search"
-                className="sm:hidden p-1.5 hover:text-red-600 transition-colors"
-                title={t('search_placeholder')}
-              >
-                <Search size="20" />
-              </LocalizedClientLink>
+              {/* Search icon for mobile - REMOVED since we have full bar */}
               
               {/* Language Switcher - Hidden on mobile */}
               <div className="hidden md:block">
                 <LanguageSwitcher />
               </div>
-
-              {/* Support - Hidden on mobile */}
-              <LocalizedClientLink
-                href="/customer-service"
-                className="hidden md:flex p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center sm:flex-col sm:gap-1"
-                title={t('support')}
-              >
-                <Headset size="20" className="sm:w-[22px] sm:h-[22px]" />
-                <span className="text-[10px] font-medium hidden sm:block">{t('support')}</span>
-              </LocalizedClientLink>
               
               {/* Favorites - Hidden on mobile */}
               <div className="hidden md:flex items-center justify-center">
@@ -171,10 +169,31 @@ export default async function Nav({ locale }: NavProps) {
               </LocalizedClientLink>
             </div>
           </div>
+          
+          {/* Mobile Search Bar - Fixed inside header */}
+          <div className="sm:hidden w-full px-4 pb-3 bg-white">
+            <form action="/search" method="get" className="relative w-full">
+              <div className="flex w-full rounded-lg overflow-hidden border border-gray-200 bg-gray-50 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-200 transition-all">
+                <input
+                  type="search"
+                  name="q"
+                  placeholder={t('search_placeholder')}
+                  className="w-full h-10 px-4 border-none focus:outline-none focus:ring-0 text-sm bg-transparent"
+                />
+                <button
+                  type="submit"
+                  className="px-3 text-gray-400 hover:text-red-600 transition-colors"
+                >
+                  <Search size="18" />
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
         </header>
 
-        {/* Spacer for fixed header */}
-        <div className="h-14 sm:h-16 lg:h-[72px]"></div>
+        {/* Spacer for fixed header + TopBar */}
+        <div className="h-14 sm:h-16 md:h-[100px] lg:h-[108px]"></div>
 
         {/* Navigation Bar - Categories (Desktop/Tablet only) */}
         <nav className="hidden md:block bg-white border-t border-gray-200 navbar-categories transition-all duration-300">

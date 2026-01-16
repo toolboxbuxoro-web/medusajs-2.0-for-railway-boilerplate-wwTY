@@ -22,7 +22,12 @@
     "info": "Ma'lumot",
     "language": "Til",
     "home": "Bosh sahifa",
-    "orders": "Buyurtmalar"
+    "orders": "Buyurtmalar",
+    "about": "Kompaniya haqida",
+    "select_city": "Shaharni tanlang",
+    "select_delivery_point": "Olib ketish punktini tanlang",
+    "region": "Viloyat",
+    "pickup_point": "Olib ketish punkti"
   },
   "hero": {
     "brand": "INTERSKOL",
@@ -138,7 +143,10 @@
     "otp_please_verify": "Iltimos, telefon raqamini tasdiqlang",
     "otp_enter_code": "6 xonali kodni kiriting",
     "trust_secure": "Xavfsiz",
-    "trust_protected": "Himoyalangan"
+    "trust_protected": "Himoyalangan",
+    "otp_login_description": "Telefon raqami orqali kiring",
+    "change_phone": "Raqamni o'zgartirish",
+    "change_phone_description": "Yangi telefon raqamini kiriting. Biz unga tasdiqlash kodini yuboramiz."
   },
   "cart": {
     "your_cart": "Xarid savati",
@@ -258,7 +266,13 @@
     "recipient": "Qabul qiluvchi",
     "contact_email": "Elektron pochta",
     "bts_delivery_point": "BTS tarqatish punkti",
-    "select_shipping_method": "Yetkazib berish usulini tanlang"
+    "select_shipping_method": "Yetkazib berish usulini tanlang",
+    "login_to_track": "Buyurtmani kuzatish uchun kiring",
+    "step_contact": "Kontaktlar",
+    "step_delivery": "Yetkazib berish",
+    "step_payment": "To'lov",
+    "verified_success": "Raqam tasdiqlandi ✓",
+    "enter_your_details": "Qabul qiluvchi ma'lumotlarini kiriting"
   },
   "product": {
     "product_info": "Mahsulot haqida ma'lumot",
@@ -311,6 +325,7 @@
     "select_variant": "Variantni tanlang",
     "quick_order_btn": "Tez buyurtma",
     "features_list": "Xususiyatlar",
+    "features": "Xususiyatlar",
     "brand_name": "Brend",
     "brand": "Brend",
     "rating_score": "Reyting",

@@ -3,7 +3,6 @@ import { cookies } from "next/headers"
 import Link from "next/link"
 
 import CartTotals from "@modules/common/components/cart-totals"
-import Help from "@modules/order/components/help"
 import Items from "@modules/order/components/items"
 import OnboardingCta from "@modules/order/components/onboarding-cta"
 import OrderDetails from "@modules/order/components/order-details"
@@ -123,10 +122,6 @@ export default async function OrderCompletedTemplate({
               <ShippingDetails order={order} locale={locale} />
               <PaymentDetails order={order} locale={locale} />
             </div>
-          </div>
-          
-          <div className="text-center py-4">
-            <Help />
           </div>
         </div>
       </div>

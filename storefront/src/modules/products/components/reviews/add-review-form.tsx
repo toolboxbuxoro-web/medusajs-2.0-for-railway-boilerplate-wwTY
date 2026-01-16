@@ -96,14 +96,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   if (isLoading) return null
 
   if (canReview === false && !success) {
-    return (
-      <div className="bg-gray-50 rounded-3xl p-8 text-center mt-12 border border-gray-200">
-        <Heading level="h2" className="text-gray-900 mb-2">{t("write_review")}</Heading>
-        <Text className="text-red-500 font-medium text-sm">
-          {error || t("only_after_purchase")}
-        </Text>
-      </div>
-    )
+    return null
   }
 
   if (success) {
