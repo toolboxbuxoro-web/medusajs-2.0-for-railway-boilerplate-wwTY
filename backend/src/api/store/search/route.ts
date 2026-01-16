@@ -63,6 +63,8 @@ export const GET = async (
       results = await fetchMeili(fallbackBody)
     }
 
+    console.log(`[Backend Search] Mode: ${mode}, Query: ${query}, Offset: ${offsetNum}, Hits: ${results?.hits?.length}, EstTotal: ${results?.estimatedTotalHits}`)
+
     if (!results) {
       return res.json({
         hits: [],
