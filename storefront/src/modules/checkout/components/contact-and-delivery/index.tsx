@@ -236,6 +236,22 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         if (btsDelivery.point_id) {
           setSelectedPointId(btsDelivery.point_id)
         }
+      } else {
+        // Fallback to localStorage (from Top Bar City Selector)
+        try {
+          const savedRegion = localStorage.getItem('bts_selected_region')
+          const savedPoint = localStorage.getItem('bts_selected_point')
+          if (savedRegion) {
+            const region = JSON.parse(savedRegion)
+            if (region?.id) setSelectedRegionId(region.id)
+          }
+          if (savedPoint) {
+            const point = JSON.parse(savedPoint)
+            if (point?.id) setSelectedPointId(point.id)
+          }
+        } catch (e) {
+          console.error("Failed to parse saved BTS selection", e)
+        }
       }
     }
   }, [cart, customer, isLoggedIn])
@@ -701,6 +717,14 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   onValueChange={(val) => {
                     setSelectedRegionId(val)
                     setSelectedPointId("")
+                    // Sync to LocalStorage (Top Bar)
+                    if (btsData) {
+                      const region = btsData.regions.find(r => r.id === val)
+                      if (region) {
+                         localStorage.setItem('bts_selected_region', JSON.stringify({ id: region.id, name: region.nameRu })) // Use nameRu to match CitySelector expectation if possible
+                         localStorage.removeItem('bts_selected_point')
+                      }
+                    }
                   }}
                   value={selectedRegionId}
                 >
@@ -723,7 +747,19 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                     <Label className="text-gray-500 text-xs uppercase tracking-wider font-semibold">
                       {t("bts_select_point")}
                     </Label>
-                    <Select onValueChange={setSelectedPointId} value={selectedPointId}>
+                    <Select 
+                      onValueChange={(val) => {
+                        setSelectedPointId(val)
+                        // Sync to LocalStorage (Top Bar)
+                        if (selectedRegionPoints) {
+                          const point = selectedRegionPoints.find(p => p.id === val)
+                          if (point) {
+                             localStorage.setItem('bts_selected_point', JSON.stringify(point))
+                          }
+                        }
+                      }} 
+                      value={selectedPointId}
+                    >
                       <Select.Trigger className="w-full bg-white border border-gray-200 h-12 rounded-lg px-4 text-gray-900 focus:border-blue-500 transition-colors">
                         <Select.Value placeholder={t("bts_point_placeholder")} />
                       </Select.Trigger>
