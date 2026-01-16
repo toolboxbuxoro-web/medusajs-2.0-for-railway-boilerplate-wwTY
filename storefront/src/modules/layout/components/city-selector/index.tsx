@@ -7,6 +7,7 @@ import { MapPin, ChevronDown, XMark } from "@medusajs/icons"
 interface BtsRegion {
   id: string
   name: string
+  nameRu?: string
 }
 
 interface BtsPoint {
@@ -22,8 +23,7 @@ export default function CitySelector() {
   const [points, setPoints] = useState<BtsPoint[]>([])
   const [selectedRegion, setSelectedRegion] = useState<BtsRegion | null>(null)
   const [selectedPoint, setSelectedPoint] = useState<BtsPoint | null>(null)
-  const [loading, setLoading] = useState(false)
-
+  
   // Load saved selection from localStorage
   useEffect(() => {
     const savedRegion = localStorage.getItem('bts_selected_region')
@@ -41,41 +41,46 @@ export default function CitySelector() {
     }
   }, [])
 
-  // Fetch regions
+  // Fetch BTS data (regions and points)
   useEffect(() => {
-    const fetchRegions = async () => {
+    const fetchBtsData = async () => {
       try {
-        const res = await fetch('/api/bts/regions')
-        const data = await res.json()
-        setRegions(data.regions || [])
+        const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+        const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+        
+        const res = await fetch(`${backendUrl}/store/bts`, {
+          headers: {
+            "x-publishable-api-key": publishableKey,
+          },
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          // Backend returns { regions: [...], pricing: {...} }
+          // Regions already contain points
+          setRegions(data.regions || [])
+        }
       } catch (e) {
-        console.error('Failed to fetch regions:', e)
+        console.error('Failed to fetch BTS data:', e)
       }
     }
-    fetchRegions()
+    fetchBtsData()
   }, [])
 
-  // Fetch points when region changes
+  // Update points when region changes
   useEffect(() => {
     if (!selectedRegion) {
       setPoints([])
       return
     }
-    
-    const fetchPoints = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch(`/api/bts/points?region_id=${selectedRegion.id}`)
-        const data = await res.json()
-        setPoints(data.points || [])
-      } catch (e) {
-        console.error('Failed to fetch points:', e)
-      } finally {
-        setLoading(false)
-      }
+    // Find the full region object from the state which has the points
+    const fullRegion = regions.find(r => r.id === selectedRegion.id)
+    if (fullRegion && (fullRegion as any).points) {
+       setPoints((fullRegion as any).points)
+    } else {
+       setPoints([])
     }
-    fetchPoints()
-  }, [selectedRegion])
+  }, [selectedRegion, regions])
 
   const handleRegionSelect = (region: BtsRegion) => {
     setSelectedRegion(region)
@@ -93,7 +98,7 @@ export default function CitySelector() {
   const displayText = selectedPoint 
     ? selectedPoint.name 
     : selectedRegion 
-      ? selectedRegion.name 
+      ? (selectedRegion.nameRu || selectedRegion.name)
       : t('select_city') || 'Выберите город'
 
   return (
@@ -144,7 +149,7 @@ export default function CitySelector() {
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      {region.name}
+                      {region.nameRu || region.name}
                     </button>
                   ))}
                 </div>
@@ -156,26 +161,22 @@ export default function CitySelector() {
                   <h3 className="text-sm font-semibold text-gray-600 mb-2">
                     {t('pickup_point') || 'Пункт выдачи'}
                   </h3>
-                  {loading ? (
-                    <div className="text-gray-400 text-sm">Загрузка...</div>
-                  ) : (
-                    <div className="space-y-2">
-                      {points.map((point) => (
-                        <button
-                          key={point.id}
-                          onClick={() => handlePointSelect(point)}
-                          className={`w-full text-left p-3 rounded-lg transition-colors ${
-                            selectedPoint?.id === point.id
-                              ? 'bg-red-50 border-2 border-red-600'
-                              : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                          }`}
-                        >
-                          <div className="font-medium text-gray-900">{point.name}</div>
-                          <div className="text-sm text-gray-500">{point.address}</div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    {points.map((point) => (
+                      <button
+                        key={point.id}
+                        onClick={() => handlePointSelect(point)}
+                        className={`w-full text-left p-3 rounded-lg transition-colors ${
+                          selectedPoint?.id === point.id
+                            ? 'bg-red-50 border-2 border-red-600'
+                            : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                        }`}
+                      >
+                        <div className="font-medium text-gray-900">{point.name}</div>
+                        <div className="text-sm text-gray-500">{point.address}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
