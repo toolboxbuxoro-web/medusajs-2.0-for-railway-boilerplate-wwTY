@@ -1,3 +1,5 @@
+"use client"
+
 import { useTranslations } from 'next-intl'
 import OrderCard from "../order-card"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
