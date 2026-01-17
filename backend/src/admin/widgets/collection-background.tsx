@@ -12,15 +12,18 @@ type WidgetProps = {
 
 const CollectionBackgroundWidget = ({ data }: WidgetProps) => {
   const [enabled, setEnabled] = useState<boolean>(false)
-  const [backgroundColor, setBackgroundColor] = useState<string>("#ffffff")
-  const [textColor, setTextColor] = useState<string>("#000000") // optional
+  const [backgroundColor, setBackgroundColor] = useState<string>("#0059b3")
+  const [backgroundImage, setBackgroundImage] = useState<string>("")
+  const [textColor, setTextColor] = useState<string>("#ffffff")
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   useEffect(() => {
-    setEnabled(Boolean(data.metadata?.colored_background))
-    setBackgroundColor(data.metadata?.background_color as string || "#ffffff")
-    setTextColor(data.metadata?.text_color as string || "#111827")
+    // Check if bg_color exists to determine if enabled
+    setEnabled(Boolean(data.metadata?.bg_color))
+    setBackgroundColor(data.metadata?.bg_color as string || "#0059b3")
+    setBackgroundImage(data.metadata?.bg_image as string || "")
+    setTextColor(data.metadata?.text_color as string || "#ffffff")
   }, [data])
 
   const handleSave = async () => {
@@ -35,16 +38,16 @@ const CollectionBackgroundWidget = ({ data }: WidgetProps) => {
         body: JSON.stringify({
           metadata: {
             ...data.metadata,
-            colored_background: enabled,
-            background_color: backgroundColor,
-            text_color: textColor,
+            bg_color: enabled ? backgroundColor : null,
+            bg_image: enabled && backgroundImage ? backgroundImage : null,
+            text_color: enabled ? textColor : null,
           },
         }),
       })
 
       if (!response.ok) throw new Error("Failed to save")
 
-      setMessage({ type: "success", text: "Цвет фона сохранён ✓" })
+      setMessage({ type: "success", text: "Настройки фона сохранены ✓" })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
       setMessage({ type: "error", text: "Ошибка сохранения" })
@@ -79,9 +82,9 @@ const CollectionBackgroundWidget = ({ data }: WidgetProps) => {
       marginTop: "16px"
     }}>
       <div style={{ padding: "16px", borderBottom: "1px solid #e5e7eb" }}>
-        <h2 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>🎨 Цвет фона страницы</h2>
+        <h2 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>🎨 Фон коллекции на главной</h2>
         <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#6b7280" }}>
-          Настройка цвета фона для страницы этой коллекции
+          Настройка цветного фона для блока коллекции на главной странице (как на фото с синим фоном)
         </p>
       </div>
 
@@ -117,45 +120,64 @@ const CollectionBackgroundWidget = ({ data }: WidgetProps) => {
         </div>
 
         {enabled && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            {/* Background Color */}
-            <div>
-              <label style={labelStyle}>Цвет фона (HEX)</label>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <input
-                  type="color"
-                  value={backgroundColor}
-                  onChange={(e) => setBackgroundColor(e.target.value)}
-                  style={{ width: "40px", height: "40px", padding: 0, border: "none", background: "none", cursor: "pointer" }}
-                />
-                <input
-                  type="text"
-                  value={backgroundColor}
-                  onChange={(e) => setBackgroundColor(e.target.value)}
-                  placeholder="#ffffff"
-                  style={inputStyle}
-                />
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              {/* Background Color */}
+              <div>
+                <label style={labelStyle}>Цвет фона (HEX)</label>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type="color"
+                    value={backgroundColor}
+                    onChange={(e) => setBackgroundColor(e.target.value)}
+                    style={{ width: "40px", height: "40px", padding: 0, border: "none", background: "none", cursor: "pointer" }}
+                  />
+                  <input
+                    type="text"
+                    value={backgroundColor}
+                    onChange={(e) => setBackgroundColor(e.target.value)}
+                    placeholder="#0059b3"
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
+              {/* Text Color */}
+              <div>
+                <label style={labelStyle}>Цвет текста (HEX)</label>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    style={{ width: "40px", height: "40px", padding: 0, border: "none", background: "none", cursor: "pointer" }}
+                  />
+                  <input
+                    type="text"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    placeholder="#ffffff"
+                    style={inputStyle}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Text Color */}
+            {/* Background Image URL */}
             <div>
-              <label style={labelStyle}>Цвет текста (HEX)</label>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <input
-                  type="color"
-                  value={textColor}
-                  onChange={(e) => setTextColor(e.target.value)}
-                  style={{ width: "40px", height: "40px", padding: 0, border: "none", background: "none", cursor: "pointer" }}
-                />
-                <input
-                  type="text"
-                  value={textColor}
-                  onChange={(e) => setTextColor(e.target.value)}
-                  placeholder="#000000"
-                  style={inputStyle}
-                />
-              </div>
+              <label style={labelStyle}>
+                URL фонового изображения (опционально)
+                <span style={{ fontSize: "11px", fontWeight: 400, color: "#9ca3af", marginLeft: "4px" }}>
+                  — будет использоваться вместо цвета
+                </span>
+              </label>
+              <input
+                type="text"
+                value={backgroundImage}
+                onChange={(e) => setBackgroundImage(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                style={inputStyle}
+              />
             </div>
           </div>
         )}
