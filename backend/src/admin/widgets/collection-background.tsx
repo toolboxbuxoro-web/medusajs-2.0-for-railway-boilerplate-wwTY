@@ -47,6 +47,16 @@ const CollectionBackgroundWidget = ({ data }: WidgetProps) => {
 
       if (!response.ok) throw new Error("Failed to save")
 
+      // Revalidate storefront cache
+      try {
+        const storefrontUrl = process.env.MEDUSA_STOREFRONT_URL || "https://www.toolbox-tools.uz"
+        await fetch(`${storefrontUrl}/api/revalidate?tag=collections`, {
+          method: "GET",
+        })
+      } catch (revalidateError) {
+        console.warn("Could not revalidate storefront cache:", revalidateError)
+      }
+
       setMessage({ type: "success", text: "Настройки фона сохранены ✓" })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
