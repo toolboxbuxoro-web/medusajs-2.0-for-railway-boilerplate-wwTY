@@ -6,7 +6,6 @@ import { getCategoriesList } from "@lib/data/categories"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
-import Search from "@modules/common/icons/search"
 import User from "@modules/common/icons/user"
 import Menu from "@modules/common/icons/menu"
 import { getTranslations } from 'next-intl/server'
@@ -19,6 +18,7 @@ import Headset from "@modules/common/icons/headset"
 import { type Locale } from '../../../../i18n'
 import { getLocalizedField } from "@lib/util/localization"
 import TopBar from "@modules/layout/components/top-bar"
+import { DesktopSearch, MobileSearch, CompactSearch } from "@modules/layout/components/nav-search"
 
 type NavProps = {
   locale: string
@@ -94,22 +94,7 @@ export default async function Nav({ locale }: NavProps) {
               <CatalogDropdown categories={mainCategories} locale={locale} isUnified={false} />
               
               {/* Search Input - Separate with red border */}
-              <form action="/search" method="get" className="relative flex-1">
-                <div className="flex w-full rounded-xl overflow-hidden border-2 border-red-500 bg-white shadow-sm hover:shadow-md hover:border-red-600 transition-all duration-300">
-                  <input
-                    type="search"
-                    name="q"
-                    placeholder={t('search_placeholder')}
-                    className="w-full h-10 lg:h-11 px-4 border-none focus:outline-none focus:ring-0 text-sm lg:text-base bg-transparent"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 bg-red-600 hover:bg-red-700 text-white transition-colors"
-                  >
-                    <Search size="20" />
-                  </button>
-                </div>
-              </form>
+              <DesktopSearch placeholder={t('search_placeholder')} />
             </div>
 
             {/* Icons - Compact on mobile, right aligned */}
@@ -172,22 +157,7 @@ export default async function Nav({ locale }: NavProps) {
           
           {/* Mobile Search Bar - Fixed inside header */}
           <div className="sm:hidden w-full px-4 pb-3 bg-white">
-            <form action="/search" method="get" className="relative w-full">
-              <div className="flex w-full rounded-lg overflow-hidden border border-gray-200 bg-gray-50 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-200 transition-all">
-                <input
-                  type="search"
-                  name="q"
-                  placeholder={t('search_placeholder')}
-                  className="w-full h-10 px-4 border-none focus:outline-none focus:ring-0 text-sm bg-transparent"
-                />
-                <button
-                  type="submit"
-                  className="px-3 text-gray-400 hover:text-red-600 transition-colors"
-                >
-                  <Search size="18" />
-                </button>
-              </div>
-            </form>
+            <MobileSearch placeholder={t('search_placeholder')} />
           </div>
           </div>
         </header>
@@ -248,20 +218,7 @@ export default async function Nav({ locale }: NavProps) {
 
         {/* Mobile Search Bar - Compact */}
         <div className="sm:hidden bg-white border-t border-gray-200 px-3 py-1.5 navbar-mobile-search">
-          <form action="/search" method="get" className="relative">
-            <input
-              type="search"
-              name="q"
-              placeholder={t('search_placeholder')}
-              className="w-full h-9 px-3 pr-9 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-            />
-            <button
-              type="submit"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
-            >
-              <Search size="16" />
-            </button>
-          </form>
+          <CompactSearch placeholder={t('search_placeholder')} />
         </div>
       </div>
     </ScrollAwareNav>
