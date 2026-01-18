@@ -49,6 +49,7 @@ export const getCollectionsWithProducts = cache(
 
       return {
         ...collection,
+        metadata: collection.metadata, // Explicitly preserve metadata
         products: response.products,
       } as unknown as HttpTypes.StoreCollection
     })
