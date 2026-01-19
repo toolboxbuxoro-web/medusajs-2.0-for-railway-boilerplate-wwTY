@@ -46,11 +46,11 @@ export const listOrders = cache(async function (
 
       const enrichedOrders: HttpTypes.StoreOrder[] = orders as HttpTypes.StoreOrder[]
 
-      for (const [regionId, regionOrders] of byRegion.entries()) {
+      for (const [regionId, regionOrders] of Array.from(byRegion.entries())) {
         const allProductIds = Array.from(
           new Set(
             regionOrders
-              .flatMap((o) => (o.items || []).map((i) => i.product_id).filter(Boolean) as string[])
+              .flatMap((o: HttpTypes.StoreOrder) => (o.items || []).map((i: HttpTypes.StoreOrderLineItem) => i.product_id).filter(Boolean) as string[])
           )
         )
 

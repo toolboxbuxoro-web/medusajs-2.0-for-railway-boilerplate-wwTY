@@ -4,7 +4,6 @@ export const ERROR_MAP: Record<string, string> = {
   invalid_code: "invalid_code",
   phone_not_verified: "phone_not_verified",
   "OTP expired or invalid code. Please try again.": "invalid_code",
-  "phone_not_verified": "phone_not_verified",
   "too_many_requests": "failed_to_send_otp", // Map rate limit to same friendly message
 }
 

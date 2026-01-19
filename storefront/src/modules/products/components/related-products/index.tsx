@@ -34,7 +34,7 @@ export default async function RelatedProducts({
     queryParams.region_id = region.id
   }
   if (product.collection_id) {
-    queryParams.collection_id = [product.collection_id]
+    (queryParams as any).collection_id = [product.collection_id]
   }
   const productWithTags = product as StoreProductWithTags
   if (productWithTags.tags) {
@@ -42,7 +42,7 @@ export default async function RelatedProducts({
       .map((t) => t.value)
       .filter(Boolean) as string[]
   }
-  queryParams.is_giftcard = false
+  (queryParams as any).is_giftcard = false
 
   const products = await getProductsList({
     queryParams,

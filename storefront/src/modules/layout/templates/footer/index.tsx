@@ -4,6 +4,7 @@ import { Text, clx } from "@medusajs/ui"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { getTranslations } from 'next-intl/server'
+import { HttpTypes } from "@medusajs/types"
 
 export default async function Footer() {
   const { collections } = await getCollectionsList(0, 6)
@@ -36,7 +37,7 @@ export default async function Footer() {
                   className="grid grid-cols-1 gap-2"
                   data-testid="footer-categories"
                 >
-                  {product_categories?.slice(0, 6).map((c) => {
+                  {product_categories?.slice(0, 6).map((c: HttpTypes.StoreProductCategory) => {
                     if (c.parent_category) {
                       return null
                     }

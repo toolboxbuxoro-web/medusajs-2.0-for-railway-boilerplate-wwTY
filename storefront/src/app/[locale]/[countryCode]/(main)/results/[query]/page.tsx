@@ -27,13 +27,11 @@ export default async function SearchResults({ params, searchParams }: Params) {
   const { query } = params
   const { sortBy, page } = searchParams
 
-  const results = await search(query, sortBy, {
-    category_id: searchParams.category_id,
-    category_title: searchParams.category_title,
-    brand: searchParams.brand,
-    min_price: searchParams.min_price,
-    max_price: searchParams.max_price,
-  })
+  const pageNumber = page ? parseInt(page) : 1
+  const limit = 24
+  const offset = (pageNumber - 1) * limit
+
+  const results = await search(query, offset, params.countryCode)
 
   const { hits, facetDistribution, estimatedTotalHits } = results
 

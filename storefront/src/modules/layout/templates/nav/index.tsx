@@ -3,7 +3,7 @@ import { Suspense } from "react"
 
 import { listRegions } from "@lib/data/regions"
 import { getCategoriesList } from "@lib/data/categories"
-import { StoreRegion } from "@medusajs/types"
+import { HttpTypes, StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import User from "@modules/common/icons/user"
@@ -27,7 +27,7 @@ type NavProps = {
 export default async function Nav({ locale }: NavProps) {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
   const { product_categories } = await getCategoriesList(0, 100)
-  const mainCategories = product_categories?.filter(cat => !cat.parent_category) || []
+  const mainCategories = product_categories?.filter((cat: HttpTypes.StoreProductCategory) => !cat.parent_category) || []
   
   const t = await getTranslations({locale, namespace: 'nav'})
 
@@ -176,7 +176,7 @@ export default async function Nav({ locale }: NavProps) {
               <span>{t('all_products') || 'Все товары'}</span>
             </LocalizedClientLink>
 
-            {mainCategories.slice(0, 10).map((category) => (
+            {mainCategories.slice(0, 10).map((category: HttpTypes.StoreProductCategory) => (
               <LocalizedClientLink
                 key={category.id}
                 href={`/categories/${category.handle}`}

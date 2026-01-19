@@ -2,6 +2,14 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { getCategoriesList } from "@lib/data/categories"
 import { getTranslations } from 'next-intl/server'
+
+type CategoryType = HttpTypes.StoreProductCategory & {
+  metadata?: {
+    icon_url?: string
+    image_url?: string
+    [key: string]: unknown
+  }
+}
 import Image from "next/image"
 
 const categoryIcons: Record<string, string> = {
@@ -18,7 +26,7 @@ const categoryIcons: Record<string, string> = {
 
 export default async function CategoryCarousel() {
   const { product_categories } = await getCategoriesList(0, 12)
-  const categories = product_categories?.filter(cat => !cat.parent_category).slice(0, 12) || []
+  const categories = (product_categories?.filter((cat: HttpTypes.StoreProductCategory) => !cat.parent_category).slice(0, 12) || []) as CategoryType[]
   const t = await getTranslations('home')
 
   return (

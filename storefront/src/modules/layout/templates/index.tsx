@@ -5,10 +5,11 @@ import Nav from "@modules/layout/templates/nav"
 
 const Layout: React.FC<{
   children: React.ReactNode
-}> = ({ children }) => {
+  locale: string
+}> = ({ children, locale }) => {
   return (
     <div>
-      <Nav />
+      <Nav locale={locale} />
       <main className="relative">{children}</main>
       <Footer />
     </div>

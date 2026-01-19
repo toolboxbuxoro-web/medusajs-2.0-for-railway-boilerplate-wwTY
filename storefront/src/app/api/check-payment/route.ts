@@ -25,16 +25,16 @@ export async function GET(request: NextRequest) {
         // We need to find order that matches our cart
         // Since order is created from cart, we can filter by metadata or just get recent
       },
-      { next: { revalidate: 0 } }
+      { next: { revalidate: 0 } as any }
     ).catch(() => ({ orders: [] }))
 
     // Check if we have an order for this cart by querying the cart
     try {
-      const cartResp = await sdk.store.cart.retrieve(cartId, {}, { next: { revalidate: 0 } })
+      const cartResp = await sdk.store.cart.retrieve(cartId, {}, { next: { revalidate: 0 } } as any)
       const cart = cartResp.cart
       
       // If cart has completed_at, it means payment was successful and order was created
-      if (cart?.completed_at) {
+      if ((cart as any)?.completed_at) {
         // Find the order - typically the order ID will be in a specific location
         // In Medusa 2.0, when cart.complete() is called, it returns the order
         // But here we're checking after the fact, so we need to find it differently
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         // or we can try to find the order ID
         return NextResponse.json({
           status: 'completed',
-          completed_at: cart.completed_at,
+          completed_at: (cart as any).completed_at,
           message: 'Payment successful, order created'
         })
       }
