@@ -84,11 +84,11 @@ const ShippingDetails = ({ order, locale }: ShippingDetailsProps) => {
           <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('method')}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {(order as any).shipping_methods?.[0]?.name}
-            {order.shipping_methods?.[0]?.total !== undefined && (
+            {(order.shipping_methods?.[0]?.total !== undefined || (btsDelivery.estimated_cost)) && (
               <>
                 {" "}
                 ({convertToLocale({
-                  amount: order.shipping_methods?.[0]?.total ?? 0,
+                  amount: order.shipping_methods?.[0]?.total || btsDelivery.estimated_cost || 0,
                   currency_code: order.currency_code,
                   locale: locale || 'ru'
                 })})
