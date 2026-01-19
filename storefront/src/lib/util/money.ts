@@ -2,7 +2,7 @@ import { isEmpty } from "./isEmpty"
 
 type ConvertToLocaleParams = {
   amount: number
-  currency_code: string
+  currency_code?: string | null
   minimumFractionDigits?: number
   maximumFractionDigits?: number
   locale?: string
@@ -41,7 +41,8 @@ export const convertToLocale = ({
   
   // Medusa stores amounts in subunits.
   // We need to determine how many decimals the currency has.
-  const isUZS = currency_code?.toUpperCase() === 'UZS'
+  const code = currency_code ? currency_code.toUpperCase() : 'UZS'
+  const isUZS = code === 'UZS'
   
   // For UZS we traditionally treat as 0 decimals in this project's subunit storage
   const fractionDigits = isUZS ? 0 : 2
@@ -55,7 +56,7 @@ export const convertToLocale = ({
   // Fallback for non-UZS currencies
   return new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : 'uz-UZ', {
     style: "currency",
-    currency: currency_code,
+    currency: code,
     minimumFractionDigits,
     maximumFractionDigits,
   }).format(value)
