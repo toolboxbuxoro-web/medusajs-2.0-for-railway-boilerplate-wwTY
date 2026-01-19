@@ -101,7 +101,7 @@ export const GET = async (
         ],
         variables: {
           filters: { id: productIds },
-          context: queryContext
+          ...queryContext // Pass context properties directly to variables for price calculation
         }
       })
 
