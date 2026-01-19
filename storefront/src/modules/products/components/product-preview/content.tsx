@@ -46,7 +46,7 @@ export default function ProductPreviewContent({
     original_price_number: metadataPrice,
     currency_code: 'UZS',
     price_type: 'default',
-    percentage_diff: 0
+    percentage_diff: '0'
   } : null)
 
   const favorite = isFavorite(product.id)
