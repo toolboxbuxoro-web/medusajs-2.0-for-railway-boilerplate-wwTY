@@ -32,8 +32,8 @@ export default function SearchGrid({ items, status, hasMore, loadMore }: SearchG
   }, [inView, hasMore, status, loadMore])
 
   return (
-    <div className="flex flex-col gap-y-8 w-full p-6">
-      <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-4 gap-y-8">
+    <div className="flex flex-col gap-y-8 w-full">
+      <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8">
         {items.map((product) => (
           <div key={product.id}>
             <ProductPreviewContent product={product} />

@@ -578,3 +578,22 @@
   animation-play-state: paused;
 }
 
+
+/* Partners Infinite Scroll Animation */
+@keyframes partners-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-partners-scroll {
+  animation: partners-scroll 40s linear infinite;
+  width: max-content; /* Ensure the container takes full width of content */
+}
+
+.animate-partners-scroll:hover {
+  animation-play-state: paused;
+}

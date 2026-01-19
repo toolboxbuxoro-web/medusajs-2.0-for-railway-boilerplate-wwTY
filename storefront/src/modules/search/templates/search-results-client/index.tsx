@@ -16,6 +16,13 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
   const pathname = usePathname()
   const initialized = useRef(false)
 
+  // Fix: Sync internal state when URL/initialQuery changes
+  useEffect(() => {
+    if (initialQuery !== query) {
+      setQuery(initialQuery)
+    }
+  }, [initialQuery, query, setQuery])
+
   // Sync URL when query changes (debounced)
   useEffect(() => {
     if (!initialized.current) {
@@ -75,12 +82,14 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
       )}
 
       {/* Main Grid */}
-      <SearchGrid 
-        items={items} 
-        status={status} 
-        hasMore={hasMore} 
-        loadMore={loadMore} 
-      />
+      <div className="content-container py-6">
+        <SearchGrid 
+          items={items} 
+          status={status} 
+          hasMore={hasMore} 
+          loadMore={loadMore} 
+        />
+      </div>
     </div>
   )
 }

@@ -42,6 +42,18 @@ export function transformProductToSearchDocument(product: any) {
     // Variant info
     variant_sku: product.variants?.[0]?.sku || "",
     
+    // Add variants array for frontend logic (e.g. "Add to cart" vs "Select")
+    variants: product.variants?.map((v: any) => ({
+      id: v.id,
+      title: v.title,
+      sku: v.sku,
+      manage_inventory: v.manage_inventory,
+      allow_backorder: v.allow_backorder,
+      inventory_quantity: v.inventory_quantity,
+      // Include calculated_price if available (for price display)
+      calculated_price: v.calculated_price || null
+    })) || [],
+    
     // Original metadata for fallback
     metadata: metadata
   }
