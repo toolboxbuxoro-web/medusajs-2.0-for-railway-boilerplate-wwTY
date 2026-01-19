@@ -5,6 +5,35 @@
  * top-level attributes to ensure they are correctly indexed and 
  * rankable by Meilisearch.
  */
+
+// Helper to get lowest price from variants
+function getLowestPrice(variants: any[]): number | null {
+  if (!variants || variants.length === 0) return null
+  
+  let lowestPrice: number | null = null
+  
+  for (const variant of variants) {
+    // Check prices array on variant
+    if (variant.prices && Array.isArray(variant.prices)) {
+      for (const price of variant.prices) {
+        const amount = price.amount
+        if (amount && (lowestPrice === null || amount < lowestPrice)) {
+          lowestPrice = amount
+        }
+      }
+    }
+    // Also check calculated_price if available
+    if (variant.calculated_price?.calculated_amount) {
+      const amount = variant.calculated_price.calculated_amount
+      if (lowestPrice === null || amount < lowestPrice) {
+        lowestPrice = amount
+      }
+    }
+  }
+  
+  return lowestPrice
+}
+
 export function transformProductToSearchDocument(product: any) {
   const metadata = product.metadata || {}
   
@@ -25,9 +54,9 @@ export function transformProductToSearchDocument(product: any) {
     title_uz: metadata.title_uz || "",
     seo_keywords: metadata.seo_keywords || "",
     
-    // Inventory and pricing (if available)
+    // Inventory and pricing - get price from variant prices if available
     in_stock: metadata.in_stock ?? true,
-    price: metadata.price || null,
+    price: getLowestPrice(product.variants) || metadata.price || null,
     sales_count: metadata.sales_count || 0,
     rating_avg: metadata.rating_avg || 0,
     rating_count: metadata.rating_count || 0,

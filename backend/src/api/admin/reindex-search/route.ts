@@ -17,11 +17,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
     const productService = req.scope.resolve(Modules.PRODUCT)
     
-    // Get all products with variants
+    // Get all products with variants and prices
     const products = await productService.listProducts(
       {},
       {
-        relations: ["variants", "categories"],
+        relations: ["variants", "variants.prices", "categories"],
         take: 5000
       }
     )
