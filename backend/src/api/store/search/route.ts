@@ -30,7 +30,18 @@ export const GET = async (
     let searchBody: any = {
       limit: limitNum,
       offset: offsetNum,
-      attributesToRetrieve: ['id', 'title', 'handle', 'thumbnail', 'status', 'metadata', 'variants', 'brand', 'title_uz', 'seo_keywords'],
+      // Only retrieve fields needed for hydration + display fallback
+      attributesToRetrieve: [
+        'id', 
+        'title', 
+        'handle', 
+        'thumbnail', 
+        'status', 
+        'metadata',
+        'variants', // For "Add to Cart" logic
+        'brand', 
+        'title_uz'
+      ],
       attributesToHighlight: ['title'],
       highlightPreTag: '<mark>',
       highlightPostTag: '</mark>',
@@ -41,7 +52,7 @@ export const GET = async (
     if (!query) {
       mode = 'recommendation'
       searchBody.q = ""
-      searchBody.sort = ["metadata.sales_count:desc", "created_at:desc"] // Popular & New
+      searchBody.sort = ["metadata.sales_count:desc", "created_at:desc"]
     } else {
       // 2. Search Mode
       mode = 'search'
@@ -53,95 +64,13 @@ export const GET = async (
     // 3. Fallback Mode (If search hits are 0 AND it's the first page)
     if (mode === 'search' && (!results || results.hits.length === 0) && offsetNum === 0) {
       mode = 'fallback'
-      // Re-fetch recommendations as fallback
       const fallbackBody = {
         ...searchBody,
         q: "",
         sort: ["metadata.sales_count:desc", "created_at:desc"],
-        offset: offsetNum // Keep offset for infinite scroll in fallback
+        offset: offsetNum
       }
       results = await fetchMeili(fallbackBody)
-    }
-
-    // 4. Hydrate with Medusa API
-    let hydratedHits = []
-    
-    if (results && results.hits && results.hits.length > 0) {
-      const productIds = results.hits.map((h: any) => h.id)
-      
-      let { currency_code, region_id } = req.query as Record<string, any>
-      const remoteQuery = req.scope.resolve("remoteQuery")
-
-      // Ensure we have context for pricing
-      if (!currency_code || !region_id) {
-        try {
-          const { data: regions } = await remoteQuery({
-            entryPoint: "region",
-            fields: ["id", "currency_code"],
-            variables: { take: 1 }
-          })
-          
-          if (regions && regions.length > 0) {
-            if (!region_id) region_id = regions[0].id
-            if (!currency_code) currency_code = regions[0].currency_code
-          }
-        } catch (e) {
-          console.warn("[Search API] Failed to fetch default region context:", e)
-        }
-      }
-      
-      // Fallback if still missing (prevent 500 error)
-      if (!currency_code) currency_code = "uzs"
-
-      const queryContext = {
-        region_id,
-        currency_code,
-      }
-
-      // Fetch full products with calculated prices
-      const { data: products } = await remoteQuery({
-        entryPoint: "product",
-        fields: [
-          "id",
-          "title",
-          "subtitle",
-          "handle",
-          "thumbnail",
-          "description",
-          "status",
-          "created_at",
-          "metadata",
-          "variants.id",
-          "variants.title",
-          "variants.sku",
-          "variants.options",
-          "variants.calculated_price.*", 
-          "variants.inventory_quantity",
-          "variants.manage_inventory",
-          "variants.allow_backorder",
-        ],
-        variables: {
-          filters: { id: productIds },
-          ...queryContext // Expanded context for price calculation
-        }
-      })
-
-      // Map back to preserve Meilisearch order & highlighting
-      hydratedHits = productIds.map((id: string) => {
-        const product = (products as any[]).find((p: any) => p.id === id)
-        if (!product) return null
-        
-        // Merge meili highlights if needed, but primarily use fresh product data
-        const hit = results.hits.find((h: any) => h.id === id)
-        
-        return {
-            ...product, // Use fresh data as base
-            _formatted: hit?._formatted, // Keep meilisearch formatting/highlights
-        }
-      }).filter(Boolean)
-    } else if (results) {
-        // Empty hits but results exists
-        hydratedHits = []
     }
 
     if (!results) {
@@ -154,14 +83,18 @@ export const GET = async (
       })
     }
 
+    // Return Meilisearch hits directly
+    // Frontend will hydrate with prices via getProductsById
     res.json({
-      hits: hydratedHits,
+      hits: results.hits || [],
       estimatedTotalHits: results.estimatedTotalHits || 0,
       query: query,
       mode: mode,
       limit: limitNum,
       offset: offsetNum,
-      processingTimeMs: results.processingTimeMs
+      processingTimeMs: results.processingTimeMs,
+      // Signal to frontend that hydration is needed
+      requiresHydration: true
     })
 
   } catch (error) {
@@ -170,7 +103,7 @@ export const GET = async (
       hits: [],
       estimatedTotalHits: 0,
       query: req.query.q || "",
-      mode: 'search', 
+      mode: 'search',
       error: "Internal server error"
     })
   }

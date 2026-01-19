@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { search } from "@modules/search/actions"
+import { getProductsById } from "@lib/data/products"
+import { getRegion } from "@lib/data/regions"
 
 export type SearchMode = "search" | "recommendation" | "fallback"
 export type SearchStatus = "idle" | "loading" | "success" | "error"
@@ -28,6 +30,14 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
   })
 
   const loadingRef = useRef(false)
+  const regionRef = useRef<any>(null)
+
+  // Pre-fetch region for hydration
+  useEffect(() => {
+    getRegion(countryCode).then(region => {
+      regionRef.current = region
+    })
+  }, [countryCode])
 
   const fetchData = useCallback(async (query: string, page: number, isNewSearch: boolean) => {
     if (loadingRef.current) return
@@ -41,20 +51,48 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
     }))
 
     try {
-      // We don't have abort support in the server action easily, 
-      // but we can ignore results if query changed.
       const offset = page * 24
+      // Step 1: Get search results from Meilisearch (basic data)
       const results = await search(query, offset, countryCode)
 
       const { hits = [], estimatedTotalHits = 0, mode = "search" } = results
 
+      // Step 2: Hydrate with full product data including prices
+      let hydratedHits = hits
+      
+      if (hits.length > 0 && regionRef.current) {
+        try {
+          const productIds = hits.map((h: any) => h.id)
+          const fullProducts = await getProductsById({
+            ids: productIds,
+            regionId: regionRef.current.id
+          })
+          
+          // Map back to preserve Meilisearch order
+          hydratedHits = productIds.map((id: string) => {
+            const fullProduct = fullProducts.find((p: any) => p.id === id)
+            const meilisearchHit = hits.find((h: any) => h.id === id)
+            
+            if (fullProduct) {
+              return {
+                ...fullProduct,
+                _formatted: meilisearchHit?._formatted, // Keep highlighting
+              }
+            }
+            // Fallback to Meilisearch data if not found
+            return meilisearchHit
+          }).filter(Boolean)
+        } catch (e) {
+          console.warn("[useInfiniteSearch] Hydration failed, using raw hits:", e)
+          // Continue with raw Meilisearch hits
+        }
+      }
+
       setState(prev => {
-        // If results came back but user already changed query, discard.
         if (prev.query !== query && isNewSearch) return prev
 
-        const newItems = isNewSearch ? hits : [...prev.items, ...hits]
-        // Stop loading if: no new hits returned OR we have all items
-        const hasMore = hits.length > 0 && newItems.length < estimatedTotalHits
+        const newItems = isNewSearch ? hydratedHits : [...prev.items, ...hydratedHits]
+        const hasMore = hydratedHits.length > 0 && newItems.length < estimatedTotalHits
 
         return {
           ...prev,
@@ -72,7 +110,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
     } finally {
       loadingRef.current = false
     }
-  }, [])
+  }, [countryCode])
 
   // Initial fetch / Query change fetch
   useEffect(() => {
@@ -85,10 +123,6 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
   }, [state.query, fetchData])
 
   const loadMore = useCallback(() => {
-    // Prevent loading more if:
-    // 1. Aleady loading
-    // 2. No more items
-    // 3. We haven't loaded the first page yet (items.length === 0 && status === 'idle') - let the useEffect handle that
     if (state.status === "loading" || !state.hasMore) return
     if (state.items.length === 0 && state.status === "idle") return 
 
