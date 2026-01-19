@@ -63,6 +63,66 @@ export const GET = async (
       results = await fetchMeili(fallbackBody)
     }
 
+    // 4. Hydrate with Medusa API
+    let hydratedHits = []
+    
+    if (results && results.hits && results.hits.length > 0) {
+      const productIds = results.hits.map((h: any) => h.id)
+      
+      const { currency_code, region_id } = req.query as Record<string, any>
+      const remoteQuery = req.scope.resolve("remoteQuery")
+      
+      const queryContext = {
+        ...(region_id && { region_id }),
+        ...(currency_code && { currency_code }),
+      }
+
+      // Fetch full products with calculated prices
+      const { data: products } = await remoteQuery({
+        entryPoint: "product",
+        fields: [
+          "id",
+          "title",
+          "subtitle",
+          "handle",
+          "thumbnail",
+          "description",
+          "status",
+          "created_at",
+          "metadata",
+          "variants.id",
+          "variants.title",
+          "variants.sku",
+          "variants.options",
+          "variants.calculated_price.*", 
+          "variants.inventory_quantity",
+          "variants.manage_inventory",
+          "variants.allow_backorder",
+        ],
+        variables: {
+          filters: { id: productIds },
+          context: queryContext
+        }
+      })
+
+      // Map back to preserve Meilisearch order & highlighting
+      hydratedHits = productIds.map((id: string) => {
+        const product = (products as any[]).find((p: any) => p.id === id)
+        if (!product) return null
+        
+        // Merge meili highlights if needed, but primarily use fresh product data
+        const hit = results.hits.find((h: any) => h.id === id)
+        
+        return {
+            ...product, // Use fresh data as base
+            _formatted: hit?._formatted, // Keep meilisearch formatting/highlights
+        }
+      }).filter(Boolean)
+    } else if (results) {
+        // Empty hits but results exists
+        hydratedHits = []
+    }
+
     if (!results) {
       return res.json({
         hits: [],
@@ -74,7 +134,7 @@ export const GET = async (
     }
 
     res.json({
-      hits: results.hits || [],
+      hits: hydratedHits,
       estimatedTotalHits: results.estimatedTotalHits || 0,
       query: query,
       mode: mode,
@@ -89,7 +149,7 @@ export const GET = async (
       hits: [],
       estimatedTotalHits: 0,
       query: req.query.q || "",
-      mode: 'search', // Don't use 'recommendation' in errors - could cause loops
+      mode: 'search', 
       error: "Internal server error"
     })
   }

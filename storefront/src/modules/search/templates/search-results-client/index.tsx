@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useSearchParams, useRouter, usePathname, useParams } from "next/navigation"
 import { Heading, Text } from "@medusajs/ui"
 import { useInfiniteSearch } from "@lib/hooks/use-infinite-search"
 import SearchGrid from "@modules/search/components/search-grid"
@@ -10,7 +10,9 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { MagnifyingGlassMini as MagnifyingGlass } from "@medusajs/icons"
 
 export default function SearchResultsClient({ initialQuery }: { initialQuery: string }) {
-  const { query, setQuery, items, status, hasMore, loadMore, mode, totalHits } = useInfiniteSearch(initialQuery)
+  const params = useParams()
+  const countryCode = params?.countryCode as string || "uz"
+  const { query, setQuery, items, status, hasMore, loadMore, mode, totalHits } = useInfiniteSearch(initialQuery, countryCode)
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()

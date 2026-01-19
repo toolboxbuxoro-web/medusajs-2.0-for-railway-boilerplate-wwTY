@@ -37,17 +37,7 @@ export default function ProductPreviewContent({
     product: product,
   })
   
-  // Fallback to metadata.price for search results (where calculated_price is not available)
-  const metadataPrice = (product as any).metadata?.price || (product as any).price
-  const displayPrice = cheapestPrice || (metadataPrice ? {
-    calculated_price: metadataPrice.toLocaleString('ru-RU') + ' сум',
-    calculated_price_number: metadataPrice,
-    original_price: metadataPrice.toLocaleString('ru-RU') + ' сум',
-    original_price_number: metadataPrice,
-    currency_code: 'UZS',
-    price_type: 'default',
-    percentage_diff: '0'
-  } : null)
+  const displayPrice = cheapestPrice
 
   const favorite = isFavorite(product.id)
 

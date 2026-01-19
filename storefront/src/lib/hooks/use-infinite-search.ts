@@ -16,7 +16,7 @@ export interface InfiniteSearchState {
   totalHits: number
 }
 
-export function useInfiniteSearch(initialQuery: string = "") {
+export function useInfiniteSearch(initialQuery: string = "", countryCode: string = "uz") {
   const [state, setState] = useState<InfiniteSearchState>({
     items: [],
     query: initialQuery,
@@ -44,7 +44,7 @@ export function useInfiniteSearch(initialQuery: string = "") {
       // We don't have abort support in the server action easily, 
       // but we can ignore results if query changed.
       const offset = page * 24
-      const results = await search(query, offset)
+      const results = await search(query, offset, countryCode)
 
       const { hits = [], estimatedTotalHits = 0, mode = "search" } = results
 
