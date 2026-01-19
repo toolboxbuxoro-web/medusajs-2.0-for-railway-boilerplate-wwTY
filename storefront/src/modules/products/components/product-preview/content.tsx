@@ -36,6 +36,18 @@ export default function ProductPreviewContent({
   const { cheapestPrice } = getProductPrice({
     product: product,
   })
+  
+  // Fallback to metadata.price for search results (where calculated_price is not available)
+  const metadataPrice = (product as any).metadata?.price || (product as any).price
+  const displayPrice = cheapestPrice || (metadataPrice ? {
+    calculated_price: metadataPrice.toLocaleString('ru-RU') + ' сум',
+    calculated_price_number: metadataPrice,
+    original_price: null,
+    original_price_number: 0,
+    currency_code: 'UZS',
+    price_type: null,
+    percentage_diff: 0
+  } : null)
 
   const favorite = isFavorite(product.id)
 
@@ -120,8 +132,8 @@ export default function ProductPreviewContent({
           <div>
             {/* Price */}
             <div className="mb-2 h-7 sm:h-8 flex items-center">
-              {cheapestPrice && (
-                <PreviewPrice price={cheapestPrice} isRed={true} />
+              {displayPrice && (
+                <PreviewPrice price={displayPrice} isRed={true} />
               )}
             </div>
 
