@@ -42,10 +42,10 @@ export default function ProductPreviewContent({
   const displayPrice = cheapestPrice || (metadataPrice ? {
     calculated_price: metadataPrice.toLocaleString('ru-RU') + ' сум',
     calculated_price_number: metadataPrice,
-    original_price: null,
-    original_price_number: 0,
+    original_price: metadataPrice.toLocaleString('ru-RU') + ' сум',
+    original_price_number: metadataPrice,
     currency_code: 'UZS',
-    price_type: null,
+    price_type: 'default',
     percentage_diff: 0
   } : null)
 
