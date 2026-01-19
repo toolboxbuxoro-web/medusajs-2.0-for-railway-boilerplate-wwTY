@@ -16,12 +16,15 @@ export default async function transferCartMetadata({
       relations: ["shipping_methods"]
     })
 
-    if (!order.cart_id) {
+    // x@ts-ignore - cart_id exists at runtime but missing from some DTO types
+    const cartId = (order as any).cart_id
+
+    if (!cartId) {
       logger.warn(`[transfer-cart-metadata] Order ${orderId} has no cart_id, skipping metadata transfer`)
       return
     }
 
-    const cart = await cartModule.retrieveCart(order.cart_id, {
+    const cart = await cartModule.retrieveCart(cartId, {
       select: ["metadata", "shipping_methods"]
     })
 
