@@ -1,6 +1,9 @@
+"use client"
+
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
+import { useTranslations } from 'next-intl'
 
 import Divider from "@modules/common/components/divider"
 
@@ -9,10 +12,8 @@ type ShippingDetailsProps = {
   locale?: string
 }
 
-import { getTranslations } from 'next-intl/server'
-
-const ShippingDetails = async ({ order, locale }: ShippingDetailsProps) => {
-  const t = await getTranslations({ locale: locale || 'ru', namespace: 'order' })
+const ShippingDetails = ({ order, locale }: ShippingDetailsProps) => {
+  const t = useTranslations('order')
   
   /**
    * BTS-ONLY DELIVERY DESIGN

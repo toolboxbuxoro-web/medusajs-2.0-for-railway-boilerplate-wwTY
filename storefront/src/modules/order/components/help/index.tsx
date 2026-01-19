@@ -1,3 +1,5 @@
+"use client"
+
 import { Heading } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import React from "react"

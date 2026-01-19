@@ -9,7 +9,10 @@ export const GET = async (
   res: MedusaResponse
 ) => {
   const { id } = req.params
-  const { limit = 10, offset = 0, sort = "newest" } = req.query as any
+  const { limit = 10, offset = 0, sort: rawSort = "newest" } = req.query as any
+
+  // Clean sort parameter (handle cache-busting suffix like "newest:1" → "newest")
+  const sort = typeof rawSort === 'string' ? rawSort.split(':')[0] : 'newest'
 
   const reviewsModuleService: ReviewsService = req.scope.resolve("reviewsModuleService")
 

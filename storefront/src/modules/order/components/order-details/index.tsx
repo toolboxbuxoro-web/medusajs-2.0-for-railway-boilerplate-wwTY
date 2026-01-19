@@ -1,5 +1,8 @@
+"use client"
+
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
+import { useTranslations } from 'next-intl'
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -9,12 +12,11 @@ type OrderDetailsProps = {
 
 import OrderStatusBadge from "@modules/account/components/order-overview/order-status-badge"
 import { getOrderDisplayDate, formatOrderDate } from "@lib/util/date"
-import { getTranslations } from 'next-intl/server'
 
-const OrderDetails = async ({ order, showStatus, locale }: OrderDetailsProps) => {
-  const t = await getTranslations({ locale: locale || 'ru', namespace: 'order' })
+const OrderDetails = ({ order, showStatus, locale }: OrderDetailsProps) => {
+  const t = useTranslations('order')
+  const tConfirmed = useTranslations('order_confirmed')
   const isPhoneEmail = order.email?.includes("@phone.local")
-  const tConfirmed = await getTranslations({ locale: locale || 'ru', namespace: 'order_confirmed' })
 
   return (
     <div>

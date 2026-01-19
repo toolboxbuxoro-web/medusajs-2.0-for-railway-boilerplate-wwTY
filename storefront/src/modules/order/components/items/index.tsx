@@ -1,3 +1,5 @@
+"use client"
+
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
 import { Table } from "@medusajs/ui"
