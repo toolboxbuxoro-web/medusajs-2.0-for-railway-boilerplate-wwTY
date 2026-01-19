@@ -69,12 +69,33 @@ export const GET = async (
     if (results && results.hits && results.hits.length > 0) {
       const productIds = results.hits.map((h: any) => h.id)
       
-      const { currency_code, region_id } = req.query as Record<string, any>
+      let { currency_code, region_id } = req.query as Record<string, any>
       const remoteQuery = req.scope.resolve("remoteQuery")
+
+      // Ensure we have context for pricing
+      if (!currency_code || !region_id) {
+        try {
+          const { data: regions } = await remoteQuery({
+            entryPoint: "region",
+            fields: ["id", "currency_code"],
+            variables: { take: 1 }
+          })
+          
+          if (regions && regions.length > 0) {
+            if (!region_id) region_id = regions[0].id
+            if (!currency_code) currency_code = regions[0].currency_code
+          }
+        } catch (e) {
+          console.warn("[Search API] Failed to fetch default region context:", e)
+        }
+      }
       
+      // Fallback if still missing (prevent 500 error)
+      if (!currency_code) currency_code = "uzs"
+
       const queryContext = {
-        ...(region_id && { region_id }),
-        ...(currency_code && { currency_code }),
+        region_id,
+        currency_code,
       }
 
       // Fetch full products with calculated prices
@@ -101,7 +122,7 @@ export const GET = async (
         ],
         variables: {
           filters: { id: productIds },
-          ...queryContext // Pass context properties directly to variables for price calculation
+          ...queryContext // Expanded context for price calculation
         }
       })
 
