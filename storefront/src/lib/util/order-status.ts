@@ -40,7 +40,7 @@ export function getOrderStatus(order: HttpTypes.StoreOrder, locale: 'ru' | 'uz' 
   const labels: Record<string, { ru: string; uz: string }> = {
     pending: { ru: 'Принят', uz: 'Qabul qilindi' },
     processing: { ru: 'В обработке', uz: 'Jarayonda' },
-    fulfilled: { ru: 'Готов к получению', uz: 'Olib ketishga tayyor' },
+    fulfilled: { ru: 'Собран', uz: 'Yig\'ildi' },
     shipped: { ru: 'В пути', uz: 'Yo\'lda' },
     delivered: { ru: 'Доставлен', uz: 'Yetkazib berildi' },
     completed: { ru: 'Завершён', uz: 'Yakunlandi' },
