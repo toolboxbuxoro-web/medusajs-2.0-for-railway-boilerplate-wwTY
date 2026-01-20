@@ -24,7 +24,7 @@ export default async function searchIndexer({
     const [product] = await productService.listProducts(
       { id: data.id },
       { 
-        relations: ["variants", "categories"],
+        relations: ["variants", "categories", "images"],
         take: 1 
       }
     )

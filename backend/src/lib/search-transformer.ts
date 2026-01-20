@@ -44,7 +44,7 @@ export function transformProductToSearchDocument(product: any) {
     subtitle: product.subtitle,
     description: product.description,
     handle: product.handle,
-    thumbnail: product.thumbnail,
+    thumbnail: product.thumbnail || product.images?.[0]?.url || null,
     status: product.status,
     created_at: product.created_at,
     updated_at: product.updated_at,
