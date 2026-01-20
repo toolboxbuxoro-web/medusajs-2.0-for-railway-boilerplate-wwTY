@@ -86,6 +86,24 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 }) => {
   const t = useTranslations("checkout")
   const tAccount = useTranslations("account")
+  const tErrors = useTranslations("errors")
+
+  // Helper to translate OTP error keys
+  const translateOtpError = (errorKey: string): string => {
+    const errorMap: Record<string, string> = {
+      "failed_to_send_otp": tErrors("failed_to_send_otp"),
+      "otp_cooldown": tErrors("otp_cooldown"),
+      "invalid_code": tErrors("invalid_code"),
+      "too_many_requests": tErrors("too_many_requests"),
+      "invalid_phone": tErrors("invalid_phone"),
+      "account_exists": tErrors("account_exists"),
+      "Network error": tErrors("error_occurred"),
+      "Login failed": tErrors("invalid_credentials"),
+      "Invalid code": tErrors("invalid_code"),
+      "Failed to send code": tErrors("failed_to_send_otp"),
+    }
+    return errorMap[errorKey] || errorKey
+  }
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -557,10 +575,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                 setOtpSent(true)
                                 setResendTimer(60)
                               } else {
-                                setOtpError(data.error || "Failed to send code")
+                                setOtpError(translateOtpError(data.error || "Failed to send code"))
                               }
                             } catch (e) {
-                              setOtpError("Network error")
+                              setOtpError(translateOtpError("Network error"))
                             }
                             setOtpLoading(false)
                           }}
@@ -608,13 +626,13 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                                        setOtpVerified(true)
                                        router.refresh()
                                     } else {
-                                       setOtpError("Login failed")
+                                       setOtpError(translateOtpError("Login failed"))
                                     }
                                   } else {
-                                    setOtpError(data.error || "Invalid code")
+                                    setOtpError(translateOtpError(data.error || "Invalid code"))
                                   }
                                 } catch (e) {
-                                  setOtpError("Network error")
+                                  setOtpError(translateOtpError("Network error"))
                                 }
                                 setOtpLoading(false)
                               }}

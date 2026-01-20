@@ -1,5 +1,5 @@
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 export default async function transferCartMetadata({
   event: { data },
@@ -7,55 +7,71 @@ export default async function transferCartMetadata({
 }: SubscriberArgs<{ id: string }>) {
   const logger = container.resolve("logger")
   const orderModule = container.resolve(Modules.ORDER)
-  const cartModule = container.resolve(Modules.CART)
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
   const orderId = data.id
 
   try {
-    const order = await orderModule.retrieveOrder(orderId, {
-      relations: ["shipping_methods"]
+    logger.info(`[transfer-cart-metadata] Processing order ${orderId}`)
+
+    // Use remoteQuery to get order with linked cart via the order-cart link
+    const { data: orders } = await query.graph({
+      entity: "order",
+      filters: { id: orderId },
+      fields: ["id", "metadata", "shipping_methods.*", "cart.*"]
     })
 
-    // x@ts-ignore - cart_id exists at runtime but missing from some DTO types
-    const cartId = (order as any).cart_id
-
-    if (!cartId) {
-      logger.warn(`[transfer-cart-metadata] Order ${orderId} has no cart_id, skipping metadata transfer`)
+    const order: any = orders?.[0]
+    if (!order) {
+      logger.warn(`[transfer-cart-metadata] Order ${orderId} not found`)
       return
     }
 
-    const cart = await cartModule.retrieveCart(cartId, {
-      select: ["metadata", "shipping_methods"]
-    })
+    logger.info(`[transfer-cart-metadata] Order fetched. Has cart: ${!!order.cart}`)
 
-    const cartMetadata = cart.metadata || {}
-    const btsDelivery = cartMetadata.bts_delivery
+    // Check if order already has bts_delivery
+    if (order.metadata?.bts_delivery) {
+      logger.info(`[transfer-cart-metadata] Order ${orderId} already has bts_delivery metadata`)
+      return
+    }
 
-    if (btsDelivery) {
-      logger.info(`[transfer-cart-metadata] Transferring BTS delivery metadata to order ${orderId}`)
-      
-      await orderModule.updateOrders([{
-        id: orderId,
-        metadata: {
-          ...order.metadata,
-          bts_delivery: btsDelivery
-        }
-      }])
+    // Try to get cart data from the linked cart
+    const cart = order.cart
+    if (!cart) {
+      logger.warn(`[transfer-cart-metadata] Order ${orderId} has no linked cart`)
+      return
+    }
 
-      // Check for zero shipping cost
-      if (order.shipping_methods?.length && (btsDelivery as any).estimated_cost) {
-        const shippingMethod = order.shipping_methods[0]
-        if (Number(shippingMethod.amount) === 0) {
-           const estimatedCost = Number((btsDelivery as any).estimated_cost)
-           if (estimatedCost > 0) {
-             logger.warn(`[transfer-cart-metadata] Order ${orderId} has 0 shipping cost but BTS estimate is ${estimatedCost}. Storefront should handle this fallback.`)
-           }
-        }
+    const btsDelivery = cart.metadata?.bts_delivery
+    if (!btsDelivery) {
+      logger.warn(`[transfer-cart-metadata] Cart ${cart.id} has no bts_delivery in metadata. Cart metadata: ${JSON.stringify(cart.metadata || {})}`)
+      return
+    }
+
+    logger.info(`[transfer-cart-metadata] Found bts_delivery: ${JSON.stringify(btsDelivery)}`)
+
+    // Update order with bts_delivery metadata
+    await orderModule.updateOrders([{
+      id: orderId,
+      metadata: {
+        ...(order.metadata || {}),
+        bts_delivery: btsDelivery
+      }
+    }])
+
+    logger.info(`[transfer-cart-metadata] Successfully updated order ${orderId} with bts_delivery metadata`)
+
+    // Log shipping cost issue
+    if (order.shipping_methods?.length && btsDelivery.estimated_cost) {
+      const shippingMethod = order.shipping_methods[0]
+      if (Number(shippingMethod.amount) === 0 && Number(btsDelivery.estimated_cost) > 0) {
+        logger.warn(`[transfer-cart-metadata] Order ${orderId} has 0 shipping cost but BTS estimate is ${btsDelivery.estimated_cost}`)
       }
     }
 
   } catch (error: any) {
     logger.error(`[transfer-cart-metadata] Error processing order ${orderId}: ${error.message}`)
+    logger.error(`[transfer-cart-metadata] Stack: ${error.stack}`)
   }
 }
 
