@@ -176,3 +176,33 @@ Before deploying new features:
 - [ ] Loading states present
 - [ ] `data-testid` attributes added
 - [ ] Cache invalidation working (`revalidateTag`)
+
+---
+
+## 9. Collections cache & revalidation workflow
+
+### When you change collection metadata in Medusa
+- **Typical changes**: `metadata.bg_color`, `metadata.bg_image`, `metadata.text_color`, localized titles/descriptions and other storefront-facing fields.
+
+### Steps to update the storefront
+1. **Change collections in Medusa Admin**
+   - Open the collection you need.
+   - Update `metadata.bg_color`, `metadata.bg_image`, `metadata.text_color` and/or localized metadata fields.
+   - Save the collection.
+
+2. **Trigger collections cache revalidation**
+   - Go to the `apps/backend` project.
+   - Run the revalidation script (from the backend workspace root):
+     - `pnpm revalidate:collections`
+   - The script sends `POST /api/revalidate` with `tags: ["collections"]` to the storefront and logs success/errors in the console.
+
+3. **Verify on the storefront**
+   - Open the main storefront page and relevant collection pages.
+   - Make sure the updated background color/image and text color are applied for all affected collections.
+
+### Notes
+- **Dev mode**:
+  - You may temporarily reduce caching or run `pnpm revalidate:collections` more often while iterating on collection design.
+- **Production**:
+  - Always rely on the `revalidate:collections` script after changing collections in Medusa.
+  - Do not bypass caching logic with ad-hoc `no-store` fetches in components — use the documented `revalidate` flow instead.

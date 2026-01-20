@@ -41,31 +41,30 @@ export const getCollectionByHandle = cache(async function (
     .then(({ collections }) => collections[0])
 })
 
-export const getCollectionsWithProducts = cache(
-  async (countryCode: string): Promise<HttpTypes.StoreCollection[] | null> => {
-    const { collections } = await getCollectionsList(0, 12)
+export const getCollectionsWithProducts = cache(async function (
+  countryCode: string
+): Promise<HttpTypes.StoreCollection[] | null> {
+  const { collections } = await getCollectionsList(0, 12)
 
+  if (!collections || collections.length === 0) {
+    return []
+  }
 
-    if (!collections || collections.length === 0) {
-      return []
-    }
-
-    const collectionPromises = collections.map(async (collection) => {
-      const { response } = await getProductsList({
-        // @ts-ignore
-        queryParams: { collection_id: [collection.id], limit: 12 },
-        countryCode,
-      })
-
-      return {
-        ...collection,
-        metadata: collection.metadata, // Explicitly preserve metadata
-        products: response.products,
-      } as unknown as HttpTypes.StoreCollection
+  const collectionPromises = collections.map(async (collection) => {
+    const { response } = await getProductsList({
+      // @ts-ignore
+      queryParams: { collection_id: [collection.id], limit: 12 },
+      countryCode,
     })
 
-    const collectionsWithProducts = await Promise.all(collectionPromises)
+    return {
+      ...collection,
+      metadata: collection.metadata, // Explicitly preserve metadata
+      products: response.products,
+    } as unknown as HttpTypes.StoreCollection
+  })
 
-    return collectionsWithProducts
-  }
-)
+  const collectionsWithProducts = await Promise.all(collectionPromises)
+
+  return collectionsWithProducts
+})

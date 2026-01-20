@@ -31,6 +31,17 @@ export default function ProductRail({
   const textColor = metadata.text_color as string | undefined
   const theme = metadata.theme as string | undefined
 
+  // #region agent log
+  console.log('[DEBUG] ProductRail render metadata:', {
+    collectionId: collection.id,
+    handle: (collection as any).handle,
+    bg_color: bgColor,
+    bg_image: bgImage,
+    text_color: textColor,
+    theme,
+  })
+  // #endregion
+
   // Determine if it should have any special background
   // Custom bg ONLY if color/image explicitly set OR theme is explicitly 'winter'
   const hasCustomBg = !!(bgColor || bgImage || theme === 'winter')
