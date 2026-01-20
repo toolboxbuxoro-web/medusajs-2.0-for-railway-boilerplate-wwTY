@@ -6,7 +6,7 @@
 
 export const OTP_LOGIN_TEXT = "Код для входа в приложение Toolbox: {code}. Не передавайте код никому."
 
-export const OTP_CHECKOUT_TEXT = "Код для оформления заказа в Toolbox: {code}. Не передавайте код никому."
+export const OTP_CHECKOUT_TEXT = "Kod podtverzhdeniya dlya oformleniya zakaza na sajte toolbox-tools.uz: {code}"
 
 export const ORDER_CONFIRMATION_TEXT = "Ваш заказ №{orderId} в Toolbox принят. Сумма: {sum} сум."
 

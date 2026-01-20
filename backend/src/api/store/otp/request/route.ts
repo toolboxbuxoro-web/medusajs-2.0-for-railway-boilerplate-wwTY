@@ -18,7 +18,7 @@ function getOtpMessage(code: string, purpose?: string): string {
   if (purpose === "checkout") {
     return OTP_CHECKOUT_TEXT.replace("{code}", code)
   }
-  // Default: login, auth, register - all use the same approved text
+  // Default: login, auth, register - all use OTP_LOGIN_TEXT
   return OTP_LOGIN_TEXT.replace("{code}", code)
 }
 
