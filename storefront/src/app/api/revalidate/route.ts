@@ -4,14 +4,20 @@ import { NextRequest, NextResponse } from "next/server"
 /**
  * On-Demand Revalidation API
  * 
- * Call this endpoint to invalidate cached data when products/collections are updated in Medusa.
+ * Call this endpoint to invalidate cached data when storefront data is updated in Medusa.
  * 
- * Usage:
- * POST /api/revalidate
- * Headers: { "x-revalidate-secret": "your-secret-key" }
- * Body: { "tags": ["products"] } or { "tags": ["products", "collections"] }
+ * Usage (POST):
+ * - URL: /api/revalidate
+ * - Headers: { "x-revalidate-secret": "your-secret-key" }
+ * - Body: { "tags": ["products"] } or { "tags": ["products", "collections"] }
  * 
- * Valid tags: "products", "collections", "categories", "regions"
+ * Usage for collections metadata:
+ * - When you change collection metadata (e.g. `metadata.bg_color`, `metadata.bg_image`, `metadata.text_color`)
+ *   in Medusa, call this endpoint with:
+ *   - Body: { "tags": ["collections"] }
+ *   This will revalidate all pages and components that are tagged with `"collections"` in the storefront.
+ * 
+ * Valid tags: "products", "collections", "categories", "regions", "banners"
  * 
  * Set REVALIDATION_SECRET environment variable for security.
  */
