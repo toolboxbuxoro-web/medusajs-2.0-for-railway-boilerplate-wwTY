@@ -22,17 +22,19 @@ export function getOrderStatus(order: HttpTypes.StoreOrder, locale: 'ru' | 'uz' 
   const fulfillments = (order as any).fulfillments || []
   if (fulfillments.length > 0) {
     const latest = fulfillments[fulfillments.length - 1]
-    if (latest.shipped_at) {
-      status = 'shipped'
-    } else if (latest.created_at) {
-      // If fulfillment exists but not shipped -> Ready for pickup
-      status = 'fulfilled' 
+    
+    // Skip canceled fulfillments - keep original order status
+    if (!latest.canceled_at) {
+      // Check delivered first (highest priority)
+      if (latest.delivered_at) {
+        status = 'delivered'
+      } else if (latest.shipped_at) {
+        status = 'shipped'
+      } else if (latest.created_at) {
+        // If fulfillment exists but not shipped -> Ready for pickup
+        status = 'fulfilled' 
+      }
     }
-  }
-  
-  // Check if delivered (from metadata)
-  if ((order.metadata as any)?.delivered_at) {
-    status = 'delivered'
   }
 
   const labels: Record<string, { ru: string; uz: string }> = {

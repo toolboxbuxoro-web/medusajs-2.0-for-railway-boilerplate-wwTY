@@ -97,23 +97,23 @@ const ShippingDetails = ({ order, locale }: ShippingDetailsProps) => {
           </Text>
         </div>
 
-        {/* Tracking Number Display */}
-        {(order as any).fulfillments?.[0]?.tracking_numbers?.length > 0 && (
-          <div className="flex flex-col" data-testid="tracking-summary">
-            <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
-              {t('tracking_number') || "Номер отслеживания"}
-            </Text>
-            <div className="flex gap-2 flex-wrap">
-              {(order as any).fulfillments.map((fulfillment: any) => (
-                fulfillment.tracking_numbers?.map((tn: string, idx: number) => (
-                   <Text key={`${fulfillment.id}-${idx}`} className="txt-medium text-ui-fg-subtle bg-gray-50 px-2 py-1 rounded inline-block">
-                     {tn}
-                   </Text>
-                ))
+        {/* Tracking Number */}
+        {(order as any).fulfillments?.map((fulfillment: any, index: number) => {
+          const trackingNumbers = fulfillment.tracking_numbers || []
+          const trackingLinks = (fulfillment.tracking_links || []).map((l: any) => l.tracking_number)
+          const allTracking = [...trackingNumbers, ...trackingLinks].filter(Boolean)
+          
+          if (allTracking.length === 0) return null
+
+          return (
+            <div key={index} className="flex flex-col mb-4">
+              <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t("tracking_number")}</Text>
+              {allTracking.map((track: string, i: number) => (
+                <Text key={i} className="txt-medium text-ui-fg-subtle">{track}</Text>
               ))}
             </div>
-          </div>
-        )}
+          )
+        })}
 
       </div>
       <Divider className="mt-8" />
