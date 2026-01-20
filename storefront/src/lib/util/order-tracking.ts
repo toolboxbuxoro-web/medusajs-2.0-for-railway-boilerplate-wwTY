@@ -4,7 +4,7 @@ import { HttpTypes } from "@medusajs/types"
  * Normalized helper to extract tracking numbers from an order.
  *
  * Priority:
- * 1. Fulfillments: tracking_numbers and tracking_links[].tracking_number
+ * 1. Fulfillments: tracking_numbers, tracking_links[].tracking_number, and labels[].tracking_number
  * 2. Metadata fallbacks (including BTS-specific keys) when fulfillments are empty
  */
 export const getTrackingNumbers = (order: HttpTypes.StoreOrder): string[] => {
