@@ -21,8 +21,11 @@ export const getTrackingNumbers = (order: HttpTypes.StoreOrder): string[] => {
       const trackingLinks = ((fulfillment?.tracking_links || []) as any[]).map(
         (l) => l?.tracking_number
       )
+      const labelNumbers = ((fulfillment?.labels || []) as any[]).map(
+        (l) => l?.tracking_number
+      )
 
-      return [...trackingNumbers, ...trackingLinks]
+      return [...trackingNumbers, ...trackingLinks, ...labelNumbers]
     })
     .filter((v) => typeof v === "string" && v.trim().length > 0)
     .map((v) => v.trim())
