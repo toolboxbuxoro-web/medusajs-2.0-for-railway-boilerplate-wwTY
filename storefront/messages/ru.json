@@ -457,7 +457,8 @@
     "bts_delivery_point": "Пункт выдачи BTS",
     "region_not_specified": "Регион не указан",
     "point_not_specified": "Пункт не указан",
-    "recipient": "Получатель"
+    "recipient": "Получатель",
+    "tracking_number": "Номер отслеживания"
   },
   "order_confirmed": {
     "title": "Спасибо!",

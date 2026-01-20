@@ -16,7 +16,24 @@ export interface OrderStatusInfo {
  * @returns StatusInfo object with label and colors
  */
 export function getOrderStatus(order: HttpTypes.StoreOrder, locale: 'ru' | 'uz' = 'ru'): OrderStatusInfo {
-  const status = (order as any).status?.toLowerCase() || 'pending'
+  let status = (order as any).status?.toLowerCase() || 'pending'
+
+  // Derive status from fulfillments if available
+  const fulfillments = (order as any).fulfillments || []
+  if (fulfillments.length > 0) {
+    const latest = fulfillments[fulfillments.length - 1]
+    if (latest.shipped_at) {
+      status = 'shipped'
+    } else if (latest.created_at) {
+      // If fulfillment exists but not shipped -> Ready for pickup
+      status = 'fulfilled' 
+    }
+  }
+  
+  // Check if delivered (from metadata)
+  if ((order.metadata as any)?.delivered_at) {
+    status = 'delivered'
+  }
 
   const labels: Record<string, { ru: string; uz: string }> = {
     pending: { ru: 'Принят', uz: 'Qabul qilindi' },

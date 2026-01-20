@@ -448,7 +448,8 @@
     "bts_delivery_point": "BTS tarqatish punkti",
     "region_not_specified": "Viloyat ko'rsatilmagan",
     "point_not_specified": "Punkt ko'rsatilmagan",
-    "recipient": "Qabul qiluvchi"
+    "recipient": "Qabul qiluvchi",
+    "tracking_number": "Kuzatuv raqami"
   },
   "order_confirmed": {
     "title": "Rahmat!",

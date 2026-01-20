@@ -21,7 +21,7 @@ export function useOrder(id: string) {
 
     setState("loading")
     try {
-      const resp = await fetch(`${BACKEND_URL}/store/orders/${id}?fields=*items,+items.thumbnail,+shipping_address`, {
+      const resp = await fetch(`${BACKEND_URL}/store/orders/${id}?fields=*items,+items.thumbnail,+shipping_address,+metadata,*fulfillments,*shipping_methods`, {
         headers: {
           ...getMedusaHeaders(),
         },

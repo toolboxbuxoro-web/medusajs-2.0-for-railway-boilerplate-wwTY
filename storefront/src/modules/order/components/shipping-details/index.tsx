@@ -96,6 +96,25 @@ const ShippingDetails = ({ order, locale }: ShippingDetailsProps) => {
             )}
           </Text>
         </div>
+
+        {/* Tracking Number Display */}
+        {(order as any).fulfillments?.[0]?.tracking_numbers?.length > 0 && (
+          <div className="flex flex-col" data-testid="tracking-summary">
+            <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
+              {t('tracking_number') || "Номер отслеживания"}
+            </Text>
+            <div className="flex gap-2 flex-wrap">
+              {(order as any).fulfillments.map((fulfillment: any) => (
+                fulfillment.tracking_numbers?.map((tn: string, idx: number) => (
+                   <Text key={`${fulfillment.id}-${idx}`} className="txt-medium text-ui-fg-subtle bg-gray-50 px-2 py-1 rounded inline-block">
+                     {tn}
+                   </Text>
+                ))
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
       <Divider className="mt-8" />
     </div>
