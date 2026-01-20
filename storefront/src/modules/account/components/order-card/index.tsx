@@ -1,13 +1,14 @@
 "use client"
 
 import { useMemo } from "react"
-import { useTranslations } from 'next-intl'
+import { useTranslations } from "next-intl"
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { useParams } from "next/navigation"
 import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
+import { getTrackingNumbers } from "@lib/util/order-tracking"
 import OrderStatusBadge from "../order-overview/order-status-badge"
 import { getOrderDisplayDate, formatOrderDateShort } from "@lib/util/date"
 import ChevronDown from "@modules/common/icons/chevron-down"
@@ -17,10 +18,13 @@ type OrderCardProps = {
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
-  const t = useTranslations('account')
+  const t = useTranslations("account")
+  const tOrder = useTranslations("order")
   const { locale } = useParams()
   const localeStr = String(locale || "ru")
   
+  const trackingNumbers = getTrackingNumbers(order)
+
   const getItemsSummary = () => {
     if (!order.items || order.items.length === 0) return ""
     
@@ -58,9 +62,19 @@ const OrderCard = ({ order }: OrderCardProps) => {
           </div>
 
           {/* Date */}
-          <span className="text-[13px] text-gray-500 mb-3">
+          <span className="text-[13px] text-gray-500 mb-1">
             {formatOrderDateShort(getOrderDisplayDate(order), localeStr as any)}
           </span>
+
+          {/* Tracking (first tracking number, if available) */}
+          {trackingNumbers.length > 0 && (
+            <span className="text-[13px] text-gray-600 mb-2">
+              {tOrder("tracking_number")}:{" "}
+              <span className="font-mono tracking-wide">
+                {trackingNumbers[0]}
+              </span>
+            </span>
+          )}
 
           {/* Items Summary */}
           <span className="text-sm text-gray-700 mb-4 line-clamp-1">

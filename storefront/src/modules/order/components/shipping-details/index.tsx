@@ -3,9 +3,10 @@
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
-import { useTranslations } from 'next-intl'
+import { useTranslations } from "next-intl"
 
 import Divider from "@modules/common/components/divider"
+import { getTrackingNumbers } from "@lib/util/order-tracking"
 
 type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -25,6 +26,7 @@ const ShippingDetails = ({ order, locale }: ShippingDetailsProps) => {
    * Delivery data is extracted from order.metadata.bts_delivery.
    */
   const btsDelivery = (order.metadata?.bts_delivery as any) || {}
+  const trackingNumbers = getTrackingNumbers(order)
 
   return (
     <div>
@@ -81,39 +83,41 @@ const ShippingDetails = ({ order, locale }: ShippingDetailsProps) => {
           className="flex flex-col"
           data-testid="shipping-method-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t('method')}</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
+            {t("method")}
+          </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {(order as any).shipping_methods?.[0]?.name}
-            {(order.shipping_methods?.[0]?.total !== undefined || (btsDelivery.estimated_cost)) && (
+            {(order.shipping_methods?.[0]?.total !== undefined ||
+              btsDelivery.estimated_cost) && (
               <>
                 {" "}
-                ({convertToLocale({
-                  amount: order.shipping_methods?.[0]?.total || btsDelivery.estimated_cost || 0,
+                {convertToLocale({
+                  amount:
+                    order.shipping_methods?.[0]?.total ||
+                    btsDelivery.estimated_cost ||
+                    0,
                   currency_code: order.currency_code,
-                  locale: locale || 'ru'
-                })})
+                  locale: locale || "ru",
+                })}
               </>
             )}
           </Text>
         </div>
 
         {/* Tracking Number */}
-        {(order as any).fulfillments?.map((fulfillment: any, index: number) => {
-          const trackingNumbers = fulfillment.tracking_numbers || []
-          const trackingLinks = (fulfillment.tracking_links || []).map((l: any) => l.tracking_number)
-          const allTracking = [...trackingNumbers, ...trackingLinks].filter(Boolean)
-          
-          if (allTracking.length === 0) return null
-
-          return (
-            <div key={index} className="flex flex-col mb-4">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">{t("tracking_number")}</Text>
-              {allTracking.map((track: string, i: number) => (
-                <Text key={i} className="txt-medium text-ui-fg-subtle">{track}</Text>
-              ))}
-            </div>
-          )
-        })}
+        {trackingNumbers.length > 0 && (
+          <div className="flex flex-col mb-4">
+            <Text className="txt-medium-plus text-ui-fg-base mb-1 font-semibold">
+              {t("tracking_number")}
+            </Text>
+            {trackingNumbers.map((track, index) => (
+              <Text key={index} className="txt-medium text-ui-fg-subtle">
+                {track}
+              </Text>
+            ))}
+          </div>
+        )}
 
       </div>
       <Divider className="mt-8" />
