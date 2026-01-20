@@ -138,10 +138,26 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     /**
-     * 4. Centralized SMS Logic:
-     * We no longer send SMS here. Instead, we save credentials to the cart metadata
-     * if cart_id is provided. order-sms-handler.ts will send the credentials
-     * once the order is placed.
+     * 4. TODO: Send password via SMS when ACCOUNT_CREATED_TEXT template is registered in Eskiz
+     * For now, user can login via OTP without knowing their password
+     */
+    // try {
+    //   const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
+    //   const { ACCOUNT_CREATED_TEXT } = await import("../../../modules/eskiz-sms/sms-texts.js")
+    //   const message = ACCOUNT_CREATED_TEXT.replace("{password}", password)
+    //   await notificationModule.createNotifications({
+    //     to: `+${normalized}`,
+    //     channel: "sms",
+    //     template: "account-created",
+    //     data: { message }
+    //   })
+    //   logger.info(`[auto-register] Sent account SMS with password to +${normalized}`)
+    // } catch (smsError: any) {
+    //   logger.error(`[auto-register] Failed to send account SMS: ${smsError.message}`)
+    // }
+
+    /**
+     * 5. Update cart metadata if provided (without password)
      */
     if (cart_id) {
        const cartModule = req.scope.resolve(Modules.CART)
@@ -151,11 +167,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
            await cartModule.updateCarts(cart_id, {
              metadata: {
                ...cart.metadata,
-               tmp_generated_password: password,
+               // DO NOT store password in metadata - sent via SMS
+               account_created_at: new Date().toISOString(),
                is_new_customer: true,
              }
            })
-           logger.info(`[auto-register] Updated cart ${cart_id} with credentials metadata`)
+           logger.info(`[auto-register] Updated cart ${cart_id} with account_created_at`)
          }
        } catch (err: any) {
          logger.warn(`[auto-register] Failed to update cart metadata: ${err.message}`)

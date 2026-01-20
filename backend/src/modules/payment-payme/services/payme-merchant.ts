@@ -645,14 +645,14 @@ export class PaymeMerchantService {
             if (cartMetadata) {
               const meta = typeof cartMetadata === 'string' ? JSON.parse(cartMetadata) : cartMetadata
               
-              // If cart has quick order data, copy to order
-              if (meta?.is_quick_order || meta?.tmp_generated_password) {
+              // If cart has quick order data, copy to order (without password - sent via SMS)
+              if (meta?.is_quick_order || meta?.account_created_at) {
                 await pgConnection.raw(
                   `UPDATE "order" SET metadata = COALESCE(metadata, '{}')::jsonb || $1::jsonb WHERE id = $2`,
                   [JSON.stringify({
                     is_quick_order: meta.is_quick_order,
                     is_new_customer: meta.is_new_customer,
-                    tmp_generated_password: meta.tmp_generated_password,
+                    account_created_at: meta.account_created_at,
                   }), orderId]
                 )
                 this.logger_.info(`[PaymeMerchant] Copied quick order metadata from cart to order ${orderId}`)

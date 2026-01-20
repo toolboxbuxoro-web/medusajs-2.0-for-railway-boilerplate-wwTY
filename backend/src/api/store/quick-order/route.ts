@@ -102,6 +102,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           }
         }
       }
+
+      // TODO: Enable when ACCOUNT_CREATED_TEXT template is registered in Eskiz
+      // For now, user can login via OTP without knowing their password
+      // try {
+      //   const notificationModule = req.scope.resolve(Modules.NOTIFICATION)
+      //   const { ACCOUNT_CREATED_TEXT } = await import("../../../modules/eskiz-sms/sms-texts.js")
+      //   const message = ACCOUNT_CREATED_TEXT.replace("{password}", password)
+      //   await notificationModule.createNotifications({
+      //     to: `+${normalized}`,
+      //     channel: "sms",
+      //     template: "account-created",
+      //     data: { message }
+      //   })
+      //   logger.info(`[quick-order] Sent account SMS with password to +${normalized}`)
+      // } catch (smsError: any) {
+      //   logger.error(`[quick-order] Failed to send account SMS: ${smsError.message}`)
+      // }
     }
 
     // Get existing cart using remoteQuery
@@ -150,13 +167,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(400).json({ error: "Корзина пуста" })
     }
 
-    // Prepare metadata update
+    // Prepare metadata update - DO NOT store password in metadata (security risk)
     const metadataUpdate = {
         ...cart.metadata,
         is_quick_order: true,
         is_new_customer: isNewCustomer,
-        // TEMP: Always include password for testing
-        tmp_generated_password: password,
+        account_created_at: isNewCustomer ? new Date().toISOString() : undefined,
     } as any
 
     // Update cart

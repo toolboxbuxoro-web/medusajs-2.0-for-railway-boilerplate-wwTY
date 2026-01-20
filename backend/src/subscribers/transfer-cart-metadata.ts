@@ -36,9 +36,34 @@ export default async function transferCartMetadata({
     }
 
     // Try to get cart data from the linked cart
-    const cart = order.cart
+    let cart = order.cart
+    
+    // Fallback: If cart is null, try to get it via remoteQuery on order_cart link
     if (!cart) {
-      logger.warn(`[transfer-cart-metadata] Order ${orderId} has no linked cart`)
+      logger.info(`[transfer-cart-metadata] Cart not in order relation, trying remoteQuery fallback`)
+      try {
+        const remoteQuery = container.resolve("remoteQuery")
+        const cartModule = container.resolve(Modules.CART)
+        
+        // Query the link table
+        const links = await remoteQuery({
+          entryPoint: "order_cart",
+          fields: ["cart_id"],
+          variables: { filters: { order_id: orderId } }
+        })
+        
+        const cartId = links?.[0]?.cart_id
+        if (cartId) {
+          cart = await cartModule.retrieveCart(cartId, { select: ["id", "metadata"] })
+          logger.info(`[transfer-cart-metadata] Found cart ${cartId} via link fallback`)
+        }
+      } catch (linkError: any) {
+        logger.warn(`[transfer-cart-metadata] Link fallback failed: ${linkError.message}`)
+      }
+    }
+    
+    if (!cart) {
+      logger.warn(`[transfer-cart-metadata] Order ${orderId} has no linked cart (all methods exhausted)`)
       return
     }
 

@@ -11,3 +11,7 @@ export const OTP_CHECKOUT_TEXT = "Kod podtverzhdeniya dlya oformleniya zakaza na
 export const ORDER_CONFIRMATION_TEXT = "Ваш заказ №{orderId} в Toolbox принят. Сумма: {sum} сум."
 
 export const CHANGE_PHONE_TEXT = "Код для подтверждения нового номера в Toolbox: {code}."
+
+// Template for new account creation - send password via SMS instead of storing in metadata
+export const ACCOUNT_CREATED_TEXT = "Vash akkaunt v Toolbox sozdan. Parol: {password}. Vhod po nomeru telefona."
+

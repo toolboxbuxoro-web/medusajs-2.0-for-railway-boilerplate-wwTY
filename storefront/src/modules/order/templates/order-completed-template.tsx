@@ -28,7 +28,8 @@ export default async function OrderCompletedTemplate({
   const t = await getTranslations({ locale: locale || 'ru', namespace: 'order' })
   const tConfirmed = await getTranslations({ locale: locale || 'ru', namespace: 'order_confirmed' })
   const isPhoneEmail = order.email?.includes("@phone.local")
-  const isNewAccount = Boolean(order.metadata?.is_new_customer) || Boolean(order.metadata?.tmp_generated_password)
+  // Check for new account - password is now sent via SMS, not stored in metadata
+  const isNewAccount = Boolean(order.metadata?.is_new_customer) || Boolean(order.metadata?.account_created_at)
 
   return (
     <div className="py-10 min-h-[calc(100vh-64px)] bg-gray-50/50">
