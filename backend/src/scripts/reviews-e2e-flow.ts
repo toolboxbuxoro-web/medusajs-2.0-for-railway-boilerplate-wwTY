@@ -20,7 +20,7 @@ export default async function reviewsE2EFlow({
   const customerModule =
     container.resolve<ICustomerModuleService>(Modules.CUSTOMER)
   const reviewsModuleService =
-    container.resolve<ReviewsService>("reviewsModuleService")
+    container.resolve<ReviewsService>("reviews")
 
   logger.info(
     "[reviews-e2e-flow] Starting full post-purchase reviews scenario"

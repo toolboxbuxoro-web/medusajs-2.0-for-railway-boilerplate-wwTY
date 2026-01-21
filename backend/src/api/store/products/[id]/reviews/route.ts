@@ -31,7 +31,7 @@ export const GET = async (
   // Clean sort parameter (handle cache-busting suffix like "newest:1" → "newest")
   const sort = typeof rawSort === "string" ? rawSort.split(":")[0] : "newest"
 
-  const reviewsModuleService: ReviewsService = req.scope.resolve("reviewsModuleService")
+  const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
 
   const order = sort === "rating_desc" ? { rating: "DESC" } : { created_at: "DESC" }
 
@@ -124,7 +124,7 @@ export const POST = async (
     })
   }
 
-  const reviewsModuleService: ReviewsService = req.scope.resolve("reviewsModuleService")
+  const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
 
   // Use the service method for validation
   const eligibility = await reviewsModuleService.canReview(product_id, customerId)

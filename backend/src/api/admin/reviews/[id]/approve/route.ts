@@ -5,7 +5,7 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
-  const reviewsModuleService: ReviewsService = req.scope.resolve("reviewsModuleService")
+  const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
   const { id } = req.params
 
   const review = await reviewsModuleService.approveReview(id)
