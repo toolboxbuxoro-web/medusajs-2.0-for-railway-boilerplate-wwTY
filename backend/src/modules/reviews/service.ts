@@ -9,10 +9,12 @@ class ReviewsService extends MedusaService({
   protected eventBus_: IEventBusModuleService
   protected container_: MedusaContainer
 
-  constructor(container: { eventBusModuleService: IEventBusModuleService } & MedusaContainer) {
+  constructor(container: MedusaContainer) {
     super(...arguments)
-    this.eventBus_ = container.eventBusModuleService
-    this.container_ = container as MedusaContainer
+    // Resolve the event bus via the module key so the service works
+    // in both dev and compiled .medusa/server environments.
+    this.eventBus_ = container.resolve(Modules.EVENT_BUS)
+    this.container_ = container
   }
 
   async canReview(productId: string, customerId: string) {
