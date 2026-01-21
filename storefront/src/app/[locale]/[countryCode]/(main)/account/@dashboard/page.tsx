@@ -17,7 +17,7 @@ export default async function OverviewTemplate({
 }) {
   const { locale } = params
   const customer = await getCustomer().catch(() => null)
-  const orders = (await listOrders().catch(() => null)) || null
+  const orders = (await listOrders(50, 0).catch(() => null)) || null
 
   if (!customer) {
     notFound()

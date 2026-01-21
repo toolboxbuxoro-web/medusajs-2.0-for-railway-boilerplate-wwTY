@@ -13,13 +13,13 @@ export const retrieveOrder = cache(async function (id: string) {
     .retrieve(
       id,
       { fields: "*payment_collections.payments,+metadata,*fulfillments,*fulfillments.labels" },
-      { next: { tags: ["order"] }, ...getAuthHeaders() }
+      { next: { tags: ["order"], revalidate: 60 }, ...getAuthHeaders() }
     )
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
 })
 
-export const listOrders = cache(async function (
+export async function listOrders(
   limit: number = 10,
   offset: number = 0
 ) {
@@ -80,7 +80,13 @@ export const listOrders = cache(async function (
         }
       }
 
-      return enrichedOrders
+      // Sort orders by created_at descending (newest first) to ensure consistent ordering
+      // across all consumers (Orders page and Recent Orders section)
+      const sorted = [...enrichedOrders].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+
+      return sorted
     })
     .catch((err) => medusaError(err))
-})
+}

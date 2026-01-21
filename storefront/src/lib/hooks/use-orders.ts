@@ -27,6 +27,7 @@ export function useOrders() {
 
     try {
       // Use server action which properly handles auth headers via cookies
+      // listOrders already returns sorted orders (newest first)
       const ordersData = await listOrders(50, 0)
       
       if (!ordersData || !Array.isArray(ordersData)) {
@@ -35,12 +36,9 @@ export function useOrders() {
         return
       }
 
-      const sortedOrders = [...ordersData].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
-      setOrders(sortedOrders)
+      setOrders(ordersData)
 
-      if (sortedOrders.length === 0) {
+      if (ordersData.length === 0) {
         setState("empty")
       } else {
         setState("loaded")
