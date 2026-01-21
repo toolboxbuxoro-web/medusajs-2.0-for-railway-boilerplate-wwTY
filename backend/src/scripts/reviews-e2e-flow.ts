@@ -41,7 +41,7 @@ export default async function reviewsE2EFlow({
         "variants.prices.currency_code",
         "variants.prices.amount",
       ],
-      options: {
+      pagination: {
         take: 1,
       },
     })
@@ -240,10 +240,7 @@ export default async function reviewsE2EFlow({
       "[reviews-e2e-flow] ✅ Full post-purchase review flow PASSED (order -> canReview -> review -> moderation -> storefront metadata)"
     )
   } catch (e: any) {
-    logger.error(
-      `[reviews-e2e-flow] 💥 FAILED: ${e?.message || e}`,
-      e?.stack ? { stack: e.stack } : undefined
-    )
+    logger.error(`[reviews-e2e-flow] 💥 FAILED: ${e?.message || e}`)
     // Ensure non-zero exit code for CI / verification scripts
     // eslint-disable-next-line no-process-exit
     process.exit(1)
