@@ -165,7 +165,7 @@ export default function CatalogDropdown({ categories, locale, isUnified = false 
           isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
         onClick={handleClose}
-        style={{ top: '100px' }}
+        style={{ top: 'calc(64px + var(--topbar-height, 0px))' }}
       />
 
       {/* Mega Menu Container - Positioned below header */}
@@ -176,7 +176,7 @@ export default function CatalogDropdown({ categories, locale, isUnified = false 
             : "-translate-y-4 opacity-0 invisible pointer-events-none"
         }`}
         // Dynamic top position matching header height
-        style={{ top: '100px' }}
+        style={{ top: 'calc(64px + var(--topbar-height, 0px))' }}
       >
         {/* Inner Content - Full height relative to container */}
         <div className="absolute inset-0 bg-white">
