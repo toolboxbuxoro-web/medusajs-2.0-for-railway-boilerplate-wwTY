@@ -6,15 +6,19 @@ import type { ReviewStatus } from "./types"
 class ReviewsService extends MedusaService({
   Review,
 }) {
-  protected eventBus_: IEventBusModuleService
   protected container_: MedusaContainer
 
   constructor(container: MedusaContainer) {
     super(...arguments)
-    // Resolve the event bus via the module key so the service works
-    // in both dev and compiled .medusa/server environments.
-    this.eventBus_ = container.resolve(Modules.EVENT_BUS)
     this.container_ = container
+  }
+
+  /**
+   * Lazy getter for event bus to avoid DI resolution issues in constructor.
+   * Resolves via module key so it works in both dev and compiled environments.
+   */
+  protected get eventBus_(): IEventBusModuleService {
+    return this.container_.resolve(Modules.EVENT_BUS) as IEventBusModuleService
   }
 
   async canReview(productId: string, customerId: string) {
