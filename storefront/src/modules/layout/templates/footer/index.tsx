@@ -118,7 +118,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    href="/account"
+                    href="/account/orders"
                     className="hover:text-ui-fg-base"
                   >
                     {t('account') || 'Личный кабинет'}

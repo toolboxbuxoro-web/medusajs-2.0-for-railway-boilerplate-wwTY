@@ -133,7 +133,7 @@ export default function MobileMenu({ categories, locale }: MobileMenuProps) {
             </h3>
             <div className="space-y-1">
               <LocalizedClientLink
-                href="/account"
+                href="/account/orders"
                 className="flex items-center gap-3 px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 onClick={() => setIsOpen(false)}
               >

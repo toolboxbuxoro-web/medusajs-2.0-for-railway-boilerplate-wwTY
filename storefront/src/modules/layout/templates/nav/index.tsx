@@ -145,7 +145,7 @@ export default async function Nav({ locale }: NavProps) {
               
               {/* Account */}
               <LocalizedClientLink
-                href="/account"
+                href="/account/orders"
                 className="p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center sm:flex-col sm:gap-1"
                 title={t('account')}
               >
