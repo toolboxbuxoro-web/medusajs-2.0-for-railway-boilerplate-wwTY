@@ -118,22 +118,17 @@ class ReviewsService extends MedusaService({
     // Base status must be "completed"
     const statusOk = order.status === "completed"
 
-    // If payment / fulfillment statuses exist, they should represent a
-    // successful flow. We keep this slightly permissive to avoid
-    // unexpected blocking in case of custom states, but still guard
-    // obvious non-completed ones.
+    // If payment status exists, it should represent a successful flow.
+    // Fulfillment мы больше не учитываем, т.к. во многих магазинах
+    // заказ считается завершённым после успешной оплаты, а отгрузка
+    // может происходить позже (или вообще не использоваться).
     const nonCompletedPaymentStatuses = ["requires_action", "canceled"]
-    const nonCompletedFulfillmentStatuses = ["not_fulfilled", "canceled"]
 
     const paymentOk =
       !order.payment_status ||
       !nonCompletedPaymentStatuses.includes(order.payment_status)
 
-    const fulfillmentOk =
-      !order.fulfillment_status ||
-      !nonCompletedFulfillmentStatuses.includes(order.fulfillment_status)
-
-    return Boolean(statusOk && paymentOk && fulfillmentOk)
+    return Boolean(statusOk && paymentOk)
   }
 }
 
