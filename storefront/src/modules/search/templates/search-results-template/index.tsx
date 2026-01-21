@@ -6,6 +6,9 @@ import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import SearchProductsSlider from "@modules/search/components/search-products-slider"
+import { getProductsById } from "@lib/data/products"
+import { getRegion } from "@lib/data/regions"
 
 type SearchResultsTemplateProps = {
   query: string
@@ -17,7 +20,7 @@ type SearchResultsTemplateProps = {
   totalHits?: number
 }
 
-const SearchResultsTemplate = ({
+const SearchResultsTemplate = async ({
   query,
   ids,
   sortBy,
@@ -27,6 +30,12 @@ const SearchResultsTemplate = ({
   totalHits,
 }: SearchResultsTemplateProps) => {
   const pageNumber = page ? parseInt(page) : 1
+
+  // Fetch products for horizontal slider
+  const region = await getRegion(countryCode)
+  const products = ids.length > 0 && region 
+    ? await getProductsById({ ids, regionId: region.id })
+    : []
 
   return (
     <>
@@ -55,13 +64,8 @@ const SearchResultsTemplate = ({
                  facets={facets} 
               /> */}
             </Suspense>
-            <div className="content-container">
-              <PaginatedProducts
-                productsIds={ids}
-                sortBy={sortBy}
-                page={pageNumber}
-                countryCode={countryCode}
-              />
+            <div className="content-container w-full">
+              <SearchProductsSlider products={products} />
             </div>
           </>
         ) : (
