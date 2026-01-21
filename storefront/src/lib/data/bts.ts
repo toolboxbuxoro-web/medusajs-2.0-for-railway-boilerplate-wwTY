@@ -342,36 +342,54 @@ export const BTS_REGIONS: BtsRegion[] = [
  * @param regionId - Region ID from BTS_REGIONS
  * @returns Delivery cost in UZS
  */
-export const calculateBtsCost = (weightKg: number, regionId: string): number => {
+export const calculateBtsCost = async (weightKg: number, regionId: string): Promise<number> => {
+  try {
+    const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+    const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
+    const response = await fetch(`${backendUrl}/store/bts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": publishableKey,
+      },
+      body: JSON.stringify({
+        weight_kg: weightKg,
+        region_id: regionId,
+      }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      return data.cost
+    }
+    
+    console.warn("[BTS] Backend API failed, using local fallback")
+  } catch (err) {
+    console.error("[BTS] Failed to fetch cost from API, using local fallback:", err)
+  }
+
+  // Local fallback logic
   const region = BTS_REGIONS.find((r) => r.id === regionId)
   if (!region) return 0
 
-  // Round weight up to next integer (BTS policy)
   const roundedWeight = Math.ceil(Math.max(BTS_PRICING.minWeight, weightKg))
   
   let cost: number
 
-  // Determine pricing tier
   if (roundedWeight <= BTS_PRICING.expressMaxWeight) {
-    // Express Mail: Use fixed rates table
-    // Find the closest weight tier (1, 2, 3, 5, 10, 15, 20)
-    // We should pick the smallest tier that is >= roundedWeight
     const tiers = Object.keys(BTS_PRICING.expressRates).map(Number).sort((a, b) => a - b)
     const tier = tiers.find(t => t >= roundedWeight) || tiers[tiers.length - 1]
-    
     cost = BTS_PRICING.expressRates[tier][region.zone]
   } else {
-    // LTL Cargo: Zone-based per-kg pricing
     const ratePerKg = BTS_PRICING.zoneRates[region.zone]
     cost = roundedWeight * ratePerKg
     
-    // Heavy weight surcharge (>50kg): ×1.3
     if (roundedWeight > BTS_PRICING.heavyWeightThreshold) {
       cost *= BTS_PRICING.heavyWeightCoefficient
     }
   }
 
-  // Winter fuel surcharge (December-March): +30%
   const currentMonth = new Date().getMonth() + 1
   if (BTS_PRICING.winterMonths.includes(currentMonth)) {
     cost *= (1 + BTS_PRICING.winterFuelSurcharge)

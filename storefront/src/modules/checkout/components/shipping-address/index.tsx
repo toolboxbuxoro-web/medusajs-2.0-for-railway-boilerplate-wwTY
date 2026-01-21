@@ -90,23 +90,26 @@ const ShippingAddress = ({
   }, [cart?.items])
 
   useEffect(() => {
-    if (selectedRegionId) {
-      const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
-      const weightInKg = effectiveWeight / 1000 
-      const cost = calculateBtsCost(weightInKg, selectedRegionId)
-      setEstimatedBtsCost(cost)
-      
-      const region = BTS_REGIONS.find(r => r.id === selectedRegionId)
-      if (region) {
-        setFormData(prev => ({
-          ...prev,
-          "shipping_address.city": region.nameRu,
-          "shipping_address.province": region.nameRu,
-        }))
+    const updateBtsCost = async () => {
+      if (selectedRegionId) {
+        const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
+        const weightInKg = effectiveWeight / 1000 
+        const cost = await calculateBtsCost(weightInKg, selectedRegionId)
+        setEstimatedBtsCost(cost)
+        
+        const region = BTS_REGIONS.find(r => r.id === selectedRegionId)
+        if (region) {
+          setFormData(prev => ({
+            ...prev,
+            "shipping_address.city": region.nameRu,
+            "shipping_address.province": region.nameRu,
+          }))
+        }
+      } else {
+        setEstimatedBtsCost(null)
       }
-    } else {
-      setEstimatedBtsCost(null)
     }
+    updateBtsCost()
   }, [selectedRegionId, cartWeight])
 
   useEffect(() => {

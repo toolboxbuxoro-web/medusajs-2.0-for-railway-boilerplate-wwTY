@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { BtsApiService } from "../../../lib/bts-api"
 
 /**
  * BTS Express Uzbekistan - Official Tariff Card 2025
@@ -314,14 +315,46 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
  * POST /store/bts - Calculate delivery cost for given weight and region
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
+  const logger = req.scope.resolve("logger")
   try {
-    const { weight_kg, region_id } = (req.body || {}) as { weight_kg?: number; region_id?: string }
+    const { weight_kg, region_id, receiver_city_id } = (req.body || {}) as { weight_kg?: number; region_id?: string; receiver_city_id?: number }
 
     if (typeof weight_kg !== "number" || !region_id) {
       return res.status(400).json({ error: "weight_kg and region_id are required" })
     }
 
-    const cost = calculateBtsCost(weight_kg, region_id)
+    if (weight_kg <= 0 || Number.isNaN(weight_kg)) {
+      return res.status(400).json({ error: "weight_kg must be a valid number greater than 0" })
+    }
+
+    const btsApi = new BtsApiService(logger)
+    const btsCityId = receiver_city_id || btsApi.mapRegionToCityId(region_id)
+
+    let cost: number
+    let source: "api" | "local_fallback" = "api"
+    let api_error: string | null = null
+
+    try {
+      // 1. Try real API first
+      // Default: Bukhara origin (40), courier delivery (sender=0, receiver=0 for pickup from office)
+      // Actually, if it's delivery TO the customer point, maybe receiverDelivery should be 0 (office) as they pick it up?
+      // Yes, current setup is "Самовывоз" (pickup) from BTS point.
+      cost = await btsApi.calculate({
+        senderCityId: 40, // Bukhara
+        receiverCityId: btsCityId,
+        weight: weight_kg,
+        senderDelivery: 0,
+        receiverDelivery: 0,
+      })
+    } catch (e: any) {
+      // 2. Fallback to local calculator
+      logger.warn(`[store/bts] API calculation failed, falling back to local: ${e.message}`)
+      BtsApiService.incrementFallbackUsage()
+      cost = calculateBtsCost(weight_kg, region_id)
+      source = "local_fallback"
+      api_error = e.message
+    }
+
     const region = BTS_REGIONS.find((r) => r.id === region_id)
 
     return res.json({
@@ -329,10 +362,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       weight_kg,
       region_id,
       region_name: region?.nameRu,
-      zone: region?.zone,
+      source,
+      api_error,
+      bts_city_id: btsCityId
     })
   } catch (e: any) {
-    const logger = req.scope.resolve("logger")
     logger?.error?.(`[store/bts] POST Error: ${e?.message || e}`)
     return res.status(500).json({ error: e?.message || "internal_error" })
   }

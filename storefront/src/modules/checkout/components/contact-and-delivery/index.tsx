@@ -39,38 +39,38 @@ interface BtsData {
   pricing: BtsPricing
 }
 
-// Calculate BTS cost on client side using pricing from backend
-const calculateBtsCost = (
+// Calculate BTS cost using backend API
+const calculateBtsCost = async (
   weightKg: number,
-  regionId: string,
-  regions: BtsRegion[],
-  pricing: BtsPricing
-): number => {
-  const region = regions.find((r) => r.id === regionId)
-  if (!region || !pricing) return 0
+  regionId: string
+): Promise<number> => {
+  try {
+    const backendUrl = (
+      process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+    ).replace(/\/$/, "")
+    const publishableKey =
+      process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
-  const roundedWeight = Math.ceil(Math.max(pricing.minWeight, weightKg))
+    const response = await fetch(`${backendUrl}/store/bts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": publishableKey,
+      },
+      body: JSON.stringify({
+        weight_kg: weightKg,
+        region_id: regionId,
+      }),
+    })
 
-  let cost: number
-
-  if (roundedWeight <= pricing.expressMaxWeight) {
-    const tiers = Object.keys(pricing.expressRates)
-      .map(Number)
-      .sort((a, b) => a - b)
-    const tier = tiers.find((t) => t >= roundedWeight) || tiers[tiers.length - 1]
-    cost = pricing.expressRates[tier][region.zone]
-  } else {
-    const ratePerKg = pricing.zoneRates[region.zone]
-    cost = roundedWeight * ratePerKg
+    if (response.ok) {
+      const data = await response.json()
+      return data.cost
+    }
+  } catch (err) {
+    console.error("Failed to calculate BTS cost via API:", err)
   }
-
-  // Winter fuel surcharge
-  const currentMonth = new Date().getMonth() + 1
-  if (pricing.winterMonths.includes(currentMonth)) {
-    cost *= 1 + pricing.winterFuelSurcharge
-  }
-
-  return Math.round(cost)
+  return 0
 }
 
 interface ContactAndDeliveryProps {
@@ -291,19 +291,20 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
   // Calculate estimated cost when region changes
   useEffect(() => {
-    if (selectedRegionId && btsData) {
-      const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
-      const weightInKg = effectiveWeight / 1000
-      const cost = calculateBtsCost(
-        weightInKg,
-        selectedRegionId,
-        btsData.regions,
-        btsData.pricing
-      )
-      setEstimatedCost(cost)
-    } else {
-      setEstimatedCost(null)
+    const updateCost = async () => {
+      if (selectedRegionId && btsData) {
+        const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
+        const weightInKg = effectiveWeight / 1000
+        const cost = await calculateBtsCost(
+          weightInKg,
+          selectedRegionId
+        )
+        setEstimatedCost(cost)
+      } else {
+        setEstimatedCost(null)
+      }
     }
+    updateCost()
   }, [selectedRegionId, cartWeight, btsData])
 
   // Get points for selected region

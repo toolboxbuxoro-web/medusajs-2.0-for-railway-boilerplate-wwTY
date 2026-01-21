@@ -17,6 +17,10 @@ export const getReviews = async (
     `${backendBaseUrl()}/store/products/${productId}/reviews?limit=${limit}&offset=${offset}&sort=${sort}`,
     {
       next: { tags: ["reviews"] },
+      headers: {
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      },
+      credentials: "include",
     }
   )
 
