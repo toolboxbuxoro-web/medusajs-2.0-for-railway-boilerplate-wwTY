@@ -20,7 +20,7 @@ const ProductSkeleton = () => (
   </div>
 )
 
-const AUTO_SCROLL_INTERVAL = 4000 // 4 seconds
+const AUTO_SCROLL_INTERVAL = 6000 // 6 seconds
 
 export default function SearchGrid({ items, status, hasMore, loadMore }: SearchGridProps) {
   const { ref, inView } = useInView({

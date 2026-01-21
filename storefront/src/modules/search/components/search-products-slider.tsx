@@ -8,7 +8,7 @@ interface SearchProductsSliderProps {
   products: HttpTypes.StoreProduct[]
 }
 
-const AUTO_SCROLL_INTERVAL = 4000 // 4 seconds
+const AUTO_SCROLL_INTERVAL = 6000 // 6 seconds
 
 export default function SearchProductsSlider({ products }: SearchProductsSliderProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)

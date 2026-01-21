@@ -5,7 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 import ProductPreviewContent from "@modules/products/components/product-preview/content"
 
 const MAX_PRODUCTS = 20
-const AUTO_SCROLL_INTERVAL = 4000 // 4 seconds
+const AUTO_SCROLL_INTERVAL = 6000 // 6 seconds
 
 interface ProductSliderProps {
   products: HttpTypes.StoreProduct[]
