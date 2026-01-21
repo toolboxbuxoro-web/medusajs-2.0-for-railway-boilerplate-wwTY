@@ -5,6 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 import ProductPreviewContent from "@modules/products/components/product-preview/content"
 
 const MAX_PRODUCTS = 20
+const AUTO_SCROLL_INTERVAL = 4000 // 4 seconds
 
 interface ProductSliderProps {
   products: HttpTypes.StoreProduct[]
@@ -16,6 +17,9 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const isUserScrollingRef = useRef(false)
+  const userScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // Limit to max 20 products
   const displayProducts = products.slice(0, MAX_PRODUCTS)
@@ -54,6 +58,65 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth"
     })
+  }, [])
+
+  const scrollToNext = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container || isUserScrollingRef.current) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    const maxScroll = scrollWidth - clientWidth
+
+    // If at the end, scroll back to start
+    if (scrollLeft >= maxScroll - 10) {
+      container.scrollTo({
+        left: 0,
+        behavior: "smooth"
+      })
+    } else {
+      // Scroll by approximately 4 cards width
+      const scrollAmount = container.clientWidth * 0.8
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth"
+      })
+    }
+  }, [])
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (displayProducts.length === 0) return
+
+    // Clear any existing interval
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current)
+    }
+
+    // Start auto-scroll
+    autoScrollIntervalRef.current = setInterval(() => {
+      scrollToNext()
+    }, AUTO_SCROLL_INTERVAL)
+
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current)
+      }
+    }
+  }, [displayProducts.length, scrollToNext])
+
+  // Handle user scroll - pause auto-scroll temporarily
+  const handleUserScroll = useCallback(() => {
+    isUserScrollingRef.current = true
+
+    // Clear existing timeout
+    if (userScrollTimeoutRef.current) {
+      clearTimeout(userScrollTimeoutRef.current)
+    }
+
+    // Resume auto-scroll after user stops scrolling for 2 seconds
+    userScrollTimeoutRef.current = setTimeout(() => {
+      isUserScrollingRef.current = false
+    }, 2000)
   }, [])
 
   // Connect external buttons if collectionId is provided
@@ -133,8 +196,9 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
     
     if (diffX > 10 || diffY > 10) {
       hasMoved.current = true
+      handleUserScroll()
     }
-  }, [])
+  }, [handleUserScroll])
 
   const handleTouchEnd = useCallback(() => {
     // Skip swipe if touch started on interactive element or didn't move
@@ -177,6 +241,7 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
           msOverflowStyle: "none",
           WebkitOverflowScrolling: "touch"
         }}
+        onScroll={handleUserScroll}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
