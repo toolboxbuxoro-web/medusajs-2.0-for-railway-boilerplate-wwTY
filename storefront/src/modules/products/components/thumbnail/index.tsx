@@ -33,23 +33,24 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   const [isHovered, setIsHovered] = useState(false)
 
   // Use up to 6 images for the hover preview to keep it snappy
-  // IMPORTANT: Prioritize images[0] over thumbnail, because in Medusa
-  // the thumbnail field is separate and doesn't auto-update when images change
+  // IMPORTANT: Prioritize the dedicated thumbnail as the primary image,
+  // and then use the rest of the gallery images as hover previews.
   const displayImages = useMemo(() => {
     const urls = images?.map((img) => img.url).filter(Boolean) || []
-    // If we have images, use them first; only fall back to thumbnail if no images exist
-    const primaryImage = urls.length > 0 ? urls[0] : thumbnail
-    const otherImages = urls.length > 0 ? urls.slice(1) : []
-    // Add thumbnail as fallback only if it's different from primary
-    const allImages = thumbnail && thumbnail !== primaryImage 
-      ? [primaryImage, ...otherImages, thumbnail]
-      : [primaryImage, ...otherImages]
+    // If thumbnail is set, always treat it as the primary visual.
+    // Otherwise, fall back to the first image from the gallery.
+    const primaryImage = thumbnail || (urls.length > 0 ? urls[0] : null)
+    const otherImages = urls.length > 0 ? urls.filter((u) => u !== primaryImage) : []
+
+    const allImages = primaryImage
+      ? [primaryImage, ...otherImages]
+      : otherImages
     const uniqueUrls = Array.from(new Set(allImages)).filter(Boolean) as string[]
     return uniqueUrls.slice(0, 6)
   }, [thumbnail, images])
 
   const hasMultipleImages = displayImages.length > 1
-  const initialImage = thumbnail || images?.[0]?.url
+  const initialImage = displayImages[0]
 
   // Determine aspect ratio: explicit prop takes priority, then size=square, then default
   const effectiveAspectRatio = size === "square" ? "1/1" : aspectRatio

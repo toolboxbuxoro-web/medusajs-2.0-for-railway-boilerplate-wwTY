@@ -40,6 +40,21 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const collectionTitle =
     product.collection ? (getLocalizedField(product.collection, "title", locale) || product.collection.title) : null
 
+  // Ensure the product page uses the same "main" image as lists/cards:
+  // put the thumbnail first (if present) and then the rest of the gallery images,
+  // while avoiding duplicate URLs.
+  const galleryImages =
+    product.thumbnail
+      ? ([
+          { id: "thumbnail", url: product.thumbnail } as any,
+          ...(product.images || []),
+        ].filter(
+          (img, index, self) =>
+            !!img?.url &&
+            self.findIndex((other) => other?.url === img.url) === index
+        ) as HttpTypes.StoreProductImage[])
+      : (product.images || [])
+
   return (
     <>
       <div className="bg-white min-h-screen">
@@ -66,7 +81,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <div className="space-y-6">
               {/* Uzum Mobile: Gallery - Full Width */}
               <div className="-mx-4 sm:-mx-6">
-                <ImageGallery images={product?.images || []} />
+                <ImageGallery images={galleryImages} />
               </div>
               
               <div className="space-y-8">
@@ -113,7 +128,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             {/* Left/Center Column: Image Gallery & Detailed Specs (9/12) */}
             <div className="lg:col-span-9 space-y-12">
               <div className="bg-white rounded-3xl overflow-hidden">
-                <ImageGallery images={product?.images || []} />
+                <ImageGallery images={galleryImages} />
               </div>
 
               {/* Detailed Technical Specs & Description below the images */}
