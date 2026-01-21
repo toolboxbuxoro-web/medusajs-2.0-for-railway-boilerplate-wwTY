@@ -8,12 +8,12 @@ export async function POST(
   const reviewsModuleService: ReviewsService = req.scope.resolve("reviewsModuleService")
   const { id } = req.params
   const { status, rejection_reason } = req.body as { 
-    status: "approved" | "rejected",
+    status: "pending" | "approved" | "rejected",
     rejection_reason?: string 
   }
 
-  if (!status || !["approved", "rejected"].includes(status)) {
-    res.status(400).json({ message: "Invalid status. Must be 'approved' or 'rejected'." })
+  if (!status || !["pending", "approved", "rejected"].includes(status)) {
+    res.status(400).json({ message: "Invalid status. Must be 'pending', 'approved' or 'rejected'." })
     return
   }
 

@@ -14,6 +14,8 @@ interface AddReviewFormProps {
   onLoginClick: () => void
 }
 
+type EligibilityReason = "already_reviewed" | "no_completed_order" | "error" | null
+
 const AddReviewForm: React.FC<AddReviewFormProps> = ({
   productId,
   onSuccess,
@@ -25,7 +27,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   const [hover, setHover] = useState(0)
   const [comment, setComment] = useState("")
   const [canReview, setCanReview] = useState<boolean | null>(null)
-  const [orderId, setOrderId] = useState<string | null>(null)
+  const [eligibilityReason, setEligibilityReason] = useState<EligibilityReason>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -37,13 +39,15 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
     try {
       const res = await checkCanReview(productId)
       setCanReview(res.can_review)
-      setOrderId(res.order_id || null)
+      setEligibilityReason(res.reason || null)
     } catch (err) {
       setCanReview(false)
+      setEligibilityReason("error")
+      setError(t("review_error"))
     } finally {
       setIsLoading(false)
     }
-  }, [productId, isLoggedIn])
+  }, [productId, isLoggedIn, t])
 
   useEffect(() => {
     fetchEligibility()
@@ -96,7 +100,29 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   if (isLoading) return null
 
   if (canReview === false && !success) {
-    return null
+    const getMessageKey = (): "already_reviewed" | "only_after_purchase" | "review_error" => {
+      if (eligibilityReason === "already_reviewed") {
+        return "already_reviewed"
+      }
+      if (eligibilityReason === "no_completed_order") {
+        return "only_after_purchase"
+      }
+      if (eligibilityReason === "error") {
+        return "review_error"
+      }
+      return "only_after_purchase"
+    }
+
+    return (
+      <div className="bg-gray-50 rounded-3xl p-8 text-center mt-12 border border-gray-100">
+        <Heading level="h2" className="text-gray-900 mb-3">
+          {t("write_review")}
+        </Heading>
+        <Text className="text-gray-500">
+          {t(getMessageKey())}
+        </Text>
+      </div>
+    )
   }
 
   if (success) {

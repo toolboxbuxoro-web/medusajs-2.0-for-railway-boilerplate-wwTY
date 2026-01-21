@@ -1,20 +1,27 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { ChatBubbleLeftRight, CheckCircle, XCircle, ChevronDownMini, ChevronUpMini, ArrowUpRightOnBox } from "@medusajs/icons"
-import { 
-  Container, 
-  Heading, 
-  Table, 
-  Text, 
-  StatusBadge, 
-  Button, 
+import {
+  ChatBubbleLeftRight,
+  CheckCircle,
+  XCircle,
+  ChevronDownMini,
+  ChevronUpMini,
+  ArrowUpRightOnBox,
+} from "@medusajs/icons"
+import {
+  Container,
+  Heading,
+  Table,
+  Text,
+  StatusBadge,
+  Button,
   clx,
   toast,
   Tabs,
   Prompt,
   Input,
-  Label
+  Label,
 } from "@medusajs/ui"
-import { useEffect, useState, useCallback, useMemo } from "react"
+import { ChangeEvent, useCallback, useEffect, useState } from "react"
 
 // Types matching the backend API response
 interface Review {
@@ -67,6 +74,7 @@ const ReviewsPage = () => {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>("pending")
+  const [productFilter, setProductFilter] = useState<string>("")
   
   // Reject Modal State
   const [rejectingReview, setRejectingReview] = useState<Review | null>(null)
@@ -76,9 +84,18 @@ const ReviewsPage = () => {
   const fetchReviews = useCallback(async () => {
     setIsLoading(true)
     try {
-      const url = statusFilter 
-        ? `/admin/reviews?status=${statusFilter}&limit=50` 
-        : "/admin/reviews?limit=50"
+      const params = new URLSearchParams()
+      params.set("limit", "50")
+
+      if (statusFilter) {
+        params.set("status", statusFilter)
+      }
+
+      if (productFilter.trim()) {
+        params.set("product_id", productFilter.trim())
+      }
+
+      const url = `/admin/reviews?${params.toString()}`
       const response = await fetch(url, { credentials: "include" })
       const data = await response.json()
       setReviews(data.reviews)
@@ -89,32 +106,51 @@ const ReviewsPage = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [statusFilter])
+  }, [statusFilter, productFilter])
 
   useEffect(() => {
     fetchReviews()
   }, [fetchReviews])
 
-  const handleUpdateStatus = async (id: string, status: "approved" | "rejected", reason?: string) => {
+  const handleUpdateStatus = async (
+    id: string,
+    status: "pending" | "approved" | "rejected",
+    reason?: string
+  ) => {
     // Optimistic Update
     const previousReviews = [...reviews]
     setReviews(prev => prev.filter(r => r.id !== id))
     setCount(prev => prev - 1)
 
     try {
-      const endpoint = `/admin/reviews/${id}/${status === "approved" ? "approve" : "reject"}`
+      const endpoint = `/admin/reviews/${id}/status`
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: status === "rejected" ? JSON.stringify({ reason }) : undefined,
+        body: JSON.stringify({
+          status,
+          rejection_reason: status === "rejected" ? reason : undefined,
+        }),
       })
 
       if (!response.ok) throw new Error("Failed to update status")
 
-      toast.success(status === "approved" ? "Отзыв одобрен" : "Отзыв отклонен")
-      // No need to refetch if optimistic was correct, but good for total count accuracy
-      if (statusFilter === "") fetchReviews() 
+      let message = "Статус отзыва обновлён"
+      if (status === "approved") {
+        message = "Отзыв одобрен"
+      } else if (status === "rejected") {
+        message = "Отзыв отклонен"
+      } else if (status === "pending") {
+        message = "Отзыв возвращён в модерацию"
+      }
+
+      toast.success(message)
+
+      // No need to refetch if optimistic был корректен, но для вкладки "Все" важно обновить список
+      if (statusFilter === "") {
+        fetchReviews()
+      }
     } catch (error) {
       setReviews(previousReviews) // Revert on failure
       setCount(previousReviews.length)
@@ -157,8 +193,8 @@ const ReviewsPage = () => {
         </Text>
       </div>
 
-      <Tabs 
-        value={statusFilter} 
+      <Tabs
+        value={statusFilter}
         onValueChange={setStatusFilter}
         className="w-full"
       >
@@ -169,6 +205,22 @@ const ReviewsPage = () => {
           <Tabs.Trigger value="">Все</Tabs.Trigger>
         </Tabs.List>
       </Tabs>
+
+      <div className="flex items-end gap-x-4">
+        <div className="flex flex-col gap-y-1 max-w-xs">
+          <Label htmlFor="product-filter" className="text-ui-fg-subtle">
+            Фильтр по ID товара
+          </Label>
+          <Input
+            id="product-filter"
+            placeholder="Например: prod_123"
+            value={productFilter}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setProductFilter(e.target.value)
+            }
+          />
+        </div>
+      </div>
 
       <Table>
         <Table.Header>
@@ -270,17 +322,17 @@ const ReviewsPage = () => {
               <Table.Cell className="text-right">
                 {review.status === "pending" && (
                   <div className="flex items-center justify-end gap-x-2">
-                    <Button 
-                      variant="secondary" 
-                      size="small" 
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleUpdateStatus(review.id, "approved")}
                       className="text-green-600 hover:text-green-700 bg-green-50 border-green-200"
                     >
                       <CheckCircle className="mr-1" /> Одобрить
                     </Button>
-                    <Button 
-                      variant="secondary" 
-                      size="small" 
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => setRejectingReview(review)}
                       className="text-red-600 hover:text-red-700 bg-red-50 border-red-200"
                     >
@@ -289,10 +341,29 @@ const ReviewsPage = () => {
                   </div>
                 )}
                 {review.status !== "pending" && (
-                   <div className="flex flex-col items-end gap-y-0.5">
-                      <Text size="xsmall" className="text-ui-fg-muted font-medium">Модерировано</Text>
-                      <Text size="xsmall" className="text-[10px] text-ui-fg-subtle">ID: {review.id.split('_').pop()}</Text>
-                   </div>
+                  <div className="flex flex-col items-end gap-y-1">
+                    <div className="flex items-center gap-x-2">
+                      <Text
+                        size="xsmall"
+                        className="text-ui-fg-muted font-medium"
+                      >
+                        Модерировано
+                      </Text>
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={() => handleUpdateStatus(review.id, "pending")}
+                      >
+                        Вернуть в модерацию
+                      </Button>
+                    </div>
+                    <Text
+                      size="xsmall"
+                      className="text-[10px] text-ui-fg-subtle"
+                    >
+                      ID: {review.id.split("_").pop()}
+                    </Text>
+                  </div>
                 )}
               </Table.Cell>
             </Table.Row>

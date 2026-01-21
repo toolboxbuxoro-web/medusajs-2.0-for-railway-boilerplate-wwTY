@@ -28,18 +28,31 @@ export default async function reviewAggregation({
     average = parseFloat((total / count).toFixed(1))
   }
 
+  const distribution = {
+    1: approvedReviews.filter((r) => r.rating === 1).length,
+    2: approvedReviews.filter((r) => r.rating === 2).length,
+    3: approvedReviews.filter((r) => r.rating === 3).length,
+    4: approvedReviews.filter((r) => r.rating === 4).length,
+    5: approvedReviews.filter((r) => r.rating === 5).length,
+  }
+
   // 3. Update product metadata
   const product = await productService.retrieveProduct(productId)
   const metadata = product.metadata || {}
 
   metadata.rating_avg = average
   metadata.rating_count = count
+  ;(metadata as any).rating_distribution = distribution
 
   await productService.updateProducts(productId, {
     metadata,
   })
 
-  console.log(`[ReviewAggregation] Updated product ${productId}: avg=${average}, count=${count}`)
+  console.log(
+    `[ReviewAggregation] Updated product ${productId}: avg=${average}, count=${count}, distribution=${JSON.stringify(
+      distribution
+    )}`
+  )
 }
 
 export const config: SubscriberConfig = {

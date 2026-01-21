@@ -3,26 +3,27 @@
 import React, { useState, useEffect, useCallback } from "react"
 import Modal from "@modules/common/components/modal"
 import { createReview, checkCanReview } from "@lib/data/review.service"
-import { useParams, useRouter } from "next/navigation"
 import StarIcon from "@modules/common/icons/star"
 import { Button, clx } from "@medusajs/ui"
 import { useAuth } from "@lib/context/auth-context"
-import { CanReviewResponse } from "@lib/data/review.types"
+import { CanReviewResponse, Review } from "@lib/data/review.types"
+import { useTranslations } from "next-intl"
 
 type AddReviewModalProps = {
   isOpen: boolean
   onClose: () => void
   productId: string
-  onSuccess: (newReview: any) => void
+  onSuccess: (newReview: Review) => void
 }
 
-const AddReviewModal: React.FC<AddReviewModalProps> = ({ 
-  isOpen, 
-  onClose, 
+const AddReviewModal: React.FC<AddReviewModalProps> = ({
+  isOpen,
+  onClose,
   productId,
-  onSuccess
+  onSuccess,
 }) => {
-  const { authStatus, customer } = useAuth()
+  const t = useTranslations("product")
+  const { authStatus } = useAuth()
   const isLoggedIn = authStatus === "authorized"
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState("")
@@ -33,17 +34,19 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
 
   const fetchEligibility = useCallback(async () => {
     if (!isLoggedIn || !isOpen) return
-    
+
     setIsLoadingEligibility(true)
     try {
       const res = await checkCanReview(productId)
       setEligibility(res)
     } catch (err) {
       console.error("Error checking review eligibility:", err)
+      setEligibility(null)
+      setError(t("review_error"))
     } finally {
       setIsLoadingEligibility(false)
     }
-  }, [productId, isLoggedIn, isOpen])
+  }, [productId, isLoggedIn, isOpen, t])
 
   useEffect(() => {
     fetchEligibility()
@@ -51,19 +54,19 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!isLoggedIn) {
-      setError("Пожалуйста, войдите, чтобы оставить отзыв")
+      setError(t("only_buyers_can_review"))
       return
     }
 
     if (!eligibility?.can_review) {
-      setError("У вас нет прав для написания отзыва к этому товару")
+      setError(t("only_after_purchase"))
       return
     }
 
     if (rating === 0) {
-      setError("Пожалуйста, выберите оценку")
+      setError(t("select_rating"))
       return
     }
 
@@ -76,25 +79,25 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
         rating,
         comment,
       })
-      
+
       onSuccess(review)
       onClose()
       setRating(0)
       setComment("")
     } catch (err: any) {
-      setError(err.message || "Произошла ошибка при отправке отзыва")
+      setError(err.message || t("review_error"))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const getEligibilityMessage = () => {
-    if (!isLoggedIn) return "Войдите, чтобы оставить отзыв"
-    if (isLoadingEligibility) return "Проверка возможности оставить отзыв..."
+    if (!isLoggedIn) return t("only_buyers_can_review")
+    if (isLoadingEligibility) return t("loading")
     if (eligibility?.can_review) return null
-    if (eligibility?.reason === "already_reviewed") return "Вы уже оставили отзыв на этот товар"
-    if (eligibility?.reason === "no_completed_order") return "Отзыв можно оставить только после покупки товара"
-    return "Вы не можете оставить отзыв на этот товар"
+    if (eligibility?.reason === "already_reviewed") return t("already_reviewed")
+    if (eligibility?.reason === "no_completed_order") return t("only_after_purchase")
+    return t("review_error")
   }
 
   const eligibilityMessage = getEligibilityMessage()
@@ -102,7 +105,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} close={onClose} size="small">
-      <Modal.Title>Оставить отзыв</Modal.Title>
+      <Modal.Title>{t("leave_review")}</Modal.Title>
       <Modal.Body>
         <form onSubmit={handleSubmit} className="w-full space-y-6 pt-4">
           {eligibilityMessage && !eligibility?.can_review && (
@@ -113,7 +116,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
 
           <div className={clx(!canSubmit && "opacity-50 pointer-events-none")}>
             <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Ваша оценка
+              {t("your_rating")}
             </label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((s) => (
@@ -123,9 +126,11 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                   onClick={() => setRating(s)}
                   className="p-1 hover:scale-110 transition-transform"
                 >
-                  <StarIcon 
-                    size={32} 
-                    className={s <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"} 
+                  <StarIcon
+                    size={32}
+                    className={
+                      s <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"
+                    }
                   />
                 </button>
               ))}
@@ -133,8 +138,11 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
           </div>
 
           <div className={clx(!canSubmit && "opacity-50 pointer-events-none")}>
-            <label htmlFor="review-comment" className="text-sm font-medium text-gray-700 mb-2 block">
-              Комментарий (необязательно)
+            <label
+              htmlFor="review-comment"
+              className="text-sm font-medium text-gray-700 mb-2 block"
+            >
+              {t("comment")}
             </label>
             <textarea
               id="review-comment"
@@ -142,13 +150,11 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none resize-none text-sm"
-              placeholder="Расскажите о своих впечатлениях от товара..."
+              placeholder={t("comment_placeholder")}
             />
           </div>
 
-          {error && (
-            <p className="text-red-500 text-xs py-1">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-xs py-1">{error}</p>}
 
           <div className="pt-4">
             <Button
@@ -160,7 +166,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                 !canSubmit && "bg-gray-200 text-gray-400 hover:bg-gray-200"
               )}
             >
-              {isLoggedIn ? "Опубликовать отзыв" : "Пожалуйста, войдите"}
+              {isLoggedIn ? t("submit_review") : t("login_or_register")}
             </Button>
           </div>
         </form>

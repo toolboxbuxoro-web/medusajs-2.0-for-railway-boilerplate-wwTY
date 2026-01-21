@@ -1,16 +1,17 @@
 import { MedusaService, ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { Review } from "./models/review"
 import { IEventBusModuleService, MedusaContainer, IProductModuleService } from "@medusajs/framework/types"
+import type { ReviewStatus } from "./types"
 
 class ReviewsService extends MedusaService({
   Review,
 }) {
-  // protected eventBus_: IEventBusModuleService
+  protected eventBus_: IEventBusModuleService
   protected container_: MedusaContainer
 
-  constructor(container: { /* eventBusModuleService: IEventBusModuleService */ } & MedusaContainer) {
+  constructor(container: { eventBusModuleService: IEventBusModuleService } & MedusaContainer) {
     super(...arguments)
-    // this.eventBus_ = container.eventBusModuleService
+    this.eventBus_ = container.eventBusModuleService
     this.container_ = container as MedusaContainer
   }
 
@@ -23,16 +24,22 @@ class ReviewsService extends MedusaService({
       customer_id: customerId
     })
     
-    if (reviews.length > 0) return { can_review: false, reason: "already_reviewed" }
+    if (reviews.length > 0) {
+      return {
+        can_review: false,
+        reason: "already_reviewed",
+      }
+    }
 
-    // 2. Check for completed/fulfilled order with this product
-    // Note: In Medusa 2.0, fulfilled state is often handled via fulfillments, but prompt specifies completed/fulfilled status
+    // 2. Check for at least one "completed" order with this product
+    // We intentionally fetch a bit wider set of fields and then apply
+    // stricter business logic in-code to decide what we consider
+    // a "completed purchase".
     const { data: orders } = await query.graph({
       entity: "order",
-      fields: ["id", "status"],
+      fields: ["id", "status", "payment_status", "fulfillment_status"],
       filters: {
         customer_id: customerId,
-        status: ["completed", "fulfilled"],
         items: {
           variant: {
             product_id: productId
@@ -41,11 +48,22 @@ class ReviewsService extends MedusaService({
       }
     })
 
-    if (orders.length > 0) {
-      return { can_review: true, order_id: orders[0].id }
+    const eligibleOrder = (orders || []).find((o: any) =>
+      this.isOrderCompleted(o)
+    )
+
+    if (eligibleOrder) {
+      return {
+        can_review: true,
+        order_id: eligibleOrder.id,
+      }
     }
 
-    return { can_review: false, reason: "no_completed_order" }
+    return {
+      can_review: false,
+      // Normalized reason used across store API and storefront.
+      reason: "no_completed_order",
+    }
   }
 
   async approveReview(id: string) {
@@ -60,52 +78,56 @@ class ReviewsService extends MedusaService({
     return await this.listReviews({ product_id: productId, status: "approved" })
   }
 
-  async updateReviewStatus(id: string, status: "approved" | "rejected", rejection_reason?: string) {
+  async updateReviewStatus(
+    id: string,
+    status: ReviewStatus,
+    rejection_reason?: string
+  ) {
     const updateData: any = { id, status }
     if (rejection_reason) {
       updateData.rejection_reason = rejection_reason
     }
     
     const review = await this.updateReviews(updateData)
-    
-    /*
+
+    // Emit domain event so that aggregation/subscribers can react
     await this.eventBus_.emit({
       name: "review.updated",
       data: { id },
     })
-    */
-
-    if (review.product_id) {
-      await this.recalculateProductRating(review.product_id)
-    }
 
     return review
   }
 
-  private async recalculateProductRating(productId: string) {
-    const reviews = await this.listReviews({
-      product_id: productId,
-      status: "approved",
-    })
+  /**
+   * Business definition of "completed purchase" for the purpose of
+   * allowing reviews. We keep this logic local so it can be evolved
+   * without changing the API surface.
+   */
+  private isOrderCompleted(order: any): boolean {
+    if (!order) {
+      return false
+    }
 
-    const count = reviews.length
-    const avg =
-      count === 0
-        ? 0
-        : Number(
-            (
-              reviews.reduce((sum, r) => sum + r.rating, 0) / count
-            ).toFixed(1)
-          )
+    // Base status must be "completed"
+    const statusOk = order.status === "completed"
 
-    const productService: IProductModuleService = this.container_.resolve(Modules.PRODUCT)
+    // If payment / fulfillment statuses exist, they should represent a
+    // successful flow. We keep this slightly permissive to avoid
+    // unexpected blocking in case of custom states, but still guard
+    // obvious non-completed ones.
+    const nonCompletedPaymentStatuses = ["requires_action", "canceled"]
+    const nonCompletedFulfillmentStatuses = ["not_fulfilled", "canceled"]
 
-    await productService.updateProducts(productId, {
-      metadata: {
-        rating_avg: avg,
-        rating_count: count,
-      },
-    })
+    const paymentOk =
+      !order.payment_status ||
+      !nonCompletedPaymentStatuses.includes(order.payment_status)
+
+    const fulfillmentOk =
+      !order.fulfillment_status ||
+      !nonCompletedFulfillmentStatuses.includes(order.fulfillment_status)
+
+    return Boolean(statusOk && paymentOk && fulfillmentOk)
   }
 }
 

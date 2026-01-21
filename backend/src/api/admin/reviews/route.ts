@@ -6,11 +6,39 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-  
+
   const { limit = 10, offset = 0, status, product_id } = req.query as any
-  
+
+  // Normalize and validate pagination to protect the database from
+  // unbounded or malformed queries.
+  const rawLimit = Number.parseInt(String(limit), 10)
+  const rawOffset = Number.parseInt(String(offset), 10)
+
+  const safeLimit =
+    Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.min(rawLimit, 100)
+      : 10
+
+  const safeOffset =
+    Number.isFinite(rawOffset) && rawOffset >= 0
+      ? rawOffset
+      : 0
+
   const filter: any = {}
-  if (status) filter.status = status
+
+  if (status) {
+    const allowedStatuses = ["pending", "approved", "rejected"]
+
+    if (!allowedStatuses.includes(String(status))) {
+      res.status(400).json({
+        message: "Invalid status filter. Must be one of: pending, approved, rejected.",
+      })
+      return
+    }
+
+    filter.status = status
+  }
+
   if (product_id) filter.product_id = product_id
 
   // Get reviews (without relations - Review model doesn't have links to Product/Customer)
@@ -28,8 +56,8 @@ export async function GET(
     ],
     filters: filter,
     pagination: {
-      skip: parseInt(offset),
-      take: parseInt(limit),
+      skip: safeOffset,
+      take: safeLimit,
       order: { created_at: "DESC" },
     },
   })
@@ -63,12 +91,21 @@ export async function GET(
 
       return {
         ...review,
-        product: product ? { title: product.title, thumbnail: product.thumbnail } : null,
-        customer: customer ? { 
-          first_name: customer.first_name, 
-          last_name: customer.last_name,
-          phone: customer.phone 
-        } : null,
+        product: product
+          ? {
+              title: product.title,
+              thumbnail: product.thumbnail,
+            }
+          : null,
+        // Expose only non-sensitive customer fields in the list view.
+        // More detailed information can be retrieved in dedicated endpoints
+        // if needed.
+        customer: customer
+          ? {
+              first_name: customer.first_name,
+              last_name: customer.last_name,
+            }
+          : null,
       }
     })
   )
@@ -76,8 +113,8 @@ export async function GET(
   res.json({
     reviews: enrichedReviews,
     count,
-    limit: parseInt(limit),
-    offset: parseInt(offset),
+    limit: safeLimit,
+    offset: safeOffset,
   })
 }
 

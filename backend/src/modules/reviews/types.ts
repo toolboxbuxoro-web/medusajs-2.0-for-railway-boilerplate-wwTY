@@ -1,5 +1,11 @@
 import { Review } from "./models/review"
 
+/**
+ * Centralized set of allowed review statuses so we don't duplicate
+ * string literals across the codebase.
+ */
+export type ReviewStatus = "pending" | "approved" | "rejected" | "hidden"
+
 export interface ReviewDTO {
   id: string
   product_id: string
@@ -7,7 +13,7 @@ export interface ReviewDTO {
   order_id: string
   rating: number
   comment?: string | null
-  status: "pending" | "approved" | "rejected"
+  status: ReviewStatus
   created_at: Date
   updated_at: Date
 }
@@ -15,10 +21,18 @@ export interface ReviewDTO {
 export interface CreateReviewDTO {
   product_id: string
   customer_id: string
-  order_id?: string  // Made optional for flexibility
+  /**
+   * For production we always expect a review to be tied to a concrete order.
+   * This is enforced by the stricter Store API flow that checks canReview.
+   */
+  order_id: string
   rating: number
   comment?: string | null
-  status?: "pending" | "approved" | "rejected"
+  /**
+   * When omitted, the module will use its default status (currently "approved").
+   * Admin flows can explicitly pass other statuses such as "pending" or "rejected".
+   */
+  status?: ReviewStatus
 }
 
 export interface IReviewModuleService {

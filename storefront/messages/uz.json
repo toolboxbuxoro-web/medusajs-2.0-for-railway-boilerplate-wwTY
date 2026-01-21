@@ -360,6 +360,7 @@
     "select_rating": "Iltimos, baho tanlang",
     "review_error": "Sharhni yuborishda xato",
     "only_after_purchase": "Sharh faqat ushbu mahsulotni sotib olgandan keyin qoldirilishi mumkin",
+      "already_reviewed": "Siz allaqachon ushbu mahsulot uchun sharh qoldirgansiz",
     "rating_excellent": "A'lo",
     "rating_good": "Yaxshi",
     "rating_normal": "Normal",

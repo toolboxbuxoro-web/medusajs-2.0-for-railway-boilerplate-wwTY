@@ -30,6 +30,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     averageRating,
     distribution,
     isLoading,
+    error,
     setReviews,
     setCount,
   } = useProductReviews(productId)
@@ -45,12 +46,18 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       <h2 className="text-3xl font-bold text-gray-900 mb-8">{t("reviews_title")}</h2>
       
       {/* Summary Block */}
-      {!isLoading && (
+      {!isLoading && !error && (
         <ProductRatingSummary 
           averageRating={averageRating} 
           count={count} 
           distribution={distribution} 
         />
+      )}
+
+      {error && (
+        <div className="mt-4 mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {t("review_error")}
+        </div>
       )}
 
       {/* Reviews List */}
