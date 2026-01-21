@@ -33,7 +33,25 @@ export async function getCollectionsList(
           { cache: "no-store", next: { tags: ["collections"] } }
         )
         .then(({ collections }) => {
-          return { collections, count: collections.length }
+          // Sort collections by metadata.home_order (ascending), then by created_at (newest first)
+          const sorted = [...(collections || [])].sort((a: any, b: any) => {
+            const orderA = a.metadata?.home_order != null ? Number(a.metadata.home_order) : null
+            const orderB = b.metadata?.home_order != null ? Number(b.metadata.home_order) : null
+
+            // Collections with order come first
+            if (orderA != null && orderB != null) {
+              return orderA - orderB
+            }
+            if (orderA != null) return -1
+            if (orderB != null) return 1
+
+            // If no order, sort by created_at (newest first)
+            const dateA = new Date(a.created_at || 0).getTime()
+            const dateB = new Date(b.created_at || 0).getTime()
+            return dateB - dateA
+          })
+
+          return { collections: sorted, count: sorted.length }
         })
     },
     [`get-collections-list-${offset}-${limit}`],
