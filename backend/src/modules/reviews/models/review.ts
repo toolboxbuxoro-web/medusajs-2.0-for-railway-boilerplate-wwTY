@@ -21,5 +21,9 @@ export const Review = model.define("review", {
   // Optimized index for common listing query:
   // WHERE product_id = ? AND status = 'approved' ORDER BY created_at DESC
   { on: ["product_id", "status", "created_at"] },
-  { on: ["product_id", "customer_id"], unique: true },
+  // Composite index for product+customer lookups (uniqueness enforced via partial unique index in migration)
+  // Migration20260121130000 creates partial unique index:
+  // UNIQUE (product_id, customer_id) WHERE status IN ('approved', 'pending')
+  // This allows users to submit new reviews if their previous one was rejected/hidden
+  { on: ["product_id", "customer_id"] },
 ])

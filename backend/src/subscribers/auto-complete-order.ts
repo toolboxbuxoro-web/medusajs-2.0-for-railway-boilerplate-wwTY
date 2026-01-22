@@ -74,14 +74,23 @@ export default async function autoCompleteOrder({
     // If both conditions are met, complete the order
     if (paymentOk && fulfillmentOk) {
       try {
-        // In Medusa 2.0, we update the order status directly
-        await orderModule.updateOrders(orderId, {
+        // Double-check status to avoid race conditions (another subscriber might have completed it)
+        const currentOrder = await orderModule.retrieveOrder(orderId)
+        if (currentOrder.status === "completed") {
+          logger.debug(`[auto-complete-order] Order ${orderId} already completed by another process, skipping`)
+          return
+        }
+
+        // In Medusa 2.0, updateOrders expects an array of order updates
+        await orderModule.updateOrders([{
+          id: orderId,
           status: "completed",
-        })
+        }])
         logger.info(`[auto-complete-order] ✅ Successfully completed order ${orderId}`)
       } catch (completeError: any) {
         logger.error(
-          `[auto-complete-order] ❌ Failed to complete order ${orderId}: ${completeError.message}`
+          `[auto-complete-order] ❌ Failed to complete order ${orderId}: ${completeError.message}`,
+          { error: completeError, stack: completeError.stack }
         )
       }
     } else {
@@ -91,7 +100,8 @@ export default async function autoCompleteOrder({
     }
   } catch (error: any) {
     logger.error(
-      `[auto-complete-order] Error processing order ${orderId}: ${error.message}`
+      `[auto-complete-order] Error processing order ${orderId}: ${error.message}`,
+      { error, stack: error.stack, eventName: name, eventData: data }
     )
   }
 }

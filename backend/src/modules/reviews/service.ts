@@ -22,53 +22,71 @@ class ReviewsService extends MedusaService({
   }
 
   async canReview(productId: string, customerId: string) {
-    const query = this.container_.resolve(ContainerRegistrationKeys.QUERY)
-    
-    // 1. Check if user already reviewed
-    const [reviews] = await this.listAndCountReviews({
-      product_id: productId,
-      customer_id: customerId
-    })
-    
-    if (reviews.length > 0) {
+    if (!productId || !customerId) {
       return {
         can_review: false,
-        reason: "already_reviewed",
+        reason: "no_completed_order",
       }
     }
 
-    // 2. Check for at least one "completed" order with this product
-    // We intentionally fetch a bit wider set of fields and then apply
-    // stricter business logic in-code to decide what we consider
-    // a "completed purchase".
-    const { data: orders } = await query.graph({
-      entity: "order",
-      fields: ["id", "status", "payment_status", "fulfillment_status"],
-      filters: {
+    const query = this.container_.resolve(ContainerRegistrationKeys.QUERY)
+    
+    try {
+      // 1. Check if user already has an active review (approved or pending)
+      // Rejected/hidden reviews don't block new reviews - user can submit a new one
+      const [existingReviews] = await this.listAndCountReviews({
+        product_id: productId,
         customer_id: customerId,
-        items: {
-          variant: {
-            product_id: productId
-          }
+        status: ["approved", "pending"] // Only check active reviews
+      })
+      
+      if (existingReviews.length > 0) {
+        return {
+          can_review: false,
+          reason: "already_reviewed",
         }
       }
-    })
 
-    const eligibleOrder = (orders || []).find((o: any) =>
-      this.isOrderCompleted(o)
-    )
+      // 2. Check for at least one "completed" order with this product
+      // We intentionally fetch a bit wider set of fields and then apply
+      // stricter business logic in-code to decide what we consider
+      // a "completed purchase".
+      const { data: orders } = await query.graph({
+        entity: "order",
+        fields: ["id", "status", "payment_status", "fulfillment_status"],
+        filters: {
+          customer_id: customerId,
+          items: {
+            variant: {
+              product_id: productId
+            }
+          }
+        }
+      })
 
-    if (eligibleOrder) {
-      return {
-        can_review: true,
-        order_id: eligibleOrder.id,
+      const eligibleOrder = (orders || []).find((o: any) =>
+        this.isOrderCompleted(o)
+      )
+
+      if (eligibleOrder && eligibleOrder.id) {
+        return {
+          can_review: true,
+          order_id: eligibleOrder.id,
+        }
       }
-    }
 
-    return {
-      can_review: false,
-      // Normalized reason used across store API and storefront.
-      reason: "no_completed_order",
+      return {
+        can_review: false,
+        // Normalized reason used across store API and storefront.
+        reason: "no_completed_order",
+      }
+    } catch (error: any) {
+      // Log error but don't expose internal details
+      console.error(`[ReviewsService.canReview] Error for product ${productId}, customer ${customerId}:`, error)
+      return {
+        can_review: false,
+        reason: "no_completed_order",
+      }
     }
   }
 
@@ -115,8 +133,13 @@ class ReviewsService extends MedusaService({
       return false
     }
 
-    // Base status must be "completed"
-    const statusOk = order.status === "completed"
+    // Base status for allowing reviews.
+    // В некоторых наших потоках заказ остаётся в status="pending",
+    // но при этом уже оплачен и доставлен, поэтому считаем такие
+    // заказы тоже подходящими для отзыва.
+    const statusOk =
+      order.status === "completed" ||
+      order.status === "pending"
 
     // If payment status exists, it should represent a successful flow.
     // Fulfillment мы больше не учитываем, т.к. во многих магазинах

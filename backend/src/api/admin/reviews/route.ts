@@ -5,41 +5,51 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+  try {
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
-  const { limit = 10, offset = 0, status, product_id } = req.query as any
+    const { limit = 10, offset = 0, status, product_id } = req.query as any
 
-  // Normalize and validate pagination to protect the database from
-  // unbounded or malformed queries.
-  const rawLimit = Number.parseInt(String(limit), 10)
-  const rawOffset = Number.parseInt(String(offset), 10)
+    // Normalize and validate pagination to protect the database from
+    // unbounded or malformed queries.
+    const rawLimit = Number.parseInt(String(limit), 10)
+    const rawOffset = Number.parseInt(String(offset), 10)
 
-  const safeLimit =
-    Number.isFinite(rawLimit) && rawLimit > 0
-      ? Math.min(rawLimit, 100)
-      : 10
+    const safeLimit =
+      Number.isFinite(rawLimit) && rawLimit > 0
+        ? Math.min(rawLimit, 100)
+        : 10
 
-  const safeOffset =
-    Number.isFinite(rawOffset) && rawOffset >= 0
-      ? rawOffset
-      : 0
+    const safeOffset =
+      Number.isFinite(rawOffset) && rawOffset >= 0
+        ? rawOffset
+        : 0
 
-  const filter: any = {}
+    const filter: any = {}
 
-  if (status) {
-    const allowedStatuses = ["pending", "approved", "rejected"]
+    if (status) {
+      const allowedStatuses = ["pending", "approved", "rejected", "hidden"]
 
-    if (!allowedStatuses.includes(String(status))) {
-      res.status(400).json({
-        message: "Invalid status filter. Must be one of: pending, approved, rejected.",
-      })
-      return
+      if (!allowedStatuses.includes(String(status))) {
+        res.status(400).json({
+          message: "Invalid status filter. Must be one of: pending, approved, rejected, hidden.",
+        })
+        return
+      }
+
+      filter.status = status
     }
 
-    filter.status = status
-  }
-
-  if (product_id) filter.product_id = product_id
+    // Validate product_id format if provided
+    if (product_id) {
+      if (typeof product_id !== "string" || product_id.trim().length === 0) {
+        res.status(400).json({
+          message: "Invalid product_id format.",
+        })
+        return
+      }
+      filter.product_id = product_id.trim()
+    }
 
   // Get reviews (without relations - Review model doesn't have links to Product/Customer)
   const { data: reviews, metadata: { count } } = await query.graph({
@@ -110,11 +120,17 @@ export async function GET(
     })
   )
 
-  res.json({
-    reviews: enrichedReviews,
-    count,
-    limit: safeLimit,
-    offset: safeOffset,
-  })
+    res.json({
+      reviews: enrichedReviews,
+      count,
+      limit: safeLimit,
+      offset: safeOffset,
+    })
+  } catch (error: any) {
+    console.error(`[GET /admin/reviews] Error:`, error)
+    res.status(500).json({
+      message: "Failed to fetch reviews",
+    })
+  }
 }
 

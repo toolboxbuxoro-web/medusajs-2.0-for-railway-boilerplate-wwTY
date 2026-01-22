@@ -5,10 +5,26 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
-  const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
-  const { id } = req.params
+  try {
+    const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
+    const { id } = req.params
 
-  const review = await reviewsModuleService.approveReview(id)
+    if (!id || typeof id !== "string") {
+      res.status(400).json({ message: "Invalid review ID" })
+      return
+    }
 
-  res.json({ review })
+    const review = await reviewsModuleService.approveReview(id)
+
+    res.json({ review })
+  } catch (error: any) {
+    console.error(`[POST /admin/reviews/${req.params.id}/approve] Error:`, error)
+    
+    if (error.message?.includes("not found") || error.message?.includes("does not exist")) {
+      res.status(404).json({ message: "Review not found" })
+      return
+    }
+
+    res.status(500).json({ message: "Failed to approve review" })
+  }
 }
