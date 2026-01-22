@@ -385,7 +385,13 @@
     "error_variant_required": "Выберите вариант товара",
     "error_add_to_cart": "Ошибка добавления товара",
     "error_submit_order": "Ошибка оформления заказа",
-    "default_buyer_name": "Покупатель"
+    "default_buyer_name": "Покупатель",
+    "pros": "Достоинства",
+    "pros_placeholder": "Что вам понравилось в товаре?",
+    "cons": "Недостатки",
+    "cons_placeholder": "Что можно улучшить?",
+    "images": "Добавить фото",
+    "only_after_delivery": "Отзыв можно оставить только после получения заказа"
   },
   "search": {
     "search": "Поиск",

@@ -376,7 +376,13 @@
     "error_variant_required": "Mahsulot variantini tanlang",
     "error_add_to_cart": "Mahsulotni savatga qo'shishda xato",
     "error_submit_order": "Buyurtmani rasmiylashtirishda xato",
-    "default_buyer_name": "Xaridor"
+    "default_buyer_name": "Xaridor",
+    "pros": "Afzalliklari",
+    "pros_placeholder": "Mahsulotda sizga nima yoqdi?",
+    "cons": "Kamchiliklari",
+    "cons_placeholder": "Nimani yaxshilash mumkin?",
+    "images": "Rasm qo'shish",
+    "only_after_delivery": "Sharh faqat buyurtmani qabul qilgandan keyin qoldirilishi mumkin"
   },
   "search": {
     "search": "Qidiruv",
