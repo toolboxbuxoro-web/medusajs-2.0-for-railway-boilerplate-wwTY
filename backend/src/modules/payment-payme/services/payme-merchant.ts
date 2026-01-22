@@ -637,7 +637,7 @@ export class PaymeMerchantService {
             
             // Get cart metadata
             const cartResult = await pgConnection.raw(
-              `SELECT metadata FROM cart WHERE id = $1`,
+              `SELECT metadata FROM cart WHERE id = ?`,
               [cartId]
             )
             const cartMetadata = cartResult?.rows?.[0]?.metadata
@@ -648,7 +648,7 @@ export class PaymeMerchantService {
               // If cart has quick order data, copy to order (without password - sent via SMS)
               if (meta?.is_quick_order || meta?.account_created_at) {
                 await pgConnection.raw(
-                  `UPDATE "order" SET metadata = COALESCE(metadata, '{}')::jsonb || $1::jsonb WHERE id = $2`,
+                  `UPDATE "order" SET metadata = COALESCE(metadata, '{}')::jsonb || ?::jsonb WHERE id = ?`,
                   [JSON.stringify({
                     is_quick_order: meta.is_quick_order,
                     is_new_customer: meta.is_new_customer,
