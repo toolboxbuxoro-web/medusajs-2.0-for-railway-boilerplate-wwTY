@@ -112,6 +112,7 @@ export const POST = async (
           }
 
           // Upload files using File Module
+          // File Module uses providers, so we need to use the correct API
           const fileModuleService: IFileModuleService = req.scope.resolve(Modules.FILE)
 
           console.log(`[POST /store/uploads] Request ${requestId} - Starting upload of ${files.length} file(s)`)
@@ -120,8 +121,8 @@ export const POST = async (
             try {
               console.log(`[POST /store/uploads] Request ${requestId} - Uploading file ${index + 1}/${files.length}: ${fileData.filename}`)
 
-              // Use File Module's createFiles method (standard Medusa File Module API)
-              const uploadResult = await (fileModuleService as any).createFiles([
+              // File Module API: createFiles accepts array of files and returns array of results
+              const uploadResults = await (fileModuleService as any).createFiles([
                 {
                   filename: fileData.filename,
                   mimeType: fileData.mimeType,
@@ -129,11 +130,13 @@ export const POST = async (
                 }
               ])
 
-              // createFiles returns an array
-              const result = Array.isArray(uploadResult) ? uploadResult[0] : uploadResult
+              // createFiles returns an array of file results
+              const result = Array.isArray(uploadResults) && uploadResults.length > 0 
+                ? uploadResults[0] 
+                : uploadResults
 
               if (!result || !result.url) {
-                throw new Error(`File Module returned invalid result for ${fileData.filename}`)
+                throw new Error(`File Module returned invalid result for ${fileData.filename}: ${JSON.stringify(result)}`)
               }
 
               console.log(`[POST /store/uploads] Request ${requestId} - Successfully uploaded: ${fileData.filename} -> ${result.url}`)
