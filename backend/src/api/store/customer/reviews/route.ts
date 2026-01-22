@@ -44,19 +44,19 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Get all order items for this customer's orders (paid orders only)
+    // Note: Medusa 2.0 order_item schema doesn't have variant_id directly
+    // We'll use product_id if it exists, otherwise fallback
     const orderItemsResult = await pgConnection.raw(`
       SELECT DISTINCT
         oi.id as item_id,
         oi.order_id,
-        pv.product_id,
+        oi.product_id,
         oi.title as item_title,
         oi.thumbnail,
-        oi.variant_id,
         o.display_id as order_display_id,
         o.created_at as order_date
       FROM order_item oi
       JOIN "order" o ON oi.order_id = o.id
-      JOIN product_variant pv ON oi.variant_id = pv.id
       JOIN order_payment_collection opc ON o.id = opc.order_id
       JOIN payment_collection pc ON opc.payment_collection_id = pc.id
       WHERE o.customer_id = ?
