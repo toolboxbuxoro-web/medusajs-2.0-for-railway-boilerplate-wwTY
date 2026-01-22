@@ -152,15 +152,16 @@ class ReviewsService extends MedusaService({
       `, [customerId])
       console.log(`[ReviewsService.canReview] DEBUG - Fulfillments:`, debugFulfillmentCheck?.rows)
 
-      // Main query - using order_item.product_id directly (Medusa 2.0 stores product_id on order_item)
+      // Main query - JOIN product_variant to get product_id from variant_id
       const result = await pgConnection.raw(`
         SELECT DISTINCT o.id as order_id
         FROM "order" o
         JOIN order_payment_collection opc ON o.id = opc.order_id
         JOIN payment_collection pc ON opc.payment_collection_id = pc.id
         JOIN order_item oi ON o.id = oi.order_id
+        JOIN product_variant pv ON oi.variant_id = pv.id
         WHERE o.customer_id = ?
-          AND oi.product_id = ?
+          AND pv.product_id = ?
           AND o.status != 'canceled'
           AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
           AND EXISTS (

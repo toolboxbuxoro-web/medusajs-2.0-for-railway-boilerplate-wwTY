@@ -98,8 +98,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       JOIN order_payment_collection opc ON o.id = opc.order_id
       JOIN payment_collection pc ON opc.payment_collection_id = pc.id
       JOIN order_item oi ON o.id = oi.order_id
+      JOIN product_variant pv ON oi.variant_id = pv.id
       WHERE o.customer_id = ?
-        AND oi.product_id = ?
+        AND pv.product_id = ?
         AND o.status != 'canceled'
         AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
         AND EXISTS (
