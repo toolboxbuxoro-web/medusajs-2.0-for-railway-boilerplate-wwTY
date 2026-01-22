@@ -732,11 +732,24 @@ export class ClickMerchantService {
 
           // CRITICAL: Capture the payment to change status from 'authorized' to 'captured'
           try {
-            await paymentModule.capturePayment({
-              payment_collection_id: session.payment_collection_id,
-              captured_by: "click-merchant"
-            })
-            this.logger_.info(`[ClickMerchant] ✅ Captured payment for order ${orderId}`)
+            // First, get the payment from the payment_collection
+            const pgConnection = this.container_.resolve("__pg_connection__")
+            const paymentResult = await pgConnection.raw(`
+              SELECT p.id as payment_id
+              FROM payment p
+              WHERE p.payment_collection_id = ?
+              ORDER BY p.created_at DESC
+              LIMIT 1
+            `, [session.payment_collection_id])
+            
+            const paymentId = paymentResult?.rows?.[0]?.payment_id
+            
+            if (paymentId) {
+              await paymentModule.capturePayment({ payment_id: paymentId })
+              this.logger_.info(`[ClickMerchant] ✅ Captured payment ${paymentId} for order ${orderId}`)
+            } else {
+              this.logger_.warn(`[ClickMerchant] No payment found for collection ${session.payment_collection_id}`)
+            }
           } catch (captureErr: any) {
             this.logger_.error(`[ClickMerchant] ⚠️ Failed to capture payment: ${captureErr.message}`)
           }
