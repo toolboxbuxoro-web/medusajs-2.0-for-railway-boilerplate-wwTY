@@ -29,17 +29,18 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = () => {
   const orderId = String(id || "")
   
   const { order, state, retry } = useOrder(orderId)
-  const [reviewStatuses, setReviewStatuses] = React.useState<Record<string, any>>({})
-
-  React.useEffect(() => {
-    import("@lib/data/reviews").then((m) => {
-      m.getCustomerReviews().then((res: any) => {
-        if (res?.reviews_by_product) {
-          setReviewStatuses(res.reviews_by_product)
-        }
-      })
-    })
-  }, [])
+  
+  // TEMPORARY: Disabled due to "use server" / client component conflict
+  // const [reviewStatuses, setReviewStatuses] = React.useState<Record<string, any>>({})
+  // React.useEffect(() => {
+  //   import("@lib/data/reviews").then((m) => {
+  //     m.getCustomerReviews().then((res: any) => {
+  //       if (res?.reviews_by_product) {
+  //         setReviewStatuses(res.reviews_by_product)
+  //       }
+  //     })
+  //   })
+  // }, [])
 
   // 1. Loading State
   if (state === "loading") {
@@ -74,7 +75,7 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = () => {
         data-testid="order-details-container"
       >
         <OrderDetails order={order} showStatus locale={localeStr} />
-        <Items items={order.items || []} orderId={order.id} reviewStatuses={reviewStatuses} />
+        <Items items={order.items || []} orderId={order.id} />
         <ShippingDetails order={order} locale={localeStr} />
         <OrderSummary order={order} locale={localeStr} />
         <div className="pt-6 border-t border-gray-50">
