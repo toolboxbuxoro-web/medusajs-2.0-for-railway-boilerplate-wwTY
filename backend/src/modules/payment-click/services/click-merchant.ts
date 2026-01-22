@@ -703,23 +703,38 @@ export class ClickMerchantService {
         },
       })
 
-      // Trigger Medusa specific logic for payment completion
-      // We assume Authorize will be called separately or we can try to trigger it via workflow?
-      // In Medusa 2, we usually just update the session status to authorized if possible?
-      // Or we call completeCartWorkflow?
-      // The original code called completeCartWorkflow.
-
+      // Trigger Medusa cart completion workflow
       try {
-        await completeCartWorkflow(this.container_).run({
+        const workflowResult = await completeCartWorkflow(this.container_).run({
           input: {
-            id: session.cart_id, // We need cart_id!
+            id: session.cart_id,
           }
         })
-        this.logger_.info(`[ClickMerchant] Cart ${session.cart_id} completed successfully`)
+        
+        const orderId = workflowResult?.result?.id
+        if (orderId) {
+          // Save medusa_order_id to session data (same as Payme does)
+          // This allows auto-complete-order subscriber to find the payment session
+          await paymentModule.updatePaymentSession({
+            id: session.id,
+            amount: Number(session.amount),
+            currency_code: session.currency_code || "uzs",
+            data: {
+              ...currentData,
+              click_state: "completed", // Change to "completed" for consistency
+              merchant_confirm_id,
+              click_error: 0,
+              click_error_note: "Success",
+              medusa_order_id: orderId, // Important for auto-complete subscriber
+            },
+          })
+          this.logger_.info(`[ClickMerchant] Cart ${session.cart_id} -> order ${orderId} (saved to session)`)
+        } else {
+          this.logger_.warn(`[ClickMerchant] completeCartWorkflow succeeded but no order ID returned`)
+        }
       } catch (wfError) {
         this.logger_.error(`[ClickMerchant] Failed to complete cart ${session.cart_id}: ${wfError}`)
         // Even if workflow fails, payment is done. We return success to Click.
-        // But we should probably note it.
       }
       
       // Fiscalization

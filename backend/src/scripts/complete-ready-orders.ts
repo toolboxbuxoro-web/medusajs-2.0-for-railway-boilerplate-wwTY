@@ -37,7 +37,7 @@ async function getPaymentStatusFromSession(
       if (data?.payme_state === 2) {
         return { paid: true, method: 'payme' }
       }
-      if (data?.click_state === 'completed') {
+      if (data?.click_state === 'completed' || data?.click_state === 'paid') {
         return { paid: true, method: 'click' }
       }
     }
@@ -65,7 +65,7 @@ async function getPaymentStatusFromSession(
       if (data?.payme_state === 2) {
         return { paid: true, method: 'payme' }
       }
-      if (data?.click_state === 'completed') {
+      if (data?.click_state === 'completed' || data?.click_state === 'paid') {
         return { paid: true, method: 'click' }
       }
       if (data?.status === 'captured' || data?.status === 'authorized') {
