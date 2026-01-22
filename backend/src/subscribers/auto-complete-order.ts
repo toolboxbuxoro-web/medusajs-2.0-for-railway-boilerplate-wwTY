@@ -34,8 +34,14 @@ export default async function autoCompleteOrder({
   }
 
   if (!orderId) {
-    logger.debug(`[auto-complete-order] No order ID found in event ${name}, skipping`)
+    logger.debug(`[auto-complete-order] No order ID found in event ${name}, skipping. Event data: ${JSON.stringify(data)}`)
     return
+  }
+
+  // For order.placed events, add a small delay to allow payment/fulfillment statuses to be set
+  if (name === "order.placed") {
+    // Wait 2 seconds to allow payment and fulfillment workflows to complete
+    await new Promise(resolve => setTimeout(resolve, 2000))
   }
 
   try {
@@ -62,7 +68,7 @@ export default async function autoCompleteOrder({
 
     // Check payment status
     // Accept both "captured" and "authorized" (some payment providers use authorized)
-    const paymentStatus = order.payment_status
+    const paymentStatus = order.payment_status || null
     const paymentOk =
       paymentStatus === "captured" ||
       paymentStatus === "authorized" ||
@@ -70,18 +76,24 @@ export default async function autoCompleteOrder({
 
     // Check fulfillment status
     // Accept "fulfilled", "shipped", or "delivered" (some flows use delivered)
-    const fulfillmentStatus = order.fulfillment_status
+    const fulfillmentStatus = order.fulfillment_status || null
     const fulfillmentOk =
       fulfillmentStatus === "fulfilled" ||
       fulfillmentStatus === "shipped" ||
       fulfillmentStatus === "delivered"
 
+    // Complete if both are OK, OR if payment is OK and fulfillment is null (digital goods)
+    // OR if fulfillment is delivered and payment is authorized/captured/null
+    const canComplete = (paymentOk && fulfillmentOk) ||
+                        (paymentOk && fulfillmentStatus === null) ||
+                        (fulfillmentOk && (paymentOk || paymentStatus === null))
+
     logger.info(
-      `[auto-complete-order] Order ${orderId}: payment=${paymentStatus} (${paymentOk}), fulfillment=${fulfillmentStatus} (${fulfillmentOk}), current_status=${order.status}`
+      `[auto-complete-order] Order ${orderId} [event: ${name}]: payment=${paymentStatus || 'null'} (${paymentOk}), fulfillment=${fulfillmentStatus || 'null'} (${fulfillmentOk}), current_status=${order.status}, canComplete=${canComplete}`
     )
 
-    // If both conditions are met, complete the order
-    if (paymentOk && fulfillmentOk) {
+    // If conditions are met, complete the order
+    if (canComplete) {
       try {
         // Double-check status to avoid race conditions (another subscriber might have completed it)
         const currentOrder = await orderModule.retrieveOrder(orderId)
