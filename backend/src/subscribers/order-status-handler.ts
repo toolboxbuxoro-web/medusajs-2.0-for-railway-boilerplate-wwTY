@@ -3,16 +3,9 @@ import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 
 /**
- * Order Status Handler - Medusa 2.0 Compliant
+ * Order Status Handler - Medusa 2.0 Compliant (Debug Version)
  * 
- * Automatically completes orders when BOTH conditions are met:
- * 1. payment_status = "captured"
- * 2. fulfillment_status = "delivered"
- * 
- * This follows Medusa 2.0 best practices:
- * - Uses query.graph instead of raw SQL
- * - Listens to fulfillment.delivered event (not payment events)
- * - Checks both payment and fulfillment status before completing
+ * Extensive logging to diagnose why payment_status/fulfillment_status are undefined
  */
 export default async function orderStatusHandler({
   event: { data, name },
@@ -38,72 +31,134 @@ export default async function orderStatusHandler({
     return
   }
 
-  logger.info(`[order-status] Processing ${name} for order ${orderId}`)
+  logger.info(`[order-status] ========== Processing ${name} for order ${orderId} ==========`)
 
-  // For order.placed, wait a bit to allow initial workflows (payment/fulfillment) to complete
+  // For order.placed, wait a bit to allow initial workflows to complete
   if (name === "order.placed") {
+    logger.info(`[order-status] Waiting 5 seconds for workflows to complete...`)
     await new Promise(resolve => setTimeout(resolve, 5000))
   }
 
   try {
-    // Use orderModule.retrieveOrder to get accurate computed fields
-    // query.graph returns undefined for payment_status/fulfillment_status
+    // METHOD 1: Try orderModule.retrieveOrder
+    logger.info(`[order-status] METHOD 1: Using orderModule.retrieveOrder()`)
     const orderResult = await orderModule.retrieveOrder(orderId)
-    const order = orderResult as any // Cast to any because payment_status/fulfillment_status exist but aren't in TS types
+    const order = orderResult as any
+    
+    logger.info(`[order-status] Order basic info:`)
+    logger.info(`  - id: ${order.id}`)
+    logger.info(`  - status: ${order.status}`)
+    logger.info(`  - display_id: ${order.display_id}`)
+    
+    logger.info(`[order-status] Order computed fields (may be undefined):`)
+    logger.info(`  - payment_status: ${order.payment_status}`)
+    logger.info(`  - fulfillment_status: ${order.fulfillment_status}`)
+    
+    logger.info(`[order-status] ALL order keys: ${Object.keys(order).join(', ')}`)
 
-    if (!order) {
-      logger.warn(`[order-status] Order ${orderId} not found`)
-      return
-    }
-
-    // Already completed - skip
     if (order.status === "completed") {
-      logger.debug(`[order-status] Order ${orderId} already completed`)
+      logger.info(`[order-status] Order already completed, stopping`)
       return
     }
 
-    // Check if order should be completed
-    // Medusa 2.0: Complete only when payment is captured AND fulfillment is delivered
-    const paymentCaptured = order.payment_status === "captured"
-    const fulfillmentDelivered = order.fulfillment_status === "delivered"
+    // METHOD 2: Try query.graph with relations
+    logger.info(`[order-status] METHOD 2: Using query.graph with relations`)
+    const { data: orders } = await query.graph({
+      entity: "order",
+      fields: [
+        "id",
+        "status",
+        "payment_status",
+        "fulfillment_status",
+        "payment_collections.*",
+        "fulfillments.*",
+      ],
+      filters: { id: orderId },
+    })
 
-    logger.info(
-      `[order-status] Order ${orderId}: payment=${order.payment_status} (${paymentCaptured}), fulfillment=${order.fulfillment_status} (${fulfillmentDelivered}), status=${order.status}`
-    )
+    const graphOrder = orders?.[0] as any
+    
+    if (graphOrder) {
+      logger.info(`[order-status] query.graph results:`)
+      logger.info(`  - payment_status: ${graphOrder.payment_status}`)
+      logger.info(`  - fulfillment_status: ${graphOrder.fulfillment_status}`)
+      logger.info(`  - payment_collections count: ${graphOrder.payment_collections?.length || 0}`)
+      logger.info(`  - fulfillments count: ${graphOrder.fulfillments?.length || 0}`)
+      
+      if (graphOrder.payment_collections?.length > 0) {
+        graphOrder.payment_collections.forEach((pc: any, i: number) => {
+          logger.info(`  - payment_collection[${i}].status: ${pc.status}`)
+          logger.info(`  - payment_collection[${i}].authorized_amount: ${pc.authorized_amount}`)
+          logger.info(`  - payment_collection[${i}].captured_amount: ${pc.captured_amount}`)
+        })
+      }
+      
+      if (graphOrder.fulfillments?.length > 0) {
+        graphOrder.fulfillments.forEach((f: any, i: number) => {
+          logger.info(`  - fulfillment[${i}].id: ${f.id}`)
+          logger.info(`  - fulfillment[${i}].shipped_at: ${f.shipped_at}`)
+          logger.info(`  - fulfillment[${i}].delivered_at: ${f.delivered_at}`)
+          logger.info(`  - fulfillment[${i}] keys: ${Object.keys(f).join(', ')}`)
+        })
+      }
+    }
 
+    // METHOD 3: Manual check logic
+    logger.info(`[order-status] METHOD 3: Manual status determination`)
+    
+    let paymentCaptured = false
+    let fulfillmentDelivered = false
+    
+    // Check if we have captured payment
+    if (graphOrder?.payment_collections?.length > 0) {
+      const pc = graphOrder.payment_collections[0]
+      paymentCaptured = pc.status === "captured" || (pc.captured_amount > 0)
+      logger.info(`  - Payment captured check: ${paymentCaptured} (status=${pc.status}, captured=${pc.captured_amount})`)
+    }
+    
+    // Check if we have delivered fulfillment
+    if (graphOrder?.fulfillments?.length > 0) {
+      const f = graphOrder.fulfillments[0]
+      fulfillmentDelivered = !!f.delivered_at
+      logger.info(`  - Fulfillment delivered check: ${fulfillmentDelivered} (delivered_at=${f.delivered_at})`)
+    }
+    
+    logger.info(`[order-status] DECISION: payment=${paymentCaptured}, fulfillment=${fulfillmentDelivered}`)
+    
     if (paymentCaptured && fulfillmentDelivered) {
+      logger.info(`[order-status] ✅ Conditions met! Completing order...`)
+      
       // Double-check to avoid race conditions
       const currentOrder = await orderModule.retrieveOrder(orderId)
       if (currentOrder.status === "completed") {
-        logger.debug(`[order-status] Order ${orderId} already completed by another process`)
+        logger.info(`[order-status] Order already completed by another process`)
         return
       }
 
-      // Complete the order
       await orderModule.updateOrders([{
         id: orderId,
         status: "completed",
       }])
 
-      logger.info(`[order-status] ✅ Completed order ${orderId}`)
+      logger.info(`[order-status] ✅✅✅ Successfully completed order ${orderId}`)
     } else {
-      logger.debug(`[order-status] Order ${orderId} not ready: payment=${paymentCaptured}, fulfillment=${fulfillmentDelivered}`)
+      logger.info(`[order-status] ⏸️ Not ready - waiting for: ${!paymentCaptured ? 'payment ' : ''}${!fulfillmentDelivered ? 'fulfillment' : ''}`)
     }
 
   } catch (error: any) {
-    logger.error(`[order-status] Error processing order ${orderId}: ${error.message}`)
+    logger.error(`[order-status] ❌ ERROR: ${error.message}`)
+    logger.error(`[order-status] Stack: ${error.stack}`)
   }
+  
+  logger.info(`[order-status] ========== END ${orderId} ==========`)
 }
 
 export const config: SubscriberConfig = {
   event: [
-    // Fulfillment events
     "fulfillment.delivered",
-    // Payment events
     "payment.captured",
     "order.payment_captured",
-    // Order events
     "order.updated",
-    "order.placed", // Safety net
+    "order.placed",
   ],
 }
