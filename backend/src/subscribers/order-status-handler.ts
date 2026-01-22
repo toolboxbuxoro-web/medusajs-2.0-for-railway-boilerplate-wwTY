@@ -191,9 +191,14 @@ export default async function orderStatusHandler({
 
 export const config: SubscriberConfig = {
   event: [
-    "fulfillment.delivered",
+    // Delivery events (when marked as delivered)
+    "delivery.created",
+    // Shipment events
+    "shipment.created",
+    // Payment events
     "payment.captured",
     "order.payment_captured",
+    // Order events
     "order.updated",
     "order.placed",
   ],
