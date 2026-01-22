@@ -10,9 +10,11 @@ import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
 
 type ItemsProps = {
   items: HttpTypes.StoreCartLineItem[] | HttpTypes.StoreOrderLineItem[] | null
+  orderId?: string
+  reviewStatuses?: Record<string, any>
 }
 
-const Items = ({ items }: ItemsProps) => {
+const Items = ({ items, orderId, reviewStatuses }: ItemsProps) => {
   return (
     <div className="flex flex-col">
       <Divider className="!mb-0" />
@@ -24,7 +26,14 @@ const Items = ({ items }: ItemsProps) => {
                   return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                 })
                 .map((item) => {
-                  return <Item key={item.id} item={item} />
+                  return (
+                    <Item 
+                      key={item.id} 
+                      item={item} 
+                      orderId={orderId} 
+                      reviewStatus={item.product_id ? reviewStatuses?.[item.product_id]?.status : "none"}
+                    />
+                  )
                 })
             : repeat(5).map((i) => {
                 return <SkeletonLineItem key={i} />

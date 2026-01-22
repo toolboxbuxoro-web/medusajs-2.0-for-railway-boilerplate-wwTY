@@ -9,12 +9,15 @@ import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
+import ReviewButton from "./review-button"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
+  orderId?: string
+  reviewStatus?: "none" | "pending" | "approved" | "rejected"
 }
 
-const Item = ({ item }: ItemProps) => {
+const Item = ({ item, orderId, reviewStatus = "none" }: ItemProps) => {
   const { locale } = useParams()
   const localeStr = String(locale || "ru")
 
@@ -27,15 +30,26 @@ const Item = ({ item }: ItemProps) => {
       </Table.Cell>
 
       <Table.Cell className="text-left">
-        <Text
-          className="txt-medium-plus text-ui-fg-base"
-          data-testid="product-name"
-        >
-          {getLocalizedLineItemTitle(item, localeStr)}
-        </Text>
-        {item.variant && (
-          <LineItemOptions variant={item.variant} data-testid="product-variant" />
-        )}
+        <div className="flex flex-col gap-y-1">
+          <Text
+            className="txt-medium-plus text-ui-fg-base"
+            data-testid="product-name"
+          >
+            {getLocalizedLineItemTitle(item, localeStr)}
+          </Text>
+          {item.variant && (
+            <LineItemOptions variant={item.variant} data-testid="product-variant" />
+          )}
+          {orderId && item.product_id && (
+            <div className="mt-2">
+              <ReviewButton 
+                productId={item.product_id} 
+                orderId={orderId} 
+                reviewStatus={reviewStatus}
+              />
+            </div>
+          )}
+        </div>
       </Table.Cell>
 
       <Table.Cell className="!pr-0">

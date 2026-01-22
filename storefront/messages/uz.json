@@ -382,7 +382,9 @@
     "cons": "Kamchiliklari",
     "cons_placeholder": "Nimani yaxshilash mumkin?",
     "images": "Rasm qo'shish",
-    "only_after_delivery": "Sharh faqat buyurtmani qabul qilgandan keyin qoldirilishi mumkin"
+    "only_after_delivery": "Sharh faqat buyurtmani qabul qilgandan keyin qoldirilishi mumkin",
+    "review_status_rejected": "Rad etilgan",
+    "my_reviews": "Mening sharhlarim"
   },
   "search": {
     "search": "Qidiruv",

@@ -391,7 +391,9 @@
     "cons": "Недостатки",
     "cons_placeholder": "Что можно улучшить?",
     "images": "Добавить фото",
-    "only_after_delivery": "Отзыв можно оставить только после получения заказа"
+    "only_after_delivery": "Отзыв можно оставить только после получения заказа",
+    "review_status_rejected": "Отклонён",
+    "my_reviews": "Мои отзывы"
   },
   "search": {
     "search": "Поиск",

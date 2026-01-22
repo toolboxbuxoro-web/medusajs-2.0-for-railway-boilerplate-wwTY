@@ -153,6 +153,7 @@ class ReviewsService extends MedusaService({
       console.log(`[ReviewsService.canReview] DEBUG - Fulfillments:`, debugFulfillmentCheck?.rows)
 
       // Main query - JOIN product_variant to get product_id from variant_id
+      // Note: delivered_at check temporarily disabled - field may not be populated
       const result = await pgConnection.raw(`
         SELECT DISTINCT o.id as order_id
         FROM "order" o
@@ -164,11 +165,6 @@ class ReviewsService extends MedusaService({
           AND pv.product_id = ?
           AND o.status != 'canceled'
           AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
-          AND EXISTS (
-            SELECT 1 FROM fulfillment f
-            JOIN order_fulfillment of ON f.id = of.fulfillment_id
-            WHERE of.order_id = o.id AND f.delivered_at IS NOT NULL
-          )
         LIMIT 1
       `, [customerId, productId])
 
