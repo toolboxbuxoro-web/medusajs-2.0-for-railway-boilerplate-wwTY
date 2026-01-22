@@ -1,5 +1,5 @@
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 
 /**
@@ -17,6 +17,7 @@ export default async function autoCompleteOrder({
 }: SubscriberArgs<any>) {
   const logger = container.resolve("logger")
   const orderModule: IOrderModuleService = container.resolve(Modules.ORDER)
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
   // Extract order ID from event data
   // Different events may have different structures
@@ -38,12 +39,20 @@ export default async function autoCompleteOrder({
   }
 
   try {
-    // Retrieve the order with current status
-    const order = await orderModule.retrieveOrder(orderId, {
-      relations: ["payment_collections", "fulfillments"],
+    // Use query.graph to get order with payment_status and fulfillment_status
+    // These fields are available in the graph but not in the typed OrderDTO
+    const { data: orders } = await query.graph({
+      entity: "order",
+      fields: ["id", "status", "payment_status", "fulfillment_status"],
+      filters: { id: orderId },
     })
 
-    const orderAny = order as any
+    const order = orders?.[0] as any
+
+    if (!order) {
+      logger.warn(`[auto-complete-order] Order ${orderId} not found`)
+      return
+    }
 
     // Skip if already completed
     if (order.status === "completed") {
@@ -53,7 +62,7 @@ export default async function autoCompleteOrder({
 
     // Check payment status
     // Accept both "captured" and "authorized" (some payment providers use authorized)
-    const paymentStatus = orderAny.payment_status || order.payment_collections?.[0]?.status
+    const paymentStatus = order.payment_status
     const paymentOk =
       paymentStatus === "captured" ||
       paymentStatus === "authorized" ||
@@ -61,7 +70,7 @@ export default async function autoCompleteOrder({
 
     // Check fulfillment status
     // Accept "fulfilled", "shipped", or "delivered" (some flows use delivered)
-    const fulfillmentStatus = orderAny.fulfillment_status || order.fulfillments?.[0]?.status
+    const fulfillmentStatus = order.fulfillment_status
     const fulfillmentOk =
       fulfillmentStatus === "fulfilled" ||
       fulfillmentStatus === "shipped" ||
@@ -89,9 +98,11 @@ export default async function autoCompleteOrder({
         logger.info(`[auto-complete-order] ✅ Successfully completed order ${orderId}`)
       } catch (completeError: any) {
         logger.error(
-          `[auto-complete-order] ❌ Failed to complete order ${orderId}: ${completeError.message}`,
-          { error: completeError, stack: completeError.stack }
+          `[auto-complete-order] ❌ Failed to complete order ${orderId}: ${completeError.message || completeError}`
         )
+        if (completeError.stack) {
+          logger.error(`[auto-complete-order] Stack: ${completeError.stack}`)
+        }
       }
     } else {
       logger.debug(
@@ -100,9 +111,12 @@ export default async function autoCompleteOrder({
     }
   } catch (error: any) {
     logger.error(
-      `[auto-complete-order] Error processing order ${orderId}: ${error.message}`,
-      { error, stack: error.stack, eventName: name, eventData: data }
+      `[auto-complete-order] Error processing order ${orderId}: ${error.message || error}`
     )
+    if (error.stack) {
+      logger.error(`[auto-complete-order] Stack: ${error.stack}`)
+    }
+    logger.debug(`[auto-complete-order] Event: ${name}, Data: ${JSON.stringify(data)}`)
   }
 }
 
