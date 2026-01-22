@@ -119,18 +119,50 @@ class ReviewsService extends MedusaService({
 
       console.log(`[ReviewsService.canReview] Querying database for eligible orders...`)
       
+      // Debug: First check if order exists at all for this customer
+      const debugOrderCheck = await pgConnection.raw(`
+        SELECT o.id, o.status, o.customer_id
+        FROM "order" o
+        WHERE o.customer_id = ?
+        ORDER BY o.created_at DESC
+        LIMIT 5
+      `, [customerId])
+      console.log(`[ReviewsService.canReview] DEBUG - Customer orders:`, debugOrderCheck?.rows)
+
+      // Debug: Check order items for the customer's orders
+      const debugItemsCheck = await pgConnection.raw(`
+        SELECT oi.id, oi.order_id, oi.variant_id, oi.product_id, oi.title
+        FROM order_item oi
+        JOIN "order" o ON oi.order_id = o.id
+        WHERE o.customer_id = ?
+        ORDER BY oi.created_at DESC
+        LIMIT 5
+      `, [customerId])
+      console.log(`[ReviewsService.canReview] DEBUG - Order items:`, debugItemsCheck?.rows)
+
+      // Debug: Check fulfillments with delivered_at
+      const debugFulfillmentCheck = await pgConnection.raw(`
+        SELECT f.id, f.delivered_at, of.order_id
+        FROM fulfillment f
+        JOIN order_fulfillment of ON f.id = of.fulfillment_id
+        JOIN "order" o ON of.order_id = o.id
+        WHERE o.customer_id = ?
+        ORDER BY f.created_at DESC
+        LIMIT 5
+      `, [customerId])
+      console.log(`[ReviewsService.canReview] DEBUG - Fulfillments:`, debugFulfillmentCheck?.rows)
+
+      // Main query - using order_item.product_id directly (Medusa 2.0 stores product_id on order_item)
       const result = await pgConnection.raw(`
         SELECT DISTINCT o.id as order_id
         FROM "order" o
         JOIN order_payment_collection opc ON o.id = opc.order_id
         JOIN payment_collection pc ON opc.payment_collection_id = pc.id
         JOIN order_item oi ON o.id = oi.order_id
-        JOIN product_variant pv ON oi.variant_id = pv.id
         WHERE o.customer_id = ?
-          AND pv.product_id = ?
+          AND oi.product_id = ?
           AND o.status != 'canceled'
           AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
-          -- Marketplace requirement: must be delivered before review
           AND EXISTS (
             SELECT 1 FROM fulfillment f
             JOIN order_fulfillment of ON f.id = of.fulfillment_id
@@ -138,6 +170,8 @@ class ReviewsService extends MedusaService({
           )
         LIMIT 1
       `, [customerId, productId])
+
+      console.log(`[ReviewsService.canReview] Query result:`, result?.rows)
 
       const eligibleOrder = result?.rows?.[0]
 
