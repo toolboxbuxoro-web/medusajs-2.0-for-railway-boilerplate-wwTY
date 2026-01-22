@@ -15,19 +15,55 @@ export default async function orderStatusHandler({
   const orderModule: IOrderModuleService = container.resolve(Modules.ORDER)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
-  // Extract order ID from event data
+  // Log raw event data for debugging
+  logger.info(`[order-status] Event: ${name}`)
+  logger.info(`[order-status] Raw data keys: ${Object.keys(data).join(', ')}`)
+  logger.info(`[order-status] Raw data: ${JSON.stringify(data).substring(0, 500)}`)
+
+  // Extract order ID from event data - handle various event structures
   let orderId: string | undefined
 
+  // Direct order_id field
   if (data.order_id) {
     orderId = data.order_id
-  } else if (data.id && typeof data.id === "string" && data.id.startsWith("order_")) {
+    logger.info(`[order-status] Found order_id in data.order_id: ${orderId}`)
+  } 
+  // Order event with id starting with order_
+  else if (data.id && typeof data.id === "string" && data.id.startsWith("order_")) {
     orderId = data.id
-  } else if (data.order?.id) {
+    logger.info(`[order-status] Found order_id in data.id: ${orderId}`)
+  } 
+  // Nested order object
+  else if (data.order?.id) {
     orderId = data.order.id
+    logger.info(`[order-status] Found order_id in data.order.id: ${orderId}`)
+  }
+  // Fulfillment event - order_id might be in fulfillment data
+  else if (data.fulfillment?.order_id) {
+    orderId = data.fulfillment.order_id
+    logger.info(`[order-status] Found order_id in data.fulfillment.order_id: ${orderId}`)
+  }
+  // Fulfillment event - sometimes just has id (fulfillment_id), need to look up order
+  else if (data.id && typeof data.id === "string" && data.id.startsWith("ful_")) {
+    logger.info(`[order-status] Got fulfillment ID ${data.id}, need to look up order`)
+    try {
+      // Query the order associated with this fulfillment
+      const { data: fulfillments } = await query.graph({
+        entity: "fulfillment",
+        fields: ["id", "order_id"],
+        filters: { id: data.id },
+      })
+      if (fulfillments?.[0]?.order_id) {
+        orderId = fulfillments[0].order_id
+        logger.info(`[order-status] Looked up order_id from fulfillment: ${orderId}`)
+      }
+    } catch (e: any) {
+      logger.warn(`[order-status] Failed to look up order from fulfillment: ${e.message}`)
+    }
   }
 
   if (!orderId) {
-    logger.debug(`[order-status] No order ID in event ${name}, skipping`)
+    logger.warn(`[order-status] No order ID found in event ${name}, skipping. Data: ${JSON.stringify(data).substring(0, 200)}`)
     return
   }
 
