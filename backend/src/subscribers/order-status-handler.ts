@@ -1,11 +1,16 @@
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
-import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 
 /**
- * Order Status Handler - Medusa 2.0 Compliant (Debug Version)
+ * Order Status Handler - Medusa 2.0 Compliant
  * 
- * Extensive logging to diagnose why payment_status/fulfillment_status are undefined
+ * Automatically completes orders when BOTH conditions are met:
+ * 1. payment_status = "captured"
+ * 2. fulfillment_status = "delivered"
+ * 
+ * Note: Uses direct SQL for status checks as computed fields are not reliably 
+ * returned by module methods during background event processing.
  */
 export default async function orderStatusHandler({
   event: { data, name },
@@ -13,192 +18,106 @@ export default async function orderStatusHandler({
 }: SubscriberArgs<any>) {
   const logger = container.resolve("logger")
   const orderModule: IOrderModuleService = container.resolve(Modules.ORDER)
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const pgConnection = container.resolve("__pg_connection__")
 
-  // Log raw event data for debugging
-  logger.info(`[order-status] Event: ${name}`)
-  logger.info(`[order-status] Raw data keys: ${Object.keys(data).join(', ')}`)
-  logger.info(`[order-status] Raw data: ${JSON.stringify(data).substring(0, 500)}`)
-
-  // Extract order ID from event data - handle various event structures
   let orderId: string | undefined
 
-  // Direct order_id field
+  // 1. Extract order ID from various event structures
   if (data.order_id) {
     orderId = data.order_id
-    logger.info(`[order-status] Found order_id in data.order_id: ${orderId}`)
-  } 
-  // Order event with id starting with order_
-  else if (data.id && typeof data.id === "string" && data.id.startsWith("order_")) {
+  } else if (data.id && typeof data.id === "string" && data.id.startsWith("order_")) {
     orderId = data.id
-    logger.info(`[order-status] Found order_id in data.id: ${orderId}`)
-  } 
-  // Nested order object
-  else if (data.order?.id) {
+  } else if (data.order?.id) {
     orderId = data.order.id
-    logger.info(`[order-status] Found order_id in data.order.id: ${orderId}`)
-  }
-  // Fulfillment event - order_id might be in fulfillment data
-  else if (data.fulfillment?.order_id) {
+  } else if (data.fulfillment?.order_id) {
     orderId = data.fulfillment.order_id
-    logger.info(`[order-status] Found order_id in data.fulfillment.order_id: ${orderId}`)
-  }
-  // Fulfillment event - sometimes just has id (fulfillment_id), need to look up order
-  else if (data.id && typeof data.id === "string" && data.id.startsWith("ful_")) {
-    logger.info(`[order-status] Got fulfillment ID ${data.id}, need to look up order`)
+  } 
+  // Handle fulfillment/delivery/shipment events where only fulfillment ID is provided
+  else if (data.id && typeof data.id === "string" && (data.id.startsWith("ful_"))) {
     try {
-      // Query the order associated with this fulfillment
-      const { data: fulfillments } = await query.graph({
-        entity: "fulfillment",
-        fields: ["id", "order_id"],
-        filters: { id: data.id },
-      })
-      if (fulfillments?.[0]?.order_id) {
-        orderId = fulfillments[0].order_id
-        logger.info(`[order-status] Looked up order_id from fulfillment: ${orderId}`)
+      // In Medusa 2.0, fulfillment -> order relationship is through order_fulfillment link table
+      const linkResult = await pgConnection.raw(`
+        SELECT order_id 
+        FROM order_fulfillment
+        WHERE fulfillment_id = ?
+        LIMIT 1
+      `, [data.id])
+      
+      if (linkResult?.rows?.[0]?.order_id) {
+        orderId = linkResult.rows[0].order_id
       }
     } catch (e: any) {
-      logger.warn(`[order-status] Failed to look up order from fulfillment: ${e.message}`)
+      logger.error(`[order-status] Failed to lookup order from fulfillment ${data.id}: ${e.message}`)
     }
   }
 
   if (!orderId) {
-    logger.warn(`[order-status] No order ID found in event ${name}, skipping. Data: ${JSON.stringify(data).substring(0, 200)}`)
+    logger.debug(`[order-status] Could not find order ID for event ${name}`)
     return
   }
 
-  logger.info(`[order-status] ========== Processing ${name} for order ${orderId} ==========`)
+  logger.info(`[order-status] Processing ${name} for order ${orderId}`)
 
-  // For order.placed, wait a bit to allow initial workflows to complete
+  // For order.placed, wait a bit to allow initial workflows (like payment capture) to complete
   if (name === "order.placed") {
-    logger.info(`[order-status] Waiting 5 seconds for workflows to complete...`)
     await new Promise(resolve => setTimeout(resolve, 5000))
   }
 
   try {
-    // METHOD 1: Try orderModule.retrieveOrder
-    logger.info(`[order-status] METHOD 1: Using orderModule.retrieveOrder()`)
-    const orderResult = await orderModule.retrieveOrder(orderId)
-    const order = orderResult as any
-    
-    logger.info(`[order-status] Order basic info:`)
-    logger.info(`  - id: ${order.id}`)
-    logger.info(`  - status: ${order.status}`)
-    logger.info(`  - display_id: ${order.display_id}`)
-    
-    logger.info(`[order-status] Order computed fields (may be undefined):`)
-    logger.info(`  - payment_status: ${order.payment_status}`)
-    logger.info(`  - fulfillment_status: ${order.fulfillment_status}`)
-    
-    logger.info(`[order-status] ALL order keys: ${Object.keys(order).join(', ')}`)
-
-    if (order.status === "completed") {
-      logger.info(`[order-status] Order already completed, stopping`)
+    // Check order status first - skip if already completed
+    const order = await orderModule.retrieveOrder(orderId)
+    if (!order || order.status === "completed") {
       return
     }
 
-    // METHOD 2: Try query.graph with relations
-    logger.info(`[order-status] METHOD 2: Using query.graph with relations`)
-    const { data: orders } = await query.graph({
-      entity: "order",
-      fields: [
-        "id",
-        "status",
-        "payment_status",
-        "fulfillment_status",
-        "payment_collections.*",
-        "fulfillments.*",
-      ],
-      filters: { id: orderId },
-    })
+    // 2. Check Payment Status via SQL
+    // In Medusa 2.0, an order is 'captured' if the associated payment_collection is captured
+    const paymentResult = await pgConnection.raw(`
+      SELECT pc.status, pc.captured_amount
+      FROM payment_collection pc
+      JOIN order_payment_collection opc ON pc.id = opc.payment_collection_id
+      WHERE opc.order_id = ?
+      LIMIT 1
+    `, [orderId])
 
-    const graphOrder = orders?.[0] as any
-    
-    if (graphOrder) {
-      logger.info(`[order-status] query.graph results:`)
-      logger.info(`  - payment_status: ${graphOrder.payment_status}`)
-      logger.info(`  - fulfillment_status: ${graphOrder.fulfillment_status}`)
-      logger.info(`  - payment_collections count: ${graphOrder.payment_collections?.length || 0}`)
-      logger.info(`  - fulfillments count: ${graphOrder.fulfillments?.length || 0}`)
-      
-      if (graphOrder.payment_collections?.length > 0) {
-        graphOrder.payment_collections.forEach((pc: any, i: number) => {
-          logger.info(`  - payment_collection[${i}].status: ${pc.status}`)
-          logger.info(`  - payment_collection[${i}].authorized_amount: ${pc.authorized_amount}`)
-          logger.info(`  - payment_collection[${i}].captured_amount: ${pc.captured_amount}`)
-        })
-      }
-      
-      if (graphOrder.fulfillments?.length > 0) {
-        graphOrder.fulfillments.forEach((f: any, i: number) => {
-          logger.info(`  - fulfillment[${i}].id: ${f.id}`)
-          logger.info(`  - fulfillment[${i}].shipped_at: ${f.shipped_at}`)
-          logger.info(`  - fulfillment[${i}].delivered_at: ${f.delivered_at}`)
-          logger.info(`  - fulfillment[${i}] keys: ${Object.keys(f).join(', ')}`)
-        })
-      }
-    }
+    const pc = paymentResult?.rows?.[0]
+    const isCaptured = pc && (pc.status === 'completed' || pc.status === 'captured' || Number(pc.captured_amount) > 0)
 
-    // METHOD 3: Manual check logic
-    logger.info(`[order-status] METHOD 3: Manual status determination`)
-    
-    let paymentCaptured = false
-    let fulfillmentDelivered = false
-    
-    // Check if we have captured payment
-    if (graphOrder?.payment_collections?.length > 0) {
-      const pc = graphOrder.payment_collections[0]
-      paymentCaptured = pc.status === "captured" || (pc.captured_amount > 0)
-      logger.info(`  - Payment captured check: ${paymentCaptured} (status=${pc.status}, captured=${pc.captured_amount})`)
-    }
-    
-    // Check if we have delivered fulfillment
-    if (graphOrder?.fulfillments?.length > 0) {
-      const f = graphOrder.fulfillments[0]
-      fulfillmentDelivered = !!f.delivered_at
-      logger.info(`  - Fulfillment delivered check: ${fulfillmentDelivered} (delivered_at=${f.delivered_at})`)
-    }
-    
-    logger.info(`[order-status] DECISION: payment=${paymentCaptured}, fulfillment=${fulfillmentDelivered}`)
-    
-    if (paymentCaptured && fulfillmentDelivered) {
-      logger.info(`[order-status] ✅ Conditions met! Completing order...`)
-      
-      // Double-check to avoid race conditions
-      const currentOrder = await orderModule.retrieveOrder(orderId)
-      if (currentOrder.status === "completed") {
-        logger.info(`[order-status] Order already completed by another process`)
-        return
-      }
+    // 3. Check Fulfillment Status via SQL
+    // An order is 'delivered' if all fulfillments associated with it are delivered
+    const fulfillmentResult = await pgConnection.raw(`
+      SELECT f.id, f.delivered_at
+      FROM fulfillment f
+      JOIN order_fulfillment of ON f.id = of.fulfillment_id
+      WHERE of.order_id = ?
+    `, [orderId])
 
+    const fulfillments = fulfillmentResult?.rows || []
+    // If no fulfillments yet, it's definitely not delivered
+    const isDelivered = fulfillments.length > 0 && fulfillments.every((f: any) => f.delivered_at !== null)
+
+    logger.info(`[order-status] Order ${orderId} status check: payment_captured=${isCaptured}, items_delivered=${isDelivered}`)
+
+    if (isCaptured && isDelivered) {
+      // Complete the order
       await orderModule.updateOrders([{
         id: orderId,
         status: "completed",
       }])
 
-      logger.info(`[order-status] ✅✅✅ Successfully completed order ${orderId}`)
-    } else {
-      logger.info(`[order-status] ⏸️ Not ready - waiting for: ${!paymentCaptured ? 'payment ' : ''}${!fulfillmentDelivered ? 'fulfillment' : ''}`)
+      logger.info(`[order-status] ✅ Order ${orderId} marked as COMPLETED`)
     }
-
   } catch (error: any) {
-    logger.error(`[order-status] ❌ ERROR: ${error.message}`)
-    logger.error(`[order-status] Stack: ${error.stack}`)
+    logger.error(`[order-status] Error processing order ${orderId}: ${error.message}`)
   }
-  
-  logger.info(`[order-status] ========== END ${orderId} ==========`)
 }
 
 export const config: SubscriberConfig = {
   event: [
-    // Delivery events (when marked as delivered)
     "delivery.created",
-    // Shipment events
     "shipment.created",
-    // Payment events
     "payment.captured",
     "order.payment_captured",
-    // Order events
     "order.updated",
     "order.placed",
   ],
