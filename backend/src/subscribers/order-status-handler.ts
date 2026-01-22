@@ -46,19 +46,10 @@ export default async function orderStatusHandler({
   }
 
   try {
-    // Get order with payment and fulfillment status using Medusa API
-    const { data: orders } = await query.graph({
-      entity: "order",
-      fields: [
-        "id",
-        "status",
-        "payment_status",
-        "fulfillment_status",
-      ],
-      filters: { id: orderId },
-    })
-
-    const order = orders?.[0] as any
+    // Use orderModule.retrieveOrder to get accurate computed fields
+    // query.graph returns undefined for payment_status/fulfillment_status
+    const orderResult = await orderModule.retrieveOrder(orderId)
+    const order = orderResult as any // Cast to any because payment_status/fulfillment_status exist but aren't in TS types
 
     if (!order) {
       logger.warn(`[order-status] Order ${orderId} not found`)
@@ -77,7 +68,7 @@ export default async function orderStatusHandler({
     const fulfillmentDelivered = order.fulfillment_status === "delivered"
 
     logger.info(
-      `[order-status] Order ${orderId}: payment=${order.payment_status} (${paymentCaptured}), fulfillment=${order.fulfillment_status} (${fulfillmentDelivered})`
+      `[order-status] Order ${orderId}: payment=${order.payment_status} (${paymentCaptured}), fulfillment=${order.fulfillment_status} (${fulfillmentDelivered}), status=${order.status}`
     )
 
     if (paymentCaptured && fulfillmentDelivered) {
