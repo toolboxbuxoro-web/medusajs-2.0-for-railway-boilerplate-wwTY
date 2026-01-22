@@ -7,12 +7,13 @@ export const Review = model.define("review", {
   order_id: model.text(),
   rating: model.number(),
   comment: model.text().nullable(),
+  pros: model.text().nullable(),      // Marketplace: pros/advantages
+  cons: model.text().nullable(),      // Marketplace: cons/disadvantages
+  images: model.json().nullable(),    // Array of image URLs: ["url1", "url2", ...]
   rejection_reason: model.text().nullable(),
   status: model
     .enum(["pending", "approved", "rejected", "hidden"])
-    // By default a new review is auto-published (approved).
-    // Other statuses are used for moderation via the admin panel.
-    .default("approved"),
+    .default("pending"),  // Changed: reviews now require moderation
 })
 .indexes([
   { on: ["product_id"] },

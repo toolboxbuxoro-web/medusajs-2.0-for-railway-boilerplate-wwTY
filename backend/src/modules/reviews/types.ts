@@ -13,6 +13,10 @@ export interface ReviewDTO {
   order_id: string
   rating: number
   comment?: string | null
+  pros?: string | null
+  cons?: string | null
+  images?: string[] | null
+  rejection_reason?: string | null
   status: ReviewStatus
   created_at: Date
   updated_at: Date
@@ -21,17 +25,12 @@ export interface ReviewDTO {
 export interface CreateReviewDTO {
   product_id: string
   customer_id: string
-  /**
-   * For production we always expect a review to be tied to a concrete order.
-   * This is enforced by the stricter Store API flow that checks canReview.
-   */
   order_id: string
   rating: number
   comment?: string | null
-  /**
-   * When omitted, the module will use its default status (currently "approved").
-   * Admin flows can explicitly pass other statuses such as "pending" or "rejected".
-   */
+  pros?: string | null
+  cons?: string | null
+  images?: string[] | null
   status?: ReviewStatus
 }
 

@@ -5,6 +5,9 @@ export interface Review {
   order_id: string
   rating: number
   comment?: string | null
+  pros?: string | null      // Marketplace: advantages
+  cons?: string | null      // Marketplace: disadvantages
+  images?: string[] | null  // Array of image URLs
   status: "pending" | "approved" | "rejected" | "hidden"
   created_at: string
   updated_at: string
@@ -14,6 +17,9 @@ export interface CreateReviewPayload {
   product_id: string
   rating: number
   comment?: string
+  pros?: string       // Marketplace: advantages
+  cons?: string       // Marketplace: disadvantages
+  images?: string[]   // Array of image URLs (max 5)
 }
 
 export interface CanReviewResponse {

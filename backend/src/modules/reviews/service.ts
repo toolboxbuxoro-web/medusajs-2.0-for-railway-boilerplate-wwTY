@@ -18,6 +18,57 @@ class ReviewsService extends MedusaService({
   }
 
   /**
+   * Create a review and emit event for aggregation.
+   * Use this instead of createReviews() directly.
+   */
+  async createReviewWithEvent(data: any) {
+    const reviewId = data.product_id ? `${data.product_id}-${data.customer_id}` : "unknown"
+    console.log(`[ReviewsService.createReviewWithEvent] Creating review for product ${data.product_id}, customer ${data.customer_id}`)
+    
+    try {
+      const review = await this.createReviews(data)
+      
+      // Get the review ID (handle both single and array responses)
+      const actualReviewId = Array.isArray(review) ? review[0]?.id : (review as any)?.id
+      
+      if (!actualReviewId) {
+        console.error(`[ReviewsService.createReviewWithEvent] Failed to get review ID after creation:`, {
+          review,
+          isArray: Array.isArray(review),
+          data
+        })
+        return review
+      }
+      
+      console.log(`[ReviewsService.createReviewWithEvent] Review created with ID: ${actualReviewId}`)
+      
+      try {
+        await this.eventBus_.emit({
+          name: "review.created",
+          data: { id: actualReviewId },
+        })
+        console.log(`[ReviewsService.createReviewWithEvent] Event 'review.created' emitted for review ${actualReviewId}`)
+      } catch (eventError: any) {
+        console.error(`[ReviewsService.createReviewWithEvent] Failed to emit event for review ${actualReviewId}:`, {
+          error: eventError.message,
+          stack: eventError.stack
+        })
+        // Don't fail the whole operation if event emission fails
+      }
+      
+      return review
+    } catch (error: any) {
+      console.error(`[ReviewsService.createReviewWithEvent] Failed to create review:`, {
+        error: error.message,
+        stack: error.stack,
+        productId: data.product_id,
+        customerId: data.customer_id
+      })
+      throw error
+    }
+  }
+
+  /**
    * Check if a customer can review a product.
    * 
    * Production-ready logic:
@@ -27,7 +78,10 @@ class ReviewsService extends MedusaService({
    * 4. User hasn't already reviewed this product (no active review)
    */
   async canReview(productId: string, customerId: string) {
+    console.log(`[ReviewsService.canReview] Checking eligibility for product ${productId}, customer ${customerId}`)
+    
     if (!productId || !customerId) {
+      console.warn(`[ReviewsService.canReview] Missing required parameters:`, { productId, customerId })
       return {
         can_review: false,
         reason: "no_completed_order",
@@ -42,7 +96,10 @@ class ReviewsService extends MedusaService({
         status: ["approved", "pending"]
       })
       
+      console.log(`[ReviewsService.canReview] Found ${existingReviews.length} existing review(s) for product ${productId}, customer ${customerId}`)
+      
       if (existingReviews.length > 0) {
+        console.log(`[ReviewsService.canReview] Customer ${customerId} already reviewed product ${productId}`)
         return {
           can_review: false,
           reason: "already_reviewed",
@@ -52,6 +109,16 @@ class ReviewsService extends MedusaService({
       // 2. Check for eligible order using SQL (query.graph doesn't return payment_status reliably)
       const pgConnection = this.container_.resolve("__pg_connection__")
 
+      if (!pgConnection) {
+        console.error(`[ReviewsService.canReview] PostgreSQL connection not available`)
+        return {
+          can_review: false,
+          reason: "no_completed_order",
+        }
+      }
+
+      console.log(`[ReviewsService.canReview] Querying database for eligible orders...`)
+      
       const result = await pgConnection.raw(`
         SELECT DISTINCT o.id as order_id
         FROM "order" o
@@ -63,24 +130,37 @@ class ReviewsService extends MedusaService({
           AND pv.product_id = ?
           AND o.status != 'canceled'
           AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
+          -- Marketplace requirement: must be delivered before review
+          AND EXISTS (
+            SELECT 1 FROM fulfillment f
+            JOIN order_fulfillment of ON f.id = of.fulfillment_id
+            WHERE of.order_id = o.id AND f.delivered_at IS NOT NULL
+          )
         LIMIT 1
       `, [customerId, productId])
 
       const eligibleOrder = result?.rows?.[0]
 
       if (eligibleOrder?.order_id) {
+        console.log(`[ReviewsService.canReview] Found eligible order ${eligibleOrder.order_id} for product ${productId}, customer ${customerId}`)
         return {
           can_review: true,
           order_id: eligibleOrder.order_id,
         }
       }
 
+      console.log(`[ReviewsService.canReview] No eligible order found for product ${productId}, customer ${customerId}`)
       return {
         can_review: false,
         reason: "no_completed_order",
       }
     } catch (error: any) {
-      console.error(`[ReviewsService.canReview] Error for product ${productId}, customer ${customerId}:`, error)
+      console.error(`[ReviewsService.canReview] Error for product ${productId}, customer ${customerId}:`, {
+        error: error.message,
+        stack: error.stack,
+        sqlError: error.code,
+        sqlState: error.sqlState
+      })
       return {
         can_review: false,
         reason: "no_completed_order",
@@ -105,19 +185,45 @@ class ReviewsService extends MedusaService({
     status: ReviewStatus,
     rejection_reason?: string
   ) {
-    const updateData: any = { id, status }
-    if (rejection_reason) {
-      updateData.rejection_reason = rejection_reason
-    }
+    console.log(`[ReviewsService.updateReviewStatus] Updating review ${id} to status: ${status}${rejection_reason ? ` (reason: ${rejection_reason.substring(0, 50)}...)` : ""}`)
     
-    const review = await this.updateReviews(updateData)
+    try {
+      const updateData: any = { id, status }
+      if (rejection_reason) {
+        updateData.rejection_reason = rejection_reason
+      }
+      
+      const review = await this.updateReviews(updateData)
 
-    await this.eventBus_.emit({
-      name: "review.updated",
-      data: { id },
-    })
+      if (!review) {
+        console.error(`[ReviewsService.updateReviewStatus] Failed to update review ${id} - updateReviews returned null/undefined`)
+        throw new Error(`Failed to update review ${id}`)
+      }
 
-    return review
+      try {
+        await this.eventBus_.emit({
+          name: "review.updated",
+          data: { id },
+        })
+        console.log(`[ReviewsService.updateReviewStatus] Event 'review.updated' emitted for review ${id}`)
+      } catch (eventError: any) {
+        console.error(`[ReviewsService.updateReviewStatus] Failed to emit event for review ${id}:`, {
+          error: eventError.message,
+          stack: eventError.stack
+        })
+        // Don't fail the whole operation if event emission fails
+      }
+
+      return review
+    } catch (error: any) {
+      console.error(`[ReviewsService.updateReviewStatus] Failed to update review ${id}:`, {
+        error: error.message,
+        stack: error.stack,
+        status,
+        hasRejectionReason: !!rejection_reason
+      })
+      throw error
+    }
   }
 }
 

@@ -12,6 +12,7 @@ export async function POST(
       status: "pending" | "approved" | "rejected" | "hidden",
       rejection_reason?: string 
     }
+    const adminId = (req as any).auth_context?.actor_id || "unknown"
 
     if (!id || typeof id !== "string") {
       res.status(400).json({ message: "Invalid review ID" })
@@ -33,12 +34,35 @@ export async function POST(
       return
     }
 
+    // Require rejection_reason when status is rejected
+    if (status === "rejected" && (!rejection_reason || rejection_reason.trim().length === 0)) {
+      res.status(400).json({ 
+        message: "Rejection reason is required when status is 'rejected'" 
+      })
+      return
+    }
+
+    // Check current status before updating
+    const currentReview = await reviewsModuleService.retrieveReview(id)
+    
+    if (currentReview.status === status) {
+      res.status(400).json({ 
+        message: `Review is already ${status}`,
+        review: currentReview
+      })
+      return
+    }
+
+    console.log(`[Admin Review Action] Admin ${adminId} updating review ${id} status from ${currentReview.status} to ${status}${rejection_reason ? `, reason: ${rejection_reason.substring(0, 50)}...` : ""}`)
+
     // Use the service method that emits the event
     const review = await reviewsModuleService.updateReviewStatus(
       id, 
       status, 
       rejection_reason?.trim() || undefined
     )
+
+    console.log(`[Admin Review Action] Review ${id} status updated successfully by admin ${adminId}`)
 
     res.json({ review })
   } catch (error: any) {
