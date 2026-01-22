@@ -40,6 +40,11 @@ export default async function orderStatusHandler({
 
   logger.info(`[order-status] Processing ${name} for order ${orderId}`)
 
+  // For order.placed, wait a bit to allow initial workflows (payment/fulfillment) to complete
+  if (name === "order.placed") {
+    await new Promise(resolve => setTimeout(resolve, 5000))
+  }
+
   try {
     // Get order with payment and fulfillment status using Medusa API
     const { data: orders } = await query.graph({
@@ -101,12 +106,13 @@ export default async function orderStatusHandler({
 
 export const config: SubscriberConfig = {
   event: [
-    // Fulfillment events - primary trigger for order completion
+    // Fulfillment events
     "fulfillment.delivered",
-    // Payment events - in case fulfillment was already delivered
+    // Payment events
     "payment.captured",
     "order.payment_captured",
-    // Order update - catch-all for any status changes
+    // Order events
     "order.updated",
+    "order.placed", // Safety net
   ],
 }
