@@ -729,6 +729,17 @@ export class ClickMerchantService {
             },
           })
           this.logger_.info(`[ClickMerchant] Cart ${session.cart_id} -> order ${orderId} (saved to session)`)
+
+          // CRITICAL: Capture the payment to change status from 'authorized' to 'captured'
+          try {
+            await paymentModule.capturePayment({
+              payment_collection_id: session.payment_collection_id,
+              captured_by: "click-merchant"
+            })
+            this.logger_.info(`[ClickMerchant] ✅ Captured payment for order ${orderId}`)
+          } catch (captureErr: any) {
+            this.logger_.error(`[ClickMerchant] ⚠️ Failed to capture payment: ${captureErr.message}`)
+          }
         } else {
           this.logger_.warn(`[ClickMerchant] completeCartWorkflow succeeded but no order ID returned`)
         }

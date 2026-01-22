@@ -678,6 +678,17 @@ export class PaymeMerchantService {
           this.logger_.info(
             `[PaymeMerchant] Completed cart ${cartId} -> order ${orderId} (saved to session ${session.id})`
           )
+
+          // CRITICAL: Capture the payment to change status from 'authorized' to 'captured'
+          try {
+            await paymentModule.capturePayment({
+              payment_collection_id: session.payment_collection_id,
+              captured_by: "payme-merchant"
+            })
+            this.logger_.info(`[PaymeMerchant] ✅ Captured payment for order ${orderId}`)
+          } catch (captureErr: any) {
+            this.logger_.error(`[PaymeMerchant] ⚠️ Failed to capture payment: ${captureErr.message}`)
+          }
         } else {
           this.logger_.warn(
             `[PaymeMerchant] completeCartWorkflow succeeded but no order ID returned for cart ${cartId}`
