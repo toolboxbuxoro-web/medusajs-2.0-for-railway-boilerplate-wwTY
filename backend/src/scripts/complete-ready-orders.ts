@@ -24,7 +24,7 @@ async function getPaymentStatusFromSession(
     const directResult = await pgConnection.raw(`
       SELECT ps.data, ps.provider_id
       FROM payment_session ps
-      WHERE ps.data->>'medusa_order_id' = $1
+      WHERE ps.data->>'medusa_order_id' = ?
       ORDER BY ps.created_at DESC
       LIMIT 1
     `, [orderId])
@@ -52,7 +52,7 @@ async function getPaymentStatusFromSession(
       FROM payment_session ps
       JOIN cart_payment_collection cpc 
         ON cpc.payment_collection_id = ps.payment_collection_id
-      WHERE cpc.cart_id = $1
+      WHERE cpc.cart_id = ?
       ORDER BY ps.created_at DESC
       LIMIT 1
     `, [cartId])

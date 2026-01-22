@@ -34,7 +34,7 @@ async function getPaymentStatusFromSession(
     const directResult = await pgConnection.raw(`
       SELECT ps.data, ps.provider_id, ps.status
       FROM payment_session ps
-      WHERE ps.data->>'medusa_order_id' = $1
+      WHERE ps.data->>'medusa_order_id' = ?
       ORDER BY ps.created_at DESC
       LIMIT 1
     `, [orderId])
@@ -58,7 +58,7 @@ async function getPaymentStatusFromSession(
     
     // Method 2: Check via order.cart_id -> cart_payment_collection -> payment_session
     const cartResult = await pgConnection.raw(`
-      SELECT o.cart_id FROM "order" o WHERE o.id = $1
+      SELECT o.cart_id FROM "order" o WHERE o.id = ?
     `, [orderId])
     
     const cartId = cartResult?.rows?.[0]?.cart_id
@@ -74,7 +74,7 @@ async function getPaymentStatusFromSession(
       FROM payment_session ps
       JOIN cart_payment_collection cpc 
         ON cpc.payment_collection_id = ps.payment_collection_id
-      WHERE cpc.cart_id = $1
+      WHERE cpc.cart_id = ?
       ORDER BY ps.created_at DESC
       LIMIT 1
     `, [cartId])
@@ -149,7 +149,7 @@ export default async function autoCompleteOrder({
     try {
       // First, check if order exists and is not already completed
       const orderResult = await pgConnection.raw(`
-        SELECT id, status, cart_id FROM "order" WHERE id = $1
+        SELECT id, status, cart_id FROM "order" WHERE id = ?
       `, [orderId])
       
       const order = orderResult?.rows?.[0]
