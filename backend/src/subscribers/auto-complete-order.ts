@@ -47,11 +47,23 @@ export default async function autoCompleteOrder({
   // Helper function to check and complete order
   const checkAndCompleteOrder = async (attempt: number = 1): Promise<boolean> => {
     try {
-      // Use query.graph to get order with payment_status and fulfillment_status
-      // These fields are available in the graph but not in the typed OrderDTO
+      // Get order with payment_collections and fulfillments to check actual statuses
+      // In Medusa 2.0, payment_status and fulfillment_status are computed from related entities
       const { data: orders } = await query.graph({
         entity: "order",
-        fields: ["id", "status", "payment_status", "fulfillment_status"],
+        fields: [
+          "id",
+          "status",
+          "payment_status",
+          "fulfillment_status",
+          "payment_collections.id",
+          "payment_collections.status",
+          "payment_collections.payment_sessions.id",
+          "payment_collections.payment_sessions.status",
+          "payment_collections.payment_sessions.data",
+          "fulfillments.id",
+          "fulfillments.status",
+        ],
         filters: { id: orderId },
       })
 
@@ -68,31 +80,86 @@ export default async function autoCompleteOrder({
         return true
       }
 
-      // Check payment status
-      // Accept both "captured" and "authorized" (some payment providers use authorized)
-      const paymentStatus = order.payment_status || null
+      // Check payment status from multiple sources
+      // In Medusa 2.0, payment_status is computed from payment_collections
+      // 1. Direct payment_status field (computed by Medusa)
+      // 2. payment_collections status
+      // 3. payment_sessions status and data (for Payme/Click custom states)
+      let paymentStatus = order.payment_status || null
+      
+      // If payment_status is null, check payment_collections directly
+      if (!paymentStatus || paymentStatus === "not_paid") {
+        if (order.payment_collections?.[0]) {
+          const paymentCollection = order.payment_collections[0]
+          paymentStatus = paymentCollection.status || null
+          
+          // If collection status not set, check payment sessions
+          if ((!paymentStatus || paymentStatus === "not_paid") && paymentCollection.payment_sessions?.[0]) {
+            const session = paymentCollection.payment_sessions[0]
+            paymentStatus = session.status || null
+            
+            // For Payme/Click, check session data for payment state
+            // Payme: payme_state=2 means authorized/paid
+            // Click: click_state="paid" means paid
+            if (session.data) {
+              const sessionData = typeof session.data === 'string' ? JSON.parse(session.data) : session.data
+              if (sessionData.payme_state === 2) {
+                paymentStatus = "authorized" // Payme state 2 = transaction performed (paid)
+              } else if (sessionData.click_state === "paid") {
+                paymentStatus = "authorized" // Click paid state
+              }
+            }
+          }
+        }
+      }
+
       const paymentOk =
         paymentStatus === "captured" ||
         paymentStatus === "authorized" ||
         paymentStatus === "paid"
 
-      // Check fulfillment status
-      // Accept "fulfilled", "shipped", or "delivered" (some flows use delivered)
-      const fulfillmentStatus = order.fulfillment_status || null
+      // Check fulfillment status from multiple sources
+      // 1. Direct fulfillment_status field (if available)
+      // 2. fulfillments status
+      let fulfillmentStatus = order.fulfillment_status || null
+      
+      if (!fulfillmentStatus && order.fulfillments?.[0]) {
+        fulfillmentStatus = order.fulfillments[0].status || null
+      }
+
       const fulfillmentOk =
         fulfillmentStatus === "fulfilled" ||
         fulfillmentStatus === "shipped" ||
         fulfillmentStatus === "delivered"
 
-      // Complete if both are OK, OR if payment is OK and fulfillment is null (digital goods)
-      // OR if fulfillment is delivered and payment is authorized/captured/null
+      // Complete if:
+      // 1. Both payment and fulfillment are OK
+      // 2. Payment is OK and fulfillment is null/not used (common for digital goods or stores without fulfillment tracking)
+      // 3. Fulfillment is delivered and payment is OK or null (for manual payment flows)
+      // 
+      // IMPORTANT: In your flow, if payment is successful (authorized/captured), we complete the order
+      // even if fulfillment_status is null, because fulfillment might not be tracked in your system
       const canComplete = (paymentOk && fulfillmentOk) ||
-                          (paymentOk && fulfillmentStatus === null) ||
+                          (paymentOk && (fulfillmentStatus === null || !order.fulfillments || order.fulfillments.length === 0)) ||
                           (fulfillmentOk && (paymentOk || paymentStatus === null))
 
+      // Detailed logging for debugging
       logger.info(
         `[auto-complete-order] Order ${orderId} [event: ${name}, attempt: ${attempt}]: payment=${paymentStatus || 'null'} (${paymentOk}), fulfillment=${fulfillmentStatus || 'null'} (${fulfillmentOk}), current_status=${order.status}, canComplete=${canComplete}`
       )
+      
+      // Debug: log what we got from query
+      if (attempt === 1 && name === "order.placed") {
+        logger.debug(
+          `[auto-complete-order] DEBUG Order ${orderId} query result: payment_collections=${order.payment_collections?.length || 0}, fulfillments=${order.fulfillments?.length || 0}, payment_status=${order.payment_status || 'null'}, fulfillment_status=${order.fulfillment_status || 'null'}`
+        )
+        if (order.payment_collections?.[0]?.payment_sessions?.[0]?.data) {
+          const sessionData = order.payment_collections[0].payment_sessions[0].data
+          logger.debug(
+            `[auto-complete-order] DEBUG Payment session data: ${JSON.stringify(typeof sessionData === 'string' ? JSON.parse(sessionData) : sessionData)}`
+          )
+        }
+      }
 
       // If conditions are met, complete the order
       if (canComplete) {
