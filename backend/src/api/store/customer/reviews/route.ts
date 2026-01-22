@@ -3,6 +3,9 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 /**
  * GET /store/customer/reviews
  * Returns customer's reviews and review statuses for their order items
+ * 
+ * TEMPORARY: Disabled due to schema issues with order_item table
+ * TODO: Fix to use correct Medusa 2.0 schema or query API
  */
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const customerId = (req as any).auth_context?.actor_id
@@ -12,82 +15,15 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   }
 
   try {
-    const pgConnection = req.scope.resolve("__pg_connection__")
-
-    // Get all reviews by this customer
-    const reviewsResult = await pgConnection.raw(`
-      SELECT 
-        r.id,
-        r.product_id,
-        r.order_id,
-        r.rating,
-        r.comment,
-        r.pros,
-        r.cons,
-        r.images,
-        r.status,
-        r.rejection_reason,
-        r.created_at
-      FROM review r
-      WHERE r.customer_id = ?
-      ORDER BY r.created_at DESC
-    `, [customerId])
-
-    const reviews = reviewsResult?.rows || []
-
-    // Create a map of product_id -> review for quick lookup
-    const reviewsByProduct: Record<string, any> = {}
-    for (const review of reviews) {
-      if (!reviewsByProduct[review.product_id]) {
-        reviewsByProduct[review.product_id] = review
-      }
-    }
-
-    // Get all order items for this customer's orders (paid orders only)
-    // Note: Medusa 2.0 order_item schema doesn't have variant_id directly
-    // We'll use product_id if it exists, otherwise fallback
-    const orderItemsResult = await pgConnection.raw(`
-      SELECT DISTINCT
-        oi.id as item_id,
-        oi.order_id,
-        oi.product_id,
-        oi.title as item_title,
-        oi.thumbnail,
-        o.display_id as order_display_id,
-        o.created_at as order_date
-      FROM order_item oi
-      JOIN "order" o ON oi.order_id = o.id
-      JOIN order_payment_collection opc ON o.id = opc.order_id
-      JOIN payment_collection pc ON opc.payment_collection_id = pc.id
-      WHERE o.customer_id = ?
-        AND o.status != 'canceled'
-        AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
-      ORDER BY o.created_at DESC
-    `, [customerId])
-
-    const orderItems = orderItemsResult?.rows || []
-
-    // Enrich order items with review status
-    const itemsWithReviewStatus = orderItems.map((item: any) => {
-      const review = reviewsByProduct[item.product_id]
-      return {
-        ...item,
-        review_status: review ? review.status : "none",
-        review_id: review?.id || null,
-        review: review || null
-      }
+    // TEMPORARY: Return empty data until we figure out the correct order_item schema
+    // The order_item table in Medusa 2.0 doesn't have product_id or variant_id columns
+    console.log(`[GET /store/customer/reviews] Temporary stub - returning empty data for customer ${customerId}`)
+    
+    return res.json({
+      pending_items: [],
+      reviews: [],
+      reviews_by_product: {}
     })
-
-    // Separate into pending reviews (no review) and submitted reviews
-    const pendingItems = itemsWithReviewStatus.filter((i: any) => i.review_status === "none")
-    const submittedReviews = reviews
-
-    res.json({
-      pending_items: pendingItems,
-      reviews: submittedReviews,
-      reviews_by_product: reviewsByProduct
-    })
-
   } catch (error: any) {
     console.error("[GET /store/customer/reviews] Error:", error)
     res.status(500).json({ error: "Failed to fetch reviews" })
