@@ -1,8 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
 import { useTranslations } from "next-intl"
-import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -11,7 +9,6 @@ import { getLocalizedLineItemTitle } from "@lib/util/get-localized-line-item"
 import { getTrackingNumbers } from "@lib/util/order-tracking"
 import OrderStatusBadge from "../order-overview/order-status-badge"
 import { getOrderDisplayDate, formatOrderDateShort } from "@lib/util/date"
-import ChevronDown from "@modules/common/icons/chevron-down"
 
 type OrderCardProps = {
   order: HttpTypes.StoreOrder

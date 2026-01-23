@@ -1,8 +1,15 @@
-import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
+import { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { IProductModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { IReviewModuleService } from "../modules/reviews/types"
 
+/**
+ * Review Aggregation Subscriber
+ * 
+ * Listens to review.created and review.updated events and recalculates
+ * product rating statistics (average rating, count, distribution).
+ * Stores results in product.metadata for fast access.
+ */
 export default async function reviewAggregation({
   event: { data, name },
   container,
@@ -28,7 +35,7 @@ export default async function reviewAggregation({
 
     // 1. Get the review and product
     console.log(`[ReviewAggregation] Event ${eventId} - Retrieving review ${reviewId}...`)
-    const review = await reviewsModuleService.retrieveReview(reviewId)
+    const review = await reviewsModuleService.retrieveReviewWithConversion(reviewId)
     
     if (!review) {
       console.error(`[ReviewAggregation] Event ${eventId} - Review ${reviewId} not found`)
@@ -46,7 +53,7 @@ export default async function reviewAggregation({
 
     // 2. Get all APPROVED reviews for this product
     console.log(`[ReviewAggregation] Event ${eventId} - Fetching approved reviews for product ${productId}...`)
-    const approvedReviews = await reviewsModuleService.listReviews(
+    const approvedReviews = await reviewsModuleService.listReviewsWithConversion(
       { product_id: productId, status: "approved" },
       { select: ["rating"] }
     )
@@ -111,5 +118,5 @@ export default async function reviewAggregation({
 }
 
 export const config: SubscriberConfig = {
-  event: ["review.updated", "review.created"],
+  event: ["review.created", "review.updated"],
 }

@@ -1,11 +1,11 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import ReviewsService from "../../../../../modules/reviews/service"
+import ReviewsService from "../../../../modules/reviews/service"
 
 /**
- * POST /admin/reviews/:id/approve
- * Approve a review
+ * GET /admin/reviews/:id
+ * Get a single review by ID
  */
-export async function POST(
+export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
@@ -14,11 +14,11 @@ export async function POST(
 
     const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
 
-    const review = await reviewsModuleService.approveReview(id)
+    const review = await reviewsModuleService.retrieveReviewWithConversion(id)
 
     res.json({ review })
   } catch (error: any) {
-    console.error(`[POST /admin/reviews/${req.params.id}/approve] Error:`, error)
+    console.error(`[GET /admin/reviews/${req.params.id}] Error:`, error)
     
     if (error.message?.includes("not found")) {
       res.status(404).json({ message: "Review not found" })
@@ -26,7 +26,7 @@ export async function POST(
     }
 
     res.status(500).json({
-      message: "Failed to approve review",
+      message: "Failed to fetch review",
     })
   }
 }

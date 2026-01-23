@@ -1,13 +1,14 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import ReviewsService from "../../../../modules/reviews/service"
 
 /**
  * GET /store/customer/reviews
- * Returns customer's reviews and review statuses for their order items
- * 
- * TEMPORARY: Disabled due to schema issues with order_item table
- * TODO: Fix to use correct Medusa 2.0 schema or query API
+ * Get all reviews for the current customer
  */
-export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
+export const GET = async (
+  req: MedusaRequest,
+  res: MedusaResponse
+) => {
   const customerId = (req as any).auth_context?.actor_id
 
   if (!customerId) {
@@ -15,14 +16,46 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   }
 
   try {
-    // TEMPORARY: Return empty data until we figure out the correct order_item schema
-    // The order_item table in Medusa 2.0 doesn't have product_id or variant_id columns
-    console.log(`[GET /store/customer/reviews] Temporary stub - returning empty data for customer ${customerId}`)
-    
-    return res.json({
-      pending_items: [],
-      reviews: [],
-      reviews_by_product: {}
+    const { limit = 10, offset = 0, status } = req.query as any
+
+    // Normalize pagination
+    const rawLimit = Number.parseInt(String(limit), 10)
+    const rawOffset = Number.parseInt(String(offset), 10)
+
+    const safeLimit =
+      Number.isFinite(rawLimit) && rawLimit > 0
+        ? Math.min(rawLimit, 50)
+        : 10
+
+    const safeOffset =
+      Number.isFinite(rawOffset) && rawOffset >= 0
+        ? rawOffset
+        : 0
+
+    const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
+
+    const filters: any = { customer_id: customerId }
+    if (status) {
+      const allowedStatuses = ["pending", "approved", "rejected", "hidden"]
+      if (allowedStatuses.includes(String(status))) {
+        filters.status = status
+      }
+    }
+
+    const [reviews, count] = await reviewsModuleService.listAndCountReviewsWithConversion(
+      filters,
+      {
+        take: safeLimit,
+        skip: safeOffset,
+        order: { created_at: "DESC" },
+      }
+    )
+
+    res.json({
+      reviews,
+      count,
+      limit: safeLimit,
+      offset: safeOffset,
     })
   } catch (error: any) {
     console.error("[GET /store/customer/reviews] Error:", error)

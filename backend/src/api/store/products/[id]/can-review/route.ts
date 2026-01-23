@@ -4,6 +4,10 @@ import {
 } from "@medusajs/framework/http"
 import ReviewsService from "../../../../../modules/reviews/service"
 
+/**
+ * GET /store/products/:id/can-review
+ * Check if the current customer can review a product
+ */
 export const GET = async (
   req: MedusaRequest,
   res: MedusaResponse
@@ -12,18 +16,17 @@ export const GET = async (
   const customerId = (req as any).auth_context?.actor_id
   
   if (!customerId) {
-    // We intentionally return 200 here so the storefront can always
-    // render a consistent shape and simply react to the flag.
+    // Return 200 so the storefront can always render consistently
     return res.status(200).json({ can_review: false, reason: "auth_required" })
   }
 
   const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
 
   try {
-    const result = await reviewsModuleService.canReview(product_id, customerId)
+    const pgConnection = req.scope.resolve("__pg_connection__")
+    const result = await reviewsModuleService.canReview(product_id, customerId, pgConnection)
 
-    // Do not expose internal linkage details such as order_id to the client.
-    // We only return the high-level eligibility flags and reason.
+    // Do not expose internal details like order_id to the client
     const { can_review, reason } = result as any
 
     res.status(200).json({
@@ -31,7 +34,7 @@ export const GET = async (
       ...(reason && { reason }),
     })
   } catch (e) {
-    // In case of unexpected errors, fail closed (no right to review)
+    // Fail closed (no right to review)
     res.status(200).json({
       can_review: false,
       reason: "error",

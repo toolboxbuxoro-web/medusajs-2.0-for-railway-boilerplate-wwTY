@@ -60,6 +60,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
               ))}
             </div>
 
+            {/* Title */}
+            {review.title && (
+              <h3 className="font-semibold text-gray-900 text-base mb-2">
+                {review.title}
+              </h3>
+            )}
+
             {/* Pros */}
             {review.pros && (
               <div className="flex items-start gap-2 mb-2">
@@ -99,6 +106,30 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
                     />
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Admin Response */}
+            {review.admin_response && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-start gap-2">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                    A
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-gray-900 text-sm">Ответ администратора</span>
+                      {review.admin_response_at && (
+                        <span className="text-xs text-gray-400">
+                          {formatReviewDate(review.admin_response_at, locale)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {review.admin_response}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>

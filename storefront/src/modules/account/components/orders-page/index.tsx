@@ -42,6 +42,9 @@ const OrdersPage: React.FC = () => {
             ))}
           </div>
         )
+      default:
+        // Exhaustive check - should never happen
+        return <OrdersSkeleton />
     }
   }
 

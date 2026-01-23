@@ -25,6 +25,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   const t = useTranslations("product")
   const [rating, setRating] = useState(0)
   const [hover, setHover] = useState(0)
+  const [title, setTitle] = useState("")
   const [comment, setComment] = useState("")
   const [pros, setPros] = useState("")
   const [cons, setCons] = useState("")
@@ -154,8 +155,9 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log(`[AddReviewForm] Form submission started for product ${productId}`, {
+      console.log(`[AddReviewForm] Form submission started for product ${productId}`, {
       rating,
+      hasTitle: !!title,
       hasComment: !!comment,
       hasPros: !!pros,
       hasCons: !!cons,
@@ -196,6 +198,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
       const review = await createReview({
         product_id: productId,
         rating,
+        title: title.trim() || undefined,
         comment: comment.trim() || undefined,
         pros: pros.trim() || undefined,
         cons: cons.trim() || undefined,
@@ -205,6 +208,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
       console.log(`[AddReviewForm] Review created successfully: ${review.id}`)
       setSuccess(true)
       onSuccess(review)
+      setTitle("")
       setComment("")
       setPros("")
       setCons("")
@@ -314,6 +318,20 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
               </span>
             )}
           </div>
+        </div>
+
+        {/* Title Field */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-700">{t("title") || "Заголовок"}</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={200}
+            className="w-full rounded-2xl border border-gray-200 p-4 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all placeholder:text-gray-400 text-[15px]"
+            placeholder={t("title_placeholder") || "Краткое описание вашего отзыва..."}
+          />
+          <span className="text-xs text-gray-400 text-right">{title.length}/200</span>
         </div>
 
         {/* Pros Field */}

@@ -1,30 +1,51 @@
-import { defineMiddlewares } from "@medusajs/medusa"
+import { defineMiddlewares, authenticate } from "@medusajs/medusa"
+
+console.log("[Middlewares] Defining routes and matchers...")
 
 export default defineMiddlewares({
   routes: [
     {
+      matcher: "/store/products/*/reviews",
+      method: "POST",
+      middlewares: [
+        authenticate("customer", ["session", "bearer"]),
+        (req, res, next) => {
+          console.log(`[Middleware Check] POST reviews match: ${req.url}`)
+          next()
+        }
+      ],
+    },
+    {
+      matcher: "/store/customer/reviews",
+      method: "GET",
+      middlewares: [
+        authenticate("customer", ["session", "bearer"])
+      ],
+    },
+    {
       matcher: "/health",
       method: "GET",
       middlewares: [],
-      authenticate: false,
     },
     {
       matcher: "/payme",
       method: "POST",
       middlewares: [],
-      authenticate: false,
     },
     {
       matcher: "/click/prepare",
       method: "POST",
       middlewares: [],
-      authenticate: false,
     },
     {
       matcher: "/click/complete",
       method: "POST",
       middlewares: [],
-      authenticate: false,
+    },
+    {
+      matcher: "/store/customer/reviews",
+      method: "GET",
+      middlewares: [],
     },
   ],
 })

@@ -23,7 +23,6 @@
     "language": "Язык",
     "home": "Главная",
     "orders": "Заказы",
-    "about": "О компании",
     "select_city": "Выберите город",
     "select_delivery_point": "Выберите пункт выдачи",
     "region": "Регион",
@@ -502,7 +501,8 @@
     "error_occurred": "Произошла ошибка. Пожалуйста, попробуйте еще раз.",
     "code_and_password_required": "Введите код и новый пароль",
     "password_reset_failed": "Не удалось сбросить пароль",
-    "password_change_failed": "Не удалось изменить пароль"
+    "password_change_failed": "Не удалось изменить пароль",
+    "authentication_failed": "Ошибка аутентификации. Попробуйте еще раз."
   },
   "success": {
     "password_reset": "Пароль успешно сброшен. Теперь вы можете войти.",

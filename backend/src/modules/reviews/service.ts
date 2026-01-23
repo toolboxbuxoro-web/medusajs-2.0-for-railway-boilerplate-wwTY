@@ -1,7 +1,14 @@
 import { MedusaService, Modules } from "@medusajs/framework/utils"
-import { Review } from "./models/review"
 import { IEventBusModuleService, MedusaContainer } from "@medusajs/framework/types"
-import type { ReviewStatus } from "./types"
+import { Review } from "./models/review"
+import type {
+  ReviewDTO,
+  CreateReviewDTO,
+  UpdateReviewDTO,
+  ReviewEligibility,
+  ReviewStatus,
+  IReviewModuleService,
+} from "./types"
 
 class ReviewsService extends MedusaService({
   Review,
@@ -9,6 +16,7 @@ class ReviewsService extends MedusaService({
   protected container_: MedusaContainer
 
   constructor(container: MedusaContainer) {
+    // @ts-ignore - MedusaService handles constructor
     super(...arguments)
     this.container_ = container
   }
@@ -18,146 +26,238 @@ class ReviewsService extends MedusaService({
   }
 
   /**
-   * Create a review and emit event for aggregation.
-   * Use this instead of createReviews() directly.
+   * Create a review with validation and emit event
    */
-  async createReviewWithEvent(data: any) {
-    const reviewId = data.product_id ? `${data.product_id}-${data.customer_id}` : "unknown"
-    console.log(`[ReviewsService.createReviewWithEvent] Creating review for product ${data.product_id}, customer ${data.customer_id}`)
-    
-    try {
-      const review = await this.createReviews(data)
-      
-      // Get the review ID (handle both single and array responses)
-      const actualReviewId = Array.isArray(review) ? review[0]?.id : (review as any)?.id
-      
-      if (!actualReviewId) {
-        console.error(`[ReviewsService.createReviewWithEvent] Failed to get review ID after creation:`, {
-          review,
-          isArray: Array.isArray(review),
-          data
-        })
-        return review
-      }
-      
-      console.log(`[ReviewsService.createReviewWithEvent] Review created with ID: ${actualReviewId}`)
-      
-      try {
-        await this.eventBus_.emit({
-          name: "review.created",
-          data: { id: actualReviewId },
-        })
-        console.log(`[ReviewsService.createReviewWithEvent] Event 'review.created' emitted for review ${actualReviewId}`)
-      } catch (eventError: any) {
-        console.error(`[ReviewsService.createReviewWithEvent] Failed to emit event for review ${actualReviewId}:`, {
-          error: eventError.message,
-          stack: eventError.stack
-        })
-        // Don't fail the whole operation if event emission fails
-      }
-      
-      return review
-    } catch (error: any) {
-      console.error(`[ReviewsService.createReviewWithEvent] Failed to create review:`, {
-        error: error.message,
-        stack: error.stack,
-        productId: data.product_id,
-        customerId: data.customer_id
-      })
-      throw error
+  async createReviewWithValidation(data: CreateReviewDTO): Promise<ReviewDTO> {
+    // Validate rating
+    if (!data.rating || data.rating < 1 || data.rating > 5) {
+      throw new Error("Rating must be between 1 and 5")
     }
+
+    // Validate text fields length
+    if (data.comment && data.comment.length > 2000) {
+      throw new Error("Comment must be 2000 characters or less")
+    }
+    if (data.pros && data.pros.length > 500) {
+      throw new Error("Pros must be 500 characters or less")
+    }
+    if (data.cons && data.cons.length > 500) {
+      throw new Error("Cons must be 500 characters or less")
+    }
+    if (data.title && data.title.length > 200) {
+      throw new Error("Title must be 200 characters or less")
+    }
+
+    // Validate images
+    if (data.images && data.images.length > 5) {
+      throw new Error("Maximum 5 images allowed")
+    }
+
+    // Prepare data for MedusaService
+    const preparedData: any = {
+      ...data,
+      status: data.status || "pending",
+    }
+
+    // @ts-ignore - MedusaService method signature
+    const result = await super.createReviews([preparedData])
+    const review = Array.isArray(result) ? result[0] : result
+
+    // Convert images
+    const reviewDTO: ReviewDTO = {
+      ...review,
+      images: Array.isArray(review.images) 
+        ? review.images 
+        : (review.images ? Object.values(review.images as Record<string, string>) : null),
+    } as ReviewDTO
+
+    // Emit event
+    try {
+      await this.eventBus_.emit({
+        name: "review.created",
+        data: { id: reviewDTO.id },
+      })
+    } catch (error: any) {
+      console.error(`[ReviewsService] Failed to emit review.created event:`, error)
+    }
+
+    return reviewDTO
   }
 
   /**
-   * Check if a customer can review a product.
-   * 
-   * Simplified logic:
-   * 1. User must be logged in (customerId required)
-   * 2. User must have purchased the product in a COMPLETED order
-   * 3. User hasn't already reviewed this product (no active review)
-   * 
-   * Works with multiple products in a single order - each product
-   * can be reviewed independently after the order is completed.
+   * Update review with validation and emit event
    */
-  async canReview(productId: string, customerId: string) {
-    console.log(`[ReviewsService.canReview] Checking eligibility for product ${productId}, customer ${customerId}`)
-    
+  async updateReviewWithValidation(id: string, data: UpdateReviewDTO): Promise<ReviewDTO> {
+    // Validate rating if provided
+    if (data.rating !== undefined) {
+      if (data.rating < 1 || data.rating > 5) {
+        throw new Error("Rating must be between 1 and 5")
+      }
+    }
+
+    // Validate text fields length
+    if (data.comment && data.comment.length > 2000) {
+      throw new Error("Comment must be 2000 characters or less")
+    }
+    if (data.pros && data.pros.length > 500) {
+      throw new Error("Pros must be 500 characters or less")
+    }
+    if (data.cons && data.cons.length > 500) {
+      throw new Error("Cons must be 500 characters or less")
+    }
+    if (data.title && data.title.length > 200) {
+      throw new Error("Title must be 200 characters or less")
+    }
+
+    // Validate images
+    if (data.images && data.images.length > 5) {
+      throw new Error("Maximum 5 images allowed")
+    }
+
+    // @ts-ignore - MedusaService method signature
+    const review = await super.updateReviews({ id, ...data })
+
+    // Convert images
+    const reviewDTO: ReviewDTO = {
+      ...review,
+      images: Array.isArray(review.images) 
+        ? review.images 
+        : (review.images ? Object.values(review.images as Record<string, string>) : null),
+    } as ReviewDTO
+
+    // Emit event
+    try {
+      await this.eventBus_.emit({
+        name: "review.updated",
+        data: { id: reviewDTO.id },
+      })
+    } catch (error: any) {
+      console.error(`[ReviewsService] Failed to emit review.updated event:`, error)
+    }
+
+    return reviewDTO
+  }
+
+  /**
+   * List reviews with proper type conversion
+   */
+  async listReviewsWithConversion(filters?: any, config?: any): Promise<ReviewDTO[]> {
+    // @ts-ignore - MedusaService method signature
+    const reviews = await super.listReviews(filters, config)
+    return reviews.map(review => ({
+      ...review,
+      images: Array.isArray(review.images) 
+        ? review.images 
+        : (review.images ? Object.values(review.images as Record<string, string>) : null),
+    })) as ReviewDTO[]
+  }
+
+  /**
+   * List and count reviews with proper type conversion
+   */
+  async listAndCountReviewsWithConversion(
+    filters?: any,
+    config?: any
+  ): Promise<[ReviewDTO[], number]> {
+    // @ts-ignore - MedusaService method signature
+    const [reviews, count] = await super.listAndCountReviews(filters, config)
+    const convertedReviews = reviews.map(review => ({
+      ...review,
+      images: Array.isArray(review.images) 
+        ? review.images 
+        : (review.images ? Object.values(review.images as Record<string, string>) : null),
+    })) as ReviewDTO[]
+    return [convertedReviews, count]
+  }
+
+  /**
+   * Retrieve review with proper type conversion
+   */
+  async retrieveReviewWithConversion(id: string, config?: any): Promise<ReviewDTO> {
+    // @ts-ignore - MedusaService method signature
+    const review = await super.retrieveReview(id, config)
+    return {
+      ...review,
+      images: Array.isArray(review.images) 
+        ? review.images 
+        : (review.images ? Object.values(review.images as Record<string, string>) : null),
+    } as ReviewDTO
+  }
+
+  /**
+   * Check if a customer can review a product
+   * 
+   * Requirements:
+   * 1. Customer must be authenticated
+   * 2. Customer must have received the product (order.status === "completed")
+   * 3. Customer hasn't already reviewed this product (no active review)
+   */
+  async canReview(
+    productId: string,
+    customerId: string,
+    sharedConnection?: any
+  ): Promise<ReviewEligibility> {
     if (!productId || !customerId) {
-      console.warn(`[ReviewsService.canReview] Missing required parameters:`, { productId, customerId })
       return {
         can_review: false,
-        reason: "no_completed_order",
+        reason: "auth_required",
       }
     }
 
     try {
       // 1. Check if user already has an active review (approved or pending)
-      const [existingReviews] = await this.listAndCountReviews({
+      const [existingReviews] = await this.listAndCountReviewsWithConversion({
         product_id: productId,
         customer_id: customerId,
-        status: ["approved", "pending"]
+        status: ["approved", "pending"],
       })
-      
-      console.log(`[ReviewsService.canReview] Found ${existingReviews.length} existing review(s) for product ${productId}, customer ${customerId}`)
-      
+
       if (existingReviews.length > 0) {
-        console.log(`[ReviewsService.canReview] Customer ${customerId} already reviewed product ${productId}`)
         return {
           can_review: false,
           reason: "already_reviewed",
         }
       }
 
-      // 2. Check for eligible order using SQL (query.graph doesn't return payment_status reliably)
-      const pgConnection = this.container_.resolve("__pg_connection__")
+      // 2. Check for eligible order (completed order with this product)
+      const pgConnection = sharedConnection || this.container_.resolve("__pg_connection__")
 
       if (!pgConnection) {
-        console.error(`[ReviewsService.canReview] PostgreSQL connection not available`)
         return {
           can_review: false,
           reason: "no_completed_order",
         }
       }
 
-      console.log(`[ReviewsService.canReview] Querying database for eligible orders...`)
-
-      // Correct Medusa 2.0 schema: order_item.item_id → order_line_item.id
-      // order_line_item has product_id, variant_id columns
-      const result = await pgConnection.raw(`
+      // SQL query to find completed order with this product
+      const query = `
         SELECT DISTINCT o.id as order_id
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
         JOIN order_line_item oli ON oi.item_id = oli.id
-        WHERE o.customer_id = ?
-          AND oli.product_id = ?
+        WHERE o.customer_id = $1
+          AND oli.product_id = $2
           AND o.status = 'completed'
         LIMIT 1
-      `, [customerId, productId])
+      `
 
-      console.log(`[ReviewsService.canReview] Query result:`, result?.rows)
-
-      const eligibleOrder = result?.rows?.[0]
+      const result = await pgConnection.raw(query, [customerId, productId])
+      const rows = result?.rows || []
+      const eligibleOrder = rows[0]
 
       if (eligibleOrder?.order_id) {
-        console.log(`[ReviewsService.canReview] Found eligible order ${eligibleOrder.order_id} for product ${productId}, customer ${customerId}`)
         return {
           can_review: true,
           order_id: eligibleOrder.order_id,
         }
       }
 
-      console.log(`[ReviewsService.canReview] No eligible order found for product ${productId}, customer ${customerId}`)
       return {
         can_review: false,
         reason: "no_completed_order",
       }
     } catch (error: any) {
-      console.error(`[ReviewsService.canReview] Error for product ${productId}, customer ${customerId}:`, {
-        error: error.message,
-        stack: error.stack,
-        sqlError: error.code,
-        sqlState: error.sqlState
-      })
+      console.error(`[ReviewsService.canReview] Error:`, error)
       return {
         can_review: false,
         reason: "no_completed_order",
@@ -165,62 +265,52 @@ class ReviewsService extends MedusaService({
     }
   }
 
-  async approveReview(id: string) {
+  /**
+   * Approve a review
+   */
+  async approveReview(id: string): Promise<ReviewDTO> {
     return await this.updateReviewStatus(id, "approved")
   }
 
-  async rejectReview(id: string, reason?: string) {
+  /**
+   * Reject a review
+   */
+  async rejectReview(id: string, reason?: string): Promise<ReviewDTO> {
     return await this.updateReviewStatus(id, "rejected", reason)
   }
 
-  async getProductReviews(productId: string) {
-    return await this.listReviews({ product_id: productId, status: "approved" })
-  }
-
-  async updateReviewStatus(
+  /**
+   * Update review status and emit event
+   */
+  protected async updateReviewStatus(
     id: string,
     status: ReviewStatus,
     rejection_reason?: string
-  ) {
-    console.log(`[ReviewsService.updateReviewStatus] Updating review ${id} to status: ${status}${rejection_reason ? ` (reason: ${rejection_reason.substring(0, 50)}...)` : ""}`)
-    
-    try {
-      const updateData: any = { id, status }
-      if (rejection_reason) {
-        updateData.rejection_reason = rejection_reason
-      }
-      
-      const review = await this.updateReviews(updateData)
-
-      if (!review) {
-        console.error(`[ReviewsService.updateReviewStatus] Failed to update review ${id} - updateReviews returned null/undefined`)
-        throw new Error(`Failed to update review ${id}`)
-      }
-
-      try {
-        await this.eventBus_.emit({
-          name: "review.updated",
-          data: { id },
-        })
-        console.log(`[ReviewsService.updateReviewStatus] Event 'review.updated' emitted for review ${id}`)
-      } catch (eventError: any) {
-        console.error(`[ReviewsService.updateReviewStatus] Failed to emit event for review ${id}:`, {
-          error: eventError.message,
-          stack: eventError.stack
-        })
-        // Don't fail the whole operation if event emission fails
-      }
-
-      return review
-    } catch (error: any) {
-      console.error(`[ReviewsService.updateReviewStatus] Failed to update review ${id}:`, {
-        error: error.message,
-        stack: error.stack,
-        status,
-        hasRejectionReason: !!rejection_reason
-      })
-      throw error
+  ): Promise<ReviewDTO> {
+    const updateData: UpdateReviewDTO = { status }
+    if (rejection_reason) {
+      updateData.rejection_reason = rejection_reason
     }
+
+    return await this.updateReviewWithValidation(id, updateData)
+  }
+
+  /**
+   * Add admin response to a review
+   */
+  async addAdminResponse(reviewId: string, response: string): Promise<ReviewDTO> {
+    if (!response || response.trim().length === 0) {
+      throw new Error("Admin response cannot be empty")
+    }
+
+    if (response.length > 2000) {
+      throw new Error("Admin response must be 2000 characters or less")
+    }
+
+    return await this.updateReviewWithValidation(reviewId, {
+      admin_response: response.trim(),
+      admin_response_at: new Date(),
+    })
   }
 }
 

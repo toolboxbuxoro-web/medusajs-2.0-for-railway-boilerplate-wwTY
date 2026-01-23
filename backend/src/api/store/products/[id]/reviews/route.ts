@@ -6,6 +6,10 @@ import { IProductModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import ReviewsService from "../../../../../modules/reviews/service"
 
+/**
+ * GET /store/products/:id/reviews
+ * Get approved reviews for a product with pagination and sorting
+ */
 export const GET = async (
   req: MedusaRequest,
   res: MedusaResponse
@@ -14,8 +18,7 @@ export const GET = async (
     const { id } = req.params
     const { limit = 10, offset = 0, sort: rawSort = "newest" } = req.query as any
 
-    // Normalize and clamp pagination parameters to avoid pathological
-    // values that could lead to excessive load.
+    // Normalize and clamp pagination parameters
     const rawLimit = Number.parseInt(String(limit), 10)
     const rawOffset = Number.parseInt(String(offset), 10)
 
@@ -29,7 +32,7 @@ export const GET = async (
         ? rawOffset
         : 0
 
-    // Clean sort parameter (handle cache-busting suffix like "newest:1" → "newest")
+    // Clean sort parameter
     const sort = typeof rawSort === "string" ? rawSort.split(":")[0] : "newest"
 
     const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
@@ -37,7 +40,7 @@ export const GET = async (
     const order = sort === "rating_desc" ? { rating: "DESC" } : { created_at: "DESC" }
 
     // Only return approved reviews
-    const [reviews, count] = await reviewsModuleService.listAndCountReviews(
+    const [reviews, count] = await reviewsModuleService.listAndCountReviewsWithConversion(
       { product_id: id, status: "approved" },
       {
         take: safeLimit,
@@ -46,15 +49,13 @@ export const GET = async (
       }
     )
 
-    // Prefer aggregated rating metadata maintained by the review aggregation
-    // subscriber. This avoids scanning all reviews on each product page load.
+    // Get product metadata for aggregated rating
     const productService: IProductModuleService = req.scope.resolve(Modules.PRODUCT)
     
     let product
     try {
       product = await productService.retrieveProduct(id)
     } catch (error: any) {
-      // Product not found or other error
       return res.status(404).json({ error: "Product not found" })
     }
     
@@ -73,9 +74,8 @@ export const GET = async (
         5: 0,
       }) as Record<number, number>
     } else {
-      // Fallback path for legacy products where metadata wasn't yet populated.
-      // This performs a one-off scan but keeps behavior backwards compatible.
-      const allApproved = await reviewsModuleService.listReviews(
+      // Fallback: calculate from reviews
+      const allApproved = await reviewsModuleService.listReviewsWithConversion(
         { product_id: id, status: "approved" },
         { select: ["rating"] }
       )
@@ -107,25 +107,24 @@ export const GET = async (
   }
 }
 
+/**
+ * POST /store/products/:id/reviews
+ * Create a new review for a product
+ */
 export const POST = async (
   req: MedusaRequest,
   res: MedusaResponse
 ) => {
   const { id: product_id } = req.params
-  const { rating, comment, pros, cons, images } = req.body as any
+  const { rating, title, comment, pros, cons, images } = req.body as any
   
   const customerId = (req as any).auth_context?.actor_id
-  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-  
-  console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Customer: ${customerId || "unauthorized"}, Product: ${product_id}`)
   
   if (!customerId) {
-    console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Unauthorized access attempt`)
     return res.status(401).json({ error: "Unauthorized" })
   }
 
   if (!product_id) {
-    console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Missing product_id`)
     return res.status(400).json({ error: "Product id is required" })
   }
 
@@ -138,7 +137,6 @@ export const POST = async (
     numericRating < 1 ||
     numericRating > 5
   ) {
-    console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Invalid rating: ${rating}`)
     return res.status(400).json({
       error: "Rating must be an integer between 1 and 5",
     })
@@ -148,27 +146,36 @@ export const POST = async (
   let sanitizedComment: string | null = null
   if (comment !== undefined && comment !== null) {
     if (typeof comment !== "string") {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Invalid comment type: ${typeof comment}`)
       return res.status(400).json({ error: "Comment must be a string" })
     }
     const trimmed = comment.trim()
     if (trimmed.length > 2000) {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Comment too long: ${trimmed.length} chars`)
       return res.status(400).json({ error: "Comment must be 2000 characters or less" })
     }
     sanitizedComment = trimmed.length > 0 ? trimmed : null
+  }
+
+  // Validate and sanitize title (max 200 chars)
+  let sanitizedTitle: string | null = null
+  if (title !== undefined && title !== null) {
+    if (typeof title !== "string") {
+      return res.status(400).json({ error: "Title must be a string" })
+    }
+    const trimmed = title.trim()
+    if (trimmed.length > 200) {
+      return res.status(400).json({ error: "Title must be 200 characters or less" })
+    }
+    sanitizedTitle = trimmed.length > 0 ? trimmed : null
   }
 
   // Validate and sanitize pros (max 500 chars)
   let sanitizedPros: string | null = null
   if (pros !== undefined && pros !== null) {
     if (typeof pros !== "string") {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Invalid pros type: ${typeof pros}`)
       return res.status(400).json({ error: "Pros must be a string" })
     }
     const trimmed = pros.trim()
     if (trimmed.length > 500) {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Pros too long: ${trimmed.length} chars`)
       return res.status(400).json({ error: "Pros must be 500 characters or less" })
     }
     sanitizedPros = trimmed.length > 0 ? trimmed : null
@@ -178,12 +185,10 @@ export const POST = async (
   let sanitizedCons: string | null = null
   if (cons !== undefined && cons !== null) {
     if (typeof cons !== "string") {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Invalid cons type: ${typeof cons}`)
       return res.status(400).json({ error: "Cons must be a string" })
     }
     const trimmed = cons.trim()
     if (trimmed.length > 500) {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Cons too long: ${trimmed.length} chars`)
       return res.status(400).json({ error: "Cons must be 500 characters or less" })
     }
     sanitizedCons = trimmed.length > 0 ? trimmed : null
@@ -193,13 +198,12 @@ export const POST = async (
   let sanitizedImages: string[] = []
   if (images !== undefined && images !== null) {
     if (!Array.isArray(images)) {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Images is not an array: ${typeof images}`)
       return res.status(400).json({ error: "Images must be an array" })
     }
     if (images.length > 5) {
-      console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Too many images: ${images.length}`)
       return res.status(400).json({ error: "Maximum 5 images allowed" })
     }
+    
     // Validate each image URL
     const allowedDomains = [
       process.env.MINIO_ENDPOINT,
@@ -209,11 +213,8 @@ export const POST = async (
       "medusa-server-testing.s3.amazonaws.com",
     ].filter(Boolean) as string[]
 
-    console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Validating ${images.length} image URL(s)`)
-
     for (const img of images) {
       if (typeof img !== "string" || !img.startsWith("http")) {
-        console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Invalid image URL format: ${img}`)
         return res.status(400).json({ error: "Each image must be a valid URL" })
       }
       
@@ -226,29 +227,25 @@ export const POST = async (
         )
         
         if (!isAllowed) {
-          console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Image URL from disallowed domain: ${hostname}`)
           return res.status(400).json({ 
             error: `Image URL must be from an allowed domain. Hostname: ${hostname}` 
           })
         }
       } catch (e) {
-        console.warn(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Invalid image URL: ${img}`, e)
         return res.status(400).json({ error: "Invalid image URL format" })
       }
     }
     sanitizedImages = images
-    console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Validated ${sanitizedImages.length} image URL(s)`)
   }
 
   const reviewsModuleService: ReviewsService = req.scope.resolve("reviews")
 
   try {
-    // Use the service method for validation
-    console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Checking review eligibility...`)
-    const eligibility = await reviewsModuleService.canReview(product_id, customerId)
+    // Check review eligibility
+    const pgConnection = req.scope.resolve("__pg_connection__")
+    const eligibility = await reviewsModuleService.canReview(product_id, customerId, pgConnection)
 
     if (!eligibility.can_review) {
-      console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Review not allowed: ${eligibility.reason}`)
       const status =
         eligibility.reason === "already_reviewed"
           ? 400
@@ -259,7 +256,7 @@ export const POST = async (
       if (eligibility.reason === "already_reviewed") {
         errorMessage = "You have already reviewed this product"
       } else if (eligibility.reason === "no_completed_order") {
-        errorMessage = "You can only review delivered products"
+        errorMessage = "You can only review products you have received"
       }
 
       return res.status(status).json({
@@ -269,42 +266,34 @@ export const POST = async (
       })
     }
 
-    // Ensure order_id is present (should always be if can_review is true)
+    // Ensure order_id is present
     if (!eligibility.order_id) {
-      console.error(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Eligibility check passed but order_id is missing!`, eligibility)
       return res.status(500).json({
         error: "Internal server error: order_id not found",
       })
     }
 
-    console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Creating review with order_id: ${eligibility.order_id}`)
-
-    // Create review with all marketplace fields and emit event for aggregation
-    const review = await reviewsModuleService.createReviewWithEvent({
+    // Create review
+    const review = await reviewsModuleService.createReviewWithValidation({
       product_id,
       customer_id: customerId,
       order_id: eligibility.order_id,
       rating: numericRating,
+      title: sanitizedTitle,
       comment: sanitizedComment,
       pros: sanitizedPros,
       cons: sanitizedCons,
-      images: (sanitizedImages.length > 0 ? sanitizedImages : null) as any,
-      status: "pending"
+      images: sanitizedImages.length > 0 ? sanitizedImages : null,
+      status: "pending",
     })
-
-    const reviewId = Array.isArray(review) ? review[0]?.id : (review as any)?.id
-    console.log(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Review created successfully: ${reviewId}`)
 
     res.status(201).json({ review })
   } catch (error: any) {
-    // Log error for debugging but don't expose internal details
-    console.error(`[POST /store/products/${product_id}/reviews] Request ${requestId} - Error:`, {
+    console.error(`[POST /store/products/${product_id}/reviews] Error:`, {
       error: error.message,
       stack: error.stack,
       productId: product_id,
       customerId,
-      rating: numericRating,
-      hasImages: sanitizedImages.length > 0
     })
     
     return res.status(500).json({
@@ -312,4 +301,3 @@ export const POST = async (
     })
   }
 }
-
