@@ -71,11 +71,13 @@ class ReviewsService extends MedusaService({
   /**
    * Check if a customer can review a product.
    * 
-   * Production-ready logic:
+   * Simplified logic:
    * 1. User must be logged in (customerId required)
-   * 2. User must have purchased the product (order exists)
-   * 3. Payment must be captured (not just authorized)
-   * 4. User hasn't already reviewed this product (no active review)
+   * 2. User must have purchased the product in a COMPLETED order
+   * 3. User hasn't already reviewed this product (no active review)
+   * 
+   * Works with multiple products in a single order - each product
+   * can be reviewed independently after the order is completed.
    */
   async canReview(productId: string, customerId: string) {
     console.log(`[ReviewsService.canReview] Checking eligibility for product ${productId}, customer ${customerId}`)
@@ -118,53 +120,16 @@ class ReviewsService extends MedusaService({
       }
 
       console.log(`[ReviewsService.canReview] Querying database for eligible orders...`)
-      
-      // Debug: First check if order exists at all for this customer
-      const debugOrderCheck = await pgConnection.raw(`
-        SELECT o.id, o.status, o.customer_id
-        FROM "order" o
-        WHERE o.customer_id = ?
-        ORDER BY o.created_at DESC
-        LIMIT 5
-      `, [customerId])
-      console.log(`[ReviewsService.canReview] DEBUG - Customer orders:`, debugOrderCheck?.rows)
 
-      // Debug: Check order items for the customer's orders
-      const debugItemsCheck = await pgConnection.raw(`
-        SELECT oi.id, oi.order_id, oi.variant_id, oi.product_id, oi.title
-        FROM order_item oi
-        JOIN "order" o ON oi.order_id = o.id
-        WHERE o.customer_id = ?
-        ORDER BY oi.created_at DESC
-        LIMIT 5
-      `, [customerId])
-      console.log(`[ReviewsService.canReview] DEBUG - Order items:`, debugItemsCheck?.rows)
-
-      // Debug: Check fulfillments with delivered_at
-      const debugFulfillmentCheck = await pgConnection.raw(`
-        SELECT f.id, f.delivered_at, of.order_id
-        FROM fulfillment f
-        JOIN order_fulfillment of ON f.id = of.fulfillment_id
-        JOIN "order" o ON of.order_id = o.id
-        WHERE o.customer_id = ?
-        ORDER BY f.created_at DESC
-        LIMIT 5
-      `, [customerId])
-      console.log(`[ReviewsService.canReview] DEBUG - Fulfillments:`, debugFulfillmentCheck?.rows)
-
-      // Main query - JOIN product_variant to get product_id from variant_id
-      // Note: delivered_at check temporarily disabled - field may not be populated
+      // Simplified query - check if order is completed and contains the product
+      // Using order_item.product_id directly (Medusa 2.0 schema)
       const result = await pgConnection.raw(`
         SELECT DISTINCT o.id as order_id
         FROM "order" o
-        JOIN order_payment_collection opc ON o.id = opc.order_id
-        JOIN payment_collection pc ON opc.payment_collection_id = pc.id
         JOIN order_item oi ON o.id = oi.order_id
-        JOIN product_variant pv ON oi.variant_id = pv.id
         WHERE o.customer_id = ?
-          AND pv.product_id = ?
-          AND o.status != 'canceled'
-          AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
+          AND oi.product_id = ?
+          AND o.status = 'completed'
         LIMIT 1
       `, [customerId, productId])
 

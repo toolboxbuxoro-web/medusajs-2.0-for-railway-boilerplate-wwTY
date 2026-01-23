@@ -91,23 +91,14 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     `, [customerId, product_id])
     debug.existing_reviews = reviewsResult?.rows || []
 
-    // 7. Run the full eligibility query
+    // 7. Run the simplified eligibility query (matches ReviewsService.canReview)
     const eligibilityResult = await pgConnection.raw(`
       SELECT DISTINCT o.id as order_id
       FROM "order" o
-      JOIN order_payment_collection opc ON o.id = opc.order_id
-      JOIN payment_collection pc ON opc.payment_collection_id = pc.id
       JOIN order_item oi ON o.id = oi.order_id
-      JOIN product_variant pv ON oi.variant_id = pv.id
       WHERE o.customer_id = ?
-        AND pv.product_id = ?
-        AND o.status != 'canceled'
-        AND (pc.captured_amount > 0 OR pc.status IN ('captured', 'completed'))
-        AND EXISTS (
-          SELECT 1 FROM fulfillment f
-          JOIN order_fulfillment of ON f.id = of.fulfillment_id
-          WHERE of.order_id = o.id AND f.delivered_at IS NOT NULL
-        )
+        AND oi.product_id = ?
+        AND o.status = 'completed'
       LIMIT 1
     `, [customerId, product_id])
     debug.eligibility_query_result = eligibilityResult?.rows || []
