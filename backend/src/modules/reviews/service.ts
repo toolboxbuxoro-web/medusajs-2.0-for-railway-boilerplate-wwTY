@@ -121,14 +121,15 @@ class ReviewsService extends MedusaService({
 
       console.log(`[ReviewsService.canReview] Querying database for eligible orders...`)
 
-      // Simplified query - check if order is completed and contains the product
-      // Using order_item.product_id directly (Medusa 2.0 schema)
+      // Correct Medusa 2.0 schema: order_item.item_id → order_line_item.id
+      // order_line_item has product_id, variant_id columns
       const result = await pgConnection.raw(`
         SELECT DISTINCT o.id as order_id
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
+        JOIN order_line_item oli ON oi.item_id = oli.id
         WHERE o.customer_id = ?
-          AND oi.product_id = ?
+          AND oli.product_id = ?
           AND o.status = 'completed'
         LIMIT 1
       `, [customerId, productId])

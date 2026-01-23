@@ -91,13 +91,15 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     `, [customerId, product_id])
     debug.existing_reviews = reviewsResult?.rows || []
 
-    // 7. Run the simplified eligibility query (matches ReviewsService.canReview)
+    // 7. Run the fixed eligibility query (matches ReviewsService.canReview)
+    // Correct schema: order_item.item_id → order_line_item.id → order_line_item.product_id
     const eligibilityResult = await pgConnection.raw(`
       SELECT DISTINCT o.id as order_id
       FROM "order" o
       JOIN order_item oi ON o.id = oi.order_id
+      JOIN order_line_item oli ON oi.item_id = oli.id
       WHERE o.customer_id = ?
-        AND oi.product_id = ?
+        AND oli.product_id = ?
         AND o.status = 'completed'
       LIMIT 1
     `, [customerId, product_id])
