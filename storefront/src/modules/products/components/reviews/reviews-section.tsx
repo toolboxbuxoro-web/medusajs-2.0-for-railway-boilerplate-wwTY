@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useInfiniteReviews } from "@lib/hooks/use-infinite-reviews"
 import ReviewsList from "./reviews-list"
 import RatingSummary from "./rating-summary"
@@ -21,9 +21,25 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   locale,
 }) => {
   const t = useTranslations("product")
-  const { authStatus } = useAuth()
+  
+  // Безопасное использование useAuth с fallback
+  let authStatus: "loading" | "authorized" | "unauthorized" = "unauthorized"
+  try {
+    const auth = useAuth()
+    authStatus = auth.authStatus
+  } catch (error) {
+    // Если AuthProvider не доступен, используем значение по умолчанию
+    console.warn("[ReviewsSection] AuthProvider not available, using default")
+  }
+  
   const isLoggedIn = authStatus === "authorized"
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+  // Проверка productId перед использованием хука
+  if (!productId) {
+    console.error("[ReviewsSection] productId is required")
+    return null
+  }
 
   const {
     total,
@@ -52,6 +68,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     })
   }
 
+  // Гарантируем, что distribution всегда объект
+  const safeDistribution = distribution && typeof distribution === "object" 
+    ? distribution 
+    : { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+
   return (
     <div
       id="reviews"
@@ -78,11 +99,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       {!isLoading && total > 0 && (
         <div className="mb-6 sm:mb-8">
           <RatingSummary
-            averageRating={averageRating}
-            count={total}
-            distribution={distribution}
+            averageRating={averageRating || 0}
+            count={total || 0}
+            distribution={safeDistribution}
             onRatingClick={handleRatingClick}
-            selectedRating={filters.rating}
+            selectedRating={filters?.rating}
           />
         </div>
       )}
@@ -93,11 +114,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         {!isLoading && total > 0 && (
           <div className="hidden lg:block">
             <ReviewsFilters
-              filters={filters}
-              sort={sort}
+              filters={filters || {}}
+              sort={sort || "newest"}
               onFiltersChange={setFilters}
               onSortChange={setSort}
-              total={total}
+              total={total || 0}
             />
           </div>
         )}
@@ -117,11 +138,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       {!isLoading && total > 0 && (
         <div className="lg:hidden mt-6">
           <ReviewsFilters
-            filters={filters}
-            sort={sort}
+            filters={filters || {}}
+            sort={sort || "newest"}
             onFiltersChange={setFilters}
             onSortChange={setSort}
-            total={total}
+            total={total || 0}
           />
         </div>
       )}
