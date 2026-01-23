@@ -21,7 +21,8 @@ export default async function OrderCompletedTemplate({
   order,
   locale
 }: OrderCompletedTemplateProps) {
-  const isOnboarding = cookies().get("_medusa_onboarding")?.value === "true"
+  const cookieStore = await cookies()
+  const isOnboarding = cookieStore.get("_medusa_onboarding")?.value === "true"
   const customer = await getCustomer().catch(() => null)
   const isGuest = !customer
 
