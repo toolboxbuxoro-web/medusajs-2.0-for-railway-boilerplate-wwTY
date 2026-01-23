@@ -16,6 +16,13 @@ export default defineMiddlewares({
       ],
     },
     {
+      matcher: "/store/products/*/can-review",
+      method: "GET",
+      middlewares: [
+        authenticate("customer", ["session", "bearer"]),
+      ],
+    },
+    {
       matcher: "/store/customer/reviews",
       method: "GET",
       middlewares: [
