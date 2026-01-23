@@ -4,7 +4,6 @@ import { cache } from "react"
 import { getRegion } from "./regions"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { sortProducts } from "@lib/util/sort-products"
-import { getAuthHeaders } from "./cookies"
 
 export const getProductsById = cache(async function ({
   ids,
@@ -21,7 +20,7 @@ export const getProductsById = cache(async function ({
         fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata",
       },
       // @ts-ignore
-      { next: { tags: ["products"], revalidate: 3600 }, ...getAuthHeaders() }
+      { next: { tags: ["products"], revalidate: 3600 } }
     )
     .then(({ products }) => products)
     .catch((err) => {
