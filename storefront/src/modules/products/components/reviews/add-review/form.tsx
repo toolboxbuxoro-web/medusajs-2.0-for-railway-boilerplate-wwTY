@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
-import { createReview, checkCanReview, uploadReviewImages } from "@lib/data/review.service"
+import { submitReview } from "@modules/products/components/reviews/actions"
+import { uploadReviewImages } from "@lib/data/review.service"
 import { Review } from "@lib/data/review.types"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
 import StarIcon from "@modules/common/icons/star"
@@ -51,7 +52,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
     setError(null)
 
     try {
-      const review = await createReview({
+      const review = await submitReview(productId, {
         product_id: productId,
         rating,
         title: title.trim() || undefined,

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { checkCanReview } from "@lib/data/review.service"
+import { checkReviewEligibility } from "@modules/products/components/reviews/actions"
 
 interface EligibilityCheckProps {
   productId: string
@@ -23,7 +23,7 @@ const EligibilityCheck: React.FC<EligibilityCheckProps> = ({
     const checkEligibility = async () => {
       setIsLoading(true)
       try {
-        const res = await checkCanReview(productId)
+        const res = await checkReviewEligibility(productId)
         setCanReview(res.can_review)
         if (res.can_review) {
           onCanReview()
