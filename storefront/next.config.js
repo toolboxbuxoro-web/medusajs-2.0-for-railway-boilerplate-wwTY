@@ -10,9 +10,7 @@ checkEnvVariables()
  */
 const nextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -65,9 +63,7 @@ const nextConfig = {
       },
     ],
   },
-  serverRuntimeConfig: {
-    port: process.env.PORT || 3000
-  }
+
 }
 
 module.exports = withNextIntl(nextConfig)
