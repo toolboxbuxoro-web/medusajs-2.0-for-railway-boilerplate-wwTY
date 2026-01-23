@@ -234,9 +234,9 @@ class ReviewsService extends MedusaService({
         SELECT DISTINCT o.id as order_id
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
-        JOIN order_line_item oli ON oi.item_id = oli.id
+        JOIN product_variant pv ON oi.variant_id = pv.id
         WHERE o.customer_id = $1
-          AND oli.product_id = $2
+          AND pv.product_id = $2
           AND o.status = 'completed'
         LIMIT 1
       `
