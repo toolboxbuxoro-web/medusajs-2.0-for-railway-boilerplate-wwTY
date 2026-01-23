@@ -96,6 +96,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
       page={page}
       sortBy={sortBy}
       countryCode={params.countryCode}
+      locale={params.locale}
     />
   )
 }

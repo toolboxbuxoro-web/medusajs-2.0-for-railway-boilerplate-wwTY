@@ -94,7 +94,7 @@ export function useInfiniteReviews({
 
       try {
         const offset = currentPage * pageSize
-        const sortParam = sort === "newest" ? "newest" : sort === "oldest" ? "newest" : sort
+        const sortParam = sort
 
         // Загружаем отзывы
         const data = await getReviews(productId, {

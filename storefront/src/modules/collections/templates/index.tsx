@@ -1,7 +1,4 @@
-"use client"
-
 import { Suspense } from "react"
-import { useParams } from "next/navigation"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
@@ -16,16 +13,17 @@ export default function CollectionTemplate({
   collection,
   page,
   countryCode,
+  locale,
 }: {
   sortBy?: SortOptions
   collection: HttpTypes.StoreCollection
   page?: string
   countryCode: string
+  locale: string
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
-  const { locale } = useParams()
-  const localeStr = String(locale || "ru")
+  const localeStr = locale
 
     const metadata = collection.metadata as Record<string, any> | undefined
     const isColored = Boolean(metadata?.colored_background)

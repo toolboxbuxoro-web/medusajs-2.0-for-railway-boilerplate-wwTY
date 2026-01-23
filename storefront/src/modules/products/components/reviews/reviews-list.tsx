@@ -12,7 +12,7 @@ interface ReviewsListProps {
 const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, locale }) => {
   const t = useTranslations("product")
 
-  if (reviews.length === 0) {
+  if (!reviews || reviews.length === 0) {
     return (
       <div className="py-12 flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
