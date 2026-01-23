@@ -151,14 +151,14 @@ export default async function reviewsE2EFlow({
     const rating = 5
     const comment = `E2E review for product ${product.id} at ${new Date().toISOString()}`
 
-    const review = await reviewsModuleService.createReviews({
+    const review = await reviewsModuleService.createReviewWithValidation({
       product_id: product.id,
       customer_id: customer.id,
       order_id: eligibility.order_id,
       rating,
       comment,
       status: "pending",
-    } as any)
+    })
 
     logger.info(
       `[reviews-e2e-flow] Created review ${review.id} with status ${review.status}`
@@ -173,10 +173,7 @@ export default async function reviewsE2EFlow({
     //
     // 6) Simulate admin moderation: approve the review
     //
-    const approved = await reviewsModuleService.updateReviewStatus(
-      review.id,
-      "approved"
-    )
+    const approved = await reviewsModuleService.approveReview(review.id)
 
     logger.info(
       `[reviews-e2e-flow] Review ${approved.id} status after moderation: ${approved.status}`
@@ -192,18 +189,20 @@ export default async function reviewsE2EFlow({
     // 7) Verify the review is visible in the public list (storefront-facing domain)
     //
     const publicReviews =
-      await reviewsModuleService.getProductReviews(product.id)
+      await reviewsModuleService.listReviewsWithConversion(
+        { product_id: product.id, status: "approved" }
+      )
 
     const found = publicReviews.find((r: any) => r.id === approved.id)
 
     if (!found) {
       throw new Error(
-        `[reviews-e2e-flow] Approved review ${approved.id} not returned by getProductReviews()`
+        `[reviews-e2e-flow] Approved review ${approved.id} not returned by listReviewsWithConversion()`
       )
     }
 
     logger.info(
-      `[reviews-e2e-flow] getProductReviews() returned the approved review as expected`
+      `[reviews-e2e-flow] listReviewsWithConversion() returned the approved review as expected`
     )
 
     //
