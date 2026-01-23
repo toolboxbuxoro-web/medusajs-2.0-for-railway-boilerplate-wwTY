@@ -8,7 +8,7 @@ function backendBaseUrl(): string {
 }
 
 export async function submitReview(productId: string, data: any) {
-  const headers = getAuthHeaders()
+  const headers = await getAuthHeaders()
   
   if (!headers || Object.keys(headers).length === 0) {
     throw new Error("Unauthorized")
@@ -36,7 +36,7 @@ export async function submitReview(productId: string, data: any) {
 }
 
 export async function checkReviewEligibility(productId: string) {
-  const headers = getAuthHeaders()
+  const headers = await getAuthHeaders()
 
   // If no auth headers, user is definitely not logged in -> can't review
   if (!headers || Object.keys(headers).length === 0) {
