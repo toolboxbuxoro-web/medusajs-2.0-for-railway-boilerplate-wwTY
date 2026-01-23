@@ -98,7 +98,7 @@ const ReviewsPage = () => {
       const url = `/admin/reviews?${params.toString()}`
       const response = await fetch(url, { credentials: "include" })
       const data = await response.json()
-      setReviews(data.reviews)
+      setReviews(Array.isArray(data.reviews) ? data.reviews : [])
       setCount(data.count)
     } catch (error) {
       console.error("Failed to fetch reviews:", error)

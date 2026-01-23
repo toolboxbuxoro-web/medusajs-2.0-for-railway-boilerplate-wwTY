@@ -18,7 +18,7 @@ const ReviewProductWidget = ({ data }: WidgetProps) => {
     try {
       const response = await fetch(`/admin/reviews?product_id=${data.id}&limit=100`, { credentials: "include" })
       const json = await response.json()
-      setReviews(json.reviews)
+      setReviews(Array.isArray(json.reviews) ? json.reviews : [])
     } catch (error) {
       console.error("Error fetching reviews for product:", error)
     } finally {
@@ -52,14 +52,14 @@ const ReviewProductWidget = ({ data }: WidgetProps) => {
     }
   }
 
-  if (reviews.length === 0 && !isLoading) return null
+  if (!reviews || reviews.length === 0 && !isLoading) return null
 
   return (
     <Container className="p-0 overflow-hidden mt-8">
       <div className="px-6 py-4 border-b border-ui-border-base bg-ui-bg-subtle/50 flex items-center justify-between">
         <div className="flex items-center gap-x-2">
            <ChatBubbleLeftRight className="text-ui-fg-subtle" />
-           <Heading level="h2">Отзывы покупателей ({reviews.length})</Heading>
+           <Heading level="h2">Отзывы покупателей ({reviews?.length || 0})</Heading>
         </div>
         <Text size="xsmall" className="text-ui-fg-muted font-medium uppercase tracking-widest">
            Последние отзывы
