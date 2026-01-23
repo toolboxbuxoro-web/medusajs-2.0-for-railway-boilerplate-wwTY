@@ -3,7 +3,7 @@
 import React, { useState, Fragment } from "react"
 import { Button, Text, Heading, Badge } from "@medusajs/ui"
 import { useTranslations } from "next-intl"
-import AddReviewForm from "@modules/products/components/reviews/add-review-form"
+import AddReviewForm from "@modules/products/components/reviews/add-review/form"
 import { Dialog, Transition } from "@headlessui/react"
 import { XMark } from "@medusajs/icons"
 
