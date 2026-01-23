@@ -3,7 +3,6 @@
 import React from "react"
 import { Heading, Text } from "@medusajs/ui"
 import { useTranslations } from "next-intl"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const ReviewsEmptyState: React.FC = () => {
   const t = useTranslations("product")

@@ -4,7 +4,6 @@ import React from "react"
 import { clx } from "@medusajs/ui"
 import { useTranslations } from "next-intl"
 import StarIcon from "@modules/common/icons/star"
-import DistributionBars from "./distribution-bars"
 
 interface RatingSummaryProps {
   averageRating: number
