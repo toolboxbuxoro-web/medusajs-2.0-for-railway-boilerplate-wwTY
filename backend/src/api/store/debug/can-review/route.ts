@@ -38,23 +38,25 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     `, [customerId])
     debug.customer_orders = ordersResult?.rows || []
 
-    // 2. Check order items for this customer
+    // 2. Check order items for this customer (join order_line_item for product info)
     const itemsResult = await pgConnection.raw(`
-      SELECT oi.id, oi.order_id, oi.variant_id, oi.product_id, oi.title
+      SELECT oi.id, oi.order_id, oli.variant_id, oli.product_id, oli.title
       FROM order_item oi
       JOIN "order" o ON oi.order_id = o.id
+      JOIN order_line_item oli ON oi.item_id = oli.id
       WHERE o.customer_id = ?
       ORDER BY oi.created_at DESC
       LIMIT 10
     `, [customerId])
     debug.order_items = itemsResult?.rows || []
 
-    // 3. Check if any order has this product
+    // 3. Check if any order has this product (join order_line_item)
     const productOrdersResult = await pgConnection.raw(`
-      SELECT oi.order_id, oi.product_id, o.status, o.customer_id
+      SELECT oi.order_id, oli.product_id, o.status, o.customer_id
       FROM order_item oi
       JOIN "order" o ON oi.order_id = o.id
-      WHERE o.customer_id = ? AND oi.product_id = ?
+      JOIN order_line_item oli ON oi.item_id = oli.id
+      WHERE o.customer_id = ? AND oli.product_id = ?
       LIMIT 5
     `, [customerId, product_id])
     debug.orders_with_product = productOrdersResult?.rows || []

@@ -4,19 +4,43 @@ function backendBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
 }
 
+export interface GetReviewsOptions {
+  limit?: number
+  offset?: number
+  sort?: string
+  rating?: number
+  withPhotos?: boolean
+}
+
 export const getReviews = async (
   productId: string,
-  { limit = 10, offset = 0, sort = "newest" }: { limit?: number; offset?: number; sort?: string } = {}
+  options: GetReviewsOptions = {}
 ): Promise<{ 
   reviews: Review[]; 
   total: number; 
   average_rating: number;
   distribution: Record<number, number>;
 }> => {
+  const { limit = 10, offset = 0, sort = "newest", rating, withPhotos } = options
+  
+  const params = new URLSearchParams({
+    limit: limit.toString(),
+    offset: offset.toString(),
+    sort,
+  })
+  
+  // Добавляем фильтры если они есть (backend может не поддерживать, но добавим для будущего)
+  if (rating) {
+    params.append("rating", rating.toString())
+  }
+  if (withPhotos) {
+    params.append("with_photos", "true")
+  }
+
   const resp = await fetch(
-    `${backendBaseUrl()}/store/products/${productId}/reviews?limit=${limit}&offset=${offset}&sort=${sort}`,
+    `${backendBaseUrl()}/store/products/${productId}/reviews?${params.toString()}`,
     {
-      next: { tags: ["reviews"] },
+      next: { tags: ["reviews", `reviews-${productId}`] },
       headers: {
         "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
       },

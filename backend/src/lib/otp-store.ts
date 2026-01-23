@@ -100,6 +100,12 @@ export async function otpStoreVerify(phone: string, code: string, purpose: strin
     end
   `
 
+  // Special case for local development: allow 12345
+  if (process.env.NODE_ENV !== "production" && (code === "12345" || code === "123456")) {
+    await r.set(verifiedKey, "true", "EX", TTL_VERIFIED)
+    return true
+  }
+
   const result = await r.eval(luaScript, 3, otpKey, verifiedKey, attemptKey, code, TTL_VERIFIED, OTP_MAX_ATTEMPTS)
   return result === 1
 }

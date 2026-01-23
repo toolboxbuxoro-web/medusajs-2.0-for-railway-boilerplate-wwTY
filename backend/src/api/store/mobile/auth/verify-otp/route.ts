@@ -44,11 +44,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const email = `${normalized}@phone.local`
     
     /**
-     * 2. Find or Create Customer
+     * 2. Find Auth Identity First
+     */
+    let authIdentityId: string | null = null
+    const identities = await authModule.listAuthIdentities({
+      provider_identities: {
+        entity_id: email,
+        provider: "emailpass",
+      },
+    })
+    authIdentityId = identities[0]?.id
+
+    /**
+     * 3. Find or Create Customer
      */
     let customer: any
-    let authIdentityId: string | null = null
-
     const existingCustomers = await customerModule.listCustomers({ email })
 
     if (existingCustomers.length > 0) {
@@ -62,44 +72,66 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         })
         logger.info(`[Mobile Auth] Updated legacy customer ${customer.id} with phone/name`)
       }
-      
-      // Resolve existing auth identity
-      const identities = await authModule.listAuthIdentities({
-        provider_identities: {
-          entity_id: email,
-          provider: "emailpass",
-        },
-      })
-      authIdentityId = identities[0]?.id
     } else {
-      // Register New Customer
-      const password = generatePassword()
-      const registerResult = await authModule.register("emailpass", {
-        body: { email, password },
-      })
-
-      if (!registerResult?.success) {
-        throw new Error("registration_failed")
+      // Register New Customer in Module
+      try {
+        customer = await customerModule.createCustomers({
+          email,
+          phone: `+${normalized}`,
+          first_name: "Покупатель",
+          has_account: true,
+        })
+        logger.info(`[Mobile Auth] Customer created: ${customer.id}`)
+      } catch (custErr: any) {
+        logger.error(`[Mobile Auth] Customer creation failed: ${custErr.message}`)
+        throw custErr
       }
+    }
 
-      authIdentityId = registerResult.authIdentity.id
+    /**
+     * 4. Register Auth Identity if missing
+     */
+    if (!authIdentityId) {
+      const password = generatePassword()
+      logger.info(`[Mobile Auth] Registering new auth identity for ${email}`)
+      try {
+        const registerResult = await authModule.register("emailpass", {
+          body: { email, password },
+        })
 
-      customer = await customerModule.createCustomers({
-        email,
-        phone: `+${normalized}`,
-        first_name: "Покупатель",
-        has_account: true,
-      })
+        if (!registerResult?.success) {
+          logger.error(`[Mobile Auth] Registration failed for ${email}: ${JSON.stringify(registerResult)}`)
+          throw new Error("registration_failed")
+        }
 
-      // Link Customer to Auth Identity
-      await authModule.updateAuthIdentities([
-        {
-          id: authIdentityId,
-          app_metadata: {
-            customer_id: customer.id,
+        authIdentityId = registerResult.authIdentity.id
+        logger.info(`[Mobile Auth] Identity created: ${authIdentityId}`)
+      } catch (regErr: any) {
+        logger.error(`[Mobile Auth] Auth register call failed: ${regErr.message}`)
+        throw regErr
+      }
+    }
+
+    /**
+     * 5. Link Customer to Auth Identity (always ensure link)
+     */
+    const identity = await authModule.retrieveAuthIdentity(authIdentityId)
+    if (!identity.app_metadata?.customer_id) {
+      try {
+        await authModule.updateAuthIdentities([
+          {
+            id: authIdentityId,
+            app_metadata: {
+              ...(identity.app_metadata || {}),
+              customer_id: customer.id,
+            },
           },
-        },
-      ])
+        ])
+        logger.info(`[Mobile Auth] Identity linked to customer ${customer.id}`)
+      } catch (linkErr: any) {
+        logger.error(`[Mobile Auth] Identity linking failed: ${linkErr.message}`)
+        throw linkErr
+      }
     }
 
     if (!authIdentityId) {
@@ -152,6 +184,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   } catch (error: any) {
     logger.error(`[Mobile Auth] Verification Error: ${error.message}`)
-    return res.status(500).json({ error: "authentication_failed" })
+    console.error(`[Mobile Auth] Error details:`, error)
+    return res.status(500).json({ 
+      error: "authentication_failed",
+      message: error.message
+    })
   }
 }

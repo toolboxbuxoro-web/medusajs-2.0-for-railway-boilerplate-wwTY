@@ -392,7 +392,21 @@
     "images": "Добавить фото",
     "only_after_delivery": "Отзыв можно оставить только после получения заказа",
     "review_status_rejected": "Отклонён",
-    "my_reviews": "Мои отзывы"
+    "my_reviews": "Мои отзывы",
+    "filter_by_rating": "Фильтр по рейтингу",
+    "with_photos": "С фото",
+    "reset_filters": "Сбросить фильтры",
+    "reset": "Сбросить",
+    "filters": "Фильтры",
+    "sort": "Сортировка",
+    "sort_newest": "Сначала новые",
+    "sort_oldest": "Сначала старые",
+    "sort_rating_desc": "Высокий рейтинг",
+    "sort_rating_asc": "Низкий рейтинг",
+    "other_filters": "Другие",
+    "view_all_reviews": "Смотреть все",
+    "title": "Заголовок",
+    "title_placeholder": "Краткое описание вашего отзыва..."
   },
   "search": {
     "search": "Поиск",
