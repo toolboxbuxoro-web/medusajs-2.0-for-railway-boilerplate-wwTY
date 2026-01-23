@@ -40,10 +40,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // 2. Check order items for this customer (join order_line_item for product info)
     const itemsResult = await pgConnection.raw(`
-      SELECT oi.id, oi.order_id, oli.variant_id, oli.product_id, oli.title
+      SELECT oi.id, oi.order_id, oi.variant_id, pv.product_id, pv.title
       FROM order_item oi
       JOIN "order" o ON oi.order_id = o.id
-      JOIN order_line_item oli ON oi.item_id = oli.id
+      JOIN product_variant pv ON oi.variant_id = pv.id
       WHERE o.customer_id = ?
       ORDER BY oi.created_at DESC
       LIMIT 10
@@ -52,11 +52,11 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // 3. Check if any order has this product (join order_line_item)
     const productOrdersResult = await pgConnection.raw(`
-      SELECT oi.order_id, oli.product_id, o.status, o.customer_id
+      SELECT oi.order_id, pv.product_id, o.status, o.customer_id
       FROM order_item oi
       JOIN "order" o ON oi.order_id = o.id
-      JOIN order_line_item oli ON oi.item_id = oli.id
-      WHERE o.customer_id = ? AND oli.product_id = ?
+      JOIN product_variant pv ON oi.variant_id = pv.id
+      WHERE o.customer_id = ? AND pv.product_id = ?
       LIMIT 5
     `, [customerId, product_id])
     debug.orders_with_product = productOrdersResult?.rows || []
@@ -94,14 +94,14 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     debug.existing_reviews = reviewsResult?.rows || []
 
     // 7. Run the fixed eligibility query (matches ReviewsService.canReview)
-    // Correct schema: order_item.item_id → order_line_item.id → order_line_item.product_id
+    // Correct schema: order_item.variant_id → product_variant.id → product_variant.product_id
     const eligibilityResult = await pgConnection.raw(`
       SELECT DISTINCT o.id as order_id
       FROM "order" o
       JOIN order_item oi ON o.id = oi.order_id
-      JOIN order_line_item oli ON oi.item_id = oli.id
+      JOIN product_variant pv ON oi.variant_id = pv.id
       WHERE o.customer_id = ?
-        AND oli.product_id = ?
+        AND pv.product_id = ?
         AND o.status = 'completed'
       LIMIT 1
     `, [customerId, product_id])
