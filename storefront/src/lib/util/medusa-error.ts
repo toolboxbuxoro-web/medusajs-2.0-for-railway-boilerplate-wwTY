@@ -1,4 +1,7 @@
 export default function medusaError(error: any): never {
+  // Log the full error object for debugging
+  console.error(`[MedusaError] Full error object:`, JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
+  
   if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
@@ -22,6 +25,7 @@ export default function medusaError(error: any): never {
   } else {
     // Something happened in setting up the request that triggered an Error
     console.error(`[MedusaError] Setup error:`, error.message)
+    console.error(`[MedusaError] Error stack:`, error.stack)
     throw new Error("Error setting up the request: " + error.message)
   }
 }

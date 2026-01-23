@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useInfiniteReviews } from "@lib/hooks/use-infinite-reviews"
 import ReviewsList from "./reviews-list"
 import RatingSummary from "./rating-summary"
@@ -22,35 +22,41 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 }) => {
   const t = useTranslations("product")
   
-  // Безопасное использование useAuth с fallback
+  // useAuth должен быть вызван безусловно (правило хуков)
   let authStatus: "loading" | "authorized" | "unauthorized" = "unauthorized"
+  let isLoggedIn = false
+  
   try {
     const auth = useAuth()
-    authStatus = auth.authStatus
+    authStatus = auth?.authStatus || "unauthorized"
+    isLoggedIn = authStatus === "authorized"
   } catch (error) {
     // Если AuthProvider не доступен, используем значение по умолчанию
     console.warn("[ReviewsSection] AuthProvider not available, using default")
   }
   
-  const isLoggedIn = authStatus === "authorized"
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
-  // Проверка productId перед использованием хука
+  // Проверка productId
   if (!productId) {
     console.error("[ReviewsSection] productId is required")
     return null
   }
 
   const {
+    reviews,
     total,
     averageRating,
     distribution,
     isLoading,
+    isLoadingMore,
+    hasMore,
     filters,
     sort,
     setFilters,
     setSort,
     refresh,
+    loadMoreRef,
   } = useInfiniteReviews({
     productId,
   })
@@ -64,7 +70,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     // Toggle rating filter
     setFilters({
       ...filters,
-      rating: filters.rating === rating ? undefined : rating,
+      rating: filters?.rating === rating ? undefined : rating,
     })
   }
 
@@ -126,11 +132,18 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         {/* Reviews List */}
         <div className="min-w-0">
           <ReviewsList
-            productId={productId}
+            reviews={reviews}
             locale={locale}
-            filters={filters}
-            sort={sort}
           />
+          
+          {/* Loading State & Infinite Scroll Sentinel */}
+          {(isLoading || isLoadingMore || hasMore) && (
+             <div ref={loadMoreRef} className="py-8 flex justify-center w-full">
+               {(isLoading || isLoadingMore) && (
+                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+               )}
+             </div>
+          )}
         </div>
       </div>
 
