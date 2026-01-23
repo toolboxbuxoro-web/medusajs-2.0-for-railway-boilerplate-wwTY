@@ -26,8 +26,10 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
     setLightboxOpen(true)
   }
 
-  const hasImages = review.images && review.images.length > 0
-  const imagesToShow = expandedImages ? review.images : review.images?.slice(0, 4) || []
+  const hasImages = Array.isArray(review.images) && review.images.length > 0
+  const imagesToShow = expandedImages 
+    ? (Array.isArray(review.images) ? review.images : [])
+    : (Array.isArray(review.images) ? review.images.slice(0, 4) : [])
   const remainingImages = hasImages ? (review.images?.length || 0) - 4 : 0
 
   return (

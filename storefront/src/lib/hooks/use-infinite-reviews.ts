@@ -104,7 +104,7 @@ export function useInfiniteReviews({
         })
 
         // Фильтруем на клиенте (если backend не поддерживает фильтры)
-        let filteredReviews = data.reviews
+        let filteredReviews = Array.isArray(data.reviews) ? data.reviews : []
 
         if (filters.rating) {
           filteredReviews = filteredReviews.filter((r) => r.rating === filters.rating)
@@ -112,7 +112,7 @@ export function useInfiniteReviews({
 
         if (filters.withPhotos) {
           filteredReviews = filteredReviews.filter(
-            (r) => r.images && r.images.length > 0
+            (r) => Array.isArray(r.images) && r.images.length > 0
           )
         }
 
@@ -129,10 +129,10 @@ export function useInfiniteReviews({
         }
 
         setReviews((prev) => (isNewSearch ? filteredReviews : [...prev, ...filteredReviews]))
-        setTotal(data.total)
-        setAverageRating(data.average_rating)
-        setDistribution(data.distribution)
-        setHasMore(filteredReviews.length === pageSize && (currentPage + 1) * pageSize < data.total)
+        setTotal(data.total || 0)
+        setAverageRating(data.average_rating || 0)
+        setDistribution(data.distribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 })
+        setHasMore(filteredReviews.length === pageSize && (currentPage + 1) * pageSize < (data.total || 0))
         setPage(currentPage)
       } catch (err: any) {
         if (err.name === "AbortError") {

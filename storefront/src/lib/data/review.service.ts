@@ -52,7 +52,18 @@ export const getReviews = async (
     throw new Error("Failed to fetch reviews")
   }
 
-  return resp.json()
+  const data = await resp.json()
+  
+  // Гарантируем правильную структуру данных
+  return {
+    reviews: Array.isArray(data.reviews) ? data.reviews : [],
+    total: typeof data.total === "number" ? data.total : 0,
+    average_rating: typeof data.average_rating === "number" ? data.average_rating : 0,
+    distribution: data.distribution && typeof data.distribution === "object" 
+      ? data.distribution 
+      : { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  }
+}
 }
 
 /**

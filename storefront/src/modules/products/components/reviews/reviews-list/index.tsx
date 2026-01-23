@@ -61,7 +61,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
   }
 
   // Empty state
-  if (reviews.length === 0) {
+  if (!reviews || reviews.length === 0) {
     return <ReviewsEmptyState />
   }
 
@@ -86,7 +86,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
       )}
 
       {/* End of List */}
-      {!hasMore && reviews.length > 0 && (
+      {!hasMore && reviews && reviews.length > 0 && (
         <div className="text-center py-6 text-sm text-gray-400">
           Все отзывы загружены
         </div>
