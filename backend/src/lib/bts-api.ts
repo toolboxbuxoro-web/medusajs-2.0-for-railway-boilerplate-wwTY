@@ -13,14 +13,16 @@ export interface BtsCalculateParams {
 }
 
 export interface BtsCalculateResponse {
-  success: boolean
+  success?: boolean
+  summaryPrice?: number
   data?: {
     summaryPrice: number
-    basePrice: number
+    basePrice?: number
     courierPickup?: number
     courierDelivery?: number
   }
   error?: string
+  message?: string
 }
 
 export interface BtsBranch {
@@ -389,15 +391,18 @@ export class BtsApiService {
 
       const json = (await resp.json()) as BtsCalculateResponse
 
-      if (!json.success || !json.data) {
-        this.logger.error(`[BTS API] Calculation response unsuccessful: ${JSON.stringify(json)}`)
+      // Flexible parsing: try root level first, then data object
+      const price = json.summaryPrice ?? json.data?.summaryPrice
+
+      if (price === undefined || price === null) {
+        this.logger.error(`[BTS API] Calculation response missing price: ${JSON.stringify(json)}`)
         this.recordFailure()
         BtsApiService.metrics.requestsFailed++
-        throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, json.error || "BTS calculation failed")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE, 
+          json.error || json.message || "BTS calculation failed: missing price in response"
+        )
       }
-
-      // 4. Cache the result
-      const price = json.data.summaryPrice
       await this.setCachedPrice(cacheKey, price)
       
       // 5. Record success
