@@ -238,11 +238,13 @@ class ReviewsService extends MedusaService({
         SELECT 
           o.id as order_id,
           o.status as order_status,
-          oi.shipped_quantity,
-          oi.fulfilled_quantity
+          oi.delivered_quantity,
+          f.delivered_at
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
         JOIN order_line_item oli ON oi.item_id = oli.id
+        LEFT JOIN order_fulfillment ofl ON o.id = ofl.order_id
+        LEFT JOIN fulfillment f ON ofl.fulfillment_id = f.id
         WHERE o.customer_id = $1
           AND oli.product_id = $2
           AND o.status != 'canceled'
@@ -258,10 +260,10 @@ class ReviewsService extends MedusaService({
         }
       }
 
-      // Check for any eligible order
+      // Check for any eligible order based on Medusa 2.0 delivery markers
       const eligibleOrder = rows.find(row => 
-        Number(row.shipped_quantity) > 0 || 
-        Number(row.fulfilled_quantity) > 0 ||
+        Number(row.delivered_quantity) > 0 || 
+        row.delivered_at !== null ||
         row.order_status === 'completed'
       )
 
