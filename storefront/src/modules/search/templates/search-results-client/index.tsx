@@ -12,7 +12,8 @@ import { MagnifyingGlassMini as MagnifyingGlass } from "@medusajs/icons"
 export default function SearchResultsClient({ initialQuery }: { initialQuery: string }) {
   const params = useParams()
   const countryCode = params?.countryCode as string || "uz"
-  const { query, setQuery, items, status, hasMore, loadMore, mode, totalHits } = useInfiniteSearch(initialQuery, countryCode)
+  const locale = params?.locale as string || "ru"
+  const { query, setQuery, items, status, hasMore, loadMore, mode, totalHits } = useInfiniteSearch(initialQuery, countryCode, locale)
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()

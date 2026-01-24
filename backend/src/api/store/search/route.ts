@@ -6,12 +6,13 @@ export const GET = async (
   res: MedusaResponse
 ) => {
   try {
-    const { q, limit = "20", offset = "0" } = req.query as Record<string, any>
+    const { q, limit = "20", offset = "0", locale = "ru" } = req.query as Record<string, any>
     const query = (q || "").trim()
+    const searchLocale = (locale || "ru").toLowerCase()
     
     // Debug logging
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Search API] Query received:', { raw: q, processed: query })
+      console.log('[Search API] Query received:', { raw: q, processed: query, locale: searchLocale })
     }
     
     // Limits
@@ -32,6 +33,13 @@ export const GET = async (
     }
 
     let mode: 'search' | 'recommendation' | 'fallback' = 'search'
+    
+    // Determine searchable attributes based on locale
+    // For Russian (ru): prioritize title, brand, seo_keywords
+    // For Uzbek (uz): prioritize title_uz, brand, seo_keywords
+    const isUzbekLocale = searchLocale === 'uz' || searchLocale === 'uz-uz'
+    const primaryTitleField = isUzbekLocale ? 'title_uz' : 'title'
+    
     let searchBody: any = {
       limit: limitNum,
       offset: offsetNum,
@@ -39,15 +47,15 @@ export const GET = async (
       attributesToRetrieve: [
         'id', 
         'title', 
+        'title_uz',
         'handle', 
         'thumbnail', 
         'status', 
         'metadata',
         'variants', // For "Add to Cart" logic
         'brand', 
-        'title_uz'
       ],
-      attributesToHighlight: ['title'],
+      attributesToHighlight: [primaryTitleField, 'title'],
       highlightPreTag: '<mark>',
       highlightPostTag: '</mark>',
       showRankingScore: true,
@@ -59,9 +67,15 @@ export const GET = async (
       searchBody.q = ""
       searchBody.sort = ["sales_count:desc", "created_at:desc"]
     } else {
-      // 2. Search Mode
+      // 2. Search Mode with locale-aware searchable attributes
       mode = 'search'
       searchBody.q = query
+      
+      // Prioritize search in the correct language field
+      // Meilisearch will search in all searchableAttributes, but we can boost the primary field
+      // by using rankingRules or by adjusting the order of searchableAttributes
+      // For now, we rely on the searchableAttributes configuration in meilisearch-settings.ts
+      // which already includes both title and title_uz
     }
 
     // Debug logging
@@ -102,10 +116,31 @@ export const GET = async (
       })
     }
 
+    // Post-process results to prioritize locale-specific content
+    // For Russian: prioritize products with title (not just title_uz)
+    // For Uzbek: prioritize products with title_uz
+    let processedHits = results.hits || []
+    
+    if (mode === 'search' && processedHits.length > 0) {
+      processedHits = processedHits.sort((a: any, b: any) => {
+        const aHasPrimaryTitle = isUzbekLocale 
+          ? Boolean(a.title_uz && a.title_uz.trim())
+          : Boolean(a.title && a.title.trim())
+        const bHasPrimaryTitle = isUzbekLocale 
+          ? Boolean(b.title_uz && b.title_uz.trim())
+          : Boolean(b.title && b.title.trim())
+        
+        // Products with primary title come first
+        if (aHasPrimaryTitle && !bHasPrimaryTitle) return -1
+        if (!aHasPrimaryTitle && bHasPrimaryTitle) return 1
+        return 0 // Keep original Meilisearch ranking
+      })
+    }
+
     // Return Meilisearch hits directly
     // Frontend will hydrate with prices via getProductsById
     res.json({
-      hits: results.hits || [],
+      hits: processedHits,
       estimatedTotalHits: results.estimatedTotalHits || 0,
       query: query,
       mode: mode,

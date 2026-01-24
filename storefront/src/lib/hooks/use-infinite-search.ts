@@ -18,7 +18,7 @@ export interface InfiniteSearchState {
   totalHits: number
 }
 
-export function useInfiniteSearch(initialQuery: string = "", countryCode: string = "uz") {
+export function useInfiniteSearch(initialQuery: string = "", countryCode: string = "uz", locale: string = "ru") {
   const [state, setState] = useState<InfiniteSearchState>({
     items: [],
     query: initialQuery,
@@ -53,7 +53,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
     try {
       const offset = page * 24
       // Step 1: Get search results from Meilisearch (basic data)
-      const results = await search(query, offset, countryCode)
+      const results = await search(query, offset, countryCode, locale)
 
       const { hits = [], estimatedTotalHits = 0, mode = "search" } = results
 
@@ -63,10 +63,18 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
       if (hits.length > 0 && regionRef.current) {
         try {
           const productIds = hits.map((h: any) => h.id)
-          const fullProducts = await getProductsById({
+          
+          // Add timeout to prevent hanging on slow backend
+          const hydrationPromise = getProductsById({
             ids: productIds,
             regionId: regionRef.current.id
           })
+          
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Hydration timeout')), 10000)
+          )
+          
+          const fullProducts = await Promise.race([hydrationPromise, timeoutPromise]) as any[]
           
           // Map back to preserve Meilisearch order
           hydratedHits = productIds.map((id: string) => {
@@ -84,7 +92,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
           }).filter(Boolean)
         } catch (e) {
           console.warn("[useInfiniteSearch] Hydration failed, using raw hits:", e)
-          // Continue with raw Meilisearch hits
+          // Continue with raw Meilisearch hits - this prevents 502 from breaking the UI
         }
       }
 
@@ -110,7 +118,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
     } finally {
       loadingRef.current = false
     }
-  }, [countryCode])
+  }, [countryCode, locale])
 
   // Initial fetch / Query change fetch
   useEffect(() => {
@@ -120,7 +128,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
 
     return () => clearTimeout(delayDebounceFn)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.query, fetchData])
+  }, [state.query, fetchData, locale])
 
   const loadMore = useCallback(() => {
     if (state.status === "loading" || !state.hasMore) return

@@ -13,12 +13,14 @@ interface Hits {
  * Uses MeiliSearch to search for a query
  * Returns basic product data for frontend hydration
  * @param {string} query - search query
+ * @param {string} locale - locale code (ru, uz, etc.)
  */
-export async function search(query: string, offset: number = 0, countryCode: string = "uz") {
+export async function search(query: string, offset: number = 0, countryCode: string = "uz", locale: string = "ru") {
   const url = new URL(`${MEDUSA_BACKEND_URL}/store/search`)
   url.searchParams.set("q", query)
   url.searchParams.set("limit", "24")
   url.searchParams.set("offset", offset.toString())
+  url.searchParams.set("locale", locale)
 
   const headers = getMedusaHeaders()
 
