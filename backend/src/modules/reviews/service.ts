@@ -221,24 +221,22 @@ class ReviewsService extends MedusaService({
         }
       }
 
-      // 2. Canonical check for PURCHASE (order exists)
-      const purchaseQuery = `
-        SELECT 
-          o.id as order_id, 
-          o.status as order_status,
-          oi.delivered_quantity
-        FROM "order" o
-        JOIN order_item oi ON oi.order_id = o.id
-        JOIN order_line_item oli ON oli.id = oi.item_id
-        WHERE
-          o.customer_id = $1
-          AND oli.product_id = $2
-          AND o.status != 'canceled'
-        LIMIT 1;
-      `
-      
-      const purchaseResult = await pgConnection.raw(purchaseQuery, [customerId, productId])
-      const purchaseRow = purchaseResult.rows[0]
+      // 2. Canonical check for PURCHASE (order exists) - using Query Builder
+      const rows = await pgConnection
+        .select(
+          "oi.delivered_quantity", 
+          "o.id as order_id", 
+          "o.status as order_status"
+        )
+        .from("order as o")
+        .join("order_item as oi", "o.id", "oi.order_id")
+        .join("order_line_item as oli", "oi.item_id", "oli.id")
+        .where("oli.product_id", productId)
+        .where("o.customer_id", customerId)
+        .whereNot("o.status", "canceled")
+        .limit(1)
+
+      const purchaseRow = rows[0]
 
       if (!purchaseRow) {
         return {
