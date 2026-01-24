@@ -20,6 +20,10 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
   filters: initialFilters,
   sort: initialSort,
 }) => {
+  if (!productId || productId === "undefined" || productId === "null") {
+    return null
+  }
+
   const {
     reviews,
     total,

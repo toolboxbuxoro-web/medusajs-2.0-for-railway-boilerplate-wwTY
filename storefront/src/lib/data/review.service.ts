@@ -21,6 +21,16 @@ export const getReviews = async (
   average_rating: number;
   distribution: Record<number, number>;
 }> => {
+  if (!productId || productId === "undefined" || productId === "null") {
+    console.warn(`[getReviews] Invalid productId: ${productId}. Skipping fetch.`)
+    return {
+      reviews: [],
+      total: 0,
+      average_rating: 0,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+    }
+  }
+
   const { limit = 10, offset = 0, sort = "newest", rating, withPhotos } = options
   
   const params = new URLSearchParams({
@@ -69,6 +79,11 @@ export const getReviews = async (
  * Check if the current customer can review the product.
  */
 export const checkCanReview = async (productId: string): Promise<CanReviewResponse> => {
+  if (!productId || productId === "undefined" || productId === "null") {
+    console.warn(`[checkCanReview] Invalid productId: ${productId}. Skipping fetch.`)
+    return { can_review: false, reason: "error" }
+  }
+
   const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   
   console.log(`[checkCanReview] Request ${requestId} - Checking eligibility for product ${productId}`)

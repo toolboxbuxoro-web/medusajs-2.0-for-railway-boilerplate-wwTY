@@ -38,8 +38,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   // Проверка productId
-  if (!productId) {
-    console.error("[ReviewsSection] productId is required")
+  if (!productId || productId === "undefined" || productId === "null") {
+    console.error("[ReviewsSection] productId is required and must be valid. Received:", productId)
     return null
   }
 
@@ -132,8 +132,10 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         {/* Reviews List */}
         <div className="min-w-0">
           <ReviewsList
-            reviews={reviews}
+            productId={productId}
             locale={locale}
+            filters={filters}
+            sort={sort}
           />
           
           {/* Loading State & Infinite Scroll Sentinel */}

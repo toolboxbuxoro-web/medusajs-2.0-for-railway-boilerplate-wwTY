@@ -108,12 +108,25 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
         onCanReview={() => {}}
         onCannotReview={() => {}}
       >
-        {({ canReview, isLoading: eligibilityLoading }) => {
+        {({ canReview, isLoading: eligibilityLoading, error: eligibilityError }) => {
           if (eligibilityLoading) {
             return (
               <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 animate-pulse">
                 <div className="h-6 w-32 bg-gray-200 rounded mb-4" />
                 <div className="h-4 w-48 bg-gray-200 rounded" />
+              </div>
+            )
+          }
+
+          if (eligibilityError) {
+            return (
+              <div className="bg-red-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center border border-red-100">
+                <Heading level="h2" className="text-red-900 mb-3 text-lg sm:text-xl">
+                  {t("review_error")}
+                </Heading>
+                <Text className="text-red-500 text-sm sm:text-base">
+                  {eligibilityError}
+                </Text>
               </div>
             )
           }

@@ -8,6 +8,11 @@ function backendBaseUrl(): string {
 }
 
 export async function submitReview(productId: string, data: any) {
+  if (!productId || productId === "undefined" || productId === "null") {
+    console.error("[submitReview] Invalid productId:", productId)
+    throw new Error("Invalid product ID")
+  }
+
   const headers = await getAuthHeaders()
   
   if (!headers || Object.keys(headers).length === 0) {
@@ -36,6 +41,11 @@ export async function submitReview(productId: string, data: any) {
 }
 
 export async function checkReviewEligibility(productId: string) {
+  if (!productId || productId === "undefined" || productId === "null") {
+    console.warn("[checkReviewEligibility] Invalid productId:", productId)
+    return { can_review: false, reason: "error" }
+  }
+
   const headers = await getAuthHeaders()
 
   // If no auth headers, user is definitely not logged in -> can't review

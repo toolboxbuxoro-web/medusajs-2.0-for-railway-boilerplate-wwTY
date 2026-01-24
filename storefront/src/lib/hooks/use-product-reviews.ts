@@ -19,6 +19,10 @@ export function useProductReviews(productId: string) {
   const [error, setError] = useState<string | null>(null)
 
   const fetchReviews = useCallback(async () => {
+    if (!productId || productId === "undefined" || productId === "null") {
+      setIsLoading(false)
+      return
+    }
     setIsLoading(true)
     setError(null)
     try {

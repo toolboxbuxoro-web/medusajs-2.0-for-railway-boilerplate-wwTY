@@ -75,7 +75,13 @@ export function useInfiniteReviews({
   // Функция загрузки отзывов
   const fetchReviews = useCallback(
     async (currentPage: number, isNewSearch: boolean) => {
-      if (loadingRef.current) return
+      if (loadingRef.current || !productId || productId === "undefined" || productId === "null") {
+        if (!productId || productId === "undefined" || productId === "null") {
+          setIsLoading(false)
+          setIsLoadingMore(false)
+        }
+        return
+      }
       loadingRef.current = true
 
       // Отменяем предыдущий запрос если есть

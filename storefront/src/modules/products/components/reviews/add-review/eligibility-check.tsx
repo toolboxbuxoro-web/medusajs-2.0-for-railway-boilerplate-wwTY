@@ -7,7 +7,7 @@ interface EligibilityCheckProps {
   productId: string
   onCanReview: () => void
   onCannotReview: () => void
-  children: (props: { canReview: boolean; isLoading: boolean }) => React.ReactNode
+  children: (props: { canReview: boolean; isLoading: boolean; error: string | null }) => React.ReactNode
 }
 
 const EligibilityCheck: React.FC<EligibilityCheckProps> = ({
@@ -17,11 +17,19 @@ const EligibilityCheck: React.FC<EligibilityCheckProps> = ({
   children,
 }) => {
   const [canReview, setCanReview] = useState<boolean | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const checkEligibility = async () => {
+      if (!productId || productId === "undefined" || productId === "null") {
+        setCanReview(false)
+        setIsLoading(false)
+        return
+      }
+
       setIsLoading(true)
+      setError(null)
       try {
         const res = await checkReviewEligibility(productId)
         setCanReview(res.can_review)
@@ -30,8 +38,9 @@ const EligibilityCheck: React.FC<EligibilityCheckProps> = ({
         } else {
           onCannotReview()
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("[EligibilityCheck] Error:", err)
+        setError(err.message || "Failed to check eligibility")
         setCanReview(false)
         onCannotReview()
       } finally {
@@ -43,7 +52,7 @@ const EligibilityCheck: React.FC<EligibilityCheckProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId])
 
-  return <>{children({ canReview: canReview === true, isLoading })}</>
+  return <>{children({ canReview: canReview === true, isLoading, error })}</>
 }
 
 export default EligibilityCheck
