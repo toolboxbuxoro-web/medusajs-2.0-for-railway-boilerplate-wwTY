@@ -96,7 +96,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     if (isLoadingEligibility) return t("loading")
     if (eligibility?.can_review) return null
     if (eligibility?.reason === "already_reviewed") return t("already_reviewed")
-    if (eligibility?.reason === "no_completed_order") return t("only_after_purchase")
+    if (eligibility?.reason === "not_purchased") return t("only_after_purchase")
     return t("review_error")
   }
 
