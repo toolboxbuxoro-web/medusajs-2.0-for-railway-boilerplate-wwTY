@@ -12,7 +12,7 @@ export const getCustomerReviews = async () => {
       reviews_by_product: Record<string, any>
     }>(`/store/customer/reviews`, {
       method: "GET",
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
       next: { tags: ["reviews", "customer_reviews"] },
     })
     .then((res) => res)
@@ -26,7 +26,7 @@ export const checkProductReviewEligibility = async (productId: string) => {
       reason?: string
     }>(`/store/products/${productId}/can-review`, {
       method: "GET",
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
       next: { tags: ["reviews", `eligibility-${productId}`] },
     })
     .then((res) => res)

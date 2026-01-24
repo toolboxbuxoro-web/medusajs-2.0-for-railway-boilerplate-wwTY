@@ -13,7 +13,7 @@ export const retrieveOrder = cache(async function (id: string) {
     .retrieve(
       id,
       { fields: "*payment_collections.payments,+metadata,*fulfillments,*fulfillments.labels,+region_id" },
-      { next: { tags: ["order"], revalidate: 60 }, ...getAuthHeaders() }
+      { next: { tags: ["order"], revalidate: 60 }, ...await getAuthHeaders() }
     )
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
@@ -24,7 +24,7 @@ export async function listOrders(
   offset: number = 0
 ) {
   return sdk.store.order
-    .list({ limit, offset, fields: "+metadata,*fulfillments,*fulfillments.labels,+region_id" }, { next: { tags: ["order"] }, ...getAuthHeaders() })
+    .list({ limit, offset, fields: "+metadata,*fulfillments,*fulfillments.labels,+region_id" }, { next: { tags: ["order"] }, ...await getAuthHeaders() })
     .then(async ({ orders }) => {
       if (!orders?.length) {
         return orders
