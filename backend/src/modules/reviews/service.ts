@@ -205,7 +205,9 @@ class ReviewsService extends MedusaService({
     }
 
     try {
-      // 1. Check if user already has an active review (approved or pending)
+      const pgConnection = sharedConnection || this.container_.resolve("__pg_connection__")
+
+      // 1. Check for existing reviews
       const [existingReviews] = await this.listAndCountReviewsWithConversion({
         product_id: productId,
         customer_id: customerId,
@@ -219,59 +221,52 @@ class ReviewsService extends MedusaService({
         }
       }
 
-      // 2. Check for eligible order (purchased and shipped/fulfilled/completed)
-      const pgConnection = sharedConnection || this.container_.resolve("__pg_connection__")
-
-      if (!pgConnection) {
-        return {
-          can_review: false,
-          reason: "not_purchased",
-        }
-      }
-
-      /**
-       * Medusa 2.0 Order Schema:
-       * "order" (o) -> order_item (oi) -> order_line_item (oli)
-       * Note: order_item.item_id links to order_line_item.id
-       */
-      const query = `
+      // 2. Canonical check for PURCHASE (order exists)
+      const purchaseQuery = `
         SELECT 
-          o.id as order_id,
+          o.id as order_id, 
           o.status as order_status,
-          oi.delivered_quantity,
-          f.delivered_at
+          oi.delivered_quantity
         FROM "order" o
-        JOIN order_item oi ON o.id = oi.order_id
-        JOIN order_line_item oli ON oi.item_id = oli.id
-        LEFT JOIN order_fulfillment ofl ON o.id = ofl.order_id
-        LEFT JOIN fulfillment f ON ofl.fulfillment_id = f.id
-        WHERE o.customer_id = $1
+        JOIN order_item oi ON oi.order_id = o.id
+        JOIN order_line_item oli ON oli.id = oi.item_id
+        WHERE
+          o.customer_id = $1
           AND oli.product_id = $2
           AND o.status != 'canceled'
+        LIMIT 1;
       `
+      
+      const purchaseResult = await pgConnection.raw(purchaseQuery, [customerId, productId])
+      const purchaseRow = purchaseResult.rows[0]
 
-      const result = await pgConnection.raw(query, [customerId, productId])
-      const rows = result?.rows || []
-
-      if (rows.length === 0) {
+      if (!purchaseRow) {
         return {
           can_review: false,
           reason: "not_purchased",
         }
       }
 
-      // Check for any eligible order based on Medusa 2.0 delivery markers
-      const eligibleOrder = rows.find(row => 
-        Number(row.delivered_quantity) > 0 || 
-        row.delivered_at !== null ||
-        row.order_status === 'completed'
-      )
+      // 3. Strict check for DELIVERY
+      const isDelivered = 
+        Number(purchaseRow.delivered_quantity) > 0 || 
+        purchaseRow.order_status === 'completed'
 
-      if (eligibleOrder) {
+      // DEBUG LOG
+      console.log("[Review Eligibility]", {
+        customer: customerId,
+        product: productId,
+        order: purchaseRow.order_id,
+        status: purchaseRow.order_status,
+        delivered_qty: purchaseRow.delivered_quantity,
+        is_delivered: isDelivered
+      })
+
+      if (isDelivered) {
         return {
           can_review: true,
-          order_id: eligibleOrder.order_id,
           reason: "ok",
+          order_id: purchaseRow.order_id
         }
       }
 
@@ -279,6 +274,7 @@ class ReviewsService extends MedusaService({
         can_review: false,
         reason: "not_delivered",
       }
+
     } catch (error: any) {
       console.error(`[ReviewsService.canReview] Error:`, error)
       return {
