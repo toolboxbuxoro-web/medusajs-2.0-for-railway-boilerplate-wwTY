@@ -4,6 +4,7 @@ import Redis from "ioredis"
 
 export interface BtsCalculateParams {
   senderCityId: number
+  senderPointId?: number // Optional specific point ID (e.g., Raymag 263)
   receiverCityId: number
   weight: number
   volume?: number | null
@@ -20,6 +21,23 @@ export interface BtsCalculateResponse {
     courierDelivery?: number
   }
   error?: string
+}
+
+export interface BtsBranch {
+  id: number
+  name: string
+  cityId: number
+  regionId: number
+  address: string
+  lat_long?: string
+}
+
+export interface BtsRegionGroup {
+  id: string
+  name: string
+  nameRu: string
+  zone: 1 | 2 | 3
+  points: { id: string; name: string; address: string; city_id: number }[]
 }
 
 // Circuit breaker state (static, shared across instances)
@@ -541,5 +559,118 @@ export class BtsApiService {
    */
   static incrementFallbackUsage(): void {
     BtsApiService.metrics.fallbackUsage++
+  }
+
+  /**
+   * Internal mapping of BTS Region IDs to our system IDs
+   */
+  protected regionIdMap: Record<number, string> = {
+    6: "tashkent-city",
+    5: "tashkent-region",
+    8: "samarkand",
+    7: "bukhara",
+    15: "fergana",
+    3: "namangan",
+    2: "andijan",
+    14: "kashkadarya",
+    13: "surkhandarya",
+    10: "navoi",
+    9: "jizzakh",
+    12: "syrdarya",
+    4: "khorezm",
+    11: "karakalpakstan"
+  }
+
+  protected regionConfig: Record<string, {name: string, nameRu: string, zone: 1 | 2 | 3}> = {
+    "tashkent-city": { name: "Toshkent shahri", nameRu: "Ташкент (Город)", zone: 2 },
+    "tashkent-region": { name: "Toshkent viloyati", nameRu: "Ташкентская область", zone: 2 },
+    "samarkand": { name: "Samarqand viloyati", nameRu: "Самаркандская область", zone: 1 },
+    "bukhara": { name: "Buxoro viloyati", nameRu: "Бухарская область", zone: 1 },
+    "fergana": { name: "Farg'ona viloyati", nameRu: "Ферганская область", zone: 3 },
+    "namangan": { name: "Namangan viloyati", nameRu: "Наманганская область", zone: 3 },
+    "andijan": { name: "Andijon viloyati", nameRu: "Андижанская область", zone: 3 },
+    "kashkadarya": { name: "Qashqadaryo viloyati", nameRu: "Кашкадарьинская область", zone: 1 },
+    "surkhandarya": { name: "Surxondaryo viloyati", nameRu: "Сурхандарьинская область", zone: 2 },
+    "navoi": { name: "Navoiy viloyati", nameRu: "Навоийская область", zone: 1 },
+    "jizzakh": { name: "Jizzax viloyati", nameRu: "Джизакская область", zone: 1 },
+    "syrdarya": { name: "Sirdaryo viloyati", nameRu: "Сырдарьинская область", zone: 2 },
+    "khorezm": { name: "Xorazm viloyati", nameRu: "Хорезмская область", zone: 2 },
+    "karakalpakstan": { name: "Qoraqalpog'iston", nameRu: "Каракалпакстан", zone: 2 },
+  }
+
+  /**
+   * Get dynamic list of branches from BTS API
+   * Caches result for 24 hours
+   */
+  async getBranches(): Promise<BtsRegionGroup[]> {
+    const cacheKey = "bts:branches:grouped:v1"
+    const redis = this.getRedis()
+    
+    // 1. Try Redis
+    if (redis) {
+      try {
+        const cached = await redis.get(cacheKey)
+        if (cached) {
+          this.logger.debug("[BTS API] Branches cache HIT")
+          return JSON.parse(cached)
+        }
+      } catch (err: any) {
+        this.logger.warn(`[BTS API] Redis get error: ${err.message}`)
+      }
+    }
+
+    try {
+      const token = await this.getToken()
+      this.logger.info("[BTS API] Fetching branches list")
+
+      const resp = await this.fetchWithRetry(`${this.baseUrl}?r=directory/branches`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+
+      if (!resp.ok) throw new Error("Failed to fetch branches")
+      
+      const json = await resp.json()
+      const rawBranches: any[] = json.data || []
+
+      // Group by region
+      const grouped: Record<string, any[]> = {}
+      
+      // Initialize groups
+      Object.keys(this.regionConfig).forEach(k => grouped[k] = [])
+
+      rawBranches.forEach(b => {
+        const regionKey = this.regionIdMap[b.regionId]
+        if (regionKey && grouped[regionKey]) {
+          grouped[regionKey].push({
+            id: b.id.toString(), // Keep as string for Select compatibility
+            name: b.name,
+            address: b.address || b.address_ru || b.name,
+            city_id: b.cityId // IMPORTANT: This is the ID for calculation
+          })
+        }
+      })
+
+      // Convert to array
+      const result: BtsRegionGroup[] = Object.entries(this.regionConfig).map(([key, config]) => ({
+        id: key,
+        name: config.name,
+        nameRu: config.nameRu,
+        zone: config.zone,
+        points: grouped[key] || []
+      }))
+
+      // Cache for 24 hours
+      if (redis) {
+        await redis.setex(cacheKey, 86400, JSON.stringify(result))
+      }
+
+      return result
+    } catch (e: any) {
+      this.logger.error(`[BTS API] Get Branches Error: ${e.message}`)
+      throw e
+    }
   }
 }

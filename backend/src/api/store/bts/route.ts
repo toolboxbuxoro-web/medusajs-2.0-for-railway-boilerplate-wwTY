@@ -286,26 +286,37 @@ export const calculateBtsCost = (weightKg: number, regionId: string): number => 
  * GET /store/bts - Returns all BTS regions with pickup points and pricing config
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
+  const logger = req.scope.resolve("logger")
   try {
     // Return regions in format suitable for frontend dropdown
-    const regions = BTS_REGIONS.map((r) => ({
-      id: r.id,
-      name: r.name,
-      nameRu: r.nameRu,
-      zone: r.zone,
-      points: r.points.map((p) => ({
-        id: p.id,
-        name: p.name,
-        address: p.address,
-      })),
-    }))
+    let regions: any[] = []
+    
+    const btsApi = new BtsApiService(logger)
+    try {
+       // Try to get dynamic branches
+       regions = await btsApi.getBranches()
+    } catch (e) {
+       logger?.warn(`[store/bts] Failed to get dynamic branches, using static fallback: ${e}`)
+       // Fallback to static list if API fails
+       regions = BTS_REGIONS.map((r) => ({
+        id: r.id,
+        name: r.name,
+        nameRu: r.nameRu,
+        zone: r.zone,
+        points: r.points.map((p) => ({
+          id: p.id,
+          name: p.name,
+          address: p.address,
+          city_id: 0 // Static fallback doesn't have accurate city_ids usually.
+        })),
+      }))
+    }
 
     return res.json({
       regions,
       pricing: BTS_PRICING,
     })
   } catch (e: any) {
-    const logger = req.scope.resolve("logger")
     logger?.error?.(`[store/bts] Error: ${e?.message || e}`)
     return res.status(500).json({ error: e?.message || "internal_error" })
   }
@@ -340,11 +351,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       // Actually, if it's delivery TO the customer point, maybe receiverDelivery should be 0 (office) as they pick it up?
       // Yes, current setup is "Самовывоз" (pickup) from BTS point.
       cost = await btsApi.calculate({
-        senderCityId: 40, // Bukhara
+        senderCityId: 40, // Bukhara (City ID)
+        senderPointId: 263, // Bukhara Raymag (Specific Point ID)
         receiverCityId: btsCityId,
         weight: weight_kg,
-        senderDelivery: 0,
-        receiverDelivery: 0,
+        senderDelivery: 0, // Sender brings to office (Raymag/Bukhara)
+        receiverDelivery: 0, // Pick up from BTS point
       })
     } catch (e: any) {
       // 2. Fallback to local calculator

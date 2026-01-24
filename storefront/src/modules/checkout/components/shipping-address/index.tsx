@@ -6,7 +6,7 @@ import { mapKeys } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
 import { useTranslations } from 'next-intl'
-import { BTS_REGIONS, calculateBtsCost, getBtsPointsByRegion } from "@lib/data/bts"
+import { BTS_REGIONS, calculateBtsCost, BtsRegion } from "@lib/data/bts"
 import { convertToLocale } from "@lib/util/money"
 
 const ShippingAddress = ({
@@ -33,10 +33,22 @@ const ShippingAddress = ({
   })
 
   // BTS State
+  const [regions, setRegions] = useState<BtsRegion[]>(BTS_REGIONS)
   const [selectedRegionId, setSelectedRegionId] = useState<string>("")
   const [selectedPointId, setSelectedPointId] = useState<string>("")
   const [estimatedBtsCost, setEstimatedBtsCost] = useState<number | null>(null)
   
+  // Fetch dynamic regions on mount
+  useEffect(() => {
+    const loadRegions = async () => {
+      // Use imported fetch function (we need to update import first)
+      const { fetchBtsRegions } = await import("@lib/data/bts")
+      const dynamicRegions = await fetchBtsRegions()
+      setRegions(dynamicRegions)
+    }
+    loadRegions()
+  }, [])
+
   // Shipping Method State
   const [selectedMethodId, setSelectedMethodId] = useState<string>(
     cart?.shipping_methods?.at(-1)?.shipping_option_id || ""
@@ -97,7 +109,7 @@ const ShippingAddress = ({
         const cost = await calculateBtsCost(weightInKg, selectedRegionId)
         setEstimatedBtsCost(cost)
         
-        const region = BTS_REGIONS.find(r => r.id === selectedRegionId)
+        const region = regions.find(r => r.id === selectedRegionId)
         if (region) {
           setFormData(prev => ({
             ...prev,
@@ -110,11 +122,11 @@ const ShippingAddress = ({
       }
     }
     updateBtsCost()
-  }, [selectedRegionId, cartWeight])
+  }, [selectedRegionId, cartWeight, regions])
 
   useEffect(() => {
     if (selectedPointId) {
-      const region = BTS_REGIONS.find(r => r.id === selectedRegionId)
+      const region = regions.find(r => r.id === selectedRegionId)
       const point = region?.points.find(p => p.id === selectedPointId)
       if (point) {
         setFormData(prev => ({
@@ -123,7 +135,7 @@ const ShippingAddress = ({
         }))
       }
     }
-  }, [selectedPointId, selectedRegionId])
+  }, [selectedPointId, selectedRegionId, regions])
 
   const setFormAddress = (
     address?: HttpTypes.StoreCartAddress,
@@ -171,6 +183,12 @@ const ShippingAddress = ({
       ...formData,
       [e.target.name]: e.target.value,
     })
+  }
+  
+  // Helper to get points for current dynamic regions
+  const getPointsForRegion = (id: string) => {
+     const region = regions.find(r => r.id === id)
+     return region?.points || []
   }
 
   return (
@@ -314,7 +332,7 @@ const ShippingAddress = ({
                             <Select.Value placeholder={t("bts_region_placeholder")} />
                         </Select.Trigger>
                         <Select.Content>
-                            {BTS_REGIONS.map((region) => (
+                            {regions.map((region) => (
                             <Select.Item key={region.id} value={region.id}>
                                 {region.nameRu}
                             </Select.Item>
@@ -333,7 +351,7 @@ const ShippingAddress = ({
                                 <Select.Value placeholder={t("bts_point_placeholder")} />
                             </Select.Trigger>
                             <Select.Content>
-                                {getBtsPointsByRegion(selectedRegionId).map((point) => (
+                                {getPointsForRegion(selectedRegionId).map((point) => (
                                 <Select.Item key={point.id} value={point.id}>
                                     <span className="font-medium text-sm">{point.name}</span>
                                     <div className="text-gray-400 text-xs mt-0.5">{point.address}</div>

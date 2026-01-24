@@ -399,7 +399,47 @@ export const calculateBtsCost = async (weightKg: number, regionId: string): Prom
 }
 
 /**
- * Get all regions for dropdown
+ * Fetch dynamic list of regions and points from backend
+ * Falls back to static BTS_REGIONS if request fails
+ */
+export const fetchBtsRegions = async (): Promise<BtsRegion[]> => {
+  try {
+    const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
+    const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+    
+    // 5 second timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+    const response = await fetch(`${backendUrl}/store/bts/cities`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": publishableKey,
+      },
+      signal: controller.signal,
+    })
+    
+    clearTimeout(timeoutId)
+
+    if (response.ok) {
+      const data = await response.json()
+      if (Array.isArray(data.cities) && data.cities.length > 0) {
+        return data.cities
+      }
+    }
+    
+    console.warn("[BTS] Failed to fetch dynamic regions, using static fallback")
+  } catch (err) {
+    console.error("[BTS] Error fetching regions:", err)
+  }
+
+  return BTS_REGIONS
+}
+
+/**
+ * Get all regions for dropdown (Static)
+ * @deprecated Use fetchBtsRegions() instead for dynamic data
  */
 export const getBtsRegions = () => {
   return BTS_REGIONS.map((r) => ({
