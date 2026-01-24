@@ -29,8 +29,17 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   countryCode,
   locale,
 }) => {
-  if (!product || !product.id) {
+  if (!product || !product.id || product.id === "undefined" || product.id === "null") {
+    console.warn("[ProductTemplate] Missing or invalid product.id. Redirecting to notFound.", {
+      id: product?.id,
+      handle: product?.handle,
+    })
     return notFound()
+  }
+
+  // Debug log to verify if it's a product ID or variant ID
+  if (product.id && !product.id.startsWith("prod_")) {
+    console.warn("[ProductTemplate] product.id does not start with 'prod_'. This might be a variant ID!", product.id)
   }
 
   const t = useTranslations('product')
@@ -108,10 +117,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   <ProductTabs product={product} />
                   
                   {/* Reviews on mobile - full width */}
-                  <ReviewsSection 
-                    productId={product.id} 
-                    locale={locale} 
-                  />
+                  {product?.id && (
+                    <ReviewsSection 
+                      productId={product.id} 
+                      locale={locale} 
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -141,10 +152,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   
                   {/* Reviews on desktop - constrained width */}
                   <div className="mt-12">
-                    <ReviewsSection 
-                      productId={product.id} 
-                      locale={locale} 
-                    />
+                    {product?.id && (
+                      <ReviewsSection 
+                        productId={product.id} 
+                        locale={locale} 
+                      />
+                    )}
                   </div>
                 </div>
               </div>

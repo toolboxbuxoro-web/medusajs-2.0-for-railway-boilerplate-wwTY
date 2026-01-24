@@ -6,6 +6,7 @@ import ReviewCard from "./review-card"
 import ReviewSkeleton from "./review-skeleton"
 import ReviewsEmptyState from "./empty-state"
 import { useInfiniteReviews } from "@lib/hooks/use-infinite-reviews"
+import { useTranslations } from "next-intl"
 
 interface ReviewsListProps {
   productId: string
@@ -20,6 +21,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
   filters: initialFilters,
   sort: initialSort,
 }) => {
+  const t = useTranslations("product")
   if (!productId || productId === "undefined" || productId === "null") {
     return null
   }
@@ -53,7 +55,9 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-        <p className="text-red-700 text-sm font-medium mb-2">{error}</p>
+        <p className="text-red-700 text-sm font-medium mb-2">
+          {t("review_error") || "Не удалось загрузить отзывы"}
+        </p>
         <button
           onClick={() => window.location.reload()}
           className="text-red-600 hover:text-red-700 text-sm underline"

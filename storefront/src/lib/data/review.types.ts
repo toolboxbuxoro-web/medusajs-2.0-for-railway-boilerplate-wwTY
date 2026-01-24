@@ -30,5 +30,5 @@ export interface CreateReviewPayload {
 export interface CanReviewResponse {
   can_review: boolean
   order_id?: string
-  reason?: "already_reviewed" | "not_purchased" | "ok" | "auth_required" | "error"
+  reason?: "already_reviewed" | "not_purchased" | "not_delivered" | "ok" | "auth_required" | "error"
 }

@@ -108,7 +108,7 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
         onCanReview={() => {}}
         onCannotReview={() => {}}
       >
-        {({ canReview, isLoading: eligibilityLoading, error: eligibilityError }) => {
+        {({ canReview, isLoading: eligibilityLoading, error: eligibilityError, reason: eligibilityReason }) => {
           if (eligibilityLoading) {
             return (
               <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 animate-pulse">
@@ -131,14 +131,23 @@ const AddReviewForm: React.FC<AddReviewFormProps> = ({
             )
           }
 
+          if (canReview === null) {
+            return null // Don't render anything if productId is missing or check not run
+          }
+
           if (!canReview) {
+            const isPurchaseIssue = eligibilityReason === "not_purchased"
+            const isAlreadyReviewed = eligibilityReason === "already_reviewed"
+
             return (
               <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center border border-gray-100">
                 <Heading level="h2" className="text-gray-900 mb-3 text-lg sm:text-xl">
                   {t("write_review")}
                 </Heading>
                 <Text className="text-gray-500 text-sm sm:text-base">
-                  {t("only_after_delivery")}
+                  {isAlreadyReviewed 
+                    ? t("already_reviewed") 
+                    : isPurchaseIssue ? t("only_after_purchase") : t("only_after_delivery")}
                 </Text>
               </div>
             )

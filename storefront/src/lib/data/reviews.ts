@@ -20,6 +20,11 @@ export const getCustomerReviews = async () => {
 }
 
 export const checkProductReviewEligibility = async (productId: string) => {
+  if (!productId || productId === "undefined" || productId === "null") {
+    console.warn(`[checkProductReviewEligibility] Invalid productId: ${productId}. Skipping fetch.`)
+    return { can_review: false, reason: "error" }
+  }
+
   return sdk.client
     .fetch<{
       can_review: boolean

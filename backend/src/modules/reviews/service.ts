@@ -235,26 +235,37 @@ class ReviewsService extends MedusaService({
        * Note: order_item.item_id links to order_line_item.id
        */
       const query = `
-        SELECT DISTINCT o.id as order_id
+        SELECT 
+          o.id as order_id,
+          o.status as order_status,
+          oi.shipped_quantity,
+          oi.fulfilled_quantity
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
         JOIN order_line_item oli ON oi.item_id = oli.id
         WHERE o.customer_id = $1
           AND oli.product_id = $2
           AND o.status != 'canceled'
-          AND (
-            oi.shipped_quantity > 0 
-            OR oi.fulfilled_quantity > 0 
-            OR o.status = 'completed'
-          )
-        LIMIT 1
       `
 
       const result = await pgConnection.raw(query, [customerId, productId])
       const rows = result?.rows || []
-      const eligibleOrder = rows[0]
 
-      if (eligibleOrder?.order_id) {
+      if (rows.length === 0) {
+        return {
+          can_review: false,
+          reason: "not_purchased",
+        }
+      }
+
+      // Check for any eligible order
+      const eligibleOrder = rows.find(row => 
+        Number(row.shipped_quantity) > 0 || 
+        Number(row.fulfilled_quantity) > 0 ||
+        row.order_status === 'completed'
+      )
+
+      if (eligibleOrder) {
         return {
           can_review: true,
           order_id: eligibleOrder.order_id,
@@ -264,7 +275,7 @@ class ReviewsService extends MedusaService({
 
       return {
         can_review: false,
-        reason: "not_purchased",
+        reason: "not_delivered",
       }
     } catch (error: any) {
       console.error(`[ReviewsService.canReview] Error:`, error)
