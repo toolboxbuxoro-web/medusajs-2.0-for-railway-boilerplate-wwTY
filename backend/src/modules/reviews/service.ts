@@ -219,25 +219,34 @@ class ReviewsService extends MedusaService({
         }
       }
 
-      // 2. Check for eligible order (completed order with this product)
+      // 2. Check for eligible order (purchased and shipped/fulfilled/completed)
       const pgConnection = sharedConnection || this.container_.resolve("__pg_connection__")
 
       if (!pgConnection) {
         return {
           can_review: false,
-          reason: "no_completed_order",
+          reason: "not_purchased",
         }
       }
 
-      // SQL query to find completed order with this product
+      /**
+       * Medusa 2.0 Order Schema:
+       * "order" (o) -> order_item (oi) -> order_line_item (oli)
+       * Note: order_item.item_id links to order_line_item.id
+       */
       const query = `
         SELECT DISTINCT o.id as order_id
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
-        JOIN product_variant pv ON oi.variant_id = pv.id
+        JOIN order_line_item oli ON oi.item_id = oli.id
         WHERE o.customer_id = $1
-          AND pv.product_id = $2
-          AND o.status = 'completed'
+          AND oli.product_id = $2
+          AND o.status != 'canceled'
+          AND (
+            oi.shipped_quantity > 0 
+            OR oi.fulfilled_quantity > 0 
+            OR o.status = 'completed'
+          )
         LIMIT 1
       `
 
@@ -249,18 +258,19 @@ class ReviewsService extends MedusaService({
         return {
           can_review: true,
           order_id: eligibleOrder.order_id,
+          reason: "ok",
         }
       }
 
       return {
         can_review: false,
-        reason: "no_completed_order",
+        reason: "not_purchased",
       }
     } catch (error: any) {
       console.error(`[ReviewsService.canReview] Error:`, error)
       return {
         can_review: false,
-        reason: "no_completed_order",
+        reason: "error",
       }
     }
   }

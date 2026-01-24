@@ -28,7 +28,7 @@ export default async function debugReviewEligibility({ container }: ExecArgs) {
     // 2. Check sample order_item data
     logger.info(`[debug-review-eligibility] Sample order_item data:`)
     const sampleItems = await pgConnection.raw(`
-      SELECT id, order_id, variant_id, product_id, title 
+      SELECT id, order_id, item_id, quantity 
       FROM order_item 
       LIMIT 3
     `)
@@ -56,12 +56,13 @@ export default async function debugReviewEligibility({ container }: ExecArgs) {
       logger.info(`[debug-review-eligibility] Testing eligibility query for order ${testOrder.id}...`)
       
       const eligibilityResult = await pgConnection.raw(`
-        SELECT DISTINCT o.id as order_id, oi.variant_id, pv.product_id
+        SELECT DISTINCT o.id as order_id, oi.item_id, oli.product_id
         FROM "order" o
         JOIN order_item oi ON o.id = oi.order_id
-        JOIN product_variant pv ON oi.variant_id = pv.id
+        JOIN order_line_item oli ON oi.item_id = oli.id
         WHERE o.id = ?
-          AND o.status = 'completed'
+          AND o.status != 'canceled'
+          AND (oi.shipped_quantity > 0 OR oi.fulfilled_quantity > 0 OR o.status = 'completed')
         LIMIT 5
       `, [testOrder.id])
       

@@ -63,7 +63,7 @@ export interface UpdateReviewDTO {
  */
 export interface ReviewEligibility {
   can_review: boolean
-  reason?: "already_reviewed" | "no_completed_order" | "auth_required"
+  reason?: "already_reviewed" | "not_purchased" | "ok" | "auth_required" | "error"
   order_id?: string
 }
 
