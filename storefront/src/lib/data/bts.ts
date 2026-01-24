@@ -47,13 +47,13 @@ export const BTS_PRICING = {
   // Express Mail fixed rates for parcels <20kg (Bukhara origin)
   // Format: weight in kg -> price in UZS per zone
   expressRates: {
-    1: { 1: 25000, 2: 30000, 3: 35000 },
-    2: { 1: 30000, 2: 35000, 3: 40000 },
-    3: { 1: 35000, 2: 40000, 3: 45000 },
-    5: { 1: 45000, 2: 55000, 3: 60000 },
-    10: { 1: 65000, 2: 80000, 3: 90000 },
-    15: { 1: 85000, 2: 100000, 3: 115000 },
-    20: { 1: 100000, 2: 120000, 3: 135000 },
+    1: { 1: 28000, 2: 33000, 3: 38000 },
+    2: { 1: 33000, 2: 38000, 3: 43000 },
+    3: { 1: 38000, 2: 43000, 3: 48000 },
+    5: { 1: 48000, 2: 58000, 3: 63000 },
+    10: { 1: 75000, 2: 96000, 3: 105000 },
+    15: { 1: 105000, 2: 129000, 3: 145000 },
+    20: { 1: 130000, 2: 160000, 3: 180000 },
   } as Record<number, Record<1 | 2 | 3, number>>,
   
   // Weight thresholds
@@ -342,7 +342,7 @@ export const BTS_REGIONS: BtsRegion[] = [
  * @param regionId - Region ID from BTS_REGIONS
  * @returns Delivery cost in UZS
  */
-export const calculateBtsCost = async (weightKg: number, regionId: string): Promise<number> => {
+export const calculateBtsCost = async (weightKg: number, regionId: string, receiverCityId?: number): Promise<number> => {
   try {
     const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
     const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
@@ -356,6 +356,7 @@ export const calculateBtsCost = async (weightKg: number, regionId: string): Prom
       body: JSON.stringify({
         weight_kg: weightKg,
         region_id: regionId,
+        receiver_city_id: receiverCityId,
       }),
     })
 

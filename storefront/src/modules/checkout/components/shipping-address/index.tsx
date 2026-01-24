@@ -106,10 +106,15 @@ const ShippingAddress = ({
       if (selectedRegionId) {
         const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
         const weightInKg = effectiveWeight / 1000 
-        const cost = await calculateBtsCost(weightInKg, selectedRegionId)
+        
+        // Find the specific city_id for the selected point
+        const region = regions.find(r => r.id === selectedRegionId)
+        const point = region?.points.find(p => p.id === selectedPointId)
+        const cityId = point?.city_id
+        
+        const cost = await calculateBtsCost(weightInKg, selectedRegionId, cityId)
         setEstimatedBtsCost(cost)
         
-        const region = regions.find(r => r.id === selectedRegionId)
         if (region) {
           setFormData(prev => ({
             ...prev,
