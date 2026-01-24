@@ -13,16 +13,14 @@ import type {
 class ReviewsService extends MedusaService({
   Review,
 }) {
-  protected container_: MedusaContainer
+  protected eventBus_: IEventBusModuleService
+  protected pgConnection_: any
 
-  constructor(container: MedusaContainer) {
+  constructor({ event_bus, __pg_connection__ }: { event_bus: IEventBusModuleService, __pg_connection__: any }) {
     // @ts-ignore - MedusaService handles constructor
     super(...arguments)
-    this.container_ = container
-  }
-
-  protected get eventBus_(): IEventBusModuleService {
-    return this.container_.resolve(Modules.EVENT_BUS) as IEventBusModuleService
+    this.eventBus_ = event_bus
+    this.pgConnection_ = __pg_connection__
   }
 
   /**
@@ -184,14 +182,7 @@ class ReviewsService extends MedusaService({
     } as ReviewDTO
   }
 
-  /**
-   * Check if a customer can review a product
-   * 
-   * Requirements:
-   * 1. Customer must be authenticated
-   * 2. Customer must have received the product (order.status === "completed")
-   * 3. Customer hasn't already reviewed this product (no active review)
-   */
+
   async canReview(
     productId: string,
     customerId: string,
@@ -205,7 +196,7 @@ class ReviewsService extends MedusaService({
     }
 
     try {
-      const pgConnection = sharedConnection || this.container_.resolve("__pg_connection__")
+      const pgConnection = sharedConnection || this.pgConnection_
 
       // 1. Check for existing reviews
       const [existingReviews] = await this.listAndCountReviewsWithConversion({
