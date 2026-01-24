@@ -134,7 +134,7 @@ const ShippingAddress = ({
       }
     }
     updateBtsCost()
-  }, [selectedRegionId, cartWeight, regions])
+  }, [selectedRegionId, selectedPointId, cartWeight, regions])
 
   useEffect(() => {
     if (selectedPointId) {
@@ -332,10 +332,14 @@ const ShippingAddress = ({
                     <Select
                       onValueChange={(val) => {
                         setSelectedRegionId(val)
-                        setSelectedPointId("")
+                        // Auto-select first point of the region
+                        const region = regions.find(r => r.id === val)
+                        const firstPointId = region?.points?.[0]?.id || ""
+                        setSelectedPointId(firstPointId)
+                        
                         setFormData((prev) => ({
                           ...prev,
-                          "shipping_address.address_1": "",
+                          "shipping_address.address_1": region?.points?.[0]?.address || "",
                         }))
                       }}
                       value={selectedRegionId}

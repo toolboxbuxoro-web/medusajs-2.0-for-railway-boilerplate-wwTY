@@ -24,6 +24,7 @@ export interface BtsPoint {
   id: string
   name: string
   address: string
+  city_id?: number
   coordinates?: { lat: number; lng: number }
 }
 
