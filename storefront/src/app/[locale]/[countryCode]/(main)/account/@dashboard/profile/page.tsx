@@ -19,7 +19,7 @@ export default async function Profile() {
   const t = await getTranslations('account')
 
   if (!customer || !regions) {
-    notFound()
+    return null
   }
 
   return (

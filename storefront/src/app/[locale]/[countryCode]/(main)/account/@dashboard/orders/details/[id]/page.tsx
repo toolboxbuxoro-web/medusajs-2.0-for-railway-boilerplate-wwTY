@@ -30,7 +30,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const order = await getOrder(params.id).catch(() => null)
 
   if (!order) {
-    notFound()
+    return {
+      title: "Order Not Found",
+      description: "Order details could not be found."
+    }
   }
 
   return {

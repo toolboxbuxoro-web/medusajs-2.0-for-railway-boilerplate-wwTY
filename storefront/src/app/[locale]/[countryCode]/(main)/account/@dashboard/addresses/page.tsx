@@ -22,7 +22,7 @@ export default async function Addresses(props: {
   const t = await getTranslations('account')
 
   if (!customer || !region) {
-    notFound()
+    return null
   }
 
   return (
