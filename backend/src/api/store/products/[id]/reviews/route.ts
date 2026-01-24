@@ -255,7 +255,7 @@ export const POST = async (
 
       if (eligibility.reason === "already_reviewed") {
         errorMessage = "You have already reviewed this product"
-      } else if (eligibility.reason === "no_completed_order") {
+      } else if (eligibility.reason === "not_purchased") {
         errorMessage = "You can only review products you have received"
       }
 
