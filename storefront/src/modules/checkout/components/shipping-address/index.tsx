@@ -97,6 +97,9 @@ const ShippingAddress = ({
         0
       const weightNum = typeof weightRaw === 'string' ? parseFloat(weightRaw) : Number(weightRaw)
       const weight = isNaN(weightNum) ? 0 : weightNum
+      
+      console.log(`[Checkout] Item: ${item.variant?.title || item.variant?.sku}, Quantity: ${item.quantity}, RawWeight: ${weightRaw}, Calculated: ${weight}`)
+      
       return acc + (weight * item.quantity)
     }, 0) || 0
   }, [cart?.items])
@@ -107,11 +110,15 @@ const ShippingAddress = ({
         const effectiveWeight = cartWeight > 0 ? cartWeight : 1000
         const weightInKg = effectiveWeight / 1000 
         
+        console.log(`[Checkout] Calculating BTS Cost: TotalWeightGrams=${cartWeight}, EffectiveWeightGrams=${effectiveWeight}, InKg=${weightInKg}`)
+
         // Find the specific city_id for the selected point
         const region = regions.find(r => r.id === selectedRegionId)
         const point = region?.points.find(p => p.id === selectedPointId)
         const cityId = point?.city_id
         
+        console.log(`[Checkout] Selection: Region=${selectedRegionId}, Point=${selectedPointId}, CityID=${cityId}`)
+
         const cost = await calculateBtsCost(weightInKg, selectedRegionId, cityId)
         setEstimatedBtsCost(cost)
         

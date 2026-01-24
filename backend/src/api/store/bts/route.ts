@@ -330,6 +330,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
     const { weight_kg, region_id, receiver_city_id } = (req.body || {}) as { weight_kg?: number; region_id?: string; receiver_city_id?: number }
 
+    logger.info(`[store/bts] POST request: weight_kg=${weight_kg}, region_id=${region_id}, receiver_city_id=${receiver_city_id}`)
+
     if (typeof weight_kg !== "number" || !region_id) {
       return res.status(400).json({ error: "weight_kg and region_id are required" })
     }

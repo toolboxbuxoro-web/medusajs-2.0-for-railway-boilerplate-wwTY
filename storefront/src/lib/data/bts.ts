@@ -347,17 +347,20 @@ export const calculateBtsCost = async (weightKg: number, regionId: string, recei
     const backendUrl = (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")
     const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
+    const payload = {
+      weight_kg: weightKg,
+      region_id: regionId,
+      receiver_city_id: receiverCityId,
+    }
+    console.log(`[BTS Data] Fetching cost from backend: ${JSON.stringify(payload)}`)
+
     const response = await fetch(`${backendUrl}/store/bts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-publishable-api-key": publishableKey,
       },
-      body: JSON.stringify({
-        weight_kg: weightKg,
-        region_id: regionId,
-        receiver_city_id: receiverCityId,
-      }),
+      body: JSON.stringify(payload),
     })
 
     if (response.ok) {

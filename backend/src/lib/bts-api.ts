@@ -323,6 +323,11 @@ export class BtsApiService {
         const json = (await resp.json()) as any
         const token = json?.data?.token
 
+        this.logger.info(`[BTS API] Auth Response status: ${resp.status}`)
+        if (token) {
+          this.logger.info(`[BTS API] Successfully obtained token (starts with: ${token.substring(0, 10)}...)`)
+        }
+
         if (!token) {
           this.logger.error(`[BTS API] Token missing in response: ${JSON.stringify(json)}`)
           throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "BTS token missing in response")
@@ -372,6 +377,9 @@ export class BtsApiService {
 
       this.logger.info(`[BTS API] Calculating cost for weight ${params.weight} from ${params.senderCityId} to ${params.receiverCityId}`)
 
+      this.logger.info(`[BTS API] REQUEST: POST ${this.baseUrl}?r=v1/order/calculate`)
+      this.logger.info(`[BTS API] PAYLOAD: ${JSON.stringify(params)}`)
+
       const resp = await this.fetchWithRetry(`${this.baseUrl}?r=v1/order/calculate`, {
         method: "POST",
         headers: {
@@ -380,6 +388,8 @@ export class BtsApiService {
         },
         body: JSON.stringify(params),
       })
+
+      this.logger.info(`[BTS API] RESPONSE STATUS: ${resp.status}`)
 
       if (!resp.ok) {
         const text = await resp.text().catch(() => "")
@@ -390,6 +400,8 @@ export class BtsApiService {
       }
 
       const json = (await resp.json()) as BtsCalculateResponse
+      
+      this.logger.info(`[BTS API] RAW RESPONSE BODY: ${JSON.stringify(json)}`)
 
       // Flexible parsing: try root level first, then data object
       const price = json.summaryPrice ?? json.data?.summaryPrice
