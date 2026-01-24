@@ -1,0 +1,33 @@
+[2026-01-23T05:50:41.876Z] [START] canReview: productId=prod_01KEBSWVV8GNB1714HRRM53NTB, customerId=cus_01KF2NG1AZ612WY8SFQBKQM3S5
+[2026-01-23T05:50:41.884Z] [INFO] Existing reviews: 0
+[2026-01-23T05:50:41.892Z] [ERROR] Exception: Could not resolve 'resolve'.
+
+Resolution path: resolve
+Stack: AwilixResolutionError: Could not resolve 'resolve'.
+
+Resolution path: resolve
+    at resolve (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/awilix@8.0.1/node_modules/awilix/src/container.ts:497:15)
+    at Object.resolve [as get] (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/awilix@8.0.1/node_modules/awilix/src/container.ts:269:52)
+    at ReviewsService.canReview (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/reviews/service.ts:126:44)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async GET (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/api/store/products/[id]/can-review/route.ts:23:20)
+    at async GET (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+framework@2.10.2_@medusajs+cli@2.10.2_@mikro-orm+core@6.4.3_@mikro-orm+knex@6.4.3_@_wdimakfrthx4mx7t42xkgncyri/node_modules/@medusajs/framework/src/http/utils/wrap-handler.ts:27:14)
+[2026-01-23T06:06:08.497Z] [START] canReview: productId=prod_01KEBSWVV8GNB1714HRRM53NTB, customerId=cus_01KF2NG1AZ612WY8SFQBKQM3S5
+[2026-01-23T06:06:08.500Z] [INFO] Existing reviews: 0
+[2026-01-23T06:06:08.500Z] [INFO] Executing SQL query...
+[2026-01-23T06:06:08.505Z] [INFO] SQL Result: [{"order_id":"order_test_1769145481513"}]
+[2026-01-23T06:06:08.505Z] [SUCCESS] Found order: order_test_1769145481513
+[2026-01-23T06:42:55.603Z] [START] canReview: productId=prod_01KEBSWVV8GNB1714HRRM53NTB, customerId=cus_01KFMSEWXS65666J50Y1TERR7J
+[2026-01-23T06:42:55.606Z] [INFO] Existing reviews: 0
+[2026-01-23T06:42:55.608Z] [ERROR] Exception: Could not resolve 'resolve'.
+
+Resolution path: resolve
+Stack: AwilixResolutionError: Could not resolve 'resolve'.
+
+Resolution path: resolve
+    at resolve (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/awilix@8.0.1/node_modules/awilix/src/container.ts:497:15)
+    at Object.resolve [as get] (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/awilix@8.0.1/node_modules/awilix/src/container.ts:269:52)
+    at ReviewsService.canReview (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/modules/reviews/service.ts:123:64)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async reviewsE2EFlow (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/src/scripts/reviews-e2e-flow.ts:127:25)
+    at async exec (/Users/nematiskandarov/Desktop/Toolbox-projects/TOOLBOX SITE AND MOBILE/toolbox-store-backend/backend/node_modules/.pnpm/@medusajs+medusa@2.10.2_53nu72u752dnr7jsrfujdqysjy/node_modules/@medusajs/medusa/src/commands/exec.ts:54:5)

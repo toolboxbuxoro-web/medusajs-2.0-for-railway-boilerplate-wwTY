@@ -59,7 +59,7 @@ export default async function Nav({ locale }: NavProps) {
                   data-testid="nav-store-link"
                 >
                   <Image
-                    src="/toolbox-logo.png?v=3"
+                    src="/toolbox-logo.png"
                     alt={t("logo")}
                     width={140}
                     height={42}
@@ -78,7 +78,7 @@ export default async function Nav({ locale }: NavProps) {
                 data-testid="nav-store-link-mobile"
               >
                 <Image
-                  src="/toolbox-logo.png?v=3"
+                  src="/toolbox-logo.png"
                   alt={t("logo")}
                   width={100}
                   height={30}

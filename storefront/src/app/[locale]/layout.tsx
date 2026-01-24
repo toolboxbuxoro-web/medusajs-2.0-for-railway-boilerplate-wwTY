@@ -1,7 +1,6 @@
 import "styles/globals.css"
 import { NextIntlClientProvider } from 'next-intl';
-import { notFound } from 'next/navigation';
-import { locales, type Locale } from '../../i18n';
+import { locales, type Locale, defaultLocale } from '../../i18n';
 import { FavoritesProvider } from "@lib/context/favorites-context"
 import { AuthProvider } from "@lib/context/auth-context"
 
@@ -26,25 +25,32 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  // Validate locale
-  if (!locales.includes(locale as Locale)) {
-    notFound();
-  }
+  // Validate locale - use defaultLocale as fallback instead of notFound()
+  // This prevents 404 during build-time static generation
+  const validLocale = locales.includes(locale as Locale) ? locale : defaultLocale;
   
-  // Load messages for the locale
+  // Load messages for the locale - use defaultLocale messages as fallback
   let messages;
   try {
-    messages = (await import(`../../../messages/${locale}.json`)).default;
+    messages = (await import(`../../../messages/${validLocale}.json`)).default;
   } catch (error) {
-    notFound();
+    // Fallback to default locale messages instead of calling notFound()
+    // This prevents 404 if message files are temporarily unavailable
+    try {
+      messages = (await import(`../../../messages/${defaultLocale}.json`)).default;
+    } catch (fallbackError) {
+      // Last resort: return empty messages object
+      console.warn(`[LocaleLayout] Failed to load messages for ${validLocale} and ${defaultLocale}. Using empty messages.`);
+      messages = {};
+    }
   }
   
   const customer = await getCustomer()
   
   return (
-    <html lang={locale} data-mode="light" suppressHydrationWarning>
+    <html lang={validLocale} data-mode="light" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={validLocale} messages={messages}>
           <AuthProvider initialCustomer={customer}>
             <FavoritesProvider>
               <main className="relative">{children}</main>
