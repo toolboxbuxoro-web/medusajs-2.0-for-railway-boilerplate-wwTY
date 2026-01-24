@@ -222,6 +222,8 @@ class ReviewsService extends MedusaService({
       }
 
       // 2. Canonical check for PURCHASE (order exists) - using Query Builder
+      // We prioritize DELIVERED items so we don't accidentally pick an old pending order
+      // when a newer delivered one exists.
       const rows = await pgConnection
         .select(
           "oi.delivered_quantity", 
@@ -234,6 +236,13 @@ class ReviewsService extends MedusaService({
         .where("oli.product_id", productId)
         .where("o.customer_id", customerId)
         .whereNot("o.status", "canceled")
+        .orderByRaw(`
+          CASE
+            WHEN oi.delivered_quantity > 0 THEN 0
+            WHEN o.status = 'completed' THEN 1
+            ELSE 2
+          END
+        `)
         .limit(1)
 
       const purchaseRow = rows[0]
