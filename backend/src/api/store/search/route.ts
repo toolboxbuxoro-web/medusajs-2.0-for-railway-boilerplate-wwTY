@@ -7,7 +7,12 @@ export const GET = async (
 ) => {
   try {
     const { q, limit = "20", offset = "0" } = req.query as Record<string, any>
-    const query = (q || "").trim().toLowerCase()
+    const query = (q || "").trim()
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Search API] Query received:', { raw: q, processed: query })
+    }
     
     // Limits
     const limitNum = Math.min(parseInt(limit) || 20, 100)
@@ -52,14 +57,28 @@ export const GET = async (
     if (!query) {
       mode = 'recommendation'
       searchBody.q = ""
-      searchBody.sort = ["metadata.sales_count:desc", "created_at:desc"]
+      searchBody.sort = ["sales_count:desc", "created_at:desc"]
     } else {
       // 2. Search Mode
       mode = 'search'
       searchBody.q = query
     }
 
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Search API] Meilisearch request:', JSON.stringify(searchBody, null, 2))
+    }
+
     let results = await fetchMeili(searchBody)
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Search API] Meilisearch response:', { 
+        hits: results?.hits?.length || 0, 
+        total: results?.estimatedTotalHits || 0,
+        query: searchBody.q 
+      })
+    }
 
     // 3. Fallback Mode (If search hits are 0 AND it's the first page)
     if (mode === 'search' && (!results || results.hits.length === 0) && offsetNum === 0) {
@@ -67,7 +86,7 @@ export const GET = async (
       const fallbackBody = {
         ...searchBody,
         q: "",
-        sort: ["metadata.sales_count:desc", "created_at:desc"],
+        sort: ["sales_count:desc", "created_at:desc"],
         offset: offsetNum
       }
       results = await fetchMeili(fallbackBody)
