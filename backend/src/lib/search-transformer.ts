@@ -84,7 +84,12 @@ export function transformProductToSearchDocument(product: any) {
     })) || [],
     
     // Original metadata for fallback
-    metadata: metadata
+    metadata: metadata,
+
+    // Store images for fallback
+    images: product.images?.map((img: any) => ({
+      url: img.url
+    })) || []
   }
 
   return doc

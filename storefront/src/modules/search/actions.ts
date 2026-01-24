@@ -27,7 +27,9 @@ export async function search(query: string, offset: number = 0, countryCode: str
   try {
     const res = await fetch(url.toString(), {
       headers,
-      cache: "no-store",
+      next: {
+        revalidate: 300 // Cache for 5 minutes
+      }
     })
 
     if (!res.ok) {

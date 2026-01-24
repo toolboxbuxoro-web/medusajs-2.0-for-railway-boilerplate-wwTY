@@ -19,7 +19,7 @@ export default async function OverviewTemplate(props: {
   const orders = (await listOrders(50, 0).catch(() => null)) || null
 
   if (!customer) {
-    notFound()
+    return null
   }
 
   return <Overview customer={customer} orders={orders} locale={locale} />

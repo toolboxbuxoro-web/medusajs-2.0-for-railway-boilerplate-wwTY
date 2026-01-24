@@ -40,9 +40,14 @@ export const GET = async (
     const isUzbekLocale = searchLocale === 'uz' || searchLocale === 'uz-uz'
     const primaryTitleField = isUzbekLocale ? 'title_uz' : 'title'
     
+    // Prepare filters
+    // We explicitly filter for published products only
+    const filters: string[] = ["status = published"]
+
     let searchBody: any = {
       limit: limitNum,
       offset: offsetNum,
+      filter: filters.join(" AND "),
       // Only retrieve fields needed for hydration + display fallback
       attributesToRetrieve: [
         'id', 
@@ -54,6 +59,7 @@ export const GET = async (
         'metadata',
         'variants', // For "Add to Cart" logic
         'brand', 
+        'images', // For fallback and gallery hover
       ],
       attributesToHighlight: [primaryTitleField, 'title'],
       highlightPreTag: '<mark>',
@@ -139,6 +145,10 @@ export const GET = async (
 
     // Return Meilisearch hits directly
     // Frontend will hydrate with prices via getProductsById
+    
+    // Cache for 5 minutes (300s)
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=300')
+    
     res.json({
       hits: processedHits,
       estimatedTotalHits: results.estimatedTotalHits || 0,
