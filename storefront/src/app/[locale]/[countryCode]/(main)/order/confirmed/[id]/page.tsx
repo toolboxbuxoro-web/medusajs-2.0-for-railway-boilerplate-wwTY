@@ -30,11 +30,10 @@ export const metadata: Metadata = {
   description: "You purchase was successful",
 }
 
-export default async function OrderConfirmedPage({
-  params,
-}: {
-  params: { id: string; locale: string }
+export default async function OrderConfirmedPage(props: {
+  params: Promise<{ id: string; locale: string }>
 }) {
+  const params = await props.params
   const order = await getOrder(params.id)
   if (!order) {
     return notFound()

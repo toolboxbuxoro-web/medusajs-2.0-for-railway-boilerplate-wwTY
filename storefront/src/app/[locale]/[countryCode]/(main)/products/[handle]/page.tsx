@@ -9,7 +9,7 @@ import { generateAlternates } from "@lib/util/seo"
 import { parseProductMetadata } from "@modules/products/types/product-metadata"
 
 type Props = {
-  params: { locale: string; countryCode: string; handle: string }
+  params: Promise<{ locale: string; countryCode: string; handle: string }>
 }
 
 export const dynamic = "force-dynamic"
@@ -47,7 +47,8 @@ export async function generateStaticParams() {
   return staticParams
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
   const { handle, locale, countryCode } = params
   const region = await getRegion(countryCode)
 
@@ -97,7 +98,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 import { getCustomer } from "@lib/data/customer"
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage(props: Props) {
+  const params = await props.params
   const region = await getRegion(params.countryCode)
   const customer = await getCustomer()
 

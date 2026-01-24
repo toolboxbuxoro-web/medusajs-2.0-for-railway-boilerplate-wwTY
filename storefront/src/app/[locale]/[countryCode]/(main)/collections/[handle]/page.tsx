@@ -16,11 +16,11 @@ import { generateAlternates } from "@lib/util/seo"
 export const dynamic = "force-dynamic"
 
 type Props = {
-  params: { handle: string; countryCode: string; locale: string }
-  searchParams: {
+  params: Promise<{ handle: string; countryCode: string; locale: string }>
+  searchParams: Promise<{
     page?: string
     sortBy?: SortOptions
-  }
+  }>
 }
 
 export const PRODUCT_LIMIT = 12
@@ -56,7 +56,8 @@ export async function generateStaticParams() {
   return staticParams
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
   const { handle, locale, countryCode } = params
   const collection = await getCollectionByHandle(handle)
 
@@ -79,7 +80,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function CollectionPage({ params, searchParams }: Props) {
+export default async function CollectionPage(props: Props) {
+  const params = await props.params
+  const searchParams = await props.searchParams
   const { sortBy, page } = searchParams
 
   const collection = await getCollectionByHandle(params.handle).then(

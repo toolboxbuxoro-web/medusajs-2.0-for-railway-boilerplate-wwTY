@@ -5,7 +5,9 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { notFound } from "next/navigation"
 import { generateAlternates } from "@lib/util/seo"
 
-export async function generateMetadata({ params: { locale, countryCode } }: { params: { locale: string; countryCode: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ locale: string; countryCode: string }> }): Promise<Metadata> {
+  const params = await props.params
+  const { locale, countryCode } = params
   const t = await getTranslations({ locale, namespace: 'delivery_page' })
   
   return {
@@ -15,7 +17,9 @@ export async function generateMetadata({ params: { locale, countryCode } }: { pa
   }
 }
 
-export default async function DeliveryPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function DeliveryPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params
+  const { locale } = params
   const t = await getTranslations({ locale, namespace: 'delivery_page' })
 
   // Icons for steps (Inline SVGs for reliability)

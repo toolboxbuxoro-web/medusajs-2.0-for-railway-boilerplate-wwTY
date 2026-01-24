@@ -7,13 +7,15 @@ export const metadata: Metadata = {
 }
 
 type Params = {
-  params: { countryCode: string; locale: string }
-  searchParams: {
+  params: Promise<{ countryCode: string; locale: string }>
+  searchParams: Promise<{
     q?: string
-  }
+  }>
 }
 
-export default async function SearchPage({ params, searchParams }: Params) {
+export default async function SearchPage(props: Params) {
+  const params = await props.params
+  const searchParams = await props.searchParams
   const query = searchParams.q || ""
 
   return (

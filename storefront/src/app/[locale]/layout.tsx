@@ -18,13 +18,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function LocaleLayout({
-  children,
-  params: { locale }
-}: {
+export default async function LocaleLayout(props: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { children } = props;
+  const params = await props.params;
+  const { locale } = params;
   // Validate locale - use defaultLocale as fallback instead of notFound()
   // This prevents 404 during build-time static generation
   const validLocale = locales.includes(locale as Locale) ? locale : defaultLocale;

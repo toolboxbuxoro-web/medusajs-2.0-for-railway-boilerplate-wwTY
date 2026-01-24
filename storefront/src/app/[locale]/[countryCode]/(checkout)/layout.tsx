@@ -4,13 +4,13 @@ import ChevronDown from "@modules/common/icons/chevron-down"
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from "@modules/checkout/components/language-switcher"
 
-export default async function CheckoutLayout({
-  children,
-  params: { locale },
-}: {
+export default async function CheckoutLayout(props: {
   children: React.ReactNode
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }) {
+  const params = await props.params
+  const { children } = props
+  const { locale } = params
   const t = await getTranslations({ locale, namespace: "checkout" })
   
   return (

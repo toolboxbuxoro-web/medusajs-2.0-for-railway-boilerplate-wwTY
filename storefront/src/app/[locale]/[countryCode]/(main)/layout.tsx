@@ -12,10 +12,12 @@ export const metadata: Metadata = {
 
 type Props = {
   children: React.ReactNode
-  params: { locale: string; countryCode: string }
+  params: Promise<{ locale: string; countryCode: string }>
 }
 
-export default async function PageLayout({ children, params }: Props) {
+export default async function PageLayout(props: Props) {
+  const { children } = props
+  const params = await props.params
   return (
     <>
       <Nav locale={params.locale} />

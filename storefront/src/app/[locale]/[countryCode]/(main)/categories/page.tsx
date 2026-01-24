@@ -9,10 +9,11 @@ import { HttpTypes } from "@medusajs/types"
 import { getTranslations } from "next-intl/server"
 
 type Props = {
-  params: { locale: string; countryCode: string }
+  params: Promise<{ locale: string; countryCode: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
   const t = await getTranslations({ locale: params.locale, namespace: "nav" })
   return {
     title: `${t("catalog")} | Toolbox`,
@@ -76,7 +77,8 @@ const CategoryCard = ({
   )
 }
 
-export default async function CategoriesPage({ params }: Props) {
+export default async function CategoriesPage(props: Props) {
+  const params = await props.params
   const t = await getTranslations({ locale: params.locale, namespace: "nav" })
   const { product_categories } = await getCategoriesList(0, 200)
 

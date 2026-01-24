@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { generateAlternates } from "@lib/util/seo"
 
-export async function generateMetadata({ params: { locale, countryCode } }: { params: { locale: string; countryCode: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ locale: string; countryCode: string }> }): Promise<Metadata> {
+  const params = await props.params
+  const { locale, countryCode } = params
   const t = await getTranslations({ locale, namespace: "about_page" })
   return {
     title: `${t("hero.title")} | Toolbox`,
@@ -12,7 +14,9 @@ export async function generateMetadata({ params: { locale, countryCode } }: { pa
   }
 }
 
-export default async function AboutPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function AboutPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params
+  const { locale } = params
   const t = await getTranslations({ locale, namespace: "about_page" })
 
   const timelineSteps = [

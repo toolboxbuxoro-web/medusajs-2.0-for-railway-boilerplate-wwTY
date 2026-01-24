@@ -12,10 +12,12 @@ import { listBanners } from "@lib/data/banners"
 import { generateAlternates } from "@lib/util/seo"
 
 type Props = {
-  params: { countryCode: string; locale: string }
+  params: Promise<{ countryCode: string; locale: string }>
 }
 
-export async function generateMetadata({ params: { countryCode, locale } }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode, locale } = params
   const t = await getTranslations({ locale, namespace: 'home' })
   
   return {
@@ -25,9 +27,9 @@ export async function generateMetadata({ params: { countryCode, locale } }: Prop
   }
 }
 
-export default async function Home({
-  params: { countryCode, locale },
-}: Props) {
+export default async function Home(props: Props) {
+  const params = await props.params
+  const { countryCode, locale } = params
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
   
