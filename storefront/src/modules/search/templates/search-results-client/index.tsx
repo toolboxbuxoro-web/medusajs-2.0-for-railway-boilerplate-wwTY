@@ -18,21 +18,49 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
   const router = useRouter()
   const pathname = usePathname()
   const initialized = useRef(false)
+  const syncingFromUrlRef = useRef(false) // Track if we're syncing from URL to prevent circular updates
+  const previousInitialQueryRef = useRef<string>(initialQuery) // Track previous initialQuery
 
   // Fix: Sync internal state when URL/initialQuery changes
   useEffect(() => {
-    console.log(`[SearchResultsClient] Sync check: initialQuery="${initialQuery}", query="${query}", initialized=${initialized.current}`)
-    if (initialQuery !== query) {
-      console.log(`[SearchResultsClient] Syncing: calling setQuery("${initialQuery}")`)
+    const previousInitialQuery = previousInitialQueryRef.current
+    console.log(`[SearchResultsClient] Sync check: initialQuery="${initialQuery}", previous="${previousInitialQuery}", query="${query}", initialized=${initialized.current}`)
+    
+    // Update ref
+    previousInitialQueryRef.current = initialQuery
+    
+    // Skip on initial mount - query is already initialized
+    if (!initialized.current) {
+      return
+    }
+    
+    // Only sync if initialQuery actually changed (not just different from query)
+    if (initialQuery !== previousInitialQuery && initialQuery !== query) {
+      console.log(`[SearchResultsClient] initialQuery changed from "${previousInitialQuery}" to "${initialQuery}", syncing to state`)
+      syncingFromUrlRef.current = true // Mark that we're syncing from URL
       setQuery(initialQuery)
+      
+      // Reset flag after a short delay to allow state to update
+      setTimeout(() => {
+        syncingFromUrlRef.current = false
+        console.log(`[SearchResultsClient] Reset syncingFromUrlRef flag`)
+      }, 100)
+    } else if (initialQuery !== query) {
+      console.log(`[SearchResultsClient] initialQuery="${initialQuery}" differs from query="${query}" but initialQuery didn't change, skipping sync`)
     }
   }, [initialQuery, query, setQuery])
 
-  // Sync URL when query changes (debounced)
+  // Sync URL when query changes (but NOT when syncing from URL)
   useEffect(() => {
     if (!initialized.current) {
       console.log(`[SearchResultsClient] Skipping URL sync on initial mount`)
       initialized.current = true
+      return
+    }
+
+    // Don't sync URL if we're currently syncing FROM URL
+    if (syncingFromUrlRef.current) {
+      console.log(`[SearchResultsClient] Skipping URL sync - currently syncing from URL`)
       return
     }
 
@@ -42,6 +70,12 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
     // Only update URL if it's different from current query
     if (currentQueryParam === query) {
       console.log(`[SearchResultsClient] URL already matches query, skipping update`)
+      return
+    }
+
+    // Don't update URL if query matches initialQuery (means change came from URL)
+    if (query === initialQuery) {
+      console.log(`[SearchResultsClient] Query matches initialQuery, skipping URL update to prevent loop`)
       return
     }
 
@@ -58,7 +92,7 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
     
     // Use replace to avoid bloating history
     router.replace(newUrl, { scroll: false })
-  }, [query, searchParams, pathname, router])
+  }, [query, searchParams, pathname, router, initialQuery])
 
   // Reset scroll on query change
   useEffect(() => {
