@@ -17,12 +17,27 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const isUserScrollingRef = useRef(false)
   const userScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // Limit to max 20 products
   const displayProducts = products.slice(0, MAX_PRODUCTS)
+  
+  // Определяем мобильную версию
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640) // sm breakpoint
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
   
   const checkScrollButtons = useCallback(() => {
     const container = scrollContainerRef.current
@@ -52,12 +67,27 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
     const container = scrollContainerRef.current
     if (!container) return
     
-    // Scroll by approximately 4 cards width
-    const scrollAmount = container.clientWidth * 0.8
-    container.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth"
-    })
+    // На мобильной версии прокручиваем по 2 карточки
+    const isMobile = window.innerWidth < 640 // sm breakpoint
+    if (isMobile) {
+      // Ширина 2 карточек на мобильной: 45% + gap + 45% ≈ 90% + gap
+      // Конвертируем в пиксели
+      const cardWidth = container.clientWidth * 0.45
+      const gap = 12 // gap-3 = 12px
+      const twoCardsWidth = cardWidth * 2 + gap
+      
+      container.scrollBy({
+        left: direction === "left" ? -twoCardsWidth : twoCardsWidth,
+        behavior: "smooth"
+      })
+    } else {
+      // На десктопе прокручиваем по 4 карточки
+      const scrollAmount = container.clientWidth * 0.8
+      container.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth"
+      })
+    }
   }, [])
 
   const scrollToNext = useCallback(() => {
@@ -104,20 +134,24 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
     }
   }, [displayProducts.length, scrollToNext])
 
-  // Handle user scroll - pause auto-scroll temporarily
-  const handleUserScroll = useCallback(() => {
-    isUserScrollingRef.current = true
-
-    // Clear existing timeout
-    if (userScrollTimeoutRef.current) {
-      clearTimeout(userScrollTimeoutRef.current)
+  const handleScrollEnd = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    const distanceToEnd = scrollWidth - scrollLeft - clientWidth
+    
+    // На мобильной версии: если осталось меньше 2 карточек до конца, прокрутить до конца
+    const isMobile = window.innerWidth < 640
+    if (isMobile && distanceToEnd > 0 && distanceToEnd < clientWidth * 0.5) {
+      container.scrollTo({
+        left: scrollWidth - clientWidth,
+        behavior: "smooth"
+      })
     }
-
-    // Resume auto-scroll after user stops scrolling for 2 seconds
-    userScrollTimeoutRef.current = setTimeout(() => {
-      isUserScrollingRef.current = false
-    }, 2000)
-  }, [])
+    
+    checkScrollButtons()
+  }, [checkScrollButtons])
 
   // Connect external buttons if collectionId is provided
   useEffect(() => {
@@ -239,21 +273,35 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
         style={{ 
           scrollbarWidth: "none", 
           msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch"
+          WebkitOverflowScrolling: "touch",
+          scrollSnapType: isMobile ? "x mandatory" : "none"
         }}
         onScroll={handleUserScroll}
+        onScrollEnd={handleScrollEnd}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {displayProducts.map((product) => (
-          <div 
-            key={product.id} 
-            className="flex-none w-[45%] sm:w-[30%] md:w-[23%] lg:w-[18%] xl:w-[15%]"
-          >
-            <ProductPreviewContent product={product} isFeatured />
-          </div>
-        ))}
+        {displayProducts.map((product, index) => {
+          const isLastCard = index === displayProducts.length - 1
+          const isOddCount = displayProducts.length % 2 !== 0
+          
+          // На мобильной версии веб-сайта: snap только на четных индексах (каждая пара начинается с четного)
+          // Если нечетное количество и это последняя карточка, тоже делаем snap
+          const shouldSnap = isMobile && (index % 2 === 0 || (isLastCard && isOddCount))
+          
+          return (
+            <div 
+              key={product.id} 
+              className="flex-none w-[45%] sm:w-[30%] md:w-[23%] lg:w-[18%] xl:w-[15%]"
+              style={{
+                scrollSnapAlign: shouldSnap ? "start" : undefined
+              }}
+            >
+              <ProductPreviewContent product={product} isFeatured />
+            </div>
+          )
+        })}
       </div>
 
       {/* Left Arrow - Mobile/Tablet only (desktop uses header arrows) */}

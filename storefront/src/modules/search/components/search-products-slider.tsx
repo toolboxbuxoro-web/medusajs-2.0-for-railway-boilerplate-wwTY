@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback, useState } from "react"
 import { HttpTypes } from "@medusajs/types"
 import ProductPreviewContent from "@modules/products/components/product-preview/content"
 
@@ -12,9 +12,24 @@ const AUTO_SCROLL_INTERVAL = 6000 // 6 seconds
 
 export default function SearchProductsSlider({ products }: SearchProductsSliderProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const isUserScrollingRef = useRef(false)
   const userScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Определяем мобильную версию
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640) // sm breakpoint
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
 
   const scrollToNext = useCallback(() => {
     const container = scrollContainerRef.current
@@ -128,24 +143,37 @@ export default function SearchProductsSlider({ products }: SearchProductsSliderP
         style={{ 
           scrollbarWidth: "none", 
           msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch"
+          WebkitOverflowScrolling: "touch",
+          scrollSnapType: isMobile ? "x mandatory" : "none"
         }}
         onScroll={handleUserScroll}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {products.map((product, index) => (
-          <div 
-            key={product.id} 
-            className="flex-none w-[45%] sm:w-[30%] md:w-[23%] lg:w-[18%] xl:w-[15%]"
-          >
-            <ProductPreviewContent 
-              product={product} 
-              isFeatured={index < 8}
-            />
-          </div>
-        ))}
+        {products.map((product, index) => {
+          const isLastCard = index === products.length - 1
+          const isOddCount = products.length % 2 !== 0
+          
+          // На мобильной версии веб-сайта: snap только на четных индексах (каждая пара начинается с четного)
+          // Если нечетное количество и это последняя карточка, тоже делаем snap
+          const shouldSnap = isMobile && (index % 2 === 0 || (isLastCard && isOddCount))
+          
+          return (
+            <div 
+              key={product.id} 
+              className="flex-none w-[45%] sm:w-[30%] md:w-[23%] lg:w-[18%] xl:w-[15%]"
+              style={{
+                scrollSnapAlign: shouldSnap ? "start" : undefined
+              }}
+            >
+              <ProductPreviewContent 
+                product={product} 
+                isFeatured={index < 8}
+              />
+            </div>
+          )
+        })}
       </div>
     </div>
   )
