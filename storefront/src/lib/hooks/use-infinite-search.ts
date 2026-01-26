@@ -57,61 +57,70 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
 
       const { hits = [], estimatedTotalHits = 0, mode = "search" } = results
 
-      // Step 2: Hydrate with full product data including prices
-      let hydratedHits = hits
-      
-      if (hits.length > 0 && regionRef.current) {
-        try {
-          const productIds = hits.map((h: any) => h.id)
-          
-          // Add timeout to prevent hanging on slow backend
-          const hydrationPromise = getProductsById({
-            ids: productIds,
-            regionId: regionRef.current.id
-          })
-          
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Hydration timeout')), 10000)
-          )
-          
-          const fullProducts = await Promise.race([hydrationPromise, timeoutPromise]) as any[]
-          
-          // Map back to preserve Meilisearch order
-          hydratedHits = productIds.map((id: string) => {
-            const fullProduct = fullProducts.find((p: any) => p.id === id)
-            const meilisearchHit = hits.find((h: any) => h.id === id)
-            
-            if (fullProduct) {
-              return {
-                ...fullProduct,
-                _formatted: meilisearchHit?._formatted, // Keep highlighting
-              }
-            }
-            // Fallback to Meilisearch data if not found
-            return meilisearchHit
-          }).filter(Boolean)
-        } catch (e) {
-          console.warn("[useInfiniteSearch] Hydration failed, using raw hits:", e)
-          // Continue with raw Meilisearch hits - this prevents 502 from breaking the UI
-        }
-      }
-
+      // Step 2: Show results immediately from Meilisearch (fast)
+      // This allows users to see results right away
       setState(prev => {
         if (prev.query !== query && isNewSearch) return prev
 
-        const newItems = isNewSearch ? hydratedHits : [...prev.items, ...hydratedHits]
-        const hasMore = hydratedHits.length > 0 && newItems.length < estimatedTotalHits
+        const newItems = isNewSearch ? hits : [...prev.items, ...hits]
+        const hasMore = hits.length > 0 && newItems.length < estimatedTotalHits
 
         return {
           ...prev,
           items: newItems,
-          status: "success",
+          status: "success", // Show results immediately
           mode: mode as SearchMode,
           totalHits: estimatedTotalHits,
           hasMore,
           page: page,
         }
       })
+
+      // Step 3: Hydrate with full product data asynchronously (in background)
+      // This doesn't block the UI - users see results immediately
+      if (hits.length > 0 && regionRef.current) {
+        // Don't await - let it run in background
+        getRegion(countryCode).then(region => {
+          if (!region) return
+          
+          const productIds = hits.map((h: any) => h.id)
+          
+          // Hydrate in background without blocking
+          getProductsById({
+            ids: productIds,
+            regionId: region.id
+          })
+            .then((fullProducts) => {
+              // Update items with hydrated data when ready
+              setState(prev => {
+                // Only update if query hasn't changed
+                if (prev.query !== query) return prev
+                
+                const hydratedItems = prev.items.map((item: any) => {
+                  const fullProduct = fullProducts.find((p: any) => p.id === item.id)
+                  if (fullProduct) {
+                    return {
+                      ...fullProduct,
+                      _formatted: item._formatted, // Keep highlighting
+                    }
+                  }
+                  return item
+                })
+                
+                return {
+                  ...prev,
+                  items: hydratedItems
+                }
+              })
+            })
+            .catch((e) => {
+              console.warn("[useInfiniteSearch] Background hydration failed, using Meilisearch data:", e)
+              // Continue with Meilisearch data - no UI impact
+            })
+        }).catch(() => {
+          // Region fetch failed - continue with Meilisearch data
+        })
+      }
     } catch (error) {
       console.error("[useInfiniteSearch] Error:", error)
       setState(prev => ({ ...prev, status: "error", hasMore: false }))
