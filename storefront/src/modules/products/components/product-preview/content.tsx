@@ -206,20 +206,11 @@ export default function ProductPreviewContent({
               disabled={isQuickOrdering || !isInStock || product.variants?.length !== 1}
               className={`w-full h-9 sm:h-10 text-xs sm:text-sm font-semibold transition-all duration-200 ${
                 isInStock && product.variants?.length === 1
-                  ? "bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 text-red-600 border border-red-200/50 shadow-sm hover:shadow-md active:scale-[0.98]" 
-                  : "bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-200"
+                  ? "bg-red-600 hover:bg-red-700 text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]" 
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed border-0"
               }`}
             >
-              {isQuickOrdering ? (
-                <Spinner />
-              ) : (
-                <span className="flex items-center justify-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  {t("quick_order")}
-                </span>
-              )}
+              {isQuickOrdering ? <Spinner /> : t("quick_order")}
             </Button>
 
             {/* Add to Cart Button */}
