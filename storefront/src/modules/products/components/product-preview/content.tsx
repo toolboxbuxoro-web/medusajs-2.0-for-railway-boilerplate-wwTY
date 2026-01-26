@@ -238,5 +238,7 @@ export default function ProductPreviewContent({
           onClose={() => setIsQuickOrderOpen(false)}
         />
       )}
-
+    </div>
+  )
+}
 
