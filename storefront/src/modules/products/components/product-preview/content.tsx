@@ -158,17 +158,17 @@ export default function ProductPreviewContent({
         </div>
 
         {/* Product Info */}
-        <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between h-full">
+        <div className="p-2 sm:p-3 flex-1 flex flex-col justify-between h-full">
           <div>
             {/* Price */}
-            <div className="mb-2 h-7 sm:h-8 flex items-center">
+            <div className="mb-1 h-6 sm:h-7 flex items-center">
               {displayPrice && (
                 <PreviewPrice price={displayPrice} isRed={true} />
               )}
             </div>
 
             {/* Title - Fixed height for 3 lines alignment, line-clamp-3 */}
-            <LocalizedClientLink href={`/products/${product.handle}`} className="block mb-2 group-hover:text-red-600 transition-colors">
+            <LocalizedClientLink href={`/products/${product.handle}`} className="block mb-1 group-hover:text-red-600 transition-colors">
               <h3 
                 className="text-gray-800 text-xs sm:text-sm font-medium leading-[1.4] line-clamp-3 min-h-[4.2em]" 
                 style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
@@ -180,7 +180,7 @@ export default function ProductPreviewContent({
             </LocalizedClientLink>
 
             {/* Rating */}
-            <div className="h-5 mb-1 flex items-center">
+            <div className="h-4 mb-0 flex items-center">
               <ProductRating 
                 rating={(product.metadata as any)?.rating || 0} 
                 reviewCount={(product.metadata as any)?.reviews_count || 0} 
@@ -188,7 +188,7 @@ export default function ProductPreviewContent({
             </div>
 
             {/* Installment - Conditional based on metadata */}
-            <div className="h-6 mb-2">
+            <div className="h-5 mb-0">
               {cheapestPrice && (product.metadata as any)?.has_installment && (
                 <InstallmentPrice 
                   amount={cheapestPrice.calculated_price_number} 
@@ -199,7 +199,7 @@ export default function ProductPreviewContent({
           </div>
 
           {/* Quick Order and Add to Cart Buttons - Persistent at bottom */}
-          <div className="mt-auto space-y-2">
+          <div className="mt-1 space-y-1.5">
             {/* Quick Order Button */}
             <Button
               onClick={handleQuickOrder}
