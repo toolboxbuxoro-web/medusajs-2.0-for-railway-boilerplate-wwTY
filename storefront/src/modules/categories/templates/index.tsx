@@ -33,23 +33,9 @@ export default function CategoryTemplate({
   if (!category || !countryCode) notFound()
 
   const CategoryMedia = ({ c }: { c: HttpTypes.StoreProductCategory }) => {
+    // Для внутренних категорий используем ТОЛЬКО image_url
     const imageUrl = c.metadata?.image_url as string | undefined
-    const iconUrl = c.metadata?.icon_url as string | undefined
 
-    // Приоритет: сначала icon_url, потом image_url
-    if (iconUrl) {
-      return (
-        <div className="relative w-full h-full shrink-0">
-          <Image
-            src={iconUrl}
-            alt=""
-            fill
-            sizes="64px"
-            className="object-contain"
-          />
-        </div>
-      )
-    }
     if (imageUrl) {
       return (
         <div className="relative w-full aspect-square shrink-0">
