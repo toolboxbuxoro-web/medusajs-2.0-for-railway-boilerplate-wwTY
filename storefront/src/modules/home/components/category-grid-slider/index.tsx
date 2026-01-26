@@ -33,6 +33,7 @@ const categoryIcons: Record<string, string> = {
 
 export default function CategoryGridSlider({ categories, locale }: CategoryGridSliderProps) {
   const desktopScrollRef = useRef<HTMLDivElement>(null)
+  const mobileScrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
@@ -175,45 +176,73 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
           </div>
         </div>
 
-        {/* Mobile: 2 columns grid */}
+        {/* Mobile: Horizontal scroll slider with 3 columns (6 cards visible: 2 rows × 3 cols) */}
         <div className="sm:hidden -mx-4 px-4">
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map((category) => {
-              const categoryName = getLocalizedField(category, "name", locale) || category.name
-              const imageUrl = category.metadata?.image_url as string | undefined
-
+          <div
+            ref={mobileScrollRef}
+            className="flex gap-2 overflow-x-auto scroll-smooth pb-2 no-scrollbar"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+              scrollSnapType: "x mandatory",
+            }}
+          >
+            {/* Group categories into chunks of 6 (2 rows × 3 cols) */}
+            {Array.from({ length: Math.ceil(categories.length / 6) }).map((_, groupIndex) => {
+              const groupCategories = categories.slice(groupIndex * 6, (groupIndex + 1) * 6)
+              
               return (
-                <LocalizedClientLink
-                  key={category.id}
-                  href={`/categories/${category.handle}`}
-                  className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col"
+                <div
+                  key={groupIndex}
+                  className="grid grid-cols-3 grid-rows-2 gap-2 flex-shrink-0"
+                  style={{
+                    width: 'calc(100vw - 2rem)',
+                    scrollSnapAlign: "start",
+                  }}
                 >
-                  {/* Category Image - Top, 1:1 aspect ratio */}
-                  <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={categoryName}
-                        fill
-                        sizes="50vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-3xl">
-                          {categoryIcons[category.handle || ''] || categoryIcons.default}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  {groupCategories.map((category) => {
+                    const categoryName = getLocalizedField(category, "name", locale) || category.name
+                    const imageUrl = category.metadata?.image_url as string | undefined
 
-                  {/* Category Name - Bottom */}
-                  <div className="px-2 py-2 border-t border-gray-100">
-                    <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 text-center group-hover:text-red-600 transition-colors">
-                      {categoryName}
-                    </h3>
-                  </div>
-                </LocalizedClientLink>
+                    return (
+                      <LocalizedClientLink
+                        key={category.id}
+                        href={`/categories/${category.handle}`}
+                        className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 hover:shadow-md transition-all duration-200 flex flex-col items-center p-2"
+                      >
+                        {/* Category Image - Compact, small square */}
+                        <div className="relative w-full aspect-square bg-gray-50 overflow-hidden rounded-md mb-1.5">
+                          {imageUrl ? (
+                            <Image
+                              src={imageUrl}
+                              alt={categoryName}
+                              fill
+                              sizes="33vw"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-lg">
+                                {categoryIcons[category.handle || ''] || categoryIcons.default}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Category Name - Compact text below image */}
+                        <h3 className="font-medium text-[10px] leading-tight text-gray-900 line-clamp-2 text-center group-hover:text-red-600 transition-colors">
+                          {categoryName}
+                        </h3>
+                      </LocalizedClientLink>
+                    )
+                  })}
+                  
+                  {/* Fill empty slots if less than 6 categories in last group */}
+                  {groupCategories.length < 6 && Array.from({ length: 6 - groupCategories.length }).map((_, emptyIndex) => (
+                    <div key={`empty-${emptyIndex}`} className="opacity-0 pointer-events-none" />
+                  ))}
+                </div>
               )
             })}
           </div>
