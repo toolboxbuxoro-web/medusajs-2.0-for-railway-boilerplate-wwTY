@@ -110,12 +110,16 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
         return prev
       }
       
-      return { 
+      const newState = { 
         ...prev, 
         status: "loading",
         query: query,
         ...(isNewSearch && { items: [], page: 0, hasMore: true, totalHits: 0 })
       }
+      
+      console.log(`[useInfiniteSearch] Setting loading state: prev.query="${prev.query}", new.query="${newState.query}", isNewSearch=${isNewSearch}, requestId=${thisRequestId}`)
+      
+      return newState
     })
 
     try {
@@ -162,9 +166,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
         const newItems = isNewSearch ? hits : [...prev.items, ...hits]
         const hasMore = hits.length > 0 && newItems.length < estimatedTotalHits
 
-        console.log(`[useInfiniteSearch] Updating state: items=${newItems.length}, hasMore=${hasMore}, requestId=${thisRequestId}`)
-
-        return {
+        const newState = {
           ...prev,
           items: newItems,
           status: "success", // Show results immediately
@@ -173,6 +175,10 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
           hasMore,
           page: page,
         }
+
+        console.log(`[useInfiniteSearch] Updating state with results: prev.query="${prev.query}", new.query="${newState.query}", items=${newItems.length}, hasMore=${hasMore}, requestId=${thisRequestId}`)
+
+        return newState
       })
 
       // Step 3: Hydrate with full product data asynchronously (in background)
@@ -291,17 +297,35 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
     }
   }, [countryCode, locale])
 
+  // Track state.query changes for debugging
+  useEffect(() => {
+    console.log(`[useInfiniteSearch] state.query changed: "${state.query}", currentQueryRef: "${currentQueryRef.current}"`)
+  }, [state.query])
+
   // Initial fetch / Query change fetch
   useEffect(() => {
+    console.log(`[useInfiniteSearch] useEffect triggered: state.query="${state.query}", currentQueryRef="${currentQueryRef.current}"`)
+    
+    // Sync currentQueryRef with state.query BEFORE debounce
+    if (currentQueryRef.current !== state.query) {
+      console.log(`[useInfiniteSearch] Syncing currentQueryRef: "${currentQueryRef.current}" -> "${state.query}"`)
+      currentQueryRef.current = state.query
+    }
+    
     const delayDebounceFn = setTimeout(() => {
+      console.log(`[useInfiniteSearch] Debounced fetch triggered: query="${state.query}", currentQueryRef="${currentQueryRef.current}"`)
       fetchData(state.query, 0, true)
     }, 300)
 
-    return () => clearTimeout(delayDebounceFn)
+    return () => {
+      console.log(`[useInfiniteSearch] Clearing debounce timer for query="${state.query}"`)
+      clearTimeout(delayDebounceFn)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.query, fetchData, locale])
 
   const loadMore = useCallback(() => {
+    console.log(`[useInfiniteSearch] loadMore called: status=${state.status}, hasMore=${state.hasMore}, items=${state.items.length}`)
     if (state.status === "loading" || !state.hasMore) return
     if (state.items.length === 0 && state.status === "idle") return 
 
@@ -309,7 +333,17 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
   }, [state.query, state.page, state.status, state.hasMore, state.items.length, fetchData])
 
   const setQuery = useCallback((newQuery: string) => {
-    setState(prev => ({ ...prev, query: newQuery }))
+    const previousQuery = currentQueryRef.current
+    console.log(`[useInfiniteSearch] setQuery called: "${previousQuery}" -> "${newQuery}"`)
+    
+    // Update currentQueryRef SYNCHRONOUSLY before setState
+    currentQueryRef.current = newQuery
+    console.log(`[useInfiniteSearch] currentQueryRef updated synchronously to: "${currentQueryRef.current}"`)
+    
+    setState(prev => {
+      console.log(`[useInfiniteSearch] setState in setQuery: prev.query="${prev.query}", newQuery="${newQuery}"`)
+      return { ...prev, query: newQuery }
+    })
   }, [])
 
   return {

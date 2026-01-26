@@ -21,7 +21,9 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
 
   // Fix: Sync internal state when URL/initialQuery changes
   useEffect(() => {
+    console.log(`[SearchResultsClient] Sync check: initialQuery="${initialQuery}", query="${query}", initialized=${initialized.current}`)
     if (initialQuery !== query) {
+      console.log(`[SearchResultsClient] Syncing: calling setQuery("${initialQuery}")`)
       setQuery(initialQuery)
     }
   }, [initialQuery, query, setQuery])
@@ -29,10 +31,21 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
   // Sync URL when query changes (debounced)
   useEffect(() => {
     if (!initialized.current) {
+      console.log(`[SearchResultsClient] Skipping URL sync on initial mount`)
       initialized.current = true
       return
     }
 
+    const currentQueryParam = searchParams.get("q") || ""
+    console.log(`[SearchResultsClient] URL sync check: query="${query}", URL param="${currentQueryParam}"`)
+    
+    // Only update URL if it's different from current query
+    if (currentQueryParam === query) {
+      console.log(`[SearchResultsClient] URL already matches query, skipping update`)
+      return
+    }
+
+    console.log(`[SearchResultsClient] Syncing URL: query="${query}"`)
     const currentParams = new URLSearchParams(searchParams.toString())
     if (query) {
       currentParams.set("q", query)
@@ -40,8 +53,11 @@ export default function SearchResultsClient({ initialQuery }: { initialQuery: st
       currentParams.delete("q")
     }
     
+    const newUrl = `${pathname}?${currentParams.toString()}`
+    console.log(`[SearchResultsClient] Updating URL to: ${newUrl}`)
+    
     // Use replace to avoid bloating history
-    router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false })
+    router.replace(newUrl, { scroll: false })
   }, [query, searchParams, pathname, router])
 
   // Reset scroll on query change
