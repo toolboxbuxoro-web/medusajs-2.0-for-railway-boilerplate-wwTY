@@ -153,6 +153,23 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
     checkScrollButtons()
   }, [checkScrollButtons])
 
+  // Handle user scroll - pause auto-scroll temporarily
+  const handleUserScroll = useCallback(() => {
+    isUserScrollingRef.current = true
+
+    // Clear existing timeout
+    if (userScrollTimeoutRef.current) {
+      clearTimeout(userScrollTimeoutRef.current)
+    }
+
+    // Resume auto-scroll after user stops scrolling for 2 seconds
+    userScrollTimeoutRef.current = setTimeout(() => {
+      isUserScrollingRef.current = false
+    }, 2000)
+    
+    checkScrollButtons()
+  }, [checkScrollButtons])
+
   // Connect external buttons if collectionId is provided
   useEffect(() => {
     if (!collectionId) return
