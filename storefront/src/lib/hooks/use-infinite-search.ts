@@ -31,6 +31,8 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
 
   const loadingRef = useRef(false)
   const regionRef = useRef<any>(null)
+  const currentQueryRef = useRef<string>("") // Track current query to prevent race conditions
+  const hydrationAbortRef = useRef<(() => void) | null>(null) // Track hydration to cancel if needed
 
   // Pre-fetch region for hydration
   useEffect(() => {
@@ -40,14 +42,23 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
   }, [countryCode])
 
   const fetchData = useCallback(async (query: string, page: number, isNewSearch: boolean) => {
-    if (loadingRef.current) return
+    // Cancel any pending hydration from previous query
+    if (hydrationAbortRef.current) {
+      hydrationAbortRef.current()
+      hydrationAbortRef.current = null
+    }
+
+    // Update current query ref
+    currentQueryRef.current = query
+
+    if (loadingRef.current && !isNewSearch) return
     loadingRef.current = true
 
     setState(prev => ({ 
       ...prev, 
       status: "loading",
       query: query,
-      ...(isNewSearch && { items: [], page: 0, hasMore: true })
+      ...(isNewSearch && { items: [], page: 0, hasMore: true, totalHits: 0 })
     }))
 
     try {
@@ -55,12 +66,21 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
       // Step 1: Get search results from Meilisearch (basic data)
       const results = await search(query, offset, countryCode, locale)
 
+      // Check if query changed during fetch (race condition prevention)
+      if (currentQueryRef.current !== query) {
+        console.log("[useInfiniteSearch] Query changed during fetch, ignoring results")
+        return
+      }
+
       const { hits = [], estimatedTotalHits = 0, mode = "search" } = results
 
       // Step 2: Show results immediately from Meilisearch (fast)
       // This allows users to see results right away
       setState(prev => {
-        if (prev.query !== query && isNewSearch) return prev
+        // Double check query hasn't changed
+        if (prev.query !== query || currentQueryRef.current !== query) {
+          return prev
+        }
 
         const newItems = isNewSearch ? hits : [...prev.items, ...hits]
         const hasMore = hits.length > 0 && newItems.length < estimatedTotalHits
@@ -79,9 +99,19 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
       // Step 3: Hydrate with full product data asynchronously (in background)
       // This doesn't block the UI - users see results immediately
       if (hits.length > 0 && regionRef.current) {
+        const hydrationQuery = query // Capture query for this hydration
+        let isCancelled = false
+
+        // Set up cancellation function
+        hydrationAbortRef.current = () => {
+          isCancelled = true
+        }
+
         // Don't await - let it run in background
         getRegion(countryCode).then(region => {
-          if (!region) return
+          if (!region || isCancelled || currentQueryRef.current !== hydrationQuery) {
+            return
+          }
           
           const productIds = hits.map((h: any) => h.id)
           
@@ -91,10 +121,18 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
             regionId: region.id
           })
             .then((fullProducts) => {
+              // Check if hydration is still valid (query hasn't changed)
+              if (isCancelled || currentQueryRef.current !== hydrationQuery) {
+                console.log("[useInfiniteSearch] Hydration cancelled or query changed")
+                return
+              }
+
               // Update items with hydrated data when ready
               setState(prev => {
                 // Only update if query hasn't changed
-                if (prev.query !== query) return prev
+                if (prev.query !== hydrationQuery || currentQueryRef.current !== hydrationQuery) {
+                  return prev
+                }
                 
                 const hydratedItems = prev.items.map((item: any) => {
                   const fullProduct = fullProducts.find((p: any) => p.id === item.id)
@@ -114,18 +152,34 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
               })
             })
             .catch((e) => {
-              console.warn("[useInfiniteSearch] Background hydration failed, using Meilisearch data:", e)
+              if (!isCancelled && currentQueryRef.current === hydrationQuery) {
+                console.warn("[useInfiniteSearch] Background hydration failed, using Meilisearch data:", e)
+              }
               // Continue with Meilisearch data - no UI impact
+            })
+            .finally(() => {
+              if (hydrationAbortRef.current && currentQueryRef.current === hydrationQuery) {
+                hydrationAbortRef.current = null
+              }
             })
         }).catch(() => {
           // Region fetch failed - continue with Meilisearch data
         })
       }
     } catch (error) {
-      console.error("[useInfiniteSearch] Error:", error)
-      setState(prev => ({ ...prev, status: "error", hasMore: false }))
+      // Only update state if query hasn't changed
+      if (currentQueryRef.current === query) {
+        console.error("[useInfiniteSearch] Error:", error)
+        setState(prev => {
+          if (prev.query !== query) return prev
+          return { ...prev, status: "error", hasMore: false }
+        })
+      }
     } finally {
-      loadingRef.current = false
+      // Only reset loading if this is still the current query
+      if (currentQueryRef.current === query) {
+        loadingRef.current = false
+      }
     }
   }, [countryCode, locale])
 
