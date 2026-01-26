@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, FormEvent } from "react"
+import { useState, FormEvent, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Search from "@modules/common/icons/search"
+import { useCitySearch } from "@lib/context/city-search-context"
 
 type SearchInputProps = {
   placeholder: string
@@ -13,6 +14,20 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
   const [query, setQuery] = useState("")
   const router = useRouter()
   const pathname = usePathname()
+  const { searchQuery, setSearchQuery } = useCitySearch()
+  
+  // Check if we're on pickup points page
+  const isPickupPointsPage = pathname?.includes("/pickup-points")
+  
+  // Sync with context when on pickup points page
+  useEffect(() => {
+    if (isPickupPointsPage) {
+      setQuery(searchQuery)
+    } else {
+      // Clear query when leaving pickup points page
+      setQuery("")
+    }
+  }, [isPickupPointsPage, searchQuery])
   
   // Extract base path for localized navigation (e.g., /ru/uz)
   const pathParts = pathname.split('/')
@@ -20,8 +35,22 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (query.trim()) {
-      router.push(`${basePath}/search?q=${encodeURIComponent(query.trim())}`)
+    if (isPickupPointsPage) {
+      // On pickup points page, just update context (no navigation)
+      setSearchQuery(query.trim())
+    } else {
+      // Normal product search
+      if (query.trim()) {
+        router.push(`${basePath}/search?q=${encodeURIComponent(query.trim())}`)
+      }
+    }
+  }
+
+  const handleChange = (value: string) => {
+    setQuery(value)
+    // Update context immediately for pickup points page (live search)
+    if (isPickupPointsPage) {
+      setSearchQuery(value.trim())
     }
   }
 
@@ -32,7 +61,7 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder}
             className="w-full h-10 lg:h-11 px-4 border-none focus:outline-none focus:ring-0 text-sm lg:text-base bg-transparent"
           />
@@ -54,7 +83,7 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder}
             className="w-full h-10 px-4 border-none focus:outline-none focus:ring-0 text-sm bg-transparent"
           />
@@ -75,7 +104,7 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
       <input
         type="text"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
         className="w-full h-9 px-3 pr-9 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
       />

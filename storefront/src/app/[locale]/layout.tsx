@@ -4,6 +4,7 @@ import { locales, type Locale, defaultLocale } from '../../i18n';
 import { FavoritesProvider } from "@lib/context/favorites-context"
 import { AuthProvider } from "@lib/context/auth-context"
 import { PickupPointProvider } from "@lib/context/pickup-point-context"
+import { CitySearchProvider } from "@lib/context/city-search-context"
 
 import { Metadata } from 'next';
 
@@ -55,7 +56,9 @@ export default async function LocaleLayout(props: {
           <AuthProvider initialCustomer={customer}>
             <FavoritesProvider>
               <PickupPointProvider>
-                <main className="relative">{children}</main>
+                <CitySearchProvider>
+                  <main className="relative">{children}</main>
+                </CitySearchProvider>
               </PickupPointProvider>
             </FavoritesProvider>
           </AuthProvider>
