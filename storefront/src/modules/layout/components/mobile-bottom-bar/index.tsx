@@ -6,6 +6,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Cart from "@modules/common/icons/cart"
 import Heart from "@modules/common/icons/heart"
 import User from "@modules/common/icons/user"
+import Menu from "@modules/common/icons/menu"
 import { useFavorites } from "@lib/context/favorites-context"
 import { HttpTypes } from "@medusajs/types"
 import { useEffect, useState } from "react"
@@ -122,28 +123,6 @@ function FavoritesButtonMobile() {
   )
 }
 
-// Иконка каталога (меню + лупа)
-const CatalogIcon = ({ size = "22", color = "currentColor" }: { size?: string; color?: string }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    {/* Три линии меню слева */}
-    <line x1="3" y1="6" x2="10" y2="6" />
-    <line x1="3" y1="12" x2="10" y2="12" />
-    <line x1="3" y1="18" x2="10" y2="18" />
-    {/* Лупа справа */}
-    <circle cx="16" cy="11" r="6" />
-    <path d="m20 15-2.5-2.5" />
-  </svg>
-)
-
 export default function MobileBottomBar({ categories, locale }: MobileBottomBarProps) {
   const pathname = usePathname()
   const t = useTranslations('nav')
@@ -186,7 +165,7 @@ export default function MobileBottomBar({ categories, locale }: MobileBottomBarP
             }`}
             title={t('catalog')}
           >
-            <CatalogIcon size="22" color={catalogIsActive ? '#DC2626' : '#4B5563'} />
+            <Menu size="22" />
             <span className="text-[9px] font-medium leading-tight">{t('catalog')}</span>
           </LocalizedClientLink>
         </div>
