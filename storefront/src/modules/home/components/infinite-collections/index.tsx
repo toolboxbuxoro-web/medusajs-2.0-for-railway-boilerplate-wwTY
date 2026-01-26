@@ -107,26 +107,10 @@ export default function InfiniteCollections({
 
       {/* When collections are finished, show products */}
       {!hasMore && collections.length > 0 && (
-        <>
-          {/* End of collections message */}
-          <div className="text-center py-8">
-            <p className="text-gray-400 text-sm">
-              {locale === 'ru' 
-                ? 'Все коллекции загружены' 
-                : 'Barcha kolleksiyalar yuklandi'}
-            </p>
-          </div>
-
-          {/* Products section header */}
-          <div className="pt-8 border-t border-gray-200">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center">
-              {locale === 'ru' ? 'Все товары' : 'Barcha mahsulotlar'}
-            </h2>
-            
-            {/* Infinite Products */}
-            <InfiniteProducts countryCode={countryCode} locale={locale} />
-          </div>
-        </>
+        <div className="pt-4">
+          {/* Infinite Products */}
+          <InfiniteProducts countryCode={countryCode} locale={locale} />
+        </div>
       )}
     </div>
   )
