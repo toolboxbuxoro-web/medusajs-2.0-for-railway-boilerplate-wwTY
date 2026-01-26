@@ -53,6 +53,24 @@ export const GET = async (
         
         if (!response.ok) {
           const errorText = await response.text()
+          let errorData: any = {}
+          try {
+            errorData = JSON.parse(errorText)
+          } catch {
+            errorData = { message: errorText }
+          }
+          
+          // Check if error is about status not being filterable
+          if (errorData.code === 'invalid_search_filter' && errorData.message?.includes('status')) {
+            console.error('[Search API] ⚠️ Status filter not available yet. Meilisearch settings need to be updated.')
+            console.error('[Search API] 💡 Solution: Restart the server or call POST /admin/meilisearch-settings to apply settings')
+            // Fallback: retry without status filter
+            const fallbackParams = { ...searchParams }
+            delete fallbackParams.filter
+            console.log('[Search API] Retrying without status filter as fallback...')
+            return fetchMeili(fallbackParams)
+          }
+          
           console.error('[Search API] Meilisearch error:', {
             status: response.status,
             statusText: response.statusText,
@@ -94,12 +112,8 @@ export const GET = async (
     const primaryTitleField = isUzbekLocale ? 'title_uz' : 'title'
     
     // Prepare filters
-    // NOTE: Temporarily removed status filter until Meilisearch settings are updated
-    // After settings update, status will be added to filterableAttributes
-    // For now, we rely on the fact that only published products should be indexed
-    const filters: string[] = []
-    // TODO: Re-enable after Meilisearch settings are updated:
-    // const filters: string[] = ["status = published"]
+    // Filter for published products only
+    const filters: string[] = ["status = published"]
 
     let searchBody: any = {
       limit: limitNum,
