@@ -37,6 +37,40 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [visibleCardsCount, setVisibleCardsCount] = useState(0)
+
+  // Вычисляем количество видимых карточек на ПК для автоматического распределения gap
+  useEffect(() => {
+    if (isMobile) {
+      setVisibleCardsCount(0)
+      return
+    }
+    
+    const calculateVisibleCards = () => {
+      const container = desktopScrollRef.current
+      if (!container) return
+      
+      const containerWidth = container.clientWidth
+      const cardWidth = 160 // w-40 = 160px
+      const minGap = 12 // gap-3 = 12px
+      const paddingRight = 16 // pr-4 = 16px
+      
+      // Вычисляем сколько карточек помещается с минимальным gap
+      const availableWidth = containerWidth - paddingRight
+      const maxCards = Math.floor((availableWidth + minGap) / (cardWidth + minGap))
+      
+      setVisibleCardsCount(maxCards)
+    }
+    
+    // Задержка для того, чтобы контейнер успел отрендериться
+    const timeoutId = setTimeout(calculateVisibleCards, 100)
+    window.addEventListener('resize', calculateVisibleCards)
+    
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener('resize', calculateVisibleCards)
+    }
+  }, [isMobile, categories.length])
 
   // Определяем мобильную версию
   useEffect(() => {
@@ -124,10 +158,14 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
             </button>
           )}
 
-          {/* Horizontal Scroll Container - один ряд маленьких карточек */}
+          {/* Horizontal Scroll Container - один ряд маленьких карточек с адаптивным gap */}
           <div
             ref={desktopScrollRef}
-            className="flex gap-3 overflow-x-auto scroll-smooth pb-2 pr-4 no-scrollbar"
+            className={`flex overflow-x-auto scroll-smooth pb-2 pr-4 no-scrollbar ${
+              visibleCardsCount > 0 && categories.length <= visibleCardsCount 
+                ? 'justify-between' 
+                : 'gap-3'
+            }`}
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -180,7 +218,7 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
         <div className="sm:hidden -mx-4 px-4">
           <div
             ref={mobileScrollRef}
-            className="flex gap-2 overflow-x-auto scroll-smooth pb-2 pr-4 no-scrollbar"
+            className="flex gap-2 overflow-x-auto scroll-smooth pb-2 no-scrollbar"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -191,17 +229,15 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
             {/* Group categories into chunks of 6 (2 rows × 3 cols) */}
             {Array.from({ length: Math.ceil(categories.length / 6) }).map((_, groupIndex) => {
               const groupCategories = categories.slice(groupIndex * 6, (groupIndex + 1) * 6)
-              const isLastGroup = groupIndex === Math.ceil(categories.length / 6) - 1
               const isFullGroup = groupCategories.length === 6
               
               return (
                 <div
                   key={groupIndex}
-                  className={`grid grid-cols-3 gap-2 flex-shrink-0 ${isFullGroup ? 'grid-rows-2' : ''}`}
+                  className={`grid grid-cols-3 gap-2 flex-shrink-0 ${isFullGroup ? 'grid-rows-2' : 'grid-rows-1'}`}
                   style={{
-                    width: isFullGroup ? 'calc(100vw - 2rem)' : 'auto',
-                    minWidth: isFullGroup ? 'calc(100vw - 2rem)' : undefined,
-                    scrollSnapAlign: isLastGroup && !isFullGroup ? "end" : "start",
+                    width: 'calc(100vw - 2rem)',
+                    scrollSnapAlign: "start",
                   }}
                 >
                   {groupCategories.map((category) => {
@@ -240,6 +276,11 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
                       </LocalizedClientLink>
                     )
                   })}
+                  
+                  {/* Fill empty slots if less than 6 categories in last group */}
+                  {groupCategories.length < 6 && Array.from({ length: 6 - groupCategories.length }).map((_, emptyIndex) => (
+                    <div key={`empty-${emptyIndex}`} className="opacity-0 pointer-events-none" />
+                  ))}
                 </div>
               )
             })}

@@ -157,6 +157,7 @@ export default async function Nav({ locale }: NavProps) {
                 href={`/categories/${category.handle}`}
                 className="group px-1.5 lg:px-3 h-full flex items-center gap-1.5 lg:gap-2 hover:text-red-600 transition-colors whitespace-nowrap text-[11px] lg:text-sm font-medium"
               >
+                {/* ТОЛЬКО icon_url для навигации сверху */}
                 {category.metadata?.icon_url ? (
                   <div className="relative w-5 h-5 lg:w-6 lg:h-6 shrink-0">
                     <Image
@@ -164,17 +165,7 @@ export default async function Nav({ locale }: NavProps) {
                       alt=""
                       fill
                       sizes="24px"
-                      className="object-cover"
-                    />
-                  </div>
-                ) : category.metadata?.image_url ? (
-                  <div className="relative w-5 h-5 lg:w-6 lg:h-6 shrink-0 rounded overflow-hidden">
-                    <Image
-                      src={category.metadata.image_url as string}
-                      alt=""
-                      fill
-                      sizes="24px"
-                      className="object-cover"
+                      className="object-contain"
                     />
                   </div>
                 ) : (
