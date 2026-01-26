@@ -29,6 +29,9 @@
     "region": "Viloyat",
     "pickup_point": "Olib ketish punkti",
     "select_pickup_point": "Olib ketish punktini tanlang",
+    "find_pickup_point": "Olib ketish punktini topish",
+    "no_points_found": "Olib ketish punktlari topilmadi",
+    "no_points_available": "Mavjud olib ketish punktlari yo'q",
     "call": "Qo'ng'iroq qilish"
   },
   "hero": {

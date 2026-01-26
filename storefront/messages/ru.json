@@ -28,6 +28,9 @@
     "region": "Регион",
     "pickup_point": "Пункт выдачи",
     "select_pickup_point": "Выберите пункт выдачи",
+    "find_pickup_point": "Найти пункт выдачи",
+    "no_points_found": "Пункты выдачи не найдены",
+    "no_points_available": "Нет доступных пунктов выдачи",
     "call": "Позвонить"
   },
   "hero": {

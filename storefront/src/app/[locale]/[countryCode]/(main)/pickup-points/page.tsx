@@ -1,28 +1,71 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { usePickupPoint } from "@lib/context/pickup-point-context"
-import { BTS_REGIONS, BtsRegion, BtsPoint } from "@lib/data/bts"
+import { BtsRegion, BtsPoint } from "@lib/data/bts"
 
 export default function PickupPointsPage() {
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
   const t = useTranslations("nav")
+  const tCommon = useTranslations("common")
   const { selectedPoint, setSelectedPoint } = usePickupPoint()
   const [searchQuery, setSearchQuery] = useState("")
+  const [regions, setRegions] = useState<BtsRegion[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch BTS data from backend API (same as checkout)
+  useEffect(() => {
+    const fetchBtsData = async () => {
+      setIsLoading(true)
+      try {
+        const backendUrl = (
+          process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+        ).replace(/\/$/, "")
+        const publishableKey =
+          process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
+        const response = await fetch(`${backendUrl}/store/bts`, {
+          headers: {
+            "x-publishable-api-key": publishableKey,
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setRegions(data.regions || [])
+        } else {
+          throw new Error("Failed to fetch BTS data")
+        }
+      } catch (err) {
+        console.error("Failed to fetch BTS data:", err)
+        // Fallback: use local import if backend fetch fails
+        try {
+          const mod = await import("@lib/data/bts")
+          setRegions(mod.BTS_REGIONS)
+        } catch (importErr) {
+          console.error("Failed to load fallback BTS data:", importErr)
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBtsData()
+  }, [])
 
   // Flatten all points with their regions
   const allPoints = useMemo(() => {
-    return BTS_REGIONS.flatMap((region) =>
+    return regions.flatMap((region) =>
       region.points.map((point) => ({
         ...point,
         region: region,
       }))
     )
-  }, [])
+  }, [regions])
 
   // Filter points based on search query
   const filteredPoints = useMemo(() => {
@@ -103,7 +146,7 @@ export default function PickupPointsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("pickup_point_placeholder") || "Найти пункт выдачи"}
+            placeholder={t("find_pickup_point") || "Найти пункт выдачи"}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
           />
         </div>
@@ -111,12 +154,18 @@ export default function PickupPointsPage() {
 
       {/* Points List */}
       <div className="pb-4">
-        {filteredPoints.length === 0 ? (
+        {isLoading ? (
+          <div className="px-4 py-8 text-center">
+            <p className="text-gray-500 text-sm">
+              {tCommon("loading") || "Загрузка..."}
+            </p>
+          </div>
+        ) : filteredPoints.length === 0 ? (
           <div className="px-4 py-8 text-center">
             <p className="text-gray-500 text-sm">
               {searchQuery
-                ? "Пункты выдачи не найдены"
-                : "Нет доступных пунктов выдачи"}
+                ? t("no_points_found") || "Пункты выдачи не найдены"
+                : t("no_points_available") || "Нет доступных пунктов выдачи"}
             </p>
           </div>
         ) : (
