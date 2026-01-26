@@ -59,7 +59,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   return (
     <>
       <div
-        className={clx("lg:hidden inset-x-0 bottom-0 fixed z-[100]", {
+        className={clx("lg:hidden inset-x-0 bottom-16 fixed z-[102]", {
           "pointer-events-none": !show,
         })}
       >
@@ -74,7 +74,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           leaveTo="opacity-0"
         >
           <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 w-full border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-2xl"
             data-testid="mobile-actions"
           >
             <div className="flex items-center justify-between w-full gap-x-4">
