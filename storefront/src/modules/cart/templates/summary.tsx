@@ -22,11 +22,16 @@ const Summary = ({ cart, selectedItemIds, handleCheckout, isProcessing }: Summar
 
   const totalItems = selectedItems.reduce((acc, item) => acc + item.quantity, 0)
   // Calculate total weight in grams, then convert to kg and round up
+  // Use the same weight access pattern as in checkout
   const totalWeightGrams = selectedItems.reduce((acc, item) => {
-    const weight = item.variant?.product?.metadata?.weight 
-      ? Number(item.variant.product.metadata.weight) * item.quantity 
-      : 0
-    return acc + weight
+    const weightRaw = 
+      item.variant?.weight || 
+      (item as any).product?.weight || 
+      (item.variant as any)?.product?.weight || 
+      0
+    const weightNum = typeof weightRaw === "string" ? parseFloat(weightRaw) : Number(weightRaw)
+    const weight = isNaN(weightNum) ? 0 : weightNum
+    return acc + (weight * item.quantity)
   }, 0)
   // Convert grams to kg and round up (500g = 1kg, 4500g = 5kg)
   const totalWeightKg = totalWeightGrams > 0 ? Math.ceil(totalWeightGrams / 1000) : 0
