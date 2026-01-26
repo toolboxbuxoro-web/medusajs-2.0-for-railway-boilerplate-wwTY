@@ -4,6 +4,7 @@ import { HttpTypes } from "@medusajs/types"
 import { useInfiniteCollections } from "@lib/hooks/use-infinite-collections"
 import ProductRail from "@modules/home/components/featured-products/product-rail"
 import SkeletonCollectionRail from "./skeleton"
+import InfiniteProducts from "@modules/home/components/infinite-products"
 
 interface InfiniteCollectionsProps {
   initialOffset: number
@@ -93,7 +94,7 @@ export default function InfiniteCollections({
         </div>
       )}
 
-      {/* Infinite scroll trigger */}
+      {/* Infinite scroll trigger for collections */}
       {hasMore && (
         <div
           ref={loadMoreRef}
@@ -104,15 +105,28 @@ export default function InfiniteCollections({
         </div>
       )}
 
-      {/* End of list message */}
+      {/* When collections are finished, show products */}
       {!hasMore && collections.length > 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-400 text-sm">
-            {locale === 'ru' 
-              ? 'Все коллекции загружены' 
-              : 'Barcha kolleksiyalar yuklandi'}
-          </p>
-        </div>
+        <>
+          {/* End of collections message */}
+          <div className="text-center py-8">
+            <p className="text-gray-400 text-sm">
+              {locale === 'ru' 
+                ? 'Все коллекции загружены' 
+                : 'Barcha kolleksiyalar yuklandi'}
+            </p>
+          </div>
+
+          {/* Products section header */}
+          <div className="pt-8 border-t border-gray-200">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center">
+              {locale === 'ru' ? 'Все товары' : 'Barcha mahsulotlar'}
+            </h2>
+            
+            {/* Infinite Products */}
+            <InfiniteProducts countryCode={countryCode} locale={locale} />
+          </div>
+        </>
       )}
     </div>
   )

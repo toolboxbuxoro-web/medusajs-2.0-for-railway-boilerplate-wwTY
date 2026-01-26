@@ -7,8 +7,18 @@ export default function ProductRating({
   rating?: number
   reviewCount?: number
 }) {
-  // Adaptive label for reviews
-  const reviewLabel = reviewCount >= 1000 ? "отз." : "отзывов"
+  // Get proper plural form for reviews
+  const getReviewLabel = (count: number) => {
+    if (count >= 1000) return "отз."
+    const lastDigit = count % 10
+    const lastTwoDigits = count % 100
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return "отзывов"
+    if (lastDigit === 1) return "отзыв"
+    if (lastDigit >= 2 && lastDigit <= 4) return "отзыва"
+    return "отзывов"
+  }
+
+  const reviewLabel = getReviewLabel(reviewCount)
   const reviewCountDisplay = reviewCount >= 1000 
     ? `${(reviewCount / 1000).toFixed(1)}k` 
     : reviewCount.toString()
@@ -24,8 +34,8 @@ export default function ProductRating({
         {rating > 0 ? rating.toFixed(1) : "0"}
       </span>
       {reviewCount > 0 && (
-        <span className="text-[10px] text-gray-400 truncate max-w-[60px]">
-          ({reviewCountDisplay} {reviewLabel})
+        <span className="text-[10px] text-gray-500">
+          {reviewCountDisplay} {reviewLabel}
         </span>
       )}
     </div>

@@ -17,6 +17,8 @@ import { useTranslations } from "next-intl"
 
 import ProductRating from "./rating"
 import InstallmentPrice from "./installment"
+import QuickOrderModal from "../quick-order-modal"
+import { useAuth } from "@lib/context/auth-context"
 
 export default function ProductPreviewContent({
   product,
@@ -31,7 +33,10 @@ export default function ProductPreviewContent({
   const router = useRouter()
   const t = useTranslations("product")
   const { toggleFavorite, isFavorite } = useFavorites()
+  const { authStatus } = useAuth()
   const [isAdding, setIsAdding] = useState(false)
+  const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false)
+  const [isQuickOrdering, setIsQuickOrdering] = useState(false)
 
   const { cheapestPrice } = getProductPrice({
     product: product,
@@ -79,6 +84,41 @@ export default function ProductPreviewContent({
     e.preventDefault()
     e.stopPropagation()
     toggleFavorite(product.id)
+  }
+
+  const handleQuickOrder = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (product.variants?.length !== 1 || !product.variants[0].id) {
+      router.push(`/${localeStr}/${countryCodeStr}/products/${product.handle}`)
+      return
+    }
+
+    if (!isInStock) return
+
+    setIsQuickOrdering(true)
+    try {
+      if (authStatus === "authorized") {
+        // Logged in user: Add to cart and redirect to checkout
+        const res = await addToCart({
+          variantId: product.variants[0].id,
+          quantity: 1,
+          countryCode: countryCodeStr,
+        })
+        if (res.success) {
+          router.push(`/${localeStr}/${countryCodeStr}/checkout`)
+        }
+      } else {
+        // Guest user: Open Quick Order Modal
+        setIsQuickOrderOpen(true)
+      }
+    } catch (err) {
+      console.error(err)
+      setIsQuickOrderOpen(true) // Fallback to modal on error
+    } finally {
+      setIsQuickOrdering(false)
+    }
   }
 
   return (
@@ -158,8 +198,22 @@ export default function ProductPreviewContent({
             </div>
           </div>
 
-          {/* Add to Cart Button - Persistent at bottom */}
-          <div className="mt-auto">
+          {/* Quick Order and Add to Cart Buttons - Persistent at bottom */}
+          <div className="mt-auto space-y-2">
+            {/* Quick Order Button */}
+            <Button
+              onClick={handleQuickOrder}
+              disabled={isQuickOrdering || !isInStock || product.variants?.length !== 1}
+              className={`w-full h-8 sm:h-9 text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                isInStock && product.variants?.length === 1
+                  ? "bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-200" 
+                  : "bg-gray-50 text-gray-400 cursor-not-allowed border-2 border-gray-200"
+              }`}
+            >
+              {isQuickOrdering ? <Spinner /> : t("quick_order")}
+            </Button>
+
+            {/* Add to Cart Button */}
             <Button
               onClick={handleAddToCart}
               disabled={isAdding || !isInStock}
@@ -174,8 +228,15 @@ export default function ProductPreviewContent({
           </div>
         </div>
       </div>
-    </div>
-  )
-}
+
+      {/* Quick Order Modal */}
+      {product.variants?.length === 1 && product.variants[0] && (
+        <QuickOrderModal
+          product={product}
+          variant={product.variants[0]}
+          isOpen={isQuickOrderOpen}
+          onClose={() => setIsQuickOrderOpen(false)}
+        />
+      )}
 
 
