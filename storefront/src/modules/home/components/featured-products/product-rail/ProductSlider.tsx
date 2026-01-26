@@ -320,38 +320,6 @@ export default function ProductSlider({ products, totalCount, collectionId }: Pr
           )
         })}
       </div>
-
-      {/* Left Arrow - Mobile/Tablet only (desktop uses header arrows) */}
-      <button
-        onClick={() => scroll("left")}
-        className={`absolute left-0 top-1/2 z-10 w-8 h-8 sm:hidden rounded-full bg-white/90 shadow-md border border-gray-200 flex items-center justify-center transition-all duration-200 ${
-          canScrollLeft 
-            ? "opacity-100" 
-            : "opacity-0 pointer-events-none"
-        }`}
-        style={{ transform: "translate(-30%, -50%)" }}
-        aria-label="Прокрутить влево"
-      >
-        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      {/* Right Arrow - Mobile/Tablet only (desktop uses header arrows) */}
-      <button
-        onClick={() => scroll("right")}
-        className={`absolute right-0 top-1/2 z-10 w-8 h-8 sm:hidden rounded-full bg-white/90 shadow-md border border-gray-200 flex items-center justify-center transition-all duration-200 ${
-          canScrollRight 
-            ? "opacity-100" 
-            : "opacity-0 pointer-events-none"
-        }`}
-        style={{ transform: "translate(30%, -50%)" }}
-        aria-label="Прокрутить вправо"
-      >
-        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
     </div>
   )
 }
