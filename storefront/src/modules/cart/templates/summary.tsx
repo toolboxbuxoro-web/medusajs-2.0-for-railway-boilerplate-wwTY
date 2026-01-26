@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@medusajs/ui"
-import DiscountCode from "@modules/checkout/components/discount-code"
 import { HttpTypes } from "@medusajs/types"
 import { convertToLocale } from "@lib/util/money"
 import { useTranslations } from 'next-intl'
@@ -22,12 +21,15 @@ const Summary = ({ cart, selectedItemIds, handleCheckout, isProcessing }: Summar
   const allSelected = cart?.items?.length === selectedItems.length
 
   const totalItems = selectedItems.reduce((acc, item) => acc + item.quantity, 0)
-  const totalWeight = selectedItems.reduce((acc, item) => {
+  // Calculate total weight in grams, then convert to kg and round up
+  const totalWeightGrams = selectedItems.reduce((acc, item) => {
     const weight = item.variant?.product?.metadata?.weight 
       ? Number(item.variant.product.metadata.weight) * item.quantity 
       : 0
     return acc + weight
   }, 0)
+  // Convert grams to kg and round up (500g = 1kg, 4500g = 5kg)
+  const totalWeightKg = totalWeightGrams > 0 ? Math.ceil(totalWeightGrams / 1000) : 0
 
   // Calculate financial totals
   // If all selected, use cart totals (which include shipping, tax, etc correctly)
@@ -60,17 +62,11 @@ const Summary = ({ cart, selectedItemIds, handleCheckout, isProcessing }: Summar
 
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-
-        {/* Promo Code */}
-        <div className="pb-4 border-b border-gray-200">
-        <DiscountCode cart={cart as any} />
-        </div>
-
         {/* Order Breakdown */}
         <div className="pb-4 border-b border-gray-200 space-y-2">
           <div className="flex justify-between text-xs sm:text-sm">
             <span className="text-gray-600">
-              {t("items_count_weight", { count: totalItems, weight: totalWeight.toFixed(2) })}
+              {t("items_count_weight", { count: totalItems, weight: totalWeightKg })}
             </span>
             <span className="font-semibold">
               {convertToLocale({
