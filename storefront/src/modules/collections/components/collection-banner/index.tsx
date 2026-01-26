@@ -33,8 +33,8 @@ export default function CollectionBanner({ collection, locale }: CollectionBanne
 
   return (
     <div className="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl sm:shadow-2xl mb-2 sm:mb-4 lg:mb-6">
-      {/* Responsive aspect ratio: 2:1 on mobile, 3:1 on larger screens */}
-      <div className="relative w-full aspect-[2/1] sm:aspect-[2.5/1] lg:aspect-[3/1]">
+      {/* Aspect ratio: 6:1 */}
+      <div className="relative w-full aspect-[6/1]">
         {/* Background image */}
         <Image 
           src={banner.image_url} 
