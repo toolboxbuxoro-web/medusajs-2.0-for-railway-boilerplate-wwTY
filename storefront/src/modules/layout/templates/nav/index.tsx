@@ -15,6 +15,8 @@ import CatalogDropdown from "@modules/layout/components/catalog-dropdown"
 import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
 import FavoritesButton from "@modules/layout/components/favorites-button"
 import Headset from "@modules/common/icons/headset"
+import Phone from "@modules/common/icons/phone"
+import PickupPointSelector from "@modules/layout/components/pickup-point-selector"
 import { type Locale } from '../../../../i18n'
 import { getLocalizedField } from "@lib/util/localization"
 import TopBar from "@modules/layout/components/top-bar"
@@ -48,8 +50,15 @@ export default async function Nav({ locale }: NavProps) {
             <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-2 sm:gap-3 lg:gap-6 transition-all duration-300 navbar-header-content relative">
             {/* Left section: Mobile Menu + Logo (desktop) */}
             <div className="flex items-center gap-2 sm:gap-3 sm:flex-shrink-0">
-              {/* Mobile Menu Button */}
-              <MobileMenu categories={mainCategories} locale={locale} />
+              {/* Mobile Menu Button - Desktop only */}
+              <div className="hidden sm:block">
+                <MobileMenu categories={mainCategories} locale={locale} />
+              </div>
+              
+              {/* Pickup Point Selector - Mobile only (left) */}
+              <div className="sm:hidden">
+                <PickupPointSelector locale={locale} />
+              </div>
               
               {/* Logo - Desktop only (left aligned) */}
               <div className="hidden sm:flex items-center flex-shrink-0">
@@ -99,11 +108,15 @@ export default async function Nav({ locale }: NavProps) {
 
             {/* Icons - Compact on mobile, right aligned */}
             <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 navbar-icons ml-auto sm:ml-0">
-              {/* Delivery Link - Desktop */}
+              {/* Phone Button - Mobile only (right) */}
+              <a
+                href="tel:+998880811112"
+                className="sm:hidden p-2 hover:text-red-600 transition-colors flex items-center justify-center"
+                title={t('call') || "Позвонить"}
+              >
+                <Phone size="20" />
+              </a>
 
-
-              {/* Search icon for mobile - REMOVED since we have full bar */}
-              
               {/* Language Switcher - Hidden on mobile */}
               <div className="hidden md:block">
                 <LanguageSwitcher />

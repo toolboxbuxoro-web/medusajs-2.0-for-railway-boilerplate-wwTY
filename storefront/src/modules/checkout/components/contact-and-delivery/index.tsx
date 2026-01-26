@@ -9,6 +9,8 @@ import { useTranslations } from "next-intl"
 import { convertToLocale } from "@lib/util/money"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePickupPoint } from "@lib/context/pickup-point-context"
+import { useParams } from "next/navigation"
 
 // Types for BTS data
 interface BtsPoint {
@@ -107,6 +109,9 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const params = useParams()
+  const locale = (params.locale as string) || "ru"
+  const { selectedPoint: globalPickupPoint, setSelectedPoint: setGlobalPickupPoint } = usePickupPoint()
 
   const isCompleted =
     !!cart?.shipping_address?.address_1 &&
@@ -228,27 +233,17 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       }
     }
 
-    // BTS Selection Logic: Prioritize LocalStorage (Top Bar) -> Then Cart Metadata
+    // BTS Selection Logic: Prioritize Global Context -> Then Cart Metadata
     let regionId = ""
     let pointId = ""
 
-    // Try LocalStorage first
-    try {
-      const savedRegion = localStorage.getItem('bts_selected_region')
-      const savedPoint = localStorage.getItem('bts_selected_point')
-      if (savedRegion) {
-        const region = JSON.parse(savedRegion)
-        if (region?.id) regionId = region.id
-      }
-      if (savedPoint) {
-        const point = JSON.parse(savedPoint)
-        if (point?.id) pointId = point.id
-      }
-    } catch (e) {
-      console.error("Failed to parse saved BTS selection", e)
+    // Try Global Context first (from header selector)
+    if (globalPickupPoint) {
+      regionId = globalPickupPoint.regionId
+      pointId = globalPickupPoint.id
     }
 
-    // If no LocalStorage, try Cart Metadata
+    // If no Global Context, try Cart Metadata
     if (!regionId && cart) {
       const btsDelivery = (cart.metadata?.bts_delivery as any) 
       if (btsDelivery?.region_id) {
@@ -263,7 +258,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     if (regionId) setSelectedRegionId(regionId)
     if (pointId) setSelectedPointId(pointId)
 
-  }, [cart, customer, isLoggedIn])
+  }, [cart, customer, isLoggedIn, globalPickupPoint])
 
   // Save to localStorage whenever fields change
   useEffect(() => {
@@ -727,12 +722,11 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   onValueChange={(val) => {
                     setSelectedRegionId(val)
                     setSelectedPointId("")
-                    // Sync to LocalStorage (Top Bar)
+                    // Sync to Global Context
                     if (btsData) {
                       const region = btsData.regions.find(r => r.id === val)
                       if (region) {
-                         localStorage.setItem('bts_selected_region', JSON.stringify({ id: region.id, name: region.nameRu })) // Use nameRu to match CitySelector expectation if possible
-                         localStorage.removeItem('bts_selected_point')
+                        setGlobalPickupPoint(null) // Clear point when region changes
                       }
                     }
                   }}
@@ -760,11 +754,17 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                     <Select 
                       onValueChange={(val) => {
                         setSelectedPointId(val)
-                        // Sync to LocalStorage (Top Bar)
-                        if (selectedRegionPoints) {
+                        // Sync to Global Context
+                        if (selectedRegionPoints && selectedRegion) {
                           const point = selectedRegionPoints.find(p => p.id === val)
-                          if (point) {
-                             localStorage.setItem('bts_selected_point', JSON.stringify(point))
+                          if (point && selectedRegion) {
+                            setGlobalPickupPoint({
+                              id: point.id,
+                              name: point.name,
+                              address: point.address,
+                              regionId: selectedRegion.id,
+                              regionName: locale === "ru" ? selectedRegion.nameRu : selectedRegion.name,
+                            })
                           }
                         }
                       }} 

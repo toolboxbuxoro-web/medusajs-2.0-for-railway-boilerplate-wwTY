@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { locales, type Locale, defaultLocale } from '../../i18n';
 import { FavoritesProvider } from "@lib/context/favorites-context"
 import { AuthProvider } from "@lib/context/auth-context"
+import { PickupPointProvider } from "@lib/context/pickup-point-context"
 
 import { Metadata } from 'next';
 
@@ -53,7 +54,9 @@ export default async function LocaleLayout(props: {
         <NextIntlClientProvider locale={validLocale} messages={messages}>
           <AuthProvider initialCustomer={customer}>
             <FavoritesProvider>
-              <main className="relative">{children}</main>
+              <PickupPointProvider>
+                <main className="relative">{children}</main>
+              </PickupPointProvider>
             </FavoritesProvider>
           </AuthProvider>
         </NextIntlClientProvider>

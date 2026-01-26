@@ -1,7 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { getLocalizedField } from "@lib/util/localization"
@@ -104,26 +103,10 @@ const CategoryItem = ({
 export default function CategoriesPageClient({ categories, locale }: CategoriesPageProps) {
   const router = useRouter()
   const t = useTranslations("nav")
-  const [searchQuery, setSearchQuery] = useState("")
-
-  const filteredCategories = categories.filter((cat: any) => {
-    if (!cat.is_internal) {
-      const name = getLocalizedField(cat, "name", locale) || cat.name
-      return name.toLowerCase().includes(searchQuery.toLowerCase())
-    }
-    return false
-  })
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-    }
-  }
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Заголовок */}
+      {/* Заголовок - без поиска, только навигация */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between px-4 h-14">
           {/* Кнопка назад */}
@@ -171,45 +154,13 @@ export default function CategoriesPageClient({ categories, locale }: CategoriesP
             </svg>
           </button>
         </div>
-
-        {/* Поле поиска */}
-        <div className="px-4 pb-3">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("search_placeholder") || "Всё для стройки, ремонта, производства"}
-              className="w-full h-10 px-4 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-600 transition-colors"
-              aria-label="Search"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          </form>
-        </div>
       </div>
 
       {/* Список категорий */}
       <div className="bg-white">
-        {filteredCategories.length > 0 ? (
+        {categories.length > 0 ? (
           <div className="divide-y divide-gray-200">
-            {filteredCategories.map((category: HttpTypes.StoreProductCategory) => (
+            {categories.map((category: HttpTypes.StoreProductCategory) => (
               <CategoryItem key={category.id} category={category} locale={locale} />
             ))}
           </div>

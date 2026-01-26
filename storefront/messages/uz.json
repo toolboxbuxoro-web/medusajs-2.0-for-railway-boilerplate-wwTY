@@ -27,7 +27,9 @@
     "select_city": "Shaharni tanlang",
     "select_delivery_point": "Olib ketish punktini tanlang",
     "region": "Viloyat",
-    "pickup_point": "Olib ketish punkti"
+    "pickup_point": "Olib ketish punkti",
+    "select_pickup_point": "Olib ketish punktini tanlang",
+    "call": "Qo'ng'iroq qilish"
   },
   "hero": {
     "brand": "INTERSKOL",
