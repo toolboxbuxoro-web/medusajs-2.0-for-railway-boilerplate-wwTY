@@ -48,10 +48,40 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
       hydrationAbortRef.current = null
     }
 
+    // Update current query ref BEFORE checking loading state
+    // This ensures new queries can always proceed even if previous is still loading
+    const previousQuery = currentQueryRef.current
+    const queryChanged = previousQuery !== query
+    
+    // If query changed, always allow new search (cancel previous)
+    if (queryChanged && isNewSearch) {
+      console.log(`[useInfiniteSearch] Query changed: "${previousQuery}" -> "${query}", resetting state`)
+      // Force reset loading state for new query
+      loadingRef.current = false
+      // Cancel any pending operations (already done above, but ensure it's done)
+      if (hydrationAbortRef.current) {
+        hydrationAbortRef.current()
+        hydrationAbortRef.current = null
+      }
+      // Immediately clear items to show loading state
+      setState(prev => ({
+        ...prev,
+        items: [],
+        status: "loading",
+        query: query,
+        page: 0,
+        hasMore: true,
+        totalHits: 0
+      }))
+    }
+    
+    // Only block if it's the same query and we're loading more pages
+    if (loadingRef.current && !isNewSearch && !queryChanged) {
+      return
+    }
+    
     // Update current query ref
     currentQueryRef.current = query
-
-    if (loadingRef.current && !isNewSearch) return
     loadingRef.current = true
 
     setState(prev => ({ 
@@ -69,6 +99,7 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
       // Check if query changed during fetch (race condition prevention)
       if (currentQueryRef.current !== query) {
         console.log("[useInfiniteSearch] Query changed during fetch, ignoring results")
+        loadingRef.current = false // Reset loading when ignoring results
         return
       }
 
@@ -174,10 +205,17 @@ export function useInfiniteSearch(initialQuery: string = "", countryCode: string
           if (prev.query !== query) return prev
           return { ...prev, status: "error", hasMore: false }
         })
+      } else {
+        // Query changed during error, ensure loading is reset
+        console.log("[useInfiniteSearch] Query changed during error, resetting loading")
       }
     } finally {
-      // Only reset loading if this is still the current query
+      // Always reset loading - if query changed, new query will handle it
+      // But we need to reset to allow new queries to proceed
       if (currentQueryRef.current === query) {
+        loadingRef.current = false
+      } else {
+        // Query changed, ensure loading is reset for new query
         loadingRef.current = false
       }
     }
