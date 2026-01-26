@@ -6,30 +6,83 @@ export const GET = async (
   res: MedusaResponse
 ) => {
   try {
+    // Check environment variables
+    if (!MEILISEARCH_HOST || !MEILISEARCH_ADMIN_KEY) {
+      console.error('[Search API] Missing Meilisearch configuration:', {
+        hasHost: !!MEILISEARCH_HOST,
+        hasKey: !!MEILISEARCH_ADMIN_KEY
+      })
+      return res.status(503).json({
+        hits: [],
+        estimatedTotalHits: 0,
+        query: req.query.q || "",
+        mode: 'search',
+        error: "Search service not configured"
+      })
+    }
+
     const { q, limit = "20", offset = "0", locale = "ru" } = req.query as Record<string, any>
     const query = (q || "").trim()
     const searchLocale = (locale || "ru").toLowerCase()
     
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Search API] Query received:', { raw: q, processed: query, locale: searchLocale })
-    }
+    // Log all requests (not just in development)
+    console.log('[Search API] Query received:', { 
+      raw: q, 
+      processed: query, 
+      locale: searchLocale,
+      limit,
+      offset
+    })
     
     // Limits
     const limitNum = Math.min(parseInt(limit) || 20, 100)
     const offsetNum = parseInt(offset) || 0
 
     const fetchMeili = async (searchParams: any) => {
-      const response = await fetch(`${MEILISEARCH_HOST}/indexes/products/search`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${MEILISEARCH_ADMIN_KEY}`,
-        },
-        body: JSON.stringify(searchParams),
-      })
-      if (!response.ok) return null
-      return response.json()
+      const url = `${MEILISEARCH_HOST}/indexes/products/search`
+      
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${MEILISEARCH_ADMIN_KEY}`,
+          },
+          body: JSON.stringify(searchParams),
+        })
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('[Search API] Meilisearch error:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: url,
+            requestBody: JSON.stringify(searchParams),
+            errorResponse: errorText
+          })
+          return null
+        }
+        
+        const data = await response.json()
+        
+        // Log successful responses
+        console.log('[Search API] Meilisearch success:', {
+          hits: data?.hits?.length || 0,
+          total: data?.estimatedTotalHits || 0,
+          query: searchParams.q || '(empty)',
+          processingTimeMs: data?.processingTimeMs
+        })
+        
+        return data
+      } catch (fetchError: any) {
+        console.error('[Search API] Meilisearch fetch failed:', {
+          url: url,
+          error: fetchError.message,
+          stack: fetchError.stack,
+          requestBody: JSON.stringify(searchParams)
+        })
+        return null
+      }
     }
 
     let mode: 'search' | 'recommendation' | 'fallback' = 'search'
@@ -84,21 +137,16 @@ export const GET = async (
       // which already includes both title and title_uz
     }
 
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Search API] Meilisearch request:', JSON.stringify(searchBody, null, 2))
-    }
+    // Log request details
+    console.log('[Search API] Meilisearch request:', {
+      mode: mode,
+      query: searchBody.q || '(empty)',
+      limit: searchBody.limit,
+      offset: searchBody.offset,
+      filter: searchBody.filter
+    })
 
     let results = await fetchMeili(searchBody)
-    
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Search API] Meilisearch response:', { 
-        hits: results?.hits?.length || 0, 
-        total: results?.estimatedTotalHits || 0,
-        query: searchBody.q 
-      })
-    }
 
     // 3. Fallback Mode (If search hits are 0 AND it's the first page)
     if (mode === 'search' && (!results || results.hits.length === 0) && offsetNum === 0) {
@@ -113,12 +161,13 @@ export const GET = async (
     }
 
     if (!results) {
-      return res.json({
+      console.error('[Search API] No results from Meilisearch, returning error response')
+      return res.status(503).json({
         hits: [],
         estimatedTotalHits: 0,
         query: query,
         mode: mode,
-        error: "Search provider error"
+        error: "Search service unavailable"
       })
     }
 
@@ -161,9 +210,14 @@ export const GET = async (
       requiresHydration: true
     })
 
-  } catch (error) {
-    console.error('[Search API] Critical error:', error)
-    res.json({
+  } catch (error: any) {
+    console.error('[Search API] Critical error:', {
+      message: error?.message,
+      stack: error?.stack,
+      query: req.query.q || "",
+      error: error
+    })
+    return res.status(500).json({
       hits: [],
       estimatedTotalHits: 0,
       query: req.query.q || "",
