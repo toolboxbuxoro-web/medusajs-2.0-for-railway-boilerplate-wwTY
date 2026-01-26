@@ -37,36 +37,41 @@ const HomeIcon = ({ size = "24", color = "currentColor" }: { size?: string; colo
 function CartButtonMobile() {
   const pathname = usePathname()
   const t = useTranslations('nav')
-  const [hasItems, setHasItems] = useState(false)
+  const [itemCount, setItemCount] = useState(0)
 
   useEffect(() => {
-    // Проверяем наличие корзины через cookie
-    const checkCart = () => {
-      const cookies = document.cookie.split(';')
-      const cartCookie = cookies.find(c => c.trim().startsWith('_medusa_cart_id'))
-      // Если есть cookie корзины, предполагаем что могут быть товары
-      // Точное количество требует серверного запроса, поэтому показываем badge если есть корзина
-      setHasItems(!!cartCookie)
+    // Функция для получения количества товаров в корзине
+    const fetchCartCount = async () => {
+      try {
+        const response = await fetch('/api/cart/count')
+        if (response.ok) {
+          const data = await response.json()
+          setItemCount(data.count || 0)
+        }
+      } catch (error) {
+        console.error('Error fetching cart count:', error)
+        setItemCount(0)
+      }
     }
 
-    checkCart()
+    fetchCartCount()
     
     // Обновляем при изменении пути (после добавления в корзину)
-    const interval = setInterval(checkCart, 1000)
+    const interval = setInterval(fetchCartCount, 2000)
     
     // Слушаем события обновления корзины
     const handleCartUpdate = () => {
-      checkCart()
+      fetchCartCount()
       // Также обновляем через небольшую задержку для надежности
-      setTimeout(checkCart, 500)
+      setTimeout(fetchCartCount, 500)
     }
     window.addEventListener('cart-updated', handleCartUpdate)
-    window.addEventListener('focus', checkCart) // Обновляем при возврате на вкладку
+    window.addEventListener('focus', fetchCartCount) // Обновляем при возврате на вкладку
     
     return () => {
       clearInterval(interval)
       window.removeEventListener('cart-updated', handleCartUpdate)
-      window.removeEventListener('focus', checkCart)
+      window.removeEventListener('focus', fetchCartCount)
     }
   }, [pathname])
 
@@ -81,8 +86,9 @@ function CartButtonMobile() {
       title={t('cart')}
     >
       <Cart size="22" />
-      {hasItems && (
-        <span className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[8px] rounded-full w-2 h-2 flex items-center justify-center font-bold border-2 border-white">
+      {itemCount > 0 && (
+        <span className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold border-2 border-white">
+          {itemCount > 99 ? '99+' : itemCount}
         </span>
       )}
       <span className="text-[9px] font-medium leading-tight">{t('cart')}</span>
