@@ -86,8 +86,8 @@ export default function CategoryTemplate({
         </nav>
 
         {/* Compact Category Header */}
-        <div className="mb-4 lg:mb-6">
-          <div className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden bg-white shadow-md border border-gray-100 group">
+        <div className="mb-3 lg:mb-6">
+          <div className="relative w-full rounded-lg sm:rounded-2xl overflow-hidden bg-white shadow-md border border-gray-100 group">
             {(() => {
               const categoryImageUrl = category.metadata?.image_url as string | undefined
               const categoryIconUrl = category.metadata?.icon_url as string | undefined
@@ -109,31 +109,31 @@ export default function CategoryTemplate({
                     </div>
                   )}
 
-                  <div className="relative z-10 flex flex-col sm:flex-row items-center w-full gap-2 sm:gap-3 p-3 sm:p-4 lg:p-5">
+                  <div className="relative z-10 flex flex-row items-center w-full gap-2 sm:gap-3 p-2 sm:p-4 lg:p-5">
                     {/* Square Image Container */}
-                    <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 shrink-0">
+                    <div className="relative w-10 h-10 sm:w-16 sm:h-16 lg:w-20 lg:h-20 shrink-0">
                       <div className="relative w-full h-full rounded-lg sm:rounded-xl overflow-hidden shadow-md ring-2 ring-white/60 group-hover:ring-white transition-all duration-300">
                         <Image
                           src={displayImageUrl}
                           alt={getLocalizedField(category, "name", locale) || category.name}
                           fill
                           priority
-                          sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
-                          className={categoryIconUrl ? "object-contain bg-white p-1.5 transition-transform duration-500 group-hover:scale-105" : "object-contain bg-white p-1.5 transition-transform duration-500 group-hover:scale-105"}
+                          sizes="(max-width: 640px) 40px, (max-width: 1024px) 64px, 80px"
+                          className={categoryIconUrl ? "object-contain bg-white p-1 transition-transform duration-500 group-hover:scale-105" : "object-contain bg-white p-1 transition-transform duration-500 group-hover:scale-105"}
                         />
                       </div>
                     </div>
 
                   {/* Text Content */}
-                  <div className="flex-1 text-center sm:text-left">
+                  <div className="flex-1 text-left">
                     <h1 
-                      className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1 tracking-tight" 
+                      className="text-base sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-0 sm:mb-1 tracking-tight" 
                       data-testid="category-page-title"
                     >
                       {getLocalizedField(category, "name", locale) || category.name}
                     </h1>
                     {(getLocalizedField(category, "description", locale) || category.description) && (
-                      <p className="text-gray-500 text-xs sm:text-sm max-w-xl leading-relaxed line-clamp-2">
+                      <p className="text-gray-500 text-xs sm:text-sm max-w-xl leading-relaxed line-clamp-2 hidden sm:block">
                         {(getLocalizedField(category, "description", locale) || category.description) as string}
                       </p>
                     )}
