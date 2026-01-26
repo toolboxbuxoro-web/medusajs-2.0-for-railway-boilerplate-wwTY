@@ -46,16 +46,16 @@ export default async function Nav({ locale }: NavProps) {
           className="bg-white fixed w-full z-[100] border-b border-gray-200 shadow-sm transition-all duration-200 navbar-header top-0 md:top-[var(--topbar-height,36px)]"
         >
           <div className="flex flex-col w-full">
-            <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-2 sm:gap-3 lg:gap-6 transition-all duration-300 navbar-header-content relative">
+            <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-1 sm:gap-3 lg:gap-6 transition-all duration-300 navbar-header-content relative px-2 sm:px-0">
             {/* Left section: Mobile Menu + Logo (desktop) */}
-            <div className="flex items-center gap-2 sm:gap-3 sm:flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-3 sm:flex-shrink-0 flex-1 sm:flex-none min-w-0">
               {/* Mobile Menu Button - Desktop only */}
               <div className="hidden sm:block">
                 <MobileMenu categories={mainCategories} locale={locale} />
               </div>
               
               {/* Pickup Point Selector - Mobile only (left) */}
-              <div className="sm:hidden">
+              <div className="sm:hidden flex-shrink-0 z-20 relative">
                 <PickupPointSelector locale={locale} />
               </div>
               
@@ -79,10 +79,10 @@ export default async function Nav({ locale }: NavProps) {
             </div>
 
             {/* Logo - Mobile only (centered) */}
-            <div className="sm:hidden absolute left-1/2 -translate-x-1/2 z-10">
+            <div className="sm:hidden absolute left-1/2 -translate-x-1/2 z-10 pointer-events-none">
               <LocalizedClientLink
                 href="/"
-                className="flex items-center"
+                className="flex items-center pointer-events-auto"
                 data-testid="nav-store-link-mobile"
               >
                 <Image
@@ -90,7 +90,7 @@ export default async function Nav({ locale }: NavProps) {
                   alt={t("logo")}
                   width={100}
                   height={30}
-                  className="w-[90px] h-auto object-contain"
+                  className="w-[70px] xs:w-[80px] sm:w-[90px] h-auto object-contain"
                   priority
                 />
               </LocalizedClientLink>
