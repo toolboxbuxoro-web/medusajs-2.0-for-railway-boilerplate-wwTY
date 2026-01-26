@@ -127,7 +127,7 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
           {/* Horizontal Scroll Container - один ряд маленьких карточек */}
           <div
             ref={desktopScrollRef}
-            className="flex gap-3 overflow-x-auto scroll-smooth pb-2 no-scrollbar"
+            className="flex gap-3 overflow-x-auto scroll-smooth pb-2 pr-4 no-scrollbar"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -180,7 +180,7 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
         <div className="sm:hidden -mx-4 px-4">
           <div
             ref={mobileScrollRef}
-            className="flex gap-2 overflow-x-auto scroll-smooth pb-2 no-scrollbar"
+            className="flex gap-2 overflow-x-auto scroll-smooth pb-2 pr-4 no-scrollbar"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -191,14 +191,17 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
             {/* Group categories into chunks of 6 (2 rows × 3 cols) */}
             {Array.from({ length: Math.ceil(categories.length / 6) }).map((_, groupIndex) => {
               const groupCategories = categories.slice(groupIndex * 6, (groupIndex + 1) * 6)
+              const isLastGroup = groupIndex === Math.ceil(categories.length / 6) - 1
+              const isFullGroup = groupCategories.length === 6
               
               return (
                 <div
                   key={groupIndex}
-                  className="grid grid-cols-3 grid-rows-2 gap-2 flex-shrink-0"
+                  className={`grid grid-cols-3 gap-2 flex-shrink-0 ${isFullGroup ? 'grid-rows-2' : ''}`}
                   style={{
-                    width: 'calc(100vw - 2rem)',
-                    scrollSnapAlign: "start",
+                    width: isFullGroup ? 'calc(100vw - 2rem)' : 'auto',
+                    minWidth: isFullGroup ? 'calc(100vw - 2rem)' : undefined,
+                    scrollSnapAlign: isLastGroup && !isFullGroup ? "end" : "start",
                   }}
                 >
                   {groupCategories.map((category) => {
@@ -237,11 +240,6 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
                       </LocalizedClientLink>
                     )
                   })}
-                  
-                  {/* Fill empty slots if less than 6 categories in last group */}
-                  {groupCategories.length < 6 && Array.from({ length: 6 - groupCategories.length }).map((_, emptyIndex) => (
-                    <div key={`empty-${emptyIndex}`} className="opacity-0 pointer-events-none" />
-                  ))}
                 </div>
               )
             })}
