@@ -94,8 +94,12 @@ export const GET = async (
     const primaryTitleField = isUzbekLocale ? 'title_uz' : 'title'
     
     // Prepare filters
-    // We explicitly filter for published products only
-    const filters: string[] = ["status = published"]
+    // NOTE: Temporarily removed status filter until Meilisearch settings are updated
+    // After settings update, status will be added to filterableAttributes
+    // For now, we rely on the fact that only published products should be indexed
+    const filters: string[] = []
+    // TODO: Re-enable after Meilisearch settings are updated:
+    // const filters: string[] = ["status = published"]
 
     let searchBody: any = {
       limit: limitNum,

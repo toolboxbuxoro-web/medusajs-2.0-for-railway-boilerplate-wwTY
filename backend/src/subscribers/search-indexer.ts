@@ -34,6 +34,28 @@ export default async function searchIndexer({
       return
     }
 
+    // Only index published products
+    if (product.status !== 'published') {
+      console.log(`[SearchIndexer] Skipping product ${data.id} - status is ${product.status}, not published`)
+      // If product was previously indexed but is now unpublished, remove it from index
+      if (product.status === 'draft' || product.status === 'proposed' || product.status === 'rejected') {
+        try {
+          const deleteResponse = await fetch(`${MEILISEARCH_HOST}/indexes/products/documents/${product.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${MEILISEARCH_ADMIN_KEY}`,
+            },
+          })
+          if (deleteResponse.ok) {
+            console.log(`[SearchIndexer] Removed unpublished product ${product.id} from index`)
+          }
+        } catch (deleteError: any) {
+          console.warn(`[SearchIndexer] Failed to remove unpublished product from index:`, deleteError.message)
+        }
+      }
+      return
+    }
+
     // 2. Transform to search document
     const document = transformProductToSearchDocument(product)
 
