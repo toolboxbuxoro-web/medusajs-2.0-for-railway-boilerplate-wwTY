@@ -41,7 +41,8 @@ async function updateSettings() {
             "variants.id",
             "variants.sku",
             "price",
-            "in_stock"
+            "in_stock",
+            "status"
         ],
         // Attributes we can sort by
         sortableAttributes: [

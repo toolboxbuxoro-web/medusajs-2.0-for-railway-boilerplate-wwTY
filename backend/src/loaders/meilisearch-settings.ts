@@ -42,7 +42,8 @@ export async function ensureProductSearchSchema() {
         "categories.id",
         "brand",
         "in_stock",
-        "price"
+        "price",
+        "status"
       ],
       sortableAttributes: [
         "created_at",
