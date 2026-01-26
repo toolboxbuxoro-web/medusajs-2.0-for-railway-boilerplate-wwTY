@@ -1,12 +1,9 @@
 import Image from "next/image"
-import { Suspense } from "react"
 
 import { listRegions } from "@lib/data/regions"
 import { getCategoriesList } from "@lib/data/categories"
 import { HttpTypes, StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import CartButton from "@modules/layout/components/cart-button"
-import User from "@modules/common/icons/user"
 import Menu from "@modules/common/icons/menu"
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from "@modules/common/components/language-switcher"
@@ -126,45 +123,6 @@ export default async function Nav({ locale }: NavProps) {
               <div className="hidden md:flex items-center justify-center">
                 <FavoritesButton label={t('favorites')} />
               </div>
-
-              {/* Cart */}
-              <Suspense
-                fallback={
-                  <LocalizedClientLink
-                    className="p-1.5 sm:p-2 hover:text-red-600 transition-colors relative flex items-center justify-center sm:flex-col sm:gap-1"
-                    href="/cart"
-                    data-testid="nav-cart-link"
-                    title={t('cart')}
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="sm:w-[22px] sm:h-[22px]"
-                    >
-                      <path d="M9 2L7 6m6-4l2 4M3 6h18l-2 12H5L3 6z" />
-                      <circle cx="7" cy="20" r="1" />
-                      <circle cx="17" cy="20" r="1" />
-                    </svg>
-                    <span className="text-[10px] font-medium hidden sm:block">{t('cart')}</span>
-                  </LocalizedClientLink>
-                }
-              >
-                <CartButton />
-              </Suspense>
-              
-              {/* Account */}
-              <LocalizedClientLink
-                href="/account/orders"
-                className="p-1.5 sm:p-2 hover:text-red-600 transition-colors flex items-center justify-center sm:flex-col sm:gap-1"
-                title={t('account')}
-              >
-                <User size="20" className="sm:w-[22px] sm:h-[22px]" />
-                <span className="text-[10px] font-medium hidden sm:block">{t('account')}</span>
-              </LocalizedClientLink>
             </div>
           </div>
           
