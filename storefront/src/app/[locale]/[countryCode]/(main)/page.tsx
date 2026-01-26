@@ -3,14 +3,18 @@ export const dynamic = 'force-dynamic'
 
 import FeaturedProducts from "@modules/home/components/featured-products"
 import BannerSlider from "@modules/home/components/banner-slider"
+import CategoryGridSlider from "@modules/home/components/category-grid-slider"
 import ValuePropositionBlocks from "@modules/home/components/value-proposition-blocks"
 import PartnersBrandBlock from "@modules/home/components/partners"
 import InfiniteCollections from "@modules/home/components/infinite-collections"
+import ScrollToTopButton from "@modules/home/components/scroll-to-top-button"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
+import { getCategoriesList } from "@lib/data/categories"
 import { getTranslations } from 'next-intl/server'
 import { listBanners } from "@lib/data/banners"
 import { generateAlternates } from "@lib/util/seo"
+import { HttpTypes } from "@medusajs/types"
 
 type Props = {
   params: Promise<{ countryCode: string; locale: string }>
@@ -39,6 +43,10 @@ export default async function Home(props: Props) {
 
   const tHome = await getTranslations({ locale, namespace: 'home' })
   const banners = await listBanners()
+  
+  // Get parent categories for the grid slider
+  const { product_categories } = await getCategoriesList(0, 50)
+  const parentCategories = (product_categories?.filter((cat: HttpTypes.StoreProductCategory) => !cat.parent_category) || []) as HttpTypes.StoreProductCategory[]
 
   const safeCollections = collections || []
 
@@ -47,6 +55,11 @@ export default async function Home(props: Props) {
       <div className="content-container px-4 md:px-6 pt-2 sm:pt-4">
         <BannerSlider slides={banners} />
       </div>
+
+      {/* Category Grid Slider */}
+      {parentCategories.length > 0 && (
+        <CategoryGridSlider categories={parentCategories} locale={locale} />
+      )}
 
       <div className="bg-white py-8 sm:py-12">
         <div className="content-container">
@@ -99,6 +112,9 @@ export default async function Home(props: Props) {
           ) : null}
         </div>
       </div>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </>
   )
 }

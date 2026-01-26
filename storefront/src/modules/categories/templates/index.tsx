@@ -36,19 +36,7 @@ export default function CategoryTemplate({
     const imageUrl = c.metadata?.image_url as string | undefined
     const iconUrl = c.metadata?.icon_url as string | undefined
 
-    if (imageUrl) {
-      return (
-        <div className="relative w-full aspect-square shrink-0">
-          <Image
-            src={imageUrl}
-            alt={getLocalizedField(c, "name", locale) || c.name}
-            fill
-            sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 250px"
-            className="object-cover"
-          />
-        </div>
-      )
-    }
+    // Приоритет: сначала icon_url, потом image_url
     if (iconUrl) {
       return (
         <div className="relative w-full h-full shrink-0">
@@ -58,6 +46,19 @@ export default function CategoryTemplate({
             fill
             sizes="64px"
             className="object-contain"
+          />
+        </div>
+      )
+    }
+    if (imageUrl) {
+      return (
+        <div className="relative w-full aspect-square shrink-0">
+          <Image
+            src={imageUrl}
+            alt={getLocalizedField(c, "name", locale) || c.name}
+            fill
+            sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 250px"
+            className="object-cover"
           />
         </div>
       )
@@ -101,34 +102,41 @@ export default function CategoryTemplate({
         {/* Compact Category Header */}
         <div className="mb-6 lg:mb-10">
           <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-lg border border-gray-100 group">
-            {typeof category.metadata?.image_url === "string" ? (
-              <>
-                {/* Ambient Background (Blurred Image) */}
-                <div className="absolute inset-0 z-0">
-                  <Image
-                    src={category.metadata.image_url as string}
-                    alt=""
-                    fill
-                    className="object-cover blur-3xl scale-125 opacity-15"
-                    aria-hidden="true"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/30 to-gray-50/40" />
-                </div>
-
-                <div className="relative z-10 flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-6 p-4 sm:p-6 lg:p-8">
-                  {/* Square Image Container */}
-                  <div className="relative w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 shrink-0">
-                    <div className="relative w-full h-full rounded-xl sm:rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/60 group-hover:ring-white transition-all duration-300">
+            {(() => {
+              const categoryImageUrl = category.metadata?.image_url as string | undefined
+              const categoryIconUrl = category.metadata?.icon_url as string | undefined
+              const displayImageUrl = categoryIconUrl || categoryImageUrl
+              
+              return displayImageUrl ? (
+                <>
+                  {/* Ambient Background (Blurred Image) - используем image_url если есть, иначе icon_url */}
+                  {categoryImageUrl && (
+                    <div className="absolute inset-0 z-0">
                       <Image
-                        src={category.metadata.image_url as string}
-                        alt={getLocalizedField(category, "name", locale) || category.name}
+                        src={categoryImageUrl}
+                        alt=""
                         fill
-                        priority
-                        sizes="(max-width: 640px) 80px, (max-width: 1024px) 112px, 144px"
-                        className="object-contain bg-white p-2 transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover blur-3xl scale-125 opacity-15"
+                        aria-hidden="true"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/30 to-gray-50/40" />
                     </div>
-                  </div>
+                  )}
+
+                  <div className="relative z-10 flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-6 p-4 sm:p-6 lg:p-8">
+                    {/* Square Image Container */}
+                    <div className="relative w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 shrink-0">
+                      <div className="relative w-full h-full rounded-xl sm:rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/60 group-hover:ring-white transition-all duration-300">
+                        <Image
+                          src={displayImageUrl}
+                          alt={getLocalizedField(category, "name", locale) || category.name}
+                          fill
+                          priority
+                          sizes="(max-width: 640px) 80px, (max-width: 1024px) 112px, 144px"
+                          className={categoryIconUrl ? "object-contain bg-white p-2 transition-transform duration-500 group-hover:scale-105" : "object-contain bg-white p-2 transition-transform duration-500 group-hover:scale-105"}
+                        />
+                      </div>
+                    </div>
 
                   {/* Text Content */}
                   <div className="flex-1 text-center sm:text-left">
@@ -146,7 +154,8 @@ export default function CategoryTemplate({
                   </div>
                 </div>
               </>
-            ) : (
+              ) : null
+            })() || (
               <div className="flex items-center gap-3 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
                   <span className="text-lg sm:text-xl">📦</span>

@@ -48,21 +48,22 @@ export default async function CategoryCarousel() {
               className="card-interactive p-4 lg:p-6 text-center group"
             >
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-red-50 transition-colors relative overflow-hidden">
-                {category.metadata?.image_url ? (
-                  <Image
-                    src={category.metadata.image_url as string}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    fill
-                    sizes="(max-width: 640px) 48px, 64px"
-                  />
-                ) : category.metadata?.icon_url ? (
+                {/* Приоритет: сначала icon_url, потом image_url */}
+                {category.metadata?.icon_url ? (
                   <Image
                     src={category.metadata.icon_url as string}
                     alt=""
                     className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 object-contain"
                     width={40}
                     height={40}
+                  />
+                ) : category.metadata?.image_url ? (
+                  <Image
+                    src={category.metadata.image_url as string}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 640px) 48px, 64px"
                   />
                 ) : (
                   <span className="text-xl sm:text-2xl lg:text-3xl">
@@ -85,21 +86,22 @@ export default async function CategoryCarousel() {
                 className="flex-shrink-0 w-24 card-interactive p-3 text-center group"
               >
                 <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-red-50 transition-colors relative overflow-hidden">
-                  {category.metadata?.image_url ? (
-                    <Image
-                      src={category.metadata.image_url as string}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      fill
-                      sizes="48px"
-                    />
-                  ) : category.metadata?.icon_url ? (
+                  {/* Приоритет: сначала icon_url, потом image_url */}
+                  {category.metadata?.icon_url ? (
                     <Image
                       src={category.metadata.icon_url as string}
                       alt=""
                       className="w-8 h-8 object-contain"
                       width={32}
                       height={32}
+                    />
+                  ) : category.metadata?.image_url ? (
+                    <Image
+                      src={category.metadata.image_url as string}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      fill
+                      sizes="48px"
                     />
                   ) : (
                     <span className="text-xl">

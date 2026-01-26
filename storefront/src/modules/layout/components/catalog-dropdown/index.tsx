@@ -253,21 +253,22 @@ export default function CatalogDropdown({ categories, locale, isUnified = false 
                       <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
                         <div className="flex items-center gap-6">
                            <div className="relative w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shadow-sm overflow-hidden shrink-0">
-                              {activeCategory.metadata?.image_url ? (
-                                <Image 
-                                  src={activeCategory.metadata.image_url as string} 
-                                  alt="" 
-                                  fill 
-                                  sizes="64px"
-                                  className="object-cover" 
-                                />
-                              ) : activeCategory.metadata?.icon_url ? (
+                              {/* Приоритет: сначала icon_url, потом image_url */}
+                              {activeCategory.metadata?.icon_url ? (
                                 <Image 
                                   src={activeCategory.metadata.icon_url as string} 
                                   alt="" 
                                   fill 
                                   sizes="64px"
                                   className="object-contain p-0" 
+                                />
+                              ) : activeCategory.metadata?.image_url ? (
+                                <Image 
+                                  src={activeCategory.metadata.image_url as string} 
+                                  alt="" 
+                                  fill 
+                                  sizes="64px"
+                                  className="object-cover" 
                                 />
                               ) : (
                                 <span className="text-5xl">{getCategoryIcon(activeCategory.handle || "")}</span>
@@ -299,21 +300,22 @@ export default function CatalogDropdown({ categories, locale, isUnified = false 
                            >
                               <div className="flex items-start justify-between mb-3">
                                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors overflow-hidden shrink-0 shadow-sm">
-                                    {child.metadata?.image_url ? (
-                                      <Image 
-                                        src={child.metadata.image_url as string} 
-                                        alt="" 
-                                        fill 
-                                        sizes="(max-width: 640px) 64px, 80px"
-                                        className="object-cover" 
-                                      />
-                                    ) : child.metadata?.icon_url ? (
+                                    {/* Приоритет: сначала icon_url, потом image_url */}
+                                    {child.metadata?.icon_url ? (
                                       <Image 
                                         src={child.metadata.icon_url as string} 
                                         alt="" 
                                         fill 
                                         sizes="(max-width: 640px) 64px, 80px"
                                         className="object-contain p-0" 
+                                      />
+                                    ) : child.metadata?.image_url ? (
+                                      <Image 
+                                        src={child.metadata.image_url as string} 
+                                        alt="" 
+                                        fill 
+                                        sizes="(max-width: 640px) 64px, 80px"
+                                        className="object-cover" 
                                       />
                                     ) : (
                                       <span className="text-4xl sm:text-5xl">{getCategoryIcon(child.handle || "")}</span>
