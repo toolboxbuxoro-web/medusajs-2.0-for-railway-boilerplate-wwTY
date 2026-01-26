@@ -32,7 +32,7 @@ const categoryIcons: Record<string, string> = {
 }
 
 export default function CategoryGridSlider({ categories, locale }: CategoryGridSliderProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const desktopScrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
@@ -52,7 +52,7 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
   }, [])
 
   const checkScrollButtons = useCallback(() => {
-    const container = scrollContainerRef.current
+    const container = desktopScrollRef.current
     if (!container) return
     
     const { scrollLeft, scrollWidth, clientWidth } = container
@@ -61,38 +61,27 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
   }, [])
 
   const scroll = useCallback((direction: "left" | "right") => {
-    const container = scrollContainerRef.current
+    const container = desktopScrollRef.current
     if (!container) return
     
-    if (isMobile) {
-      // На мобильной версии прокручиваем по 1 карточке
-      const cardWidth = container.clientWidth * 0.9 // 90% ширины экрана
-      const gap = 12 // gap-3 = 12px
-      const scrollAmount = cardWidth + gap
-      
-      container.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth"
-      })
-    } else {
-      // На ПК прокручиваем по 2 колонки (ширина одной карточки + gap)
-      // Вычисляем ширину одной карточки: (clientWidth - gap) / 2
-      const gap = 16 // gap-4 = 16px
-      const cardWidth = (container.clientWidth - gap) / 2
-      const scrollAmount = cardWidth + gap // ширина одной колонки (карточка + gap)
-      
-      container.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth"
-      })
-    }
-  }, [isMobile])
+    // На ПК прокручиваем по несколько маленьких карточек
+    const cardWidth = 160 // фиксированная ширина карточки на ПК
+    const gap = 12 // gap-3 = 12px
+    const scrollAmount = (cardWidth + gap) * 3 // прокручиваем по 3 карточки
+    
+    container.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth"
+    })
+  }, [])
 
-  // Проверка возможности прокрутки при загрузке и изменении размера
+  // Проверка возможности прокрутки при загрузке и изменении размера (только для десктопа)
   useEffect(() => {
+    if (isMobile) return
+    
     checkScrollButtons()
     
-    const container = scrollContainerRef.current
+    const container = desktopScrollRef.current
     if (!container) return
 
     container.addEventListener('scroll', checkScrollButtons)
@@ -102,16 +91,16 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
       container.removeEventListener('scroll', checkScrollButtons)
       window.removeEventListener('resize', checkScrollButtons)
     }
-  }, [checkScrollButtons, categories.length])
+  }, [checkScrollButtons, categories.length, isMobile])
 
   if (!categories || categories.length === 0) {
     return null
   }
 
   return (
-    <div className="bg-white py-6 sm:py-8">
+    <div className="bg-white py-4 sm:py-6">
       <div className="content-container relative">
-        {/* Desktop: Grid with arrows */}
+        {/* Desktop: Horizontal scroll with small cards in one row */}
         <div className="hidden sm:block relative">
           {/* Navigation Arrows - Desktop only */}
           {canScrollLeft && (
@@ -134,76 +123,18 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
             </button>
           )}
 
-          {/* Scrollable Grid Container - ограниченная высота для показа 4 рядов (8 карточек) */}
+          {/* Horizontal Scroll Container - один ряд маленьких карточек */}
           <div
-            ref={scrollContainerRef}
-            className="overflow-x-auto overflow-y-hidden scroll-smooth pb-2 no-scrollbar"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              WebkitOverflowScrolling: "touch",
-              maxHeight: 'calc((200px + 1rem) * 4)', // 4 ряда карточек по 200px + gap
-            }}
-            onScroll={checkScrollButtons}
-          >
-            {/* Grid wrapper - 2 columns */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 min-w-max">
-              {categories.map((category) => {
-                const categoryName = getLocalizedField(category, "name", locale) || category.name
-                const imageUrl = category.metadata?.image_url as string | undefined
-
-                return (
-                  <LocalizedClientLink
-                    key={category.id}
-                    href={`/categories/${category.handle}`}
-                    className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col h-[200px]"
-                  >
-                    {/* Category Name - Top */}
-                    <div className="px-3 py-2.5 sm:px-4 sm:py-3 border-b border-gray-100 flex-shrink-0">
-                      <h3 className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 group-hover:text-red-600 transition-colors">
-                        {categoryName}
-                      </h3>
-                    </div>
-
-                    {/* Category Image - Bottom, 1:1 aspect ratio */}
-                    <div className="relative w-full flex-1 bg-gray-50 overflow-hidden">
-                      {imageUrl ? (
-                        <Image
-                          src={imageUrl}
-                          alt={categoryName}
-                          fill
-                          sizes="(max-width: 640px) 150px, 200px"
-                          className="object-cover rounded-b-xl"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-3xl sm:text-4xl">
-                            {categoryIcons[category.handle || ''] || categoryIcons.default}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </LocalizedClientLink>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile: Single column with swipe (no arrows) */}
-        <div className="sm:hidden -mx-4 px-4">
-          <div
-            ref={scrollContainerRef}
+            ref={desktopScrollRef}
             className="flex gap-3 overflow-x-auto scroll-smooth pb-2 no-scrollbar"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
               WebkitOverflowScrolling: "touch",
-              scrollSnapType: "x mandatory",
             }}
             onScroll={checkScrollButtons}
           >
-            {categories.map((category, index) => {
+            {categories.map((category) => {
               const categoryName = getLocalizedField(category, "name", locale) || category.name
               const imageUrl = category.metadata?.image_url as string | undefined
 
@@ -211,35 +142,76 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
                 <LocalizedClientLink
                   key={category.id}
                   href={`/categories/${category.handle}`}
-                  className="flex-shrink-0 w-[90%] group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col"
-                  style={{
-                    scrollSnapAlign: "start",
-                  }}
+                  className="flex-shrink-0 w-40 group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col"
                 >
-                  {/* Category Name - Top */}
-                  <div className="px-3 py-2.5 border-b border-gray-100">
-                    <h3 className="font-semibold text-sm text-gray-900 line-clamp-2 group-hover:text-red-600 transition-colors">
-                      {categoryName}
-                    </h3>
-                  </div>
-
-                  {/* Category Image - Bottom, 1:1 aspect ratio */}
+                  {/* Category Image - Top, 1:1 aspect ratio */}
                   <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
                         alt={categoryName}
                         fill
-                        sizes="90vw"
-                        className="object-cover rounded-b-xl"
+                        sizes="160px"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-4xl">
+                        <span className="text-2xl">
                           {categoryIcons[category.handle || ''] || categoryIcons.default}
                         </span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Category Name - Bottom */}
+                  <div className="px-2 py-2 border-t border-gray-100">
+                    <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 text-center group-hover:text-red-600 transition-colors">
+                      {categoryName}
+                    </h3>
+                  </div>
+                </LocalizedClientLink>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Mobile: 2 columns grid */}
+        <div className="sm:hidden -mx-4 px-4">
+          <div className="grid grid-cols-2 gap-3">
+            {categories.map((category) => {
+              const categoryName = getLocalizedField(category, "name", locale) || category.name
+              const imageUrl = category.metadata?.image_url as string | undefined
+
+              return (
+                <LocalizedClientLink
+                  key={category.id}
+                  href={`/categories/${category.handle}`}
+                  className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col"
+                >
+                  {/* Category Image - Top, 1:1 aspect ratio */}
+                  <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={categoryName}
+                        fill
+                        sizes="50vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-3xl">
+                          {categoryIcons[category.handle || ''] || categoryIcons.default}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Category Name - Bottom */}
+                  <div className="px-2 py-2 border-t border-gray-100">
+                    <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 text-center group-hover:text-red-600 transition-colors">
+                      {categoryName}
+                    </h3>
                   </div>
                 </LocalizedClientLink>
               )
