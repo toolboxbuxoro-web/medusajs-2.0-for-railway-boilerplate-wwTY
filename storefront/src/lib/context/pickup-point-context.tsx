@@ -17,28 +17,66 @@ interface PickupPointContextType {
 
 const PickupPointContext = createContext<PickupPointContextType | undefined>(undefined)
 
+// Custom event name for same-tab synchronization
+const PICKUP_POINT_CHANGED_EVENT = "pickup-point-changed"
+
 export function PickupPointProvider({ children }: { children: ReactNode }) {
   const [selectedPoint, setSelectedPointState] = useState<PickupPoint | null>(null)
 
-  // Загружаем из localStorage при монтировании
+  // Load from localStorage on mount and listen for changes
   useEffect(() => {
-    const saved = localStorage.getItem("selected_pickup_point")
-    if (saved) {
+    const loadFromStorage = () => {
       try {
-        setSelectedPointState(JSON.parse(saved))
+        const saved = localStorage.getItem("selected_pickup_point")
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          setSelectedPointState(parsed)
+        } else {
+          setSelectedPointState(null)
+        }
       } catch (e) {
         console.error("Failed to load pickup point from localStorage", e)
+        setSelectedPointState(null)
       }
+    }
+
+    // Load initially
+    loadFromStorage()
+
+    // Listen for storage changes (cross-tab synchronization)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "selected_pickup_point") {
+        loadFromStorage()
+      }
+    }
+
+    // Listen for custom events (same-tab synchronization)
+    const handleCustomEvent = () => {
+      loadFromStorage()
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener(PICKUP_POINT_CHANGED_EVENT, handleCustomEvent)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener(PICKUP_POINT_CHANGED_EVENT, handleCustomEvent)
     }
   }, [])
 
-  // Сохраняем в localStorage при изменении
+  // Save to localStorage and notify other components
   const setSelectedPoint = (point: PickupPoint | null) => {
     setSelectedPointState(point)
-    if (point) {
-      localStorage.setItem("selected_pickup_point", JSON.stringify(point))
-    } else {
-      localStorage.removeItem("selected_pickup_point")
+    try {
+      if (point) {
+        localStorage.setItem("selected_pickup_point", JSON.stringify(point))
+      } else {
+        localStorage.removeItem("selected_pickup_point")
+      }
+      // Dispatch custom event for same-tab synchronization
+      window.dispatchEvent(new CustomEvent(PICKUP_POINT_CHANGED_EVENT))
+    } catch (e) {
+      console.error("Failed to save pickup point to localStorage", e)
     }
   }
 

@@ -2,12 +2,15 @@
 
 import { useState, useEffect, createContext, useContext } from "react"
 import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Phone } from "@medusajs/icons"
-import CitySelector from "@modules/layout/components/city-selector"
+import PickupPointSelector from "@modules/layout/components/pickup-point-selector"
 
 export default function TopBar() {
   const t = useTranslations('nav')
+  const params = useParams()
+  const locale = params.locale as string
   const [isAtTop, setIsAtTop] = useState(true)
   
   useEffect(() => {
@@ -38,9 +41,9 @@ export default function TopBar() {
       isAtTop ? 'h-9 opacity-100' : 'h-0 opacity-0'
     }`}>
       <div className="content-container flex items-center justify-between h-9">
-        {/* Left side - City selector */}
+        {/* Left side - Pickup point selector */}
         <div className="flex items-center gap-6">
-          <CitySelector />
+          <PickupPointSelector locale={locale} variant="desktop" />
         </div>
         
         {/* Center - Links */}
