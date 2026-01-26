@@ -146,7 +146,7 @@ export default function MobileBottomBar({ categories, locale }: MobileBottomBarP
   const catalogIsActive = pathname?.startsWith('/store') || pathname?.startsWith('/categories')
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[99] bg-white border-t border-gray-200 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[101] bg-white border-t border-gray-200 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex items-center justify-around h-16 px-1">
         {/* Главное */}
         <div className="flex-1 flex justify-center">

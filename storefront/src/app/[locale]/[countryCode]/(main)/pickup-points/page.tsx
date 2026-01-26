@@ -119,15 +119,22 @@ export default function PickupPointsPage() {
   }
 
   const handleSelectPoint = (region: BtsRegion, point: BtsPoint) => {
-    setSelectedPoint({
+    const pickupPointData = {
       id: point.id,
       name: point.name,
       address: point.address,
       regionId: region.id,
       regionName: locale === "ru" ? region.nameRu : region.name,
-    })
+    }
+    
+    console.log("[PickupPointsPage] Saving pickup point:", pickupPointData)
+    setSelectedPoint(pickupPointData)
     setSearchQuery("") // Clear search when selecting point
-    router.back()
+    
+    // Small delay to ensure context is updated before navigation
+    setTimeout(() => {
+      router.back()
+    }, 100)
   }
 
   const currentTitle = selectedRegion

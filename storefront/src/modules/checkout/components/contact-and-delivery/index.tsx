@@ -232,8 +232,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         setLastName(cart.shipping_address.last_name || "")
       }
     }
+  }, [cart, customer, isLoggedIn])
 
-    // BTS Selection Logic: Prioritize Global Context -> Then Cart Metadata
+  // BTS Selection Logic: Prioritize Global Context -> Then localStorage -> Then Cart Metadata
+  useEffect(() => {
     let regionId = ""
     let pointId = ""
 
@@ -241,9 +243,33 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     if (globalPickupPoint) {
       regionId = globalPickupPoint.regionId
       pointId = globalPickupPoint.id
+      console.log("[ContactAndDelivery] Using globalPickupPoint:", {
+        regionId,
+        pointId,
+        name: globalPickupPoint.name
+      })
+    } else {
+      // Fallback: try localStorage directly (in case context hasn't loaded yet)
+      try {
+        const saved = localStorage.getItem("selected_pickup_point")
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed?.regionId) {
+            regionId = parsed.regionId
+            pointId = parsed.id
+            console.log("[ContactAndDelivery] Using localStorage fallback:", {
+              regionId,
+              pointId,
+              name: parsed.name
+            })
+          }
+        }
+      } catch (e) {
+        console.error("[ContactAndDelivery] Failed to read from localStorage:", e)
+      }
     }
 
-    // If no Global Context, try Cart Metadata
+    // If still no data, try Cart Metadata
     if (!regionId && cart) {
       const btsDelivery = (cart.metadata?.bts_delivery as any) 
       if (btsDelivery?.region_id) {
@@ -251,14 +277,34 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
         if (btsDelivery.point_id) {
           pointId = btsDelivery.point_id
         }
+        console.log("[ContactAndDelivery] Using cart metadata:", {
+          regionId,
+          pointId
+        })
       }
     }
 
-    // Apply selection
-    if (regionId) setSelectedRegionId(regionId)
-    if (pointId) setSelectedPointId(pointId)
+    // Apply selection - only update if values changed
+    if (regionId && regionId !== selectedRegionId) {
+      console.log("[ContactAndDelivery] Setting regionId:", regionId)
+      setSelectedRegionId(regionId)
+    }
+    if (pointId && pointId !== selectedPointId) {
+      console.log("[ContactAndDelivery] Setting pointId:", pointId)
+      setSelectedPointId(pointId)
+    }
+    
+    // Clear selection if no data found and we have previous selection
+    if (!regionId && selectedRegionId) {
+      console.log("[ContactAndDelivery] Clearing regionId")
+      setSelectedRegionId("")
+    }
+    if (!pointId && selectedPointId) {
+      console.log("[ContactAndDelivery] Clearing pointId")
+      setSelectedPointId("")
+    }
 
-  }, [cart, customer, isLoggedIn, globalPickupPoint])
+  }, [cart, globalPickupPoint, selectedRegionId, selectedPointId])
 
   // Save to localStorage whenever fields change
   useEffect(() => {

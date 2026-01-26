@@ -134,16 +134,21 @@ export default function CitySelector() {
     setSelectedPoint(point)
     
     // Save to global context (this is what checkout uses)
-    setGlobalPickupPoint({
+    const pickupPointData = {
       id: point.id,
       name: point.name,
       address: point.address,
       regionId: selectedRegion.id,
       regionName: locale === "ru" ? (selectedRegion.nameRu || selectedRegion.name) : selectedRegion.name,
-    })
+    }
     
-    // Keep localStorage for backward compatibility
+    console.log("[CitySelector] Saving pickup point to context:", pickupPointData)
+    setGlobalPickupPoint(pickupPointData)
+    
+    // Keep localStorage for backward compatibility (save full data structure)
     localStorage.setItem('bts_selected_point', JSON.stringify(point))
+    localStorage.setItem('bts_selected_region', JSON.stringify(selectedRegion))
+    
     setIsOpen(false)
   }
 
