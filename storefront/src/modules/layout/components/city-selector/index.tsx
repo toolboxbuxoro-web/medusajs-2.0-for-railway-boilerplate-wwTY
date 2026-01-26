@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import { MapPin, ChevronDown, XMark } from "@medusajs/icons"
+import { usePickupPoint } from "@lib/context/pickup-point-context"
 
 interface BtsRegion {
   id: string
   name: string
   nameRu?: string
+  points?: BtsPoint[]
 }
 
 interface BtsPoint {
@@ -18,28 +21,47 @@ interface BtsPoint {
 
 export default function CitySelector() {
   const t = useTranslations('nav')
+  const params = useParams()
+  const locale = (params.locale as string) || "ru"
+  const { selectedPoint: globalPickupPoint, setSelectedPoint: setGlobalPickupPoint } = usePickupPoint()
   const [isOpen, setIsOpen] = useState(false)
   const [regions, setRegions] = useState<BtsRegion[]>([])
   const [points, setPoints] = useState<BtsPoint[]>([])
   const [selectedRegion, setSelectedRegion] = useState<BtsRegion | null>(null)
   const [selectedPoint, setSelectedPoint] = useState<BtsPoint | null>(null)
   
-  // Load saved selection from localStorage
+  // Load saved selection from global context first, then fallback to localStorage
   useEffect(() => {
-    const savedRegion = localStorage.getItem('bts_selected_region')
-    const savedPoint = localStorage.getItem('bts_selected_point')
-    
-    if (savedRegion) {
-      try {
-        setSelectedRegion(JSON.parse(savedRegion))
-      } catch (e) {}
+    // Prioritize global context
+    if (globalPickupPoint) {
+      // Find region by regionId
+      const region = regions.find(r => r.id === globalPickupPoint.regionId)
+      if (region) {
+        setSelectedRegion(region)
+        const point = region.points?.find(p => p.id === globalPickupPoint.id)
+        if (point) {
+          setSelectedPoint(point)
+        }
+      }
+    } else {
+      // Fallback to localStorage (for backward compatibility)
+      const savedRegion = localStorage.getItem('bts_selected_region')
+      const savedPoint = localStorage.getItem('bts_selected_point')
+      
+      if (savedRegion) {
+        try {
+          const region = JSON.parse(savedRegion)
+          setSelectedRegion(region)
+        } catch (e) {}
+      }
+      if (savedPoint) {
+        try {
+          const point = JSON.parse(savedPoint)
+          setSelectedPoint(point)
+        } catch (e) {}
+      }
     }
-    if (savedPoint) {
-      try {
-        setSelectedPoint(JSON.parse(savedPoint))
-      } catch (e) {}
-    }
-  }, [])
+  }, [globalPickupPoint, regions])
 
   // Fetch BTS data (regions and points)
   useEffect(() => {
@@ -82,23 +104,59 @@ export default function CitySelector() {
     }
   }, [selectedRegion, regions])
 
+  // When opening modal, ensure region is selected if there's a global pickup point
+  useEffect(() => {
+    if (isOpen && globalPickupPoint && regions.length > 0) {
+      const region = regions.find(r => r.id === globalPickupPoint.regionId)
+      if (region && !selectedRegion) {
+        setSelectedRegion(region)
+        const point = region.points?.find(p => p.id === globalPickupPoint.id)
+        if (point) {
+          setSelectedPoint(point)
+        }
+      }
+    }
+  }, [isOpen, globalPickupPoint, regions, selectedRegion])
+
   const handleRegionSelect = (region: BtsRegion) => {
     setSelectedRegion(region)
     setSelectedPoint(null)
+    // Clear global context when region changes (point must be reselected)
+    setGlobalPickupPoint(null)
+    // Keep localStorage for backward compatibility
     localStorage.setItem('bts_selected_region', JSON.stringify(region))
     localStorage.removeItem('bts_selected_point')
   }
 
   const handlePointSelect = (point: BtsPoint) => {
+    if (!selectedRegion) return
+    
     setSelectedPoint(point)
+    
+    // Save to global context (this is what checkout uses)
+    setGlobalPickupPoint({
+      id: point.id,
+      name: point.name,
+      address: point.address,
+      regionId: selectedRegion.id,
+      regionName: locale === "ru" ? (selectedRegion.nameRu || selectedRegion.name) : selectedRegion.name,
+    })
+    
+    // Keep localStorage for backward compatibility
     localStorage.setItem('bts_selected_point', JSON.stringify(point))
     setIsOpen(false)
   }
 
-  const displayText = selectedPoint 
-    ? selectedPoint.name 
-    : selectedRegion 
-      ? (selectedRegion.nameRu || selectedRegion.name)
+  // Use global context for display if available, otherwise use local state
+  const displayPoint = globalPickupPoint || selectedPoint
+  const displayRegion = displayPoint 
+    ? regions.find(r => r.id === (globalPickupPoint?.regionId || selectedRegion?.id))
+    : selectedRegion
+    
+  const displayText = displayPoint 
+    ? displayPoint.name 
+    : displayRegion 
+      ? (displayRegion.nameRu || displayRegion.name)
       : t('select_city') || 'Выберите город'
 
   return (
@@ -139,43 +197,52 @@ export default function CitySelector() {
                   {t('region') || 'Регион'}
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {regions.map((region) => (
-                    <button
-                      key={region.id}
-                      onClick={() => handleRegionSelect(region)}
-                      className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                        selectedRegion?.id === region.id
-                          ? 'bg-red-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {region.nameRu || region.name}
-                    </button>
-                  ))}
+                  {regions.map((region) => {
+                    // Check if this region is selected (either from global context or local state)
+                    const isSelected = 
+                      (globalPickupPoint && globalPickupPoint.regionId === region.id) ||
+                      (selectedRegion && selectedRegion.id === region.id)
+                    return (
+                      <button
+                        key={region.id}
+                        onClick={() => handleRegionSelect(region)}
+                        className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                          isSelected
+                            ? 'bg-red-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {region.nameRu || region.name}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
               {/* Points */}
-              {selectedRegion && (
+              {(selectedRegion || (globalPickupPoint && regions.find(r => r.id === globalPickupPoint.regionId))) && (
                 <div>
                   <h3 className="text-sm font-semibold text-gray-600 mb-2">
                     {t('pickup_point') || 'Пункт выдачи'}
                   </h3>
                   <div className="space-y-2">
-                    {points.map((point) => (
-                      <button
-                        key={point.id}
-                        onClick={() => handlePointSelect(point)}
-                        className={`w-full text-left p-3 rounded-lg transition-colors ${
-                          selectedPoint?.id === point.id
-                            ? 'bg-red-50 border-2 border-red-600'
-                            : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                        }`}
-                      >
-                        <div className="font-medium text-gray-900">{point.name}</div>
-                        <div className="text-sm text-gray-500">{point.address}</div>
-                      </button>
-                    ))}
+                    {points.map((point) => {
+                      const isSelected = globalPickupPoint?.id === point.id || selectedPoint?.id === point.id
+                      return (
+                        <button
+                          key={point.id}
+                          onClick={() => handlePointSelect(point)}
+                          className={`w-full text-left p-3 rounded-lg transition-colors ${
+                            isSelected
+                              ? 'bg-red-50 border-2 border-red-600'
+                              : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900">{point.name}</div>
+                          <div className="text-sm text-gray-500">{point.address}</div>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               )}
