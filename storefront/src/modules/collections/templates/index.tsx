@@ -26,14 +26,25 @@ export default function CollectionTemplate({
   const localeStr = locale
 
     const metadata = collection.metadata as Record<string, any> | undefined
-    const isColored = Boolean(metadata?.colored_background)
-    const bgColor = (metadata?.background_color as string) || "#ffffff"
+    const bgColor = metadata?.bg_color as string | undefined
+    const bgImage = metadata?.bg_image as string | undefined
     const textColor = (metadata?.text_color as string) || "#111827"
+    const hasCustomBg = !!(bgColor || bgImage)
+
+    // Computed styles for background
+    const containerStyle: React.CSSProperties = hasCustomBg ? {
+      backgroundColor: bgColor,
+      backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      color: textColor,
+      minHeight: '100vh'
+    } : {}
 
     return (
         <div 
           className="w-full"
-          style={isColored ? { backgroundColor: bgColor, color: textColor, minHeight: '100vh' } : undefined}
+          style={containerStyle}
         >
           <div className="flex flex-col small:flex-row small:items-start py-6 content-container">
             <RefinementList sortBy={sort} />
@@ -42,7 +53,7 @@ export default function CollectionTemplate({
               <CollectionBanner collection={collection} locale={localeStr} />
               
               <div className="mb-8 text-2xl-semi">
-                <h1 style={isColored ? { color: textColor } : undefined}>
+                <h1 style={hasCustomBg ? { color: textColor } : undefined}>
                   {getLocalizedField(collection, "title", localeStr)}
                 </h1>
               </div>

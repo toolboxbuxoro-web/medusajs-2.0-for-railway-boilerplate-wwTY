@@ -11,6 +11,8 @@ import MobileMenu from "@modules/layout/components/mobile-menu"
 import CatalogDropdown from "@modules/layout/components/catalog-dropdown"
 import ScrollAwareNav from "@modules/layout/components/scroll-aware-nav"
 import FavoritesButton from "@modules/layout/components/favorites-button"
+import CartButton from "@modules/layout/components/cart-button"
+import ProfileButton from "@modules/layout/components/profile-button"
 import Headset from "@modules/common/icons/headset"
 import Phone from "@modules/common/icons/phone"
 import PickupPointSelector from "@modules/layout/components/pickup-point-selector"
@@ -119,9 +121,11 @@ export default async function Nav({ locale }: NavProps) {
                 <LanguageSwitcher />
               </div>
               
-              {/* Favorites - Hidden on mobile */}
-              <div className="hidden md:flex items-center justify-center">
+              {/* Favorites, Cart, Profile - PC version only */}
+              <div className="hidden md:flex items-center justify-center gap-1 md:gap-2">
                 <FavoritesButton label={t('favorites')} />
+                <CartButton />
+                <ProfileButton label={t('account')} />
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import FeaturedProducts from "@modules/home/components/featured-products"
 import BannerSlider from "@modules/home/components/banner-slider"
 import ValuePropositionBlocks from "@modules/home/components/value-proposition-blocks"
 import PartnersBrandBlock from "@modules/home/components/partners"
+import InfiniteCollections from "@modules/home/components/infinite-collections"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import { getTranslations } from 'next-intl/server'
@@ -79,22 +80,23 @@ export default async function Home(props: Props) {
       {/* 4. Partners / Brands Block */}
       <PartnersBrandBlock />
 
-      {/* 5. Remaining Collections */}
+      {/* 5. Remaining Collections with Infinite Scroll */}
       <div className="bg-white py-8 sm:py-12">
         <div className="content-container">
-          <div className="flex flex-col gap-y-8">
-            {safeCollections.length > 2 && region ? (
-              <ul className="flex flex-col gap-y-8 list-none p-0 m-0">
-                <FeaturedProducts collections={safeCollections.slice(2)} region={region} locale={locale} offset={2} />
-              </ul>
-            ) : safeCollections.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-gray-500 italic">
-                  {tHome('products_loading')}
-                </p>
-              </div>
-            )}
-          </div>
+          {region ? (
+            <InfiniteCollections
+              initialOffset={2}
+              countryCode={countryCode}
+              locale={locale}
+              region={region}
+            />
+          ) : safeCollections.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-500 italic">
+                {tHome('products_loading')}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </>
