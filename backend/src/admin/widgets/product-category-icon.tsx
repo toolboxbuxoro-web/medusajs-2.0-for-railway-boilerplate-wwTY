@@ -33,6 +33,21 @@ const ProductCategoryIconWidget = ({ data }: WidgetProps) => {
 
   const hasIcon = useMemo(() => Boolean(iconUrl), [iconUrl])
 
+  // Получить актуальные метаданные категории с сервера
+  const fetchCurrentMetadata = async (): Promise<Record<string, any>> => {
+    const res = await fetch(`/admin/product-categories/${data.id}`, {
+      method: "GET",
+      credentials: "include",
+    })
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch category metadata")
+    }
+
+    const category = await res.json()
+    return category.product_category?.metadata || {}
+  }
+
   const uploadAndSave = async () => {
     if (!file) {
       setMessage({ type: "error", text: "Выберите файл (PNG/SVG/WebP)" })
@@ -64,13 +79,16 @@ const ProductCategoryIconWidget = ({ data }: WidgetProps) => {
         throw new Error("Upload did not return a URL")
       }
 
+      // Получить актуальные метаданные перед сохранением
+      const currentMetadata = await fetchCurrentMetadata()
+
       const saveRes = await fetch(`/admin/product-categories/${data.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           metadata: {
-            ...data.metadata,
+            ...currentMetadata,
             icon_url: url,
           },
         }),
@@ -96,13 +114,16 @@ const ProductCategoryIconWidget = ({ data }: WidgetProps) => {
     setMessage(null)
 
     try {
+      // Получить актуальные метаданные перед сохранением
+      const currentMetadata = await fetchCurrentMetadata()
+
       const saveRes = await fetch(`/admin/product-categories/${data.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           metadata: {
-            ...data.metadata,
+            ...currentMetadata,
             icon_url: null,
           },
         }),
