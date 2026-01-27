@@ -462,7 +462,7 @@ export class BtsApiService {
       const token = await this.getToken()
       this.logger.info("[BTS API] Fetching cities list")
 
-      const resp = await this.fetchWithRetry(`${this.baseUrl}?r=v1/directory/cities`, {
+      const resp = await this.fetchWithRetry(`${this.baseUrl}?r=directory/cities`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
