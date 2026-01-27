@@ -69,9 +69,8 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         
         {/* Price */}
         <div className="flex items-center justify-between w-full">
-          <span className="flex gap-x-1.5 text-sm text-gray-500">
-            {item.quantity}x 
-            <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
+          <span className="text-sm text-gray-500">
+            {item.quantity}x
           </span>
           <span className="font-bold text-base text-gray-900">
             <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
