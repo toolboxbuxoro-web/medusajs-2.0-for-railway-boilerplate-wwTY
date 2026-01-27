@@ -94,7 +94,6 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
             {/* Code & Availability */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 mb-2">
               <span>{tProduct("code")}: {item.variant?.sku || "N/A"}</span>
-              <span className="text-green-600">• {t("available_today")}</span>
             </div>
 
             {/* Price & Quantity Row */}
@@ -137,12 +136,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
               </div>
             </div>
 
-            {/* Delete Button */}
-            <div className="mt-2 pt-2 border-t border-gray-100">
-              <DeleteButton id={item.id} className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1">
-                {t("remove")}
-              </DeleteButton>
-            </div>
+
           </div>
 
           {/* Desktop Layout */}
@@ -163,7 +157,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
                 <p className="text-sm text-gray-600 mb-1">
                   {tProduct("code")}: {(item.variant?.product?.metadata as any)?.code || item.variant?.sku || "N/A"}
                 </p>
-                <p className="text-sm text-green-600 mb-3">{t("can_be_picked_up_today")}</p>
+
 
                 <div className="flex items-center gap-4">
                   {/* Quantity Controls */}
@@ -185,9 +179,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
                     </button>
                   </div>
 
-                  <DeleteButton id={item.id} className="text-sm text-gray-600 hover:text-red-600 flex items-center gap-1">
-                    {t("remove")}
-                  </DeleteButton>
+
                 </div>
               </div>
 
