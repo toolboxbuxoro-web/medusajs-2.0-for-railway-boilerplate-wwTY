@@ -2,7 +2,7 @@ import { Heading } from "@medusajs/ui"
 
 import ItemsPreviewTemplate from "@modules/cart/templates/preview"
 import DiscountCode from "@modules/checkout/components/discount-code"
-import CartTotals from "@modules/common/components/cart-totals"
+import CheckoutTotals from "@modules/checkout/components/checkout-totals"
 import Divider from "@modules/common/components/divider"
 import { getTranslations } from 'next-intl/server'
 
@@ -37,9 +37,9 @@ const CheckoutSummary = async ({
 
         <Divider className="my-6 border-gray-200" />
         
-        {/* Cart Totals */}
+        {/* Cart Totals (Simplified) */}
         <div className="mb-6">
-          <CartTotals totals={cart} />
+          <CheckoutTotals cart={cart} locale={locale} />
         </div>
 
         <Divider className="my-6 border-gray-200" />
