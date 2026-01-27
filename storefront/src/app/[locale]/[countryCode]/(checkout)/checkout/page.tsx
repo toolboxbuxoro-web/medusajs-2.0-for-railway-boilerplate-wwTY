@@ -1,8 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { redirect } from "next/navigation"
-import Link from "next/link"
-
 import Wrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
@@ -11,7 +9,6 @@ import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
 import { getTranslations } from 'next-intl/server'
 import CheckoutProviderWrapper from "@modules/checkout/components/checkout-provider-wrapper"
-import LanguageSwitcher from "@modules/checkout/components/language-switcher"
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -42,30 +39,7 @@ export default async function Checkout(props: {
 
   return (
     <div className="min-h-screen bg-[#f3f4f6]">
-      {/* Checkout Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="content-container py-4">
-          <div className="flex items-center justify-between">
-            {/* Left: Back to Cart */}
-            <Link 
-              href={`/${locale}/${countryCode}/cart`} 
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              {t('back_to_cart')}
-            </Link>
-            
-            {/* Center: Logo */}
-            <div className="absolute left-1/2 -translate-x-1/2">
-              <span className="bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">
-                Toolbox
-              </span>
-            </div>
-            
-            {/* Right: Language Selector */}
-            <LanguageSwitcher />
-          </div>
-        </div>
-      </div>
+
 
       {/* Main Content Grid */}
       <div className="content-container py-8">
