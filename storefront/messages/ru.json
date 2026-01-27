@@ -258,6 +258,7 @@
     "manual_payment": "Оплата вручную",
     "credit_card": "Банковская карта",
     "payme": "Payme",
+    "pp_payme_payme": "Payme",
     "method": "Способ",
     "saved_address_prompt": "Привет, {name}, хотите использовать один из сохраненных адресов?",
     "courier_delivery": "Курьерская доставка",

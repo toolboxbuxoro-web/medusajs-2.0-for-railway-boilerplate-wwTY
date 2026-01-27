@@ -250,6 +250,7 @@
     "manual_payment": "Qo'lda to'lov",
     "credit_card": "Bank kartasi",
     "payme": "Payme",
+    "pp_payme_payme": "Payme",
     "method": "Usul",
     "saved_address_prompt": "Salom, {name}, saqlangan manzillaringizdan birini ishlatmoqchimisiz?",
     "courier_delivery": "Kuryer orqali yetkazib berish",
