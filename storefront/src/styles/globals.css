@@ -318,7 +318,7 @@
 }
 
 .navbar-scrolled .navbar-header-content {
-  @apply h-14 md:h-16;
+  @apply md:h-14 lg:h-16;
 }
 
 .navbar-scrolled .navbar-logo {

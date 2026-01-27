@@ -46,7 +46,7 @@ export default async function Nav({ locale }: NavProps) {
           className="bg-white fixed w-full z-[100] border-b border-gray-200 shadow-sm transition-all duration-200 navbar-header top-0 md:top-[var(--topbar-height,36px)]"
         >
           <div className="flex flex-col w-full">
-            <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-1 sm:gap-3 lg:gap-6 transition-all duration-300 navbar-header-content relative px-2 sm:px-0">
+            <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-1 sm:gap-3 lg:gap-6 transition-[height] duration-300 navbar-header-content relative px-2 sm:px-0">
             {/* Left section: Mobile Menu + Logo (desktop) */}
             <div className="flex items-center gap-1 sm:gap-3 sm:flex-shrink-0 flex-1 sm:flex-none min-w-0">
               {/* Mobile Menu Button - Desktop only */}
@@ -79,7 +79,7 @@ export default async function Nav({ locale }: NavProps) {
             </div>
 
             {/* Logo - Mobile only (centered) */}
-            <div className="sm:hidden absolute left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+            <div className="sm:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
               <LocalizedClientLink
                 href="/"
                 className="flex items-center pointer-events-auto"
@@ -88,9 +88,9 @@ export default async function Nav({ locale }: NavProps) {
                 <Image
                   src="/toolbox-logo.png"
                   alt={t("logo")}
-                  width={200}
-                  height={60}
-                  className="w-[130px] xs:w-[150px] sm:w-[170px] h-auto object-contain"
+                  width={140}
+                  height={42}
+                  className="w-[100px] xs:w-[110px] sm:w-[120px] h-auto object-contain"
                   priority
                 />
               </LocalizedClientLink>
