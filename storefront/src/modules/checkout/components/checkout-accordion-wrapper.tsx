@@ -116,7 +116,9 @@ export default function CheckoutAccordionWrapper({
         summary={
           paymentSummary && (
             <div className="text-sm text-gray-500">
-              {t('payment_method_selected')}: <span className="font-medium text-gray-700 font-bold uppercase">{paymentInfoMap[paymentSummary.method]?.title || t(paymentSummary.method) || paymentSummary.method}</span>
+            <div className="text-sm text-gray-500">
+              {t('payment_method_selected')}: <span className="font-medium text-gray-700 font-bold uppercase">{paymentInfoMap[paymentSummary.method.toLowerCase()]?.title || t(paymentSummary.method.toLowerCase()) || paymentSummary.method}</span>
+            </div>
             </div>
           )
         }
