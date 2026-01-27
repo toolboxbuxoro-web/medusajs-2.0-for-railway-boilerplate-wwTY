@@ -54,38 +54,39 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
   if (type === "preview") {
     return (
-      <div className="flex flex-col gap-2 w-full pt-1 pb-2 border-b border-gray-100 last:border-0" data-testid="product-row">
-        <div className="flex justify-between items-start gap-4">
-          <LocalizedClientLink
-            href={`/products/${handle}`}
-            className="w-16 h-16 rounded-md overflow-hidden bg-gray-50 flex-shrink-0"
-          >
-            <Thumbnail
-              thumbnail={item.variant?.product?.thumbnail}
-              images={item.variant?.product?.images}
-              size="square"
-            />
-          </LocalizedClientLink>
-          
-          <div className="flex flex-col items-end flex-shrink-0">
-             <span className="flex gap-x-1 text-sm text-gray-500">
-              {item.quantity}x 
-              <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
-            </span>
-            <span className="font-semibold text-gray-900">
-               <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
-            </span>
-          </div>
+      <div className="flex flex-col gap-2 w-full pt-2 pb-3 border-b border-gray-100 last:border-0" data-testid="product-row">
+        {/* Large Photo */}
+        <LocalizedClientLink
+          href={`/products/${handle}`}
+          className="w-full aspect-square rounded-lg overflow-hidden bg-gray-50"
+        >
+          <Thumbnail
+            thumbnail={item.variant?.product?.thumbnail}
+            images={item.variant?.product?.images}
+            size="square"
+          />
+        </LocalizedClientLink>
+        
+        {/* Price */}
+        <div className="flex items-center justify-between w-full">
+          <span className="flex gap-x-1.5 text-sm text-gray-500">
+            {item.quantity}x 
+            <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
+          </span>
+          <span className="font-bold text-base text-gray-900">
+            <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
+          </span>
         </div>
         
+        {/* Title */}
         <div className="w-full">
-           <Text
-            className="text-sm font-medium text-gray-900 line-clamp-2"
+          <Text
+            className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug"
             data-testid="product-title"
           >
             {getLocalizedLineItemTitle(item, localeStr)}
           </Text>
-          <div className="text-xs text-gray-500 mt-0.5">
+          <div className="text-xs text-gray-500 mt-1">
             <LineItemOptions variant={item.variant} data-testid="product-variant" />
           </div>
         </div>
