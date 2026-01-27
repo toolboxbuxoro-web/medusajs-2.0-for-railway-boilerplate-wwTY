@@ -7,6 +7,7 @@ import ContactAndDelivery from "./contact-and-delivery"
 import Payment from "./payment"
 import Review from "./review"
 import { Text } from "@medusajs/ui"
+import { useTranslations } from "next-intl"
 
 export default function CheckoutAccordionWrapper({
   cart,
@@ -14,15 +15,14 @@ export default function CheckoutAccordionWrapper({
   shippingMethods,
   paymentMethods,
   initialBtsData,
-  t,
 }: {
   cart: any
   customer: any
   shippingMethods: any[]
   paymentMethods: any[]
   initialBtsData: any
-  t: any
 }) {
+  const t = useTranslations("checkout")
   const { 
     activeSection, 
     setActiveSection, 

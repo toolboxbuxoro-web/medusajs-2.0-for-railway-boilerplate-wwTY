@@ -54,7 +54,6 @@ export default async function CheckoutForm({
           shippingMethods={shippingMethods}
           paymentMethods={paymentMethods}
           initialBtsData={initialBtsData}
-          t={t}
         />
       </CheckoutErrorBoundary>
     </CheckoutProvider>
