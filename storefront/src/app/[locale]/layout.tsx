@@ -1,4 +1,5 @@
 import "styles/globals.css"
+import { retrieveCart } from "@lib/data/cart"
 import { NextIntlClientProvider } from 'next-intl';
 import { locales, type Locale, defaultLocale } from '../../i18n';
 import { FavoritesProvider } from "@lib/context/favorites-context"
@@ -48,6 +49,7 @@ export default async function LocaleLayout(props: {
   }
   
   const customer = await getCustomer()
+  const cart = await retrieveCart() // Fetch cart
   
   return (
     <html lang={validLocale} data-mode="light" suppressHydrationWarning>
@@ -55,7 +57,10 @@ export default async function LocaleLayout(props: {
         <NextIntlClientProvider locale={validLocale} messages={messages}>
           <AuthProvider initialCustomer={customer}>
             <FavoritesProvider>
-              <PickupPointProvider>
+              <PickupPointProvider 
+                cartId={cart?.id} 
+                initialData={(cart?.metadata as any)?.bts_delivery}
+              >
                 <CitySearchProvider>
                   <main className="relative">{children}</main>
                 </CitySearchProvider>

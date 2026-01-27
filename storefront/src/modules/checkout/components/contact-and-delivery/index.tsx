@@ -140,14 +140,19 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   // BTS state - Initialize with prop data if available
   console.log('[ContactAndDelivery] initialBtsData:', initialBtsData ? `Regions: ${initialBtsData.regions?.length}` : 'null')
   const [btsData, setBtsData] = useState<BtsData | null>(initialBtsData || null)
-  const [selectedRegionId, setSelectedRegionId] = useState("")
-  const [selectedPointId, setSelectedPointId] = useState("")
+  
+  // Removed local state - using globalPickupPoint from context as SSoT
+  const selectedRegionId = globalPickupPoint?.regionId || ""
+  const selectedPointId = globalPickupPoint?.id || ""
+  
+  // Ref backup for submit race conditions (Safety Risk #1)
+  const pointRef = useRef<any>(null)
+  
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Track if user has manually edited the selection to prevent overwriting
-  const userEditedPickupRef = useRef(false)
+  // Removed userEditedPickupRef - no longer needed with SSoT
 
   // OTP verification state (for guests)
   const [otpCode, setOtpCode] = useState("")
@@ -211,68 +216,20 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     }
   }, [cart, customer, isLoggedIn])
 
-  // BTS Selection Logic: Split into Initialization and Sync
-
-  // 1. Initialization Effect (Runs ONCE on mount)
+  // BTS Selection Logic: REMOVED complex sync logic
+  // Now using Context as Single Source of Truth
+  // No need for useEffects to sync state back and forth
+  
+  // Validate that selected region exists in btsData (Safety Risk #7)
   useEffect(() => {
-    let regionId = ""
-    let pointId = ""
-
-    // Priority: globalPickupPoint -> localStorage -> cart.metadata
-    if (globalPickupPoint) {
-      regionId = globalPickupPoint.regionId
-      pointId = globalPickupPoint.id
-      console.log("[ContactAndDelivery] Init from globalPickupPoint:", { regionId, pointId })
-    } else {
-      try {
-        const saved = localStorage.getItem("selected_pickup_point")
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (parsed?.regionId) {
-            regionId = parsed.regionId
-            pointId = parsed.id
-            console.log("[ContactAndDelivery] Init from localStorage:", { regionId, pointId })
-          }
-        }
-      } catch (e) {
-        console.error("[ContactAndDelivery] Failed to read from localStorage:", e)
+    if (btsData && selectedRegionId) {
+      const regionExists = btsData.regions.find(r => r.id === selectedRegionId)
+      if (!regionExists) {
+        console.warn(`[ContactAndDelivery] Region ${selectedRegionId} not found in btsData, clearing`)
+        setGlobalPickupPoint(null)
       }
     }
-
-    // Fallback to cart metadata if still empty
-    if (!regionId && cart?.metadata?.bts_delivery) {
-      const btsDelivery = cart.metadata.bts_delivery as any
-      regionId = btsDelivery.region_id || ""
-      pointId = btsDelivery.point_id || ""
-      console.log("[ContactAndDelivery] Init from cart metadata:", { regionId, pointId })
-    }
-
-    if (regionId) setSelectedRegionId(regionId)
-    if (pointId) setSelectedPointId(pointId)
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Run once on mount
-
-  // 2. Sync Effect (Runs when context changes)
-  // Only sync if user hasn't manually edited the form
-  useEffect(() => {
-    if (userEditedPickupRef.current) {
-      console.log("[ContactAndDelivery] Skipping sync from context (user edited)")
-      return
-    }
-
-    if (globalPickupPoint) {
-      console.log("[ContactAndDelivery] Syncing from context:", globalPickupPoint)
-      // Verify region exists to prevent invalid state
-      if (btsData?.regions && !btsData.regions.find(r => r.id === globalPickupPoint.regionId)) {
-        console.warn(`[ContactAndDelivery] Context region ${globalPickupPoint.regionId} not found in btsData`)
-        return
-      }
-      
-      setSelectedRegionId(globalPickupPoint.regionId)
-      setSelectedPointId(globalPickupPoint.id)
-    }
-  }, [globalPickupPoint, btsData])
+  }, [btsData, selectedRegionId, setGlobalPickupPoint])
 
   // Save to localStorage whenever fields change
   useEffect(() => {
@@ -429,8 +386,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       router.push(pathname + "?step=payment", { scroll: false })
       router.refresh()
       
-      // Reset dirty flag after successful submit
-      userEditedPickupRef.current = false
+      // No dirty flag to reset anymore
     } catch (err: any) {
       console.error("Submit error:", err)
       setError(err.message || "An error occurred")
@@ -738,16 +694,11 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 </Label>
                 <Select
                   onValueChange={(val) => {
-                    userEditedPickupRef.current = true // Mark as manually edited
-                    setSelectedRegionId(val)
-                    setSelectedPointId("")
-                    // Sync to Global Context
-                    if (btsData) {
-                      const region = btsData.regions.find(r => r.id === val)
-                      if (region) {
-                        setGlobalPickupPoint(null) // Clear point when region changes
-                      }
-                    }
+                    // Update Context directly
+                    setGlobalPickupPoint(null) // Clear point when region changes
+                    
+                    // Optionally pre-select logic could go here if needed
+                    console.log("[ContactAndDelivery] Region changed to:", val)
                   }}
                   value={selectedRegionId}
                 >
@@ -772,19 +723,19 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                     </Label>
                     <Select 
                       onValueChange={(val) => {
-                        userEditedPickupRef.current = true // Mark as manually edited
-                        setSelectedPointId(val)
-                        // Sync to Global Context
+                        // Update Context directly
                         if (selectedRegionPoints && selectedRegion) {
                           const point = selectedRegionPoints.find(p => p.id === val)
                           if (point && selectedRegion) {
-                            setGlobalPickupPoint({
+                            const newPoint = {
                               id: point.id,
                               name: point.name,
                               address: point.address,
                               regionId: selectedRegion.id,
                               regionName: locale === "ru" ? selectedRegion.nameRu : selectedRegion.name,
-                            })
+                            }
+                            setGlobalPickupPoint(newPoint)
+                            pointRef.current = newPoint // Immediate backup for race condition
                           }
                         }
                       }} 
