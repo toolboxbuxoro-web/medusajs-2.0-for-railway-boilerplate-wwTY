@@ -12,7 +12,7 @@ export const IS_DEV = process.env.NODE_ENV === 'development'
 /**
  * Public URL for the backend
  */
-export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000'
+export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : undefined) ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000'
 
 /**
  * Database URL for Postgres instance used by the backend
@@ -30,17 +30,17 @@ export const REDIS_URL = process.env.REDIS_URL;
 /**
  * Admin CORS origins
  */
-export const ADMIN_CORS = process.env.ADMIN_CORS || 'http://localhost:7000,http://localhost:7001';
+export const ADMIN_CORS = process.env.ADMIN_CORS || `${BACKEND_URL},http://localhost:7000,http://localhost:7001,https://backend-production-5df6.up.railway.app`;
 
 /**
  * Auth CORS origins
  */
-export const AUTH_CORS = process.env.AUTH_CORS || 'http://localhost:7000,http://localhost:7001,http://localhost:8000,http://localhost:3000';
+export const AUTH_CORS = process.env.AUTH_CORS || `${BACKEND_URL},http://localhost:7000,http://localhost:7001,http://localhost:8000,http://localhost:3000,https://backend-production-5df6.up.railway.app,https://toolbox-tools.uz,https://www.toolbox-tools.uz`;
 
 /**
  * Store/frontend CORS origins
  */
-export const STORE_CORS = process.env.STORE_CORS || 'http://localhost:8000,http://localhost:3000';
+export const STORE_CORS = process.env.STORE_CORS || `${BACKEND_URL},http://localhost:8000,http://localhost:3000,https://toolbox-tools.uz,https://www.toolbox-tools.uz`;
 
 /**
  * Store/frontend URL (for redirects, emails, etc)
