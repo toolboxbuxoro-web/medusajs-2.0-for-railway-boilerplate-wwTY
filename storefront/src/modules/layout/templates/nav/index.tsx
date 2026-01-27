@@ -43,7 +43,7 @@ export default async function Nav({ locale }: NavProps) {
         
         {/* Main Header - Fixed, position controlled by CSS variable */}
         <header 
-          className="bg-white fixed w-full z-[100] border-b border-gray-200 shadow-sm transition-all duration-200 navbar-header top-0 md:top-[var(--topbar-height,36px)]"
+          className="bg-white fixed w-full z-[100] border-b border-gray-200 shadow-sm md:transition-all md:duration-200 navbar-header top-0 md:top-[var(--topbar-height,36px)]"
         >
           <div className="flex flex-col w-full">
             <div className="content-container flex items-center justify-between h-14 sm:h-16 lg:h-18 gap-1 sm:gap-3 lg:gap-6 transition-[height] duration-300 navbar-header-content relative px-2 sm:px-0">
