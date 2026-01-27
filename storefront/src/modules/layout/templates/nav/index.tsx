@@ -88,9 +88,9 @@ export default async function Nav({ locale }: NavProps) {
                 <Image
                   src="/toolbox-logo.png"
                   alt={t("logo")}
-                  width={100}
-                  height={30}
-                  className="w-[70px] xs:w-[80px] sm:w-[90px] h-auto object-contain"
+                  width={200}
+                  height={60}
+                  className="w-[130px] xs:w-[150px] sm:w-[170px] h-auto object-contain"
                   priority
                 />
               </LocalizedClientLink>

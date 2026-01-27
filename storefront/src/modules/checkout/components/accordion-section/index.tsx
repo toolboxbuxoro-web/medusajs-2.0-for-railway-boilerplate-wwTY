@@ -3,6 +3,7 @@
 import React from "react"
 import { clx, Heading, Text } from "@medusajs/ui"
 import { CheckCircleSolid, LockClosedSolid } from "@medusajs/icons"
+import { useTranslations } from "next-intl"
 
 interface AccordionSectionProps {
   number: number
@@ -25,6 +26,8 @@ const AccordionSection: React.FC<AccordionSectionProps> = ({
   onToggle,
   children,
 }) => {
+  const t = useTranslations("checkout")
+  
   return (
     <div 
       id={`checkout-section-${number}`}
@@ -84,7 +87,7 @@ const AccordionSection: React.FC<AccordionSectionProps> = ({
             <LockClosedSolid className="text-gray-400 w-5 h-5" />
           ) : !isOpen && isCompleted ? (
             <Text className="text-blue-600 font-medium text-sm hover:underline">
-              Изменить
+              {t("change")}
             </Text>
           ) : (
             <div className={clx("w-5 h-5 transition-transform duration-300", { "rotate-180": isOpen })}>

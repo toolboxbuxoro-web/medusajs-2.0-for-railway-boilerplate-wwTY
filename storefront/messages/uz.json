@@ -23,7 +23,6 @@
     "language": "Til",
     "home": "Bosh sahifa",
     "orders": "Buyurtmalar",
-    "about": "Kompaniya haqida",
     "select_city": "Shaharni tanlang",
     "find_city": "Shaharni topish",
     "select_delivery_point": "Olib ketish punktini tanlang",
@@ -205,6 +204,7 @@
     "billing_same_as_shipping": "To'lov manzili yetkazib berish manzili bilan bir xil",
     "contact": "Aloqa",
     "edit": "Tahrirlash",
+    "change": "O'zgartirish",
     "delivery": "Yetkazib berish",
     "delivery_method": "Yetkazib berish usuli",
     "payment": "To'lov",
@@ -239,7 +239,6 @@
     "promotion_applied": "Qo'llangan promokodlar:",
     "apply": "Qo'llash",
     "enter_code": "Kodni kiriting",
-    "delivery": "Yetkazib berish",
     "total": "Jami",
     "payment_method": "To'lov usuli",
     "payment_details": "To'lov tafsilotlari",
@@ -289,7 +288,9 @@
     "login_to_track_short": "Kuzatish uchun kiring",
     "continue_short": "Davom etish",
     "delivery_type_short": "YETKAZIB BERISH",
-    "bts_pickup_point_short": "OLIB KETISH PUNKTI"
+    "bts_pickup_point_short": "OLIB KETISH PUNKTI",
+    "pp_system_default": "Qabul qilishda to'lash",
+    "pp_click_click": "Click"
   },
   "product": {
     "product_info": "Mahsulot haqida ma'lumot",

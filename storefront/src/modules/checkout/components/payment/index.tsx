@@ -176,7 +176,7 @@ const Payment = ({
                                     "text-blue-700": isSelected, 
                                     "text-gray-900": !isSelected
                                   })}>
-                                      {info?.title || paymentMethod.id}
+                                      {t(paymentMethod.id) || info?.title || paymentMethod.id}
                                   </span>
                                   {isSelected && (
                                     <span className="text-[10px] text-blue-500 font-semibold uppercase tracking-wider mt-0.5">

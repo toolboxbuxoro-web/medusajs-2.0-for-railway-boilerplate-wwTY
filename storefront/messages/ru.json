@@ -213,6 +213,7 @@
     "billing_same_as_shipping": "Адрес выставления счета совпадает с адресом доставки",
     "contact": "Контакты",
     "edit": "Редактировать",
+    "change": "Изменить",
     "delivery": "Доставка",
     "delivery_method": "Способ доставки",
     "payment": "Оплата",
@@ -247,7 +248,6 @@
     "promotion_applied": "Применённые промокоды:",
     "apply": "Применить",
     "enter_code": "Введите код",
-    "delivery": "Доставка",
     "total": "Итого",
     "payment_method": "Способ оплаты",
     "payment_details": "Детали оплаты",
@@ -297,7 +297,9 @@
     "please_complete_previous_steps": "Пожалуйста, заполните предыдущие шаги",
     "continue_short": "Далее",
     "delivery_type_short": "ДОСТАВКА",
-    "bts_pickup_point_short": "ПУНКТ ВЫДАЧИ"
+    "bts_pickup_point_short": "ПУНКТ ВЫДАЧИ",
+    "pp_system_default": "Оплата при получении",
+    "pp_click_click": "Click"
   },
   "product": {
     "product_info": "Информация о товаре",
