@@ -289,7 +289,8 @@
     "verified_success": "Номер подтверждён ✓",
     "enter_your_details": "Введите данные получателя",
     "payment_method_selected": "Выбран способ",
-    "step_progress": "Шаг {current} из {total}"
+    "step_progress": "Шаг {current} из {total}",
+    "please_complete_previous_steps": "Пожалуйста, заполните предыдущие шаги"
   },
   "product": {
     "product_info": "Информация о товаре",
