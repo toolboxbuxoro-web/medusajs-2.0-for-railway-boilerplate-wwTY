@@ -55,29 +55,35 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   if (type === "preview") {
     return (
       <div className="flex flex-col gap-2 w-full pt-2 pb-3 border-b border-gray-100 last:border-0" data-testid="product-row">
-        {/* Large Photo */}
-        <LocalizedClientLink
-          href={`/products/${handle}`}
-          className="w-2/3 mx-auto md:w-1/3 aspect-square rounded-lg overflow-hidden bg-gray-50"
-        >
-          <Thumbnail
-            thumbnail={item.variant?.product?.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
-          />
-        </LocalizedClientLink>
-        
-        {/* Price */}
-        <div className="flex items-center justify-between w-full">
-          <span className="text-sm text-gray-500">
-            {item.quantity}x
-          </span>
-          <span className="font-bold text-lg text-gray-900">
-            <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
-          </span>
+        {/* Responsive Layout */}
+        <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+          {/* Photo: Full width on mobile, small on desktop */}
+          <LocalizedClientLink
+            href={`/products/${handle}`}
+            className="w-full md:w-20 aspect-square rounded-lg overflow-hidden bg-gray-50 flex-shrink-0"
+          >
+            <Thumbnail
+              thumbnail={item.variant?.product?.thumbnail}
+              images={item.variant?.product?.images}
+              size="square"
+            />
+          </LocalizedClientLink>
+          
+          {/* Price & Quantity - Different layouts for mobile/desktop */}
+          <div className="flex flex-col gap-1 md:flex-1 md:min-w-0">
+            {/* Price Row */}
+            <div className="flex items-center justify-between w-full">
+              <span className="text-base md:text-sm text-gray-500">
+                {item.quantity}x
+              </span>
+              <span className="font-bold text-xl md:text-2xl text-gray-900">
+                <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
+              </span>
+            </div>
+          </div>
         </div>
         
-        {/* Title */}
+        {/* Title - Full width below on both mobile and desktop */}
         <div className="w-full">
           <Text
             className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug"
