@@ -19,13 +19,6 @@ const Review = ({ cart }: { cart: any }) => {
     <div className="bg-white">
       {previousStepsCompleted ? (
         <>
-          <div className="flex items-start gap-x-1 w-full mb-6">
-            <div className="w-full">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1 break-words">
-                {t("legal_text")}
-              </Text>
-            </div>
-          </div>
           <PaymentButton cart={cart} data-testid="submit-order-button" />
         </>
       ) : (

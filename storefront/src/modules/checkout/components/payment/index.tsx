@@ -106,8 +106,16 @@ const Payment = ({
       }
 
       if (!shouldInputCard) {
+        const displayNames: Record<string, string> = {
+          'pp_click_click': 'Click',
+          'pp_payme_payme': 'Payme',
+          'pp_stripe_stripe': 'Банковская карта',
+          'manual': 'Оплата вручную',
+          'stripe': 'Банковская карта'
+        }
+        
         onComplete?.({
-          method: providerIdToUse
+          method: displayNames[providerIdToUse.toLowerCase()] || providerIdToUse
         })
         router.refresh()
       }
