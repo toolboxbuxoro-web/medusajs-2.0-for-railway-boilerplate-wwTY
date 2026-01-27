@@ -32,6 +32,9 @@ interface CheckoutContextType {
   setPaymentCompleted: (summary: PaymentSummary) => void
   
   resetSection: (section: CheckoutSection) => void
+  
+  deliveryCost: number | null
+  setDeliveryCost: (cost: number | null) => void
 }
 
 const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined)
@@ -43,6 +46,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   
   const [contactSummary, setContactSummary] = useState<ContactSummary | null>(null)
   const [paymentSummary, setPaymentSummary] = useState<PaymentSummary | null>(null)
+  const [deliveryCost, setDeliveryCost] = useState<number | null>(null)
 
   const setActiveSection = useCallback((section: CheckoutSection) => {
     setActiveSectionState(section)
@@ -98,6 +102,8 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         setContactCompleted,
         setPaymentCompleted,
         resetSection,
+        deliveryCost,
+        setDeliveryCost,
       }}
     >
       {children}
