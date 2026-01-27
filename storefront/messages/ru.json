@@ -283,6 +283,7 @@
     "bts_delivery_point": "Пункт выдачи BTS",
     "select_shipping_method": "Выберите способ доставки",
     "login_to_track": "Войдите, чтобы отслеживать заказ",
+    "login_to_track_short": "Войдите для отслеживания",
     "step_contact": "Контакты",
     "step_delivery": "Доставка",
     "step_payment": "Оплата",
@@ -290,7 +291,9 @@
     "enter_your_details": "Введите данные получателя",
     "payment_method_selected": "Выбран способ",
     "step_progress": "Шаг {current} из {total}",
-    "please_complete_previous_steps": "Пожалуйста, заполните предыдущие шаги"
+    "please_complete_previous_steps": "Пожалуйста, заполните предыдущие шаги",
+    "continue_short": "Далее",
+    "delivery_type_short": "ДОСТАВКА"
   },
   "product": {
     "product_info": "Информация о товаре",

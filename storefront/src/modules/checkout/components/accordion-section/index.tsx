@@ -54,12 +54,12 @@ const AccordionSection: React.FC<AccordionSectionProps> = ({
             "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
             {
               "bg-blue-600 text-white": isOpen,
-              "bg-green-500 text-white": isCompleted && !isOpen,
+              "text-green-500 bg-transparent": isCompleted && !isOpen,
               "bg-gray-200 text-gray-500": !isOpen && !isCompleted && !isLocked,
               "bg-gray-100 text-gray-400": isLocked,
             }
           )}>
-            {isCompleted && !isOpen ? <CheckCircleSolid className="w-5 h-5" /> : number}
+            {isCompleted && !isOpen ? <CheckCircleSolid className="w-7 h-7" /> : number}
           </div>
           
           <div className="flex flex-col">

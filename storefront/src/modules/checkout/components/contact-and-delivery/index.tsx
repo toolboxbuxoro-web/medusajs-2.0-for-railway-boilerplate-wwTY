@@ -451,11 +451,9 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   {/* Explanation text */}
                   {!otpVerified && (
                     <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                      <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-sm text-blue-700">
-                        {t("login_to_track")}
+                      <p className="text-xs sm:text-sm text-blue-700 leading-snug">
+                        <span className="hidden sm:inline">{t("login_to_track")}</span>
+                        <span className="sm:hidden">{t("login_to_track_short") || "Войдите для отслеживания"}</span>
                       </p>
                     </div>
                   )}
@@ -599,8 +597,9 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
             {/* Delivery Type Info */}
             <div className="flex flex-col gap-3">
-              <Label className="text-gray-500 text-xs uppercase tracking-wider font-bold">
-                {t("delivery_type") as string}
+              <Label className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider font-bold">
+                <span className="hidden sm:inline">{t("delivery_type")}</span>
+                <span className="sm:hidden">{t("delivery_type_short") || "ДОСТАВКА"}</span>
               </Label>
               <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-600 border border-blue-50">
@@ -618,9 +617,9 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                     />
                   </svg>
                 </div>
-                <div>
-                  <div className="font-bold text-gray-900">{t("bts_pickup") as string}</div>
-                  <div className="text-xs text-gray-500">{t("bts_delivery_info") as string}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-gray-900 text-sm sm:text-base truncate">{t("bts_pickup") as string}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 truncate">{t("bts_delivery_info") as string}</div>
                 </div>
               </div>
             </div>
@@ -628,7 +627,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
             {/* BTS Region & Point Selection */}
             <div className="bg-white rounded-xl border border-blue-100 overflow-hidden shadow-sm">
               <div className="p-4 sm:p-6 bg-blue-50/50 border-b border-blue-100">
-                <Label className="text-blue-500 text-xs uppercase tracking-wider font-semibold mb-1">
+                <Label className="text-blue-500 text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider font-semibold mb-1">
                   {t("bts_select_region") as string}
                 </Label>
                 <Select
@@ -651,7 +650,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   }}
                   value={selectedRegionId}
                 >
-                  <Select.Trigger className="w-full min-w-[200px] border-none bg-transparent shadow-none p-0 h-auto text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors focus:ring-0">
+                  <Select.Trigger className="w-full min-w-[200px] border-none bg-transparent shadow-none p-0 h-auto text-base sm:text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors focus:ring-0">
                     <Select.Value placeholder={t("bts_region_placeholder")} />
                   </Select.Trigger>
                   <Select.Content>
@@ -667,7 +666,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
               {selectedRegionId && (
                 <div className="p-4 sm:p-6 space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-gray-500 text-xs uppercase tracking-wider font-semibold">
+                    <Label className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider font-semibold">
                       {t("bts_select_point")}
                     </Label>
                     <Select 
@@ -690,15 +689,19 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       }} 
                       value={selectedPointId}
                     >
-                      <Select.Trigger className="w-full bg-white border border-gray-200 h-12 rounded-lg px-4 text-gray-900 focus:border-blue-500 transition-colors">
+                      <Select.Trigger className="w-full bg-white border border-gray-200 h-10 sm:h-12 rounded-lg px-4 text-sm sm:text-base text-gray-900 focus:border-blue-500 transition-colors">
                         <Select.Value placeholder={t("bts_point_placeholder")} />
                       </Select.Trigger>
                       <Select.Content>
                         {selectedRegionPoints.map((point) => (
                           <Select.Item key={point.id} value={point.id}>
-                            <span className="font-medium text-sm">{point.name}</span>
-                            <div className="text-gray-400 text-xs mt-0.5">
-                              {point.address}
+                            <div className="flex flex-col gap-0.5 min-w-0">
+                              <span className="font-medium text-xs sm:text-sm truncate">
+                                {point.name}
+                              </span>
+                              <div className="text-gray-400 text-[10px] sm:text-xs truncate">
+                                {point.address}
+                              </div>
                             </div>
                           </Select.Item>
                         ))}
@@ -708,11 +711,11 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
                   {estimatedCost !== null && (
                     <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-gray-400">
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 truncate">
                           {t("bts_estimated_cost")}
                         </span>
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-base sm:text-lg font-bold text-gray-900 truncate">
                           {convertToLocale({
                             amount: estimatedCost,
                             currency_code: cart?.currency_code || "uzs",
@@ -762,7 +765,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 {t("processing") as string}
               </span>
             ) : (
-              t("continue")
+              <>
+                <span className="hidden sm:inline">{t("continue")}</span>
+                <span className="sm:hidden">{t("continue_short") || "Далее"}</span>
+              </>
             )}
           </button>
         </form>

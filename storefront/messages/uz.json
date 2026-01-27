@@ -279,7 +279,13 @@
     "step_delivery": "Yetkazib berish",
     "step_payment": "To'lov",
     "verified_success": "Raqam tasdiqlandi ✓",
-    "enter_your_details": "Qabul qiluvchi ma'lumotlarini kiriting"
+    "enter_your_details": "Qabul qiluvchi ma'lumotlarini kiriting",
+    "payment_method_selected": "To'lov usuli tanlandi",
+    "step_progress": "Qadam {current} dan {total}",
+    "please_complete_previous_steps": "Iltimos, oldingi qadamlarni yakunlang",
+    "login_to_track_short": "Kuzatish uchun kiring",
+    "continue_short": "Davom etish",
+    "delivery_type_short": "YETKAZIB BERISH"
   },
   "product": {
     "product_info": "Mahsulot haqida ma'lumot",

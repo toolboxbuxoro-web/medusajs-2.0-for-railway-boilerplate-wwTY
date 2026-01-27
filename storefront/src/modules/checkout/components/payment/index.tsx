@@ -158,29 +158,54 @@ const Payment = ({
                             onClick={async () => {
                               setSelectedPaymentMethod(paymentMethod.id)
 
-                              // For non-stripe providers we can immediately initialize the session
-                              // and advance to review.
                               if (!isStripeFunc(paymentMethod.id)) {
                                 await handleSubmit(paymentMethod.id)
                               }
                             }}
                             className={clx(
-                                "cursor-pointer rounded-xl border p-4 transition-all duration-200 flex flex-col justify-between h-32 hover:border-blue-500 hover:shadow-md",
+                                "group cursor-pointer rounded-2xl border p-5 transition-all duration-300 flex flex-col justify-between h-36 relative overflow-hidden",
                                 {
-                                    "border-blue-600 ring-1 ring-blue-600 bg-blue-50/10": isSelected,
-                                    "border-gray-200 bg-white": !isSelected
+                                    "border-blue-600 ring-2 ring-blue-600/20 bg-blue-50/20 backdrop-blur-sm shadow-inner": isSelected,
+                                    "border-gray-200 bg-white hover:border-blue-400 hover:shadow-lg hover:-translate-y-1": !isSelected
                                 }
                             )}
                         >
-                            <div className="flex justify-between items-start">
-                                <span className={clx("font-semibold text-lg", { "text-blue-700": isSelected, "text-gray-900": !isSelected})}>
-                                    {info?.title || paymentMethod.id}
-                                </span>
-                                {isSelected && <CheckCircleSolid className="text-blue-600" />}
+                            <div className="flex justify-between items-start relative z-10">
+                                <div className="flex flex-col">
+                                  <span className={clx("font-bold text-base sm:text-lg transition-colors", { 
+                                    "text-blue-700": isSelected, 
+                                    "text-gray-900": !isSelected
+                                  })}>
+                                      {info?.title || paymentMethod.id}
+                                  </span>
+                                  {isSelected && (
+                                    <span className="text-[10px] text-blue-500 font-semibold uppercase tracking-wider mt-0.5">
+                                      {t("payment_method_selected") || "Выбран"}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className={clx("w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300", {
+                                  "bg-blue-600 scale-110 shadow-md": isSelected,
+                                  "bg-gray-100": !isSelected
+                                })}>
+                                  {isSelected ? (
+                                    <CheckCircleSolid className="text-white w-4 h-4" />
+                                  ) : (
+                                    <div className="w-2 h-2 rounded-full bg-gray-300" />
+                                  )}
+                                </div>
                             </div>
-                            <div className="self-end opacity-80 scale-125 origin-bottom-right">
+                            <div className={clx("self-end transition-transform duration-500", {
+                              "scale-150 -translate-y-1": isSelected,
+                              "scale-125 group-hover:scale-135": !isSelected
+                            })}>
                                 {info?.icon}
                             </div>
+
+                            {/* Decorative background element for premium feel */}
+                            {isSelected && (
+                              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+                            )}
                         </div>
                     )
                   })}
