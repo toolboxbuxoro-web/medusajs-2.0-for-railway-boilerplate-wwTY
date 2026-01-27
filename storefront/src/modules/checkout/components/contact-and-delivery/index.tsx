@@ -685,14 +685,14 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       }} 
                       value={selectedPointId}
                     >
-                      <Select.Trigger className="w-full bg-white border border-gray-200 h-10 sm:h-12 rounded-lg px-4 text-sm sm:text-base text-gray-900 focus:border-blue-500 transition-colors">
+                      <Select.Trigger className="w-full bg-white border border-gray-200 h-10 sm:h-12 rounded-lg px-3 sm:px-4 text-[11px] xs:text-xs sm:text-base text-gray-900 focus:border-blue-500 transition-colors">
                         <Select.Value placeholder={t("bts_point_placeholder")} />
                       </Select.Trigger>
                       <Select.Content>
                         {selectedRegionPoints.map((point) => (
                           <Select.Item key={point.id} value={point.id}>
-                            <div className="flex flex-col gap-0.5 min-w-0 py-1">
-                              <span className="font-medium text-xs sm:text-sm truncate">
+                            <div className="flex flex-col gap-1 py-1 max-w-[280px] sm:max-w-md">
+                              <span className="font-medium text-xs sm:text-sm leading-tight">
                                 {point.name}
                               </span>
                               <div className="text-gray-400 text-[10px] sm:text-xs truncate">
