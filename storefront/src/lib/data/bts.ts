@@ -416,7 +416,7 @@ export const fetchBtsRegions = async (): Promise<BtsRegion[]> => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-    const response = await fetch(`${backendUrl}/store/bts/cities`, {
+    const response = await fetch(`${backendUrl}/store/bts`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -429,8 +429,9 @@ export const fetchBtsRegions = async (): Promise<BtsRegion[]> => {
 
     if (response.ok) {
       const data = await response.json()
-      if (Array.isArray(data.cities) && data.cities.length > 0) {
-        return data.cities
+      if (Array.isArray(data.regions) && data.regions.length > 0) {
+        console.log(`[BTS] Fetched ${data.regions.length} regions from backend`)
+        return data.regions
       }
     }
     
@@ -439,6 +440,7 @@ export const fetchBtsRegions = async (): Promise<BtsRegion[]> => {
     console.error("[BTS] Error fetching regions:", err)
   }
 
+  console.log(`[BTS] Using static fallback: ${BTS_REGIONS.length} regions`)
   return BTS_REGIONS
 }
 

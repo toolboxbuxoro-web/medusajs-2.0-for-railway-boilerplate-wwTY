@@ -285,75 +285,115 @@ export class BtsApiService {
   }
 
   private async getToken(): Promise<string> {
+    // Check cache first
     if (BtsApiService.cachedToken && BtsApiService.cachedToken.expires > Date.now()) {
       return BtsApiService.cachedToken.token
     }
 
-    if (!this.credentials.login || !this.credentials.pass) {
-      throw new MedusaError(MedusaError.Types.INVALID_DATA, "BTS API credentials not configured")
-    }
-
-    // Prevent race conditions with a lock
+    // Atomic lock check - return existing promise if refresh in progress
     if (BtsApiService.tokenRefreshPromise) {
       return BtsApiService.tokenRefreshPromise
     }
 
+    // Set promise IMMEDIATELY before async work starts
+    BtsApiService.tokenRefreshPromise = this.refreshToken()
+    
+    try {
+      return await BtsApiService.tokenRefreshPromise
+    } finally {
+      BtsApiService.tokenRefreshPromise = null
+    }
+  }
+
+  /**
+   * Internal method to refresh the authentication token
+   */
+  private async refreshToken(): Promise<string> {
+    if (!this.credentials.login || !this.credentials.pass) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "BTS API credentials not configured")
+    }
+
     this.logger.info("[BTS API] Fetching new auth token")
     
-    BtsApiService.tokenRefreshPromise = (async () => {
-      try {
-        const resp = await this.fetchWithRetry(`${this.baseUrl}?r=v1/auth/get-token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: this.credentials.login,
-            password: this.credentials.pass,
-            inn: this.credentials.inn,
-          }),
-        })
+    const resp = await this.fetchWithRetry(`${this.baseUrl}?r=v1/auth/get-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: this.credentials.login,
+        password: this.credentials.pass,
+        inn: this.credentials.inn,
+      }),
+    })
 
-        if (!resp.ok) {
-          const text = await resp.text().catch(() => "")
-          this.logger.error(`[BTS API] Auth failed: ${resp.status} ${text}`)
-          throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `BTS Auth failed (${resp.status})`)
-        }
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => "")
+      this.logger.error(`[BTS API] Auth failed: ${resp.status} ${text}`)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `BTS Auth failed (${resp.status})`)
+    }
 
-        const json = (await resp.json()) as any
-        const token = json?.data?.token
+    const json = (await resp.json()) as any
+    const token = json?.data?.token
 
-        this.logger.info(`[BTS API] Auth Response status: ${resp.status}`)
-        if (token) {
-          this.logger.info(`[BTS API] Successfully obtained token (starts with: ${token.substring(0, 10)}...)`)
-        }
+    this.logger.info(`[BTS API] Auth Response status: ${resp.status}`)
+    if (token) {
+      this.logger.info(`[BTS API] Successfully obtained token (starts with: ${token.substring(0, 10)}...)`)
+    }
 
-        if (!token) {
-          this.logger.error(`[BTS API] Token missing in response: ${JSON.stringify(json)}`)
-          throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "BTS token missing in response")
-        }
+    if (!token) {
+      this.logger.error(`[BTS API] Token missing in response: ${JSON.stringify(json)}`)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "BTS token missing in response")
+    }
 
-        // Cache for 1 hour (static) with 5 min buffer
-        BtsApiService.cachedToken = {
-          token,
-          expires: Date.now() + 3600 * 1000 - 300 * 1000, 
-        }
+    // Cache for 1 hour (static) with 5 min buffer
+    BtsApiService.cachedToken = {
+      token,
+      expires: Date.now() + 3600 * 1000 - 300 * 1000, 
+    }
 
-        return token
-      } catch (error: any) {
-         this.logger.error(`[BTS API] Token fetch error: ${error.message}`)
-         throw error
-      } finally {
-        BtsApiService.tokenRefreshPromise = null
-      }
-    })()
-
-    return BtsApiService.tokenRefreshPromise
+    return token
   }
 
   async calculate(params: BtsCalculateParams): Promise<number> {
     const startTime = Date.now()
     BtsApiService.metrics.requestsTotal++
+
+    // ✨ NEW: Input validation
+    if (!params.weight || params.weight <= 0 || params.weight > 1000) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Invalid weight: ${params.weight}kg (must be between 0 and 1000)`
+      )
+    }
+
+    if (!params.senderCityId || params.senderCityId <= 0) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Invalid sender city ID: ${params.senderCityId}`
+      )
+    }
+
+    if (!params.receiverCityId || params.receiverCityId <= 0) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Invalid receiver city ID: ${params.receiverCityId}`
+      )
+    }
+
+    if (params.senderDelivery !== 0 && params.senderDelivery !== 1) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Invalid senderDelivery: ${params.senderDelivery} (must be 0 or 1)`
+      )
+    }
+
+    if (params.receiverDelivery !== 0 && params.receiverDelivery !== 1) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Invalid receiverDelivery: ${params.receiverDelivery} (must be 0 or 1)`
+      )
+    }
 
     // 1. Check circuit breaker
     if (this.isCircuitOpen()) {
@@ -489,27 +529,22 @@ export class BtsApiService {
       return cities
     } catch (error: any) {
       this.logger.error(`[BTS API] Failed to get cities: ${error.message}`)
-      // Fallback to basic map if API fails
-      return this.getFallbackCities()
+      
+      // Fallback to static regions data from route
+      try {
+        const { BTS_REGIONS } = await import('../api/store/bts/route.js')
+        return BTS_REGIONS.flatMap(region => 
+          region.points.map(point => ({
+            id: parseInt(point.id) || 0,
+            name: point.name,
+            region_id: region.id,
+          }))
+        )
+      } catch (err) {
+        this.logger.error(`[BTS API] Fallback import failed: ${err.message}`)
+        return []
+      }
     }
-  }
-
-  protected getFallbackCities() {
-    return [
-      { id: 101, name: "Ташкент", region_id: "tashkent-city" },
-      { id: 45, name: "Самарканд", region_id: "samarkand" },
-      { id: 40, name: "Бухара", region_id: "bukhara" },
-      { id: 86, name: "Фергана", region_id: "fergana" },
-      { id: 95, name: "Наманган", region_id: "namangan" },
-      { id: 36, name: "Андижан", region_id: "andijan" },
-      { id: 41, name: "Карши", region_id: "kashkadarya" },
-      { id: 102, name: "Термез", region_id: "surkhandarya" },
-      { id: 54, name: "Навои", region_id: "navoi" },
-      { id: 38, name: "Джизак", region_id: "jizzakh" },
-      { id: 37, name: "Гулистан", region_id: "syrdarya" },
-      { id: 104, name: "Ургенч", region_id: "khorezm" },
-      { id: 56, name: "Нукус", region_id: "karakalpakstan" },
-    ]
   }
 
   /**

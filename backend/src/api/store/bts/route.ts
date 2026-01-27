@@ -298,6 +298,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     } catch (e) {
        logger?.warn(`[store/bts] Failed to get dynamic branches, using static fallback: ${e}`)
        // Fallback to static list if API fails
+        const { BTS_REGIONS } = await import('./route.js')
        regions = BTS_REGIONS.map((r) => ({
         id: r.id,
         name: r.name,
@@ -349,15 +350,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     try {
       // 1. Try real API first
-      // Default: Bukhara origin (40), courier delivery (sender=0, receiver=0 for pickup from office)
-      // Actually, if it's delivery TO the customer point, maybe receiverDelivery should be 0 (office) as they pick it up?
-      // Yes, current setup is "Самовывоз" (pickup) from BTS point.
+      // Read warehouse config from env (defaults to Bukhara)
+      const senderCityId = parseInt(process.env.BTS_SENDER_CITY_ID || '40')
+      const senderPointId = parseInt(process.env.BTS_SENDER_POINT_ID || '263')
+      
+      if (process.env.NODE_ENV === 'development') {
+        logger.info(`[store/bts] Using sender: City ${senderCityId}, Point ${senderPointId}`)
+      }
+      
       cost = await btsApi.calculate({
-        senderCityId: 40, // Bukhara (City ID)
-        senderPointId: 263, // Bukhara Raymag (Specific Point ID)
+        senderCityId,
+        senderPointId,
         receiverCityId: btsCityId,
         weight: weight_kg,
-        senderDelivery: 0, // Sender brings to office (Raymag/Bukhara)
+        senderDelivery: 0, // Sender brings to office
         receiverDelivery: 0, // Pick up from BTS point
       })
     } catch (e: any) {
