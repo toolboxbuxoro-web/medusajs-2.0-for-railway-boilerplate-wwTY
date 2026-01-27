@@ -10,6 +10,7 @@ import { enrichLineItems, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
 import { getTranslations } from 'next-intl/server'
+import CheckoutProviderWrapper from "@modules/checkout/components/checkout-provider-wrapper"
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -75,6 +76,7 @@ export default async function Checkout(props: {
 
       {/* Main Content Grid */}
       <div className="content-container py-8">
+      <CheckoutProviderWrapper>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-6 lg:gap-8 items-start">
           <div className="animate-fade-in-up">
             <Wrapper cart={cart}>
@@ -85,6 +87,7 @@ export default async function Checkout(props: {
             <CheckoutSummary cart={cart} locale={locale} />
           </div>
         </div>
+      </CheckoutProviderWrapper>
       </div>
     </div>
   )

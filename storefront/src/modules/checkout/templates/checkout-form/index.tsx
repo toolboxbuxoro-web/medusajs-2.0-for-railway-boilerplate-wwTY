@@ -6,7 +6,6 @@ import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import { getTranslations } from 'next-intl/server'
 import { fetchBtsRegions, BTS_PRICING } from "@lib/data/bts"
-import { CheckoutProvider } from "@lib/context/checkout-context"
 import CheckoutAccordionWrapper from "@modules/checkout/components/checkout-accordion-wrapper"
 import CheckoutErrorBoundary from "@modules/checkout/components/checkout-error-boundary"
 
@@ -46,7 +45,6 @@ export default async function CheckoutForm({
   }
 
   return (
-    <CheckoutProvider>
       <CheckoutErrorBoundary>
         <CheckoutAccordionWrapper 
           cart={cart}
@@ -56,7 +54,6 @@ export default async function CheckoutForm({
           initialBtsData={initialBtsData}
         />
       </CheckoutErrorBoundary>
-    </CheckoutProvider>
   )
 }
 
