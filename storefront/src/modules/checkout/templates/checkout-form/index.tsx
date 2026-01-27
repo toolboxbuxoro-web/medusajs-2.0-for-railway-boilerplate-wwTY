@@ -35,6 +35,11 @@ export default async function CheckoutForm({
     regions: btsRegions,
     pricing: BTS_PRICING
   }
+
+  console.log('[CheckoutForm] Fetched BTS regions count:', btsRegions?.length)
+  if (btsRegions?.length === 0) {
+    console.warn('[CheckoutForm] BTS regions is empty!')
+  }
   
   if (process.env.NODE_ENV === "development") {
     console.log(`[CheckoutForm] regionId: ${regionId}, paymentMethods: ${paymentMethods?.length}`)

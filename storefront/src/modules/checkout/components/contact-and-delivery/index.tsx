@@ -138,6 +138,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const [lastName, setLastName] = useState("")
 
   // BTS state - Initialize with prop data if available
+  console.log('[ContactAndDelivery] initialBtsData:', initialBtsData ? `Regions: ${initialBtsData.regions?.length}` : 'null')
   const [btsData, setBtsData] = useState<BtsData | null>(initialBtsData || null)
   const [selectedRegionId, setSelectedRegionId] = useState("")
   const [selectedPointId, setSelectedPointId] = useState("")
