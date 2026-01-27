@@ -694,11 +694,22 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 </Label>
                 <Select
                   onValueChange={(val) => {
-                    // Update Context directly
-                    setGlobalPickupPoint(null) // Clear point when region changes
-                    
-                    // Optionally pre-select logic could go here if needed
-                    console.log("[ContactAndDelivery] Region changed to:", val)
+                    // Create intermediate PickupPoint with selected region but no point yet
+                    if (btsData) {
+                      const region = btsData.regions.find(r => r.id === val)
+                      if (region) {
+                        const intermediatePoint = {
+                          id: "", // No point selected yet
+                          name: "",
+                          address: "",
+                          regionId: region.id,
+                          regionName: locale === "ru" ? region.nameRu : region.name,
+                        }
+                        setGlobalPickupPoint(intermediatePoint)
+                        pointRef.current = intermediatePoint
+                        console.log("[ContactAndDelivery] Region selected:", region.nameRu)
+                      }
+                    }
                   }}
                   value={selectedRegionId}
                 >
