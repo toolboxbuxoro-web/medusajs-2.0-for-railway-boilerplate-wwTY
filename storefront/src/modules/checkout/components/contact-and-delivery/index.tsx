@@ -9,7 +9,7 @@ import { CheckCircleSolid } from "@medusajs/icons"
 import { usePathname, useRouter } from "next/navigation"
 import { usePickupPoint } from "@lib/context/pickup-point-context"
 import { useParams } from "next/navigation"
-import { ContactSummary } from "@lib/context/checkout-context"
+import { ContactSummary, useCheckout } from "@lib/context/checkout-context"
 
 // Types for BTS data
 interface BtsPoint {
@@ -114,6 +114,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const params = useParams()
   const locale = (params.locale as string) || "ru"
   const { selectedPoint: globalPickupPoint, setSelectedPoint: setGlobalPickupPoint } = usePickupPoint()
+
+  const { setDeliveryCost: setGlobalDeliveryCost } = useCheckout()
 
   const isCompleted =
     !!cart?.shipping_address?.address_1 &&
@@ -253,12 +255,14 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
           selectedRegionId
         )
         setEstimatedCost(cost)
+        setGlobalDeliveryCost(cost)
       } else {
         setEstimatedCost(null)
+        setGlobalDeliveryCost(null)
       }
     }
     updateCost()
-  }, [selectedRegionId, cartWeight, btsData])
+  }, [selectedRegionId, cartWeight, btsData, setGlobalDeliveryCost])
 
   // Get points for selected region
   const selectedRegionPoints = useMemo(() => {
