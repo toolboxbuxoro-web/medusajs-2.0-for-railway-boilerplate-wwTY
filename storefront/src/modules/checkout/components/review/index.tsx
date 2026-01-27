@@ -1,17 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
-import { Heading, Text, clx } from "@medusajs/ui"
-
+import { Text } from "@medusajs/ui"
 import PaymentButton from "../payment-button"
-import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 
 const Review = ({ cart }: { cart: any }) => {
-  const searchParams = useSearchParams()
   const t = useTranslations("checkout")
-
-  const isOpen = searchParams.get("step") === "review"
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
@@ -21,36 +15,9 @@ const Review = ({ cart }: { cart: any }) => {
     (cart.shipping_methods?.length ?? 0) > 0 &&
     (!!cart.payment_collection || !!(cart as any).payment_collection_id || !!(cart as any).payment_collections?.length || paidByGiftcard)
 
-  useEffect(() => {
-    if (isOpen) {
-      console.log("[Review] Debug Status:", {
-        id: cart.id,
-        "1_address": !!cart.shipping_address,
-        "2_shipping_methods": cart.shipping_methods?.length,
-        "3_payment_collection": !!cart.payment_collection,
-        "3_payment_sessions": (cart as any).payment_collections?.length || (cart as any).payment_collection_id,
-        paidByGiftcard,
-        previousStepsCompleted
-      })
-    }
-  }, [isOpen, cart, paidByGiftcard, previousStepsCompleted])
-
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className={clx(
-            "flex flex-row text-2xl sm:text-3xl-regular gap-x-2 items-baseline",
-            {
-              "opacity-50 pointer-events-none select-none": !isOpen,
-            }
-          )}
-        >
-          {t("review_title")}
-        </Heading>
-      </div>
-      {isOpen && previousStepsCompleted && (
+      {previousStepsCompleted ? (
         <>
           <div className="flex items-start gap-x-1 w-full mb-6">
             <div className="w-full">
@@ -61,6 +28,12 @@ const Review = ({ cart }: { cart: any }) => {
           </div>
           <PaymentButton cart={cart} data-testid="submit-order-button" />
         </>
+      ) : (
+        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <Text className="text-gray-500 italic">
+            {t("please_complete_previous_steps") || "Пожалуйста, заполните предыдущие шаги"}
+          </Text>
+        </div>
       )}
     </div>
   )

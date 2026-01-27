@@ -1,5 +1,3 @@
-"use client"
-
 import { HttpTypes } from "@medusajs/types"
 import { Container, Select, Label, Text, Heading } from "@medusajs/ui"
 import Input from "@modules/common/components/input"
@@ -8,9 +6,10 @@ import React, { useEffect, useMemo, useState, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { convertToLocale } from "@lib/util/money"
 import { CheckCircleSolid } from "@medusajs/icons"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { usePickupPoint } from "@lib/context/pickup-point-context"
 import { useParams } from "next/navigation"
+import { ContactSummary } from "@lib/context/checkout-context"
 
 // Types for BTS data
 interface BtsPoint {
@@ -80,6 +79,7 @@ interface ContactAndDeliveryProps {
   customer: HttpTypes.StoreCustomer | null
   availableShippingMethods?: HttpTypes.StoreCartShippingOption[]
   initialBtsData?: BtsData
+  onComplete?: (data: ContactSummary) => void
 }
 
 const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
@@ -87,6 +87,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   customer,
   availableShippingMethods,
   initialBtsData,
+  onComplete,
 }) => {
   const t = useTranslations("checkout")
   const tAccount = useTranslations("account")
@@ -108,7 +109,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     }
     return errorMap[errorKey] || errorKey
   }
-  const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
   const params = useParams()
@@ -119,18 +119,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     !!cart?.shipping_address?.address_1 &&
     (cart?.shipping_methods?.length ?? 0) > 0
 
-  useEffect(() => {
-    console.log("[ContactAndDelivery] Status:", {
-      address_1: cart?.shipping_address?.address_1,
-      methods: cart?.shipping_methods?.length,
-      isCompleted,
-      step: searchParams.get("step")
-    })
-  }, [cart, isCompleted, searchParams])
+  const isOpen = true // Controlled by accordion
 
-  const isOpen = 
-    ["address", "delivery", "shipping"].includes(searchParams.get("step") || "") || 
-    (!searchParams.get("step") && !isCompleted)
 
   // Form state
   const [phone, setPhone] = useState("")
@@ -138,7 +128,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const [lastName, setLastName] = useState("")
 
   // BTS state - Initialize with prop data if available
-  console.log('[ContactAndDelivery] initialBtsData:', initialBtsData ? `Regions: ${initialBtsData.regions?.length}` : 'null')
   const [btsData, setBtsData] = useState<BtsData | null>(initialBtsData || null)
   
   // Removed local state - using globalPickupPoint from context as SSoT
@@ -176,7 +165,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   // Fallback: If no initial data, load static fallback (we removed client fetch to save requests)
   useEffect(() => {
     if (!btsData) {
-       console.log("[ContactAndDelivery] No initialBtsData, loading fallback")
        import("@lib/data/bts")
         .then((mod) => {
           setBtsData({
@@ -225,7 +213,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     if (btsData && selectedRegionId) {
       const regionExists = btsData.regions.find(r => r.id === selectedRegionId)
       if (!regionExists) {
-        console.warn(`[ContactAndDelivery] Region ${selectedRegionId} not found in btsData, clearing`)
         setGlobalPickupPoint(null)
       }
     }
@@ -290,9 +277,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     [selectedRegionPoints, selectedPointId]
   )
 
-  const handleEdit = () => {
-    router.push(pathname + "?step=address")
-  }
+  // handleEdit removed - edit functionality is now handled by AccordionSection's onToggle
 
   // Resend timer countdown
   useEffect(() => {
@@ -381,12 +366,16 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
       // Auto-register removed. OTP Login is now enforced above.
       console.log("[Checkout] Address submitted. isLoggedIn:", isLoggedIn, "otpVerified:", otpVerified)
 
-      // Navigate to payment step
-      // Navigate to payment step
-      router.push(pathname + "?step=payment", { scroll: false })
-      router.refresh()
+      // Trigger onComplete to advance accordion
+      onComplete?.({
+        firstName,
+        lastName,
+        phone,
+        region: selectedRegion?.nameRu,
+        point: selectedPoint?.name,
+      })
       
-      // No dirty flag to reset anymore
+      router.refresh()
     } catch (err: any) {
       console.error("Submit error:", err)
       setError(err.message || "An error occurred")
@@ -403,58 +392,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
 
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-4 px-2">
-        <Heading
-          level="h2"
-          className="text-xl font-bold text-gray-900 flex items-center gap-2"
-        >
-          {t("shipping_information") as string}
-        </Heading>
-        {!isOpen && isCompleted && (
-          <button
-            onClick={handleEdit}
-            className="text-blue-600 hover:text-blue-700 font-semibold text-sm transition-colors flex items-center gap-1 group"
-            data-testid="edit-address-button"
-          >
-            <svg
-              className="w-4 h-4 group-hover:rotate-12 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-            {t("edit") as string}
-          </button>
-        )}
-      </div>
-
-      {isOpen ? (
-        <form onSubmit={handleSubmit} className="pb-4">
-          {/* Step Progress Indicator */}
-          <div className="flex items-center justify-between mb-6 px-2">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">1</div>
-              <span className="text-sm font-medium text-blue-600">{t("step_contact")}</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-gray-200 mx-2" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-bold">2</div>
-              <span className="text-sm font-medium text-gray-500">{t("step_delivery")}</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-gray-200 mx-2" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-bold">3</div>
-              <span className="text-sm font-medium text-gray-500">{t("step_payment")}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-y-6">
+      <form onSubmit={handleSubmit} className="pb-4">
+        <div className="flex flex-col gap-y-6">
             {/* Recipient Details Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-gray-600 text-sm">
@@ -707,7 +646,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                         }
                         setGlobalPickupPoint(intermediatePoint)
                         pointRef.current = intermediatePoint
-                        console.log("[ContactAndDelivery] Region selected:", region.nameRu)
                       }
                     }
                   }}
@@ -828,60 +766,6 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
             )}
           </button>
         </form>
-      ) : (
-        <div className="space-y-6">
-          {isCompleted && cart ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 rounded-2xl p-4 sm:p-6 border border-gray-100">
-              <div className="space-y-4">
-                <div data-testid="shipping-address-summary">
-                  <Text className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">
-                    {t("recipient") as string}
-                  </Text>
-                  <Text className="text-base font-semibold text-gray-900 leading-tight">
-                    {cart.shipping_address?.first_name} {cart.shipping_address?.last_name}
-                  </Text>
-                  <Text className="text-sm text-gray-600 font-medium">
-                    {cart.shipping_address?.phone}
-                  </Text>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {(cart.metadata?.bts_delivery as { region?: string; point?: string } | undefined) && (
-                  <div>
-                    <Text className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">
-                      {t("bts_delivery_point") as string}
-                    </Text>
-                    <div className="bg-white rounded-xl border border-blue-100 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                        <Text className="text-sm font-bold text-gray-900">
-                          {String((cart.metadata?.bts_delivery as { region?: string })?.region || "")}
-                        </Text>
-                      </div>
-                      <Text className="text-xs text-gray-500 font-medium line-clamp-2">
-                        {String((cart.metadata?.bts_delivery as { point?: string })?.point || "")}
-                      </Text>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 flex items-center justify-between">
-              <Text className="text-orange-600 font-medium">
-                {t("incomplete_information") || "Incomplete information"}
-              </Text>
-              <button 
-                onClick={() => router.push(pathname + "?step=address")}
-                className="text-orange-700 font-bold hover:underline"
-              >
-                {t("edit") || "Edit"}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }

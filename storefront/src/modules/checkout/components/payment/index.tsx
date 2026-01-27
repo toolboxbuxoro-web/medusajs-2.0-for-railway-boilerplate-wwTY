@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
@@ -17,13 +17,16 @@ import { initiatePaymentSession } from "@lib/data/cart"
 import { useTranslations } from "next-intl"
 
 import { HttpTypes } from "@medusajs/types"
+import { PaymentSummary } from "@lib/context/checkout-context"
 
 const Payment = ({
   cart,
   availablePaymentMethods,
+  onComplete,
 }: {
   cart: any
   availablePaymentMethods: any[]
+  onComplete?: (data: PaymentSummary) => void
 }) => {
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession: any) => paymentSession.status === "pending" || paymentSession.status === "authorized"
@@ -37,14 +40,13 @@ const Payment = ({
     activeSession?.provider_id ?? ""
   )
 
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const pathname = usePathname()
   const t = useTranslations("checkout")
 
-  const isOpen = searchParams.get("step") === "payment"
+  const isOpen = true // Controlled by accordion
 
   const isStripe = isStripeFunc(activeSession?.provider_id)
+
   const stripeReady = useContext(StripeContext)
 
   const paidByGiftcard =
@@ -71,22 +73,6 @@ const Payment = ({
       },
     }
   }, [])
-
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams)
-      params.set(name, value)
-
-      return params.toString()
-    },
-    [searchParams]
-  )
-
-  const handleEdit = () => {
-    router.push(pathname + "?" + createQueryString("step", "payment"), {
-      scroll: false,
-    })
-  }
 
   const handleSubmit = async (overrideProviderId?: string) => {
     const providerIdToUse = overrideProviderId || selectedPaymentMethod
@@ -120,12 +106,9 @@ const Payment = ({
       }
 
       if (!shouldInputCard) {
-        router.push(
-          pathname + "?" + createQueryString("step", "review"),
-          {
-            scroll: false,
-          }
-        )
+        onComplete?.({
+          method: providerIdToUse
+        })
         router.refresh()
       }
     } catch (err: any) {
@@ -148,31 +131,9 @@ const Payment = ({
   }, [activeSession?.provider_id])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className="flex flex-row text-xl font-bold text-gray-900 gap-x-2 items-center"
-        >
-          {t("payment")}
-          {!isOpen && paymentReady && (
-            <CheckCircleSolid className="text-green-500" />
-          )}
-        </Heading>
-        {!isOpen && paymentReady && (
-          <Text className="ml-auto">
-            <button
-              onClick={handleEdit}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
-              data-testid="edit-payment-button"
-            >
-              {t("edit")}
-            </button>
-          </Text>
-        )}
-      </div>
+    <div className="bg-white">
       <div>
-        <div className={isOpen ? "block" : "hidden"}>
+        <div className="block">
           {!paidByGiftcard && availablePaymentMethods?.length && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                {availablePaymentMethods

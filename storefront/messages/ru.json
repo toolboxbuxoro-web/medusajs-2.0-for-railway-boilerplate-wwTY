@@ -287,7 +287,9 @@
     "step_delivery": "Доставка",
     "step_payment": "Оплата",
     "verified_success": "Номер подтверждён ✓",
-    "enter_your_details": "Введите данные получателя"
+    "enter_your_details": "Введите данные получателя",
+    "payment_method_selected": "Выбран способ",
+    "step_progress": "Шаг {current} из {total}"
   },
   "product": {
     "product_info": "Информация о товаре",
