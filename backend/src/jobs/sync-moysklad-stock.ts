@@ -16,6 +16,12 @@ export default async function syncMoySkladStockJob(container: MedusaContainer) {
   const moySkladService: MoySkladService = container.resolve(MOYSKLAD_MODULE)
 
   const startTime = Date.now()
+
+  if (!process.env.MOYSKLAD_TOKEN) {
+    logger.warn("⚠️ MOYSKLAD_TOKEN is not configured. Skipping stock sync job.")
+    return
+  }
+
   logger.info("🔄 Starting MoySklad stock sync job...")
 
   try {

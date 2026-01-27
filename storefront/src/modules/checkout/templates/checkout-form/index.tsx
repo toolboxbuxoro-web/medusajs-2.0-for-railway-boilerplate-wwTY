@@ -5,6 +5,7 @@ import ContactAndDelivery from "@modules/checkout/components/contact-and-deliver
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import { getTranslations } from 'next-intl/server'
+import { fetchBtsRegions, BTS_PRICING } from "@lib/data/bts"
 
 export default async function CheckoutForm({
   cart,
@@ -19,9 +20,21 @@ export default async function CheckoutForm({
     return null
   }
 
-  const shippingMethods = await listCartShippingMethods(cart.id)
   const regionId = cart.region_id || cart.region?.id || ""
-  const paymentMethods = await listCartPaymentMethods(regionId)
+
+  const [shippingMethods, paymentMethods, btsRegions] = await Promise.all([
+    listCartShippingMethods(cart.id),
+    listCartPaymentMethods(regionId),
+    fetchBtsRegions().catch((err) => {
+      console.error('[CheckoutForm] Failed to fetch BTS regions:', err)
+      return []
+    }),
+  ])
+  
+  const initialBtsData = {
+    regions: btsRegions,
+    pricing: BTS_PRICING
+  }
   
   if (process.env.NODE_ENV === "development") {
     console.log(`[CheckoutForm] regionId: ${regionId}, paymentMethods: ${paymentMethods?.length}`)
@@ -44,7 +57,8 @@ export default async function CheckoutForm({
           <ContactAndDelivery 
             cart={cart} 
             customer={customer} 
-            availableShippingMethods={shippingMethods} 
+            availableShippingMethods={shippingMethods}
+            initialBtsData={initialBtsData}
           />
         </div>
 

@@ -54,6 +54,33 @@ export async function retrieveCart() {
   }
 }
 
+
+export async function retrieveCartItemCount() {
+  const cartId = await getCartId()
+
+  if (!cartId) {
+    return 0
+  }
+
+  try {
+    const { cart } = await sdk.store.cart.retrieve(
+      cartId,
+      {
+        fields: "items.quantity",
+      },
+      { next: { tags: ["cart"] }, ...await getAuthHeaders() }
+    )
+
+    if (!cart || !cart.items) {
+      return 0
+    }
+
+    return cart.items.reduce((acc, item) => acc + item.quantity, 0)
+  } catch (error) {
+    return 0
+  }
+}
+
 export async function getOrSetCart(countryCode: string) {
   let cart = await retrieveCart()
   const cc = (countryCode || "").toLowerCase()

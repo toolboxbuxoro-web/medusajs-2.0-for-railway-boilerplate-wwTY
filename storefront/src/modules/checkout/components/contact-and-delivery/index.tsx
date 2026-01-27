@@ -79,12 +79,14 @@ interface ContactAndDeliveryProps {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
   availableShippingMethods?: HttpTypes.StoreCartShippingOption[]
+  initialBtsData?: BtsData
 }
 
 const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   cart,
   customer,
   availableShippingMethods,
+  initialBtsData,
 }) => {
   const t = useTranslations("checkout")
   const tAccount = useTranslations("account")
@@ -135,8 +137,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
 
-  // BTS state
-  const [btsData, setBtsData] = useState<BtsData | null>(null)
+  // BTS state - Initialize with prop data if available
+  const [btsData, setBtsData] = useState<BtsData | null>(initialBtsData || null)
   const [selectedRegionId, setSelectedRegionId] = useState("")
   const [selectedPointId, setSelectedPointId] = useState("")
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null)
@@ -162,51 +164,22 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
     return btsMethod?.id || availableShippingMethods?.[0]?.id || ""
   }, [availableShippingMethods])
 
-  // Fetch BTS data from backend
+  // Fallback: If no initial data, load static fallback (we removed client fetch to save requests)
   useEffect(() => {
-    const fetchBtsData = async () => {
-      try {
-        const backendUrl = (
-          process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
-        ).replace(/\/$/, "")
-        const publishableKey =
-          process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-
-        const response = await fetch(`${backendUrl}/store/bts`, {
-          headers: {
-            "x-publishable-api-key": publishableKey,
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setBtsData(data)
-        }
-      } catch (err) {
-        console.error("Failed to fetch BTS data:", err)
-        // Fallback: use local import if backend fetch fails
-        import("@lib/data/bts").then((mod) => {
+    if (!btsData) {
+       console.log("[ContactAndDelivery] No initialBtsData, loading fallback")
+       import("@lib/data/bts")
+        .then((mod) => {
           setBtsData({
             regions: mod.BTS_REGIONS as unknown as BtsRegion[],
-            pricing: {
-              zoneRates: { 1: 5000, 2: 6000, 3: 6500 },
-              expressRates: {
-                1: { 1: 25000, 2: 30000, 3: 35000 },
-                5: { 1: 45000, 2: 55000, 3: 60000 },
-                10: { 1: 65000, 2: 80000, 3: 90000 },
-                20: { 1: 100000, 2: 120000, 3: 135000 },
-              },
-              expressMaxWeight: 20,
-              minWeight: 1,
-              winterMonths: [12, 1, 2, 3],
-              winterFuelSurcharge: 0.3,
-            },
+            pricing: mod.BTS_PRICING
           })
         })
-      }
+        .catch((err) => {
+          console.error('[ContactAndDelivery] Failed to load BTS fallback:', err)
+        })
     }
-
-    fetchBtsData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Initialize form with customer data (for logged-in) or localStorage/cart data (for guests)

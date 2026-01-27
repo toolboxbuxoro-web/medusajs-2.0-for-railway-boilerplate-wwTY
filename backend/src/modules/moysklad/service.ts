@@ -79,10 +79,18 @@ export default class MoySkladService {
 
   /**
    * Get default headers for MoySklad API requests
+   * MoySklad supports both Basic Auth (base64 login:password) and Bearer Token
+   * If token is hex format (like d315552c...), use Bearer
+   * If token is base64 format, use Basic
    */
   private getHeaders(): HeadersInit {
+    // Auto-detect: if token contains only hex chars, it's likely an Access Token (use Bearer)
+    // Otherwise, it's base64-encoded credentials (use Basic)
+    const isAccessToken = /^[a-f0-9]+$/i.test(this.token_)
+    const authScheme = isAccessToken ? 'Bearer' : 'Basic'
+    
     return {
-      "Authorization": `Bearer ${this.token_}`,
+      "Authorization": `${authScheme} ${this.token_}`,
       "Accept": "application/json;charset=utf-8",
       "Accept-Encoding": "gzip",
       "Content-Type": "application/json"
