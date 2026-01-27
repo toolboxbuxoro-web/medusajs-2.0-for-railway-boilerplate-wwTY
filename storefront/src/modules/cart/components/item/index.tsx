@@ -58,7 +58,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         {/* Large Photo */}
         <LocalizedClientLink
           href={`/products/${handle}`}
-          className="w-full aspect-square rounded-lg overflow-hidden bg-gray-50"
+          className="w-2/3 mx-auto md:w-1/3 aspect-square rounded-lg overflow-hidden bg-gray-50"
         >
           <Thumbnail
             thumbnail={item.variant?.product?.thumbnail}
@@ -72,7 +72,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           <span className="text-sm text-gray-500">
             {item.quantity}x
           </span>
-          <span className="font-bold text-base text-gray-900">
+          <span className="font-bold text-lg text-gray-900">
             <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
           </span>
         </div>
