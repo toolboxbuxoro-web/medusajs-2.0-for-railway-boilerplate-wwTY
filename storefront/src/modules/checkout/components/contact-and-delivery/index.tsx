@@ -699,7 +699,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                               <span className="font-medium text-xs sm:text-sm leading-tight">
                                 {point.name}
                               </span>
-                              <div className="text-gray-400 text-[10px] sm:text-xs truncate">
+                              <div className="text-gray-400 text-[10px] sm:text-xs whitespace-normal leading-tight">
                                 {point.address}
                               </div>
                             </div>
