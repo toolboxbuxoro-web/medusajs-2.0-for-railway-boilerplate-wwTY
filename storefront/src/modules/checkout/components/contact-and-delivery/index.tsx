@@ -689,7 +689,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       }} 
                       value={selectedPointId}
                     >
-                      <Select.Trigger className="w-full bg-white border border-gray-200 h-10 sm:h-12 rounded-lg px-3 sm:px-4 text-[11px] xs:text-xs sm:text-base text-gray-900 focus:border-blue-500 transition-colors">
+                      <Select.Trigger className="w-full bg-white border border-gray-200 h-auto min-h-[40px] sm:min-h-[48px] py-2 rounded-lg px-3 sm:px-4 text-[11px] xs:text-xs sm:text-base text-gray-900 focus:border-blue-500 transition-colors">
                         <Select.Value placeholder={t("bts_point_placeholder")} />
                       </Select.Trigger>
                       <Select.Content>
