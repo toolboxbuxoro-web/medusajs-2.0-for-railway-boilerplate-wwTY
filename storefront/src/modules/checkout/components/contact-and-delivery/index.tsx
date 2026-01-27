@@ -595,13 +595,10 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
               )}
             </div>
 
-            {/* Delivery Type Info */}
-            <div className="flex flex-col gap-3">
-              <Label className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider font-bold">
-                <span className="hidden sm:inline">{t("delivery_type")}</span>
-                <span className="sm:hidden">{t("delivery_type_short") || "ДОСТАВКА"}</span>
-              </Label>
-              <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center gap-3">
+            {/* BTS Region & Point Selection */}
+            <div className="bg-white rounded-xl border border-blue-100 overflow-hidden shadow-sm">
+              {/* Delivery Type Header */}
+              <div className="p-4 bg-blue-50/50 border-b border-blue-100 flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-600 border border-blue-50">
                   <svg
                     className="w-6 h-6"
@@ -622,10 +619,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   <div className="text-[10px] sm:text-xs text-gray-500 truncate">{t("bts_delivery_info") as string}</div>
                 </div>
               </div>
-            </div>
-
-            {/* BTS Region & Point Selection */}
-            <div className="bg-white rounded-xl border border-blue-100 overflow-hidden shadow-sm">
+              
+              {/* Region Selection */}
               <div className="p-4 sm:p-6 bg-blue-50/50 border-b border-blue-100">
                 <Label className="text-blue-500 text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider font-semibold mb-1">
                   {t("bts_select_region") as string}
