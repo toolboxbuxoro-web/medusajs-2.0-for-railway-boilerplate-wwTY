@@ -11,7 +11,7 @@ type CategoryType = HttpTypes.StoreProductCategory & {
   metadata?: {
     image_url?: string
     [key: string]: unknown
-  }
+  } | null
 }
 
 interface CategoryGridSliderProps {
@@ -133,7 +133,7 @@ export default function CategoryGridSlider({ categories, locale }: CategoryGridS
   }
 
   return (
-    <div className="bg-white py-4 sm:py-6">
+    <div className="bg-white pt-4 pb-1 sm:pt-6 sm:pb-2">
       <div className="content-container relative">
         {/* Desktop: Horizontal scroll with small cards in one row */}
         <div className="hidden sm:block relative">

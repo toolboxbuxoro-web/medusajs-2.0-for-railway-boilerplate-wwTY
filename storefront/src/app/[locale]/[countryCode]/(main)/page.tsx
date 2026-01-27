@@ -61,7 +61,7 @@ export default async function Home(props: Props) {
         <CategoryGridSlider categories={parentCategories} locale={locale} />
       )}
 
-      <div className="bg-white py-8 sm:py-12">
+      <div className="bg-white pt-4 pb-8 sm:pt-8 sm:pb-12">
         <div className="content-container">
           <div className="flex flex-col gap-y-8">
             {/* 1. First Collection (Winter Theme) */}
