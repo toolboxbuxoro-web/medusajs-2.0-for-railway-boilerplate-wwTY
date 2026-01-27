@@ -71,13 +71,15 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           
           {/* Price & Quantity - Different layouts for mobile/desktop */}
           <div className="flex flex-col gap-1 md:flex-1 md:min-w-0">
-            {/* Price Row */}
-            <div className="flex items-center justify-between w-full">
-              <span className="text-base md:text-sm text-gray-500">
-                {item.quantity}x
-              </span>
-              <span className="font-bold text-xl md:text-2xl text-gray-900">
+            {/* Mobile: Horizontal row | Desktop: Vertical stack */}
+            <div className="flex md:flex-col items-center md:items-end justify-between md:justify-start gap-1">
+              {/* Price - show first on desktop (flex-col-reverse effect) */}
+              <span className="font-bold text-2xl md:text-2xl text-gray-900 order-2 md:order-1">
                 <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
+              </span>
+              {/* Quantity - show first on mobile, below price on desktop */}
+              <span className="text-lg md:text-sm text-gray-500 order-1 md:order-2">
+                {item.quantity}x
               </span>
             </div>
           </div>
