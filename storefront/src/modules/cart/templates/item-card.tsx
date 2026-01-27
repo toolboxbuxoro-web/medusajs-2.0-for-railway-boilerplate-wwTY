@@ -91,10 +91,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
               </Marquee>
             </LocalizedClientLink>
 
-            {/* Code & Availability */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 mb-2">
-              <span>{tProduct("code")}: {item.variant?.sku || "N/A"}</span>
-            </div>
+
 
             {/* Price & Quantity Row */}
             <div className="flex items-center justify-between gap-2">
@@ -154,9 +151,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
                     {getLocalizedLineItemTitle(item, localeStr)}
                   </h3>
                 </LocalizedClientLink>
-                <p className="text-sm text-gray-600 mb-1">
-                  {tProduct("code")}: {(item.variant?.product?.metadata as any)?.code || item.variant?.sku || "N/A"}
-                </p>
+
 
 
                 <div className="flex items-center gap-4">
