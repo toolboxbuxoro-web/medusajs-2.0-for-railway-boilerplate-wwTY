@@ -8,6 +8,7 @@ import Payment from "./payment"
 import Review from "./review"
 import { Text } from "@medusajs/ui"
 import { useTranslations } from "next-intl"
+import { paymentInfoMap } from "@lib/constants"
 
 export default function CheckoutAccordionWrapper({
   cart,
@@ -115,7 +116,7 @@ export default function CheckoutAccordionWrapper({
         summary={
           paymentSummary && (
             <div className="text-sm text-gray-500">
-              {t('payment_method_selected')}: <span className="font-medium text-gray-700 font-bold uppercase">{paymentSummary.method}</span>
+              {t('payment_method_selected')}: <span className="font-medium text-gray-700 font-bold uppercase">{paymentInfoMap[paymentSummary.method]?.title || t(paymentSummary.method) || paymentSummary.method}</span>
             </div>
           )
         }

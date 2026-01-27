@@ -662,7 +662,8 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                 <div className="p-4 sm:p-6 space-y-4">
                   <div className="space-y-2">
                     <Label className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider font-semibold">
-                      {t("bts_select_point")}
+                      <span className="hidden sm:inline">{t("bts_select_point")}</span>
+                      <span className="sm:hidden">{t("bts_pickup_point_short") || "ПУНКТ ВЫДАЧИ"}</span>
                     </Label>
                     <Select 
                       onValueChange={(val) => {
@@ -690,7 +691,7 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                       <Select.Content>
                         {selectedRegionPoints.map((point) => (
                           <Select.Item key={point.id} value={point.id}>
-                            <div className="flex flex-col gap-0.5 min-w-0">
+                            <div className="flex flex-col gap-0.5 min-w-0 py-1">
                               <span className="font-medium text-xs sm:text-sm truncate">
                                 {point.name}
                               </span>
@@ -705,21 +706,21 @@ const ContactAndDelivery: React.FC<ContactAndDeliveryProps> = ({
                   </div>
 
                   {estimatedCost !== null && (
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 truncate">
+                    <div className="flex flex-col gap-1 pt-4 border-t border-gray-50">
+                        <span className="text-[10px] uppercase font-bold text-gray-400">
                           {t("bts_estimated_cost")}
                         </span>
-                        <span className="text-base sm:text-lg font-bold text-gray-900 truncate">
-                          {convertToLocale({
-                            amount: estimatedCost,
-                            currency_code: cart?.currency_code || "uzs",
-                          })}
-                        </span>
-                      </div>
-                      <div className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
-                        {t("bts_payment_on_delivery")}
-                      </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <span className="text-xl sm:text-2xl font-bold text-gray-900">
+                            {convertToLocale({
+                              amount: estimatedCost,
+                              currency_code: cart?.currency_code || "uzs",
+                            })}
+                          </span>
+                          <div className="self-start sm:self-auto text-[10px] sm:text-xs font-bold text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-md">
+                            {t("bts_payment_on_delivery")}
+                          </div>
+                        </div>
                     </div>
                   )}
                 </div>

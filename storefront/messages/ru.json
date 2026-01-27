@@ -294,7 +294,8 @@
     "step_progress": "Шаг {current} из {total}",
     "please_complete_previous_steps": "Пожалуйста, заполните предыдущие шаги",
     "continue_short": "Далее",
-    "delivery_type_short": "ДОСТАВКА"
+    "delivery_type_short": "ДОСТАВКА",
+    "bts_pickup_point_short": "ПУНКТ ВЫДАЧИ"
   },
   "product": {
     "product_info": "Информация о товаре",
