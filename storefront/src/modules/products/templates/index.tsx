@@ -1,3 +1,5 @@
+"use client"
+
 import React, { Suspense } from "react"
 
 import ImageGallery from "@modules/products/components/image-gallery"
