@@ -129,6 +129,86 @@ function FavoritesButtonMobile() {
   )
 }
 
+// Smart Home Button с двойным нажатием и запоминанием позиции
+function SmartHomeButton({ isActive, label }: { isActive: boolean; label: string }) {
+  const pathname = usePathname()
+  const [lastTap, setLastTap] = useState(0)
+  
+  useEffect(() => {
+    // Сохраняем позицию скролла главной страницы перед уходом
+    const saveScrollPosition = () => {
+      if (pathname === '/' || pathname?.match(/^\/[a-z]{2}$/)) {
+        const scrollPos = window.scrollY
+        localStorage.setItem('homeScrollPosition', scrollPos.toString())
+      }
+    }
+    
+    // Сохраняем при скролле (с debounce)
+    let timeoutId: NodeJS.Timeout
+    const handleScroll = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(saveScrollPosition, 200)
+    }
+    
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('beforeunload', saveScrollPosition)
+    
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('beforeunload', saveScrollPosition)
+    }
+  }, [pathname])
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    
+    const currentTime = Date.now()
+    const isDoubleTap = currentTime - lastTap < 300 // 300ms для двойного клика
+    
+    const isOnHomePage = pathname === '/' || pathname?.match(/^\/[a-z]{2}$/)
+    
+    if (isOnHomePage) {
+      if (isDoubleTap) {
+        // Двойной клик - скролл наверх
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        // Одинарный клик на главной - ничего не делаем или скролл наверх
+        // (можно настроить поведение)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    } else {
+      // Не на главной - переходим на главную
+      const savedPosition = localStorage.getItem('homeScrollPosition')
+      
+      // Переходим на главную
+      window.location.href = '/'
+      
+      // После загрузки восстанавливаем позицию
+      if (savedPosition && !isDoubleTap) {
+        setTimeout(() => {
+          window.scrollTo({ top: parseInt(savedPosition), behavior: 'auto' })
+        }, 100)
+      }
+    }
+    
+    setLastTap(currentTime)
+  }
+  
+  return (
+    <button
+      onClick={handleClick}
+      className={`flex flex-col items-center justify-center gap-0.5 p-1.5 transition-colors ${
+        isActive ? 'text-red-600' : 'text-gray-600'
+      }`}
+      title={label}
+    >
+      <HomeIcon size="22" color={isActive ? '#DC2626' : '#4B5563'} />
+      <span className="text-[9px] font-medium leading-tight">{label}</span>
+    </button>
+  )
+}
+
 export default function MobileBottomBar({ categories, locale }: MobileBottomBarProps) {
   const pathname = usePathname()
   const t = useTranslations('nav')
@@ -148,18 +228,9 @@ export default function MobileBottomBar({ categories, locale }: MobileBottomBarP
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[101] bg-white border-t border-gray-200 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex items-center justify-around h-16 px-1">
-        {/* Главное */}
+        {/* Главное - Smart scroll button */}
         <div className="flex-1 flex justify-center">
-          <LocalizedClientLink
-            href="/"
-            className={`flex flex-col items-center justify-center gap-0.5 p-1.5 transition-colors ${
-              isActive('/') ? 'text-red-600' : 'text-gray-600'
-            }`}
-            title={t('home') || 'Главная'}
-          >
-            <HomeIcon size="22" color={isActive('/') ? '#DC2626' : '#4B5563'} />
-            <span className="text-[9px] font-medium leading-tight">{t('home') || 'Главная'}</span>
-          </LocalizedClientLink>
+          <SmartHomeButton isActive={isActive('/')} label={t('home') || 'Главная'} />
         </div>
 
         {/* Каталог - открывает страницу /categories */}
