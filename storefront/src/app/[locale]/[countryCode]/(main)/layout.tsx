@@ -1,6 +1,5 @@
 import { Metadata } from "next"
 
-import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import MobileBottomBar from "@modules/layout/components/mobile-bottom-bar"
 import { getBaseURL } from "@lib/util/env"
@@ -30,7 +29,6 @@ export default async function PageLayout(props: Props) {
       <div className="md:pb-0 pb-20">
         {children}
       </div>
-      <Footer />
       <MobileBottomBar categories={mainCategories} locale={params.locale} />
     </>
   )
