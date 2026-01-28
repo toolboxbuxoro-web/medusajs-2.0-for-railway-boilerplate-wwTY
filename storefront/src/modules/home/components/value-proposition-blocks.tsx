@@ -12,7 +12,7 @@ export default function ValuePropositionBlocks({ locale }: ValuePropositionBlock
 
   return (
     <>
-      <div className="py-8 sm:py-12 bg-gray-50/50">
+      <div className="bg-gray-50/50">
         <div className="content-container">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
