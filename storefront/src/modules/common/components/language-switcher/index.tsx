@@ -106,7 +106,7 @@ export default function LanguageSwitcher({ variant = 'default' }: LanguageSwitch
       </button>
       
       {isOpen && (
-        <div className={`absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-200 ${
+        <div className={`absolute z-[100] bg-white border border-gray-200 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-200 ${
           isMobile ? 'right-0 mt-1 w-32' : 'right-0 mt-2 w-48'
         }`}>
           {locales.map((locale) => (
