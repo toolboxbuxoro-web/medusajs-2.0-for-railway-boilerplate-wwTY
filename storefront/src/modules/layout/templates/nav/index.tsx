@@ -156,7 +156,7 @@ export default async function Nav({ locale }: NavProps) {
               <span>{t('all_products') || 'Все товары'}</span>
             </LocalizedClientLink>
 
-            {mainCategories.slice(0, 10).map((category: HttpTypes.StoreProductCategory) => (
+            {mainCategories.slice(0, 8).map((category: HttpTypes.StoreProductCategory) => (
               <LocalizedClientLink
                 key={category.id}
                 href={`/categories/${category.handle}`}
