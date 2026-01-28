@@ -121,15 +121,6 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
             )}
           </div>
 
-          {/* Interaction Bar (Favorite/Share) - Moved to sticky sidebar or top of details */}
-          <div className="flex items-center gap-4 py-4 border-y border-gray-50">
-            <FavoriteButton productId={product.id} />
-            <button className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6a3 3 0 100-2.684m0 2.684l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-              {t('share')}
-            </button>
-          </div>
-
           {/* Features (Above Fold - First 4) */}
           {metadata.features.length > 0 && (
             <ProductFeatures features={metadata.features} maxItems={4} showTitle={true} />
