@@ -18,14 +18,38 @@ const MobileProductHeader: React.FC<MobileProductHeaderProps> = ({ product }) =>
   
   const productTitle = getLocalizedField(product, "title", localeStr) || product.title
 
+  const [galleryHeight, setGalleryHeight] = useState(400) // Default fallback
+
+  useEffect(() => {
+    // Get gallery height on mount
+    const updateGalleryHeight = () => {
+      const gallery = document.querySelector('[data-testid="image-gallery"]')
+      if (gallery) {
+        setGalleryHeight(gallery.clientHeight)
+      }
+    }
+
+    // Wait a bit for images to load
+    const timer = setTimeout(updateGalleryHeight, 500)
+    
+    // Also update on resize
+    window.addEventListener('resize', updateGalleryHeight)
+
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('resize', updateGalleryHeight)
+    }
+  }, [])
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
+      // Header becomes solid when scrolled past the gallery
+      setIsScrolled(window.scrollY > galleryHeight - 56) // 56px = header height
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [galleryHeight])
 
   const handleShare = async () => {
     if (navigator.share) {

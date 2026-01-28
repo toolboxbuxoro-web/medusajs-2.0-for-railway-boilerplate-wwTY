@@ -255,7 +255,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
       {/* Mobile Layout: Kept with snap behavior for tactile feel */}
       <div className="lg:hidden">
-        <div className="relative group/mobile">
+        <div className="relative group/mobile" data-testid="image-gallery">
           <div 
             ref={mobileScrollRef}
             className="w-full overflow-x-auto snap-x snap-mandatory flex gap-0 no-scrollbar pb-4"
