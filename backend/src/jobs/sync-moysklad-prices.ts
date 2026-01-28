@@ -191,10 +191,8 @@ export default async function syncMoySkladPricesJob(container: MedusaContainer) 
   }
 }
 
-/*
 export const config = {
   name: "sync-moysklad-prices",
   // Run every hour
   schedule: "0 * * * *",
 }
-*/
