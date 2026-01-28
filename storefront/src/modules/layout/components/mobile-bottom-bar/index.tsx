@@ -1,6 +1,6 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTranslations } from 'next-intl'
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Cart from "@modules/common/icons/cart"
@@ -132,6 +132,7 @@ function FavoritesButtonMobile() {
 // Smart Home Button с двойным нажатием и запоминанием позиции
 function SmartHomeButton({ isActive, label }: { isActive: boolean; label: string }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [lastTap, setLastTap] = useState(0)
   
   useEffect(() => {
@@ -173,22 +174,25 @@ function SmartHomeButton({ isActive, label }: { isActive: boolean; label: string
         // Двойной клик - скролл наверх
         window.scrollTo({ top: 0, behavior: 'smooth' })
       } else {
-        // Одинарный клик на главной - ничего не делаем или скролл наверх
-        // (можно настроить поведение)
+        // Одинарный клик на главной - скролл наверх
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } else {
-      // Не на главной - переходим на главную
+      // Не на главной - переходим на главную с помощью роутера
       const savedPosition = localStorage.getItem('homeScrollPosition')
       
-      // Переходим на главную
-      window.location.href = '/'
+      // Используем Next.js router для навигации без перезагрузки
+      router.push('/')
       
-      // После загрузки восстанавливаем позицию
+      // Восстанавливаем позицию после навигации
       if (savedPosition && !isDoubleTap) {
-        setTimeout(() => {
-          window.scrollTo({ top: parseInt(savedPosition), behavior: 'auto' })
-        }, 100)
+        // Ждём немного пока страница загрузится
+        const restorePosition = () => {
+          const pos = parseInt(savedPosition)
+          window.scrollTo({ top: pos, behavior: 'auto' })
+        }
+        
+        setTimeout(restorePosition, 100)
       }
     }
     
