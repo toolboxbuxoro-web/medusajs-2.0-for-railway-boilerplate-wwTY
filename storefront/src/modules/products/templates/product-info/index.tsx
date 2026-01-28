@@ -10,11 +10,12 @@ import ProductFeatures from "@modules/products/components/product-features"
 import ProductUseCases from "@modules/products/components/product-use-cases"
 import { getLocalizedField } from "@lib/util/localization"
 import { parseProductMetadata } from "@modules/products/types/product-metadata"
+import RatingSummary from "@modules/products/components/rating-summary"
 
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
-  variant?: "header" | "details" | "full"
+  variant?: "header" | "details" | "full" | "compact"
 }
 
 const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
@@ -31,9 +32,10 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
 
   const isHeader = variant === "header"
   const isDetails = variant === "details" || variant === "full"
+  const isCompact = variant === "compact"
 
   return (
-    <div id="product-info" className="space-y-6">
+    <div id="product-info" className={isCompact ? "" : "space-y-6"}>
       {isHeader && (
         <div className="space-y-4">
           <div className="space-y-2">
@@ -47,6 +49,20 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
             </Heading>
           </div>
 
+        </div>
+      )}
+
+      {isCompact && (
+        <div className="flex items-center gap-6 py-2">
+          <RatingSummary 
+            ratingAvg={metadata.rating_avg} 
+            ratingCount={metadata.rating_count} 
+          />
+          {metadata.brand && (
+            <span className="text-gray-400 text-sm">
+              {t('brand')}: <span className="text-red-600 font-bold hover:underline cursor-pointer">{metadata.brand}</span>
+            </span>
+          )}
         </div>
       )}
 

@@ -138,8 +138,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             
             {/* Left/Center Column: Image Gallery & Detailed Specs (9/12) */}
             <div className="lg:col-span-9 space-y-12">
-              <div className="bg-white rounded-3xl overflow-hidden">
+              <div className="bg-white rounded-3xl overflow-hidden space-y-4">
                 <ImageGallery images={galleryImages} />
+                <div className="px-6 pb-2">
+                   <ProductInfo product={product} variant="compact" />
+                </div>
               </div>
 
               {/* Detailed Technical Specs & Description below the images */}
