@@ -119,10 +119,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
           {/* Mobile Layout */}
           <div className="lg:hidden">
-            {/* Add top padding to account for fixed header */}
-            <div className="pt-14"></div>
             <div className="space-y-6">
-              {/* Uzum Mobile: Gallery - Full Width */}
+              {/* Uzum Mobile: Gallery - Full Width, starts from top */}
               <div className="-mx-4 sm:-mx-6">
                 <ImageGallery images={galleryImages} />
               </div>

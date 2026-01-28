@@ -20,7 +20,7 @@ const MobileProductHeader: React.FC<MobileProductHeaderProps> = ({ product }) =>
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100)
+      setIsScrolled(window.scrollY > 20)
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
