@@ -103,7 +103,10 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
             {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 && (
               <div className="flex flex-col gap-1">
                 <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('rating')}</span>
-                <RatingSummary product={product} variant="inline" />
+                <RatingSummary 
+                  ratingAvg={Number(product.metadata.rating_avg)}
+                  ratingCount={Number(product.metadata.rating_count) || 0}
+                />
               </div>
             )}
 
