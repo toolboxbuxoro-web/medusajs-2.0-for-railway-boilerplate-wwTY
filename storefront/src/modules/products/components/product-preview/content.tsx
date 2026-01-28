@@ -182,8 +182,8 @@ export default function ProductPreviewContent({
             {/* Rating */}
             <div className="h-4 mb-0 flex items-center">
               <ProductRating 
-                rating={(product.metadata as any)?.rating || 0} 
-                reviewCount={(product.metadata as any)?.reviews_count || 0} 
+                rating={(product.metadata as any)?.rating_avg || 0} 
+                reviewCount={(product.metadata as any)?.rating_count || 0} 
               />
             </div>
 

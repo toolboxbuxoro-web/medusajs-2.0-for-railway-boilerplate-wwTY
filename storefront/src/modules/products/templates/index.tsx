@@ -70,22 +70,38 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   useEffect(() => {
     // Add class to body on mobile to hide global header
-    const isMobile = window.innerWidth < 1024
-    if (isMobile) {
-      document.body.classList.add("product-page-mobile")
+    const updateMobileClass = () => {
+      const isMobile = window.innerWidth < 1024
+      if (isMobile) {
+        document.body.classList.add("product-page-mobile")
+      } else {
+        document.body.classList.remove("product-page-mobile")
+      }
     }
+
+    // Initial check
+    updateMobileClass()
+
+    // Update on resize
+    window.addEventListener('resize', updateMobileClass)
 
     return () => {
       document.body.classList.remove("product-page-mobile")
+      window.removeEventListener('resize', updateMobileClass)
     }
   }, [])
 
   return (
     <>
+      {/* Mobile Product Header - Fixed, outside content-container */}
+      <div className="lg:hidden">
+        <MobileProductHeader product={product} />
+      </div>
+
       <div className="bg-white min-h-screen">
         <div className="content-container py-4 sm:py-6" data-testid="product-container">
-          {/* Breadcrumbs - Desktop & Mobile */}
-            <nav className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-8 overflow-x-auto no-scrollbar whitespace-nowrap">
+          {/* Breadcrumbs - Desktop only (hidden on mobile with custom header) */}
+            <nav className="hidden lg:block text-xs sm:text-sm text-gray-500 mb-4 sm:mb-8 overflow-x-auto no-scrollbar whitespace-nowrap">
                 <LocalizedClientLink href="/" className="hover:text-red-600 transition-colors">
                   {tNav('home')}
                 </LocalizedClientLink>
@@ -103,7 +119,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
           {/* Mobile Layout */}
           <div className="lg:hidden">
-            <MobileProductHeader product={product} />
+            {/* Add top padding to account for fixed header */}
+            <div className="pt-14"></div>
             <div className="space-y-6">
               {/* Uzum Mobile: Gallery - Full Width */}
               <div className="-mx-4 sm:-mx-6">

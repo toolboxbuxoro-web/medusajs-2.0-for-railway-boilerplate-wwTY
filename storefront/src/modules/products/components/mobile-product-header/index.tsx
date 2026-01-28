@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import FavoriteButton from "@modules/products/components/favorite-button"
-import Back from "@modules/common/icons/back"
 import { getLocalizedField } from "@lib/util/localization"
 
 type MobileProductHeaderProps = {
@@ -61,7 +60,9 @@ const MobileProductHeader: React.FC<MobileProductHeaderProps> = ({ product }) =>
             isScrolled ? "text-gray-900" : "text-gray-900 bg-white/50 backdrop-blur-sm shadow-sm"
           }`}
         >
-          <Back size={20} />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
         </button>
 
         {/* Center: Title (Visible on scroll) */}
