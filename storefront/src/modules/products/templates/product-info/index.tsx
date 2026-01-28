@@ -79,46 +79,52 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
             </Heading>
           </div>
 
-          {/* Metadata Row for Details section (previously in header) */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm pt-4 border-t border-gray-100">
-            {/* Code */}
-            <div className="flex flex-col gap-1">
-              <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('code')}</span>
-              <span className="text-gray-900 font-bold text-base">
-                {(product.metadata as any)?.code || product.handle}
-              </span>
+          {/* Metadata Rows - Brand & Rating first, then SKU & Warranty */}
+          <div className="space-y-4 pt-4">
+            {/* First Row: Brand and Rating */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+              {/* Brand */}
+              {product.metadata?.brand && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('brand'))}</span>
+                  <span className="text-gray-900 font-semibold text-base">
+                    {String(product.metadata.brand)}
+                  </span>
+                </div>
+              )}
+
+              {/* Rating */}
+              {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('rating'))}</span>
+                  <RatingSummary 
+                    ratingAvg={Number(product.metadata.rating_avg)}
+                    ratingCount={Number(product.metadata.rating_count) || 0}
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Brand */}
-            {product.metadata?.brand && (
+            {/* Second Row: SKU and Warranty */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+              {/* Code */}
               <div className="flex flex-col gap-1">
-                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('brand')}</span>
-                <span className="text-gray-900 font-semibold text-base">
-                  {String(product.metadata.brand)}
+                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('code'))}</span>
+                <span className="text-gray-900 font-bold text-base">
+                  {(product.metadata as any)?.code || product.handle}
                 </span>
               </div>
-            )}
 
-            {/* Rating */}
-            {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 && (
-              <div className="flex flex-col gap-1">
-                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('rating')}</span>
-                <RatingSummary 
-                  ratingAvg={Number(product.metadata.rating_avg)}
-                  ratingCount={Number(product.metadata.rating_count) || 0}
-                />
-              </div>
-            )}
-
-            {/* Warranty Badge */}
-            {warrantyYears && (
-              <div className="flex flex-col gap-1">
-                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('warranty')}</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-500 text-white uppercase tracking-wider w-fit">
-                   {t('official')}
-                </span>
-              </div>
-            )}
+              {/* Warranty Badge */}
+              {warrantyYears && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('warranty'))}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-500 text-white uppercase tracking-wider w-fit">
+                     {String(t('official'))}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Features (Above Fold - First 4) */}
