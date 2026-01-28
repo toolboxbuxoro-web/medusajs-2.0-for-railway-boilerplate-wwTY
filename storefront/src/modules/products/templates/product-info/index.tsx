@@ -93,16 +93,18 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
                 </div>
               )}
 
-              {/* Rating */}
-              {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 && (
-                <div className="flex flex-col gap-1 items-end">
-                  <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('rating'))}</span>
+              {/* Rating - with placeholder if no reviews */}
+              <div className="flex flex-col gap-1 items-end">
+                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('rating'))}</span>
+                {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 ? (
                   <RatingSummary 
                     ratingAvg={Number(product.metadata.rating_avg)}
                     ratingCount={Number(product.metadata.rating_count) || 0}
                   />
-                </div>
-              )}
+                ) : (
+                  <span className="text-gray-400 text-sm">Нет отзывов</span>
+                )}
+              </div>
             </div>
 
             {/* Second Row: SKU and Warranty */}
