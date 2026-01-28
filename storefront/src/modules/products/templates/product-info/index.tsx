@@ -79,10 +79,10 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
             </Heading>
           </div>
 
-          {/* Metadata Rows - Brand & Rating first, then SKU & Warranty */}
-          <div className="space-y-4 pt-4">
-            {/* First Row: Brand and Rating */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+          {/* Metadata Rows - Brand & Rating first row, SKU & Warranty second row */}
+          <div className="space-y-3 pt-3">
+            {/* First Row: Brand (left) and Rating (right) */}
+            <div className="flex items-center justify-between gap-4 text-sm">
               {/* Brand */}
               {product.metadata?.brand && (
                 <div className="flex flex-col gap-1">
@@ -95,7 +95,7 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
 
               {/* Rating */}
               {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 && (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 items-end">
                   <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{String(t('rating'))}</span>
                   <RatingSummary 
                     ratingAvg={Number(product.metadata.rating_avg)}
@@ -133,7 +133,7 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
           )}
 
           {/* Specifications */}
-          <div className="pt-6 border-t border-gray-100">
+          <div className="border-t border-gray-100">
             <ProductSpecs product={product} maxItems={8} />
           </div>
 
