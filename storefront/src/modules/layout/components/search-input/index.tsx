@@ -85,7 +85,7 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
             value={query}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full h-10 px-4 border-none focus:outline-none focus:ring-0 text-sm bg-transparent"
+            className="w-full h-10 px-4 border-none focus:outline-none focus:ring-0 text-base bg-transparent"
           />
           <button
             type="submit"
@@ -106,7 +106,7 @@ export default function SearchInput({ placeholder, variant = "desktop" }: Search
         value={query}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-9 px-3 pr-9 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+        className="w-full h-9 px-3 pr-9 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
       />
       <button
         type="submit"

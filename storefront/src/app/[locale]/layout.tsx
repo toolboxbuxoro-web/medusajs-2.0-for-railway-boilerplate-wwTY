@@ -7,7 +7,7 @@ import { AuthProvider } from "@lib/context/auth-context"
 import { PickupPointProvider } from "@lib/context/pickup-point-context"
 import { CitySearchProvider } from "@lib/context/city-search-context"
 
-import { Metadata } from 'next';
+import { Metadata, Viewport } from 'next';
 
 import { getCustomer } from "@lib/data/customer"
 
@@ -47,6 +47,13 @@ export const metadata: Metadata = {
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
   },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default async function LocaleLayout(props: {
