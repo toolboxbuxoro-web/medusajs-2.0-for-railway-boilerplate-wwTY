@@ -5,12 +5,16 @@ import { useLocale } from 'next-intl'
 import { useState, useRef, useEffect } from 'react'
 import { locales, type Locale } from '../../../../i18n'
 
-const languages: Record<Locale, { name: string }> = {
-  ru: { name: 'Русский' },
-  uz: { name: 'O\'zbekcha' },
+const languages: Record<Locale, { name: string; short: string }> = {
+  ru: { name: 'Русский', short: 'RU' },
+  uz: { name: 'O\'zbekcha', short: 'UZ' },
 }
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  variant?: 'default' | 'mobile'
+}
+
+export default function LanguageSwitcher({ variant = 'default' }: LanguageSwitcherProps) {
   const pathname = usePathname()
   const params = useParams()
   const [isOpen, setIsOpen] = useState(false)
@@ -76,15 +80,23 @@ export default function LanguageSwitcher() {
     window.location.href = fullUrl
   }
 
+  const isMobile = variant === 'mobile'
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm hover:text-red-600 transition-colors"
+        className={`flex items-center gap-1.5 transition-colors ${
+          isMobile 
+            ? 'px-2 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs font-semibold text-gray-700' 
+            : 'px-3 py-2 text-sm hover:text-red-600'
+        }`}
       >
-        <span>{languages[currentLocale]?.name}</span>
+        <span>
+          {isMobile ? languages[currentLocale]?.short : languages[currentLocale]?.name}
+        </span>
         <svg 
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`transition-transform ${isMobile ? 'w-3 h-3' : 'w-4 h-4'} ${isOpen ? 'rotate-180' : ''}`}
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -94,7 +106,9 @@ export default function LanguageSwitcher() {
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className={`absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-200 ${
+          isMobile ? 'right-0 mt-1 w-32' : 'right-0 mt-2 w-48'
+        }`}>
           {locales.map((locale) => (
             <button
               key={locale}
@@ -103,7 +117,7 @@ export default function LanguageSwitcher() {
                 locale === currentLocale ? 'bg-gray-100 font-semibold' : ''
               }`}
             >
-              <span>{languages[locale].name}</span>
+              <span>{isMobile ? languages[locale].name : languages[locale].name}</span>
               {locale === currentLocale && (
                 <svg className="w-4 h-4 ml-auto text-red-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
