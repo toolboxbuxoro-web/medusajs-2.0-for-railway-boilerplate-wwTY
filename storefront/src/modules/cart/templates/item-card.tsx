@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { updateLineItem } from "@lib/data/cart"
+import { updateLineItem, deleteLineItem } from "@lib/data/cart"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
@@ -30,7 +30,13 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
   const [updating, setUpdating] = useState(false)
 
   const handleQuantityChange = async (newQuantity: number) => {
-    if (newQuantity < 1) return
+    if (newQuantity < 1) {
+      // Delete item when quantity would go below 1
+      setUpdating(true)
+      await deleteLineItem(item.id)
+      setUpdating(false)
+      return
+    }
     setUpdating(true)
     await updateLineItem({
       lineId: item.id,
@@ -99,7 +105,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
               <div className="flex items-center gap-1 sm:gap-2">
                 <button
                   onClick={() => handleQuantityChange(quantity - 1)}
-                  disabled={updating || quantity <= 1}
+                  disabled={updating}
                   className="w-7 h-7 sm:w-8 sm:h-8 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 text-sm"
                 >
                   −
@@ -159,7 +165,7 @@ const ItemCard = ({ item, selected, onSelect, currencyCode }: ItemCardProps) => 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleQuantityChange(quantity - 1)}
-                      disabled={updating || quantity <= 1}
+                      disabled={updating}
                       className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100 disabled:opacity-50"
                     >
                       −

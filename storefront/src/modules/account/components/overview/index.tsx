@@ -28,55 +28,6 @@ const Overview = async ({ customer, orders, locale }: OverviewProps) => {
         </div>
 
 
-        {/* Navigation Buttons Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <LocalizedClientLink 
-            href="/delivery" 
-            className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-red-200 transition-all duration-200 group"
-          >
-            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-red-50 text-red-600 mb-3 group-hover:scale-110 transition-transform">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="1" y="3" width="15" height="13"></rect>
-                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                <circle cx="18.5" cy="18.5" r="2.5"></circle>
-              </svg>
-            </div>
-            <span className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
-              {t('delivery') || 'Доставка и оплата'}
-            </span>
-          </LocalizedClientLink>
-
-          <LocalizedClientLink 
-            href="/customer-service" 
-            className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-red-200 transition-all duration-200 group"
-          >
-            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-red-50 text-red-600 mb-3 group-hover:scale-110 transition-transform">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-              </svg>
-            </div>
-            <span className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
-              {t('customer_service') || 'Поддержка'}
-            </span>
-          </LocalizedClientLink>
-
-          <LocalizedClientLink 
-            href="/about" 
-            className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-red-200 transition-all duration-200 group"
-          >
-            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-red-50 text-red-600 mb-3 group-hover:scale-110 transition-transform">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </div>
-            <span className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
-              {t('about_us') || 'О компании'}
-            </span>
-          </LocalizedClientLink>
-        </div>
         {/* Recent Orders Section */}
         <div className="flex flex-col gap-y-4">
           <div className="flex items-center justify-between">
