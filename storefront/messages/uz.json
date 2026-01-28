@@ -766,6 +766,30 @@
   },
   "b2b": {
     "seo_title": "Yuridik shaxslar bilan ish | Toolbox",
-    "seo_description": "Toolbox bilan hamkorlik uchun ariza qoldiring. Doimiy mijozlar uchun to'liq hujjatlar to'plami."
+    "seo_description": "Toolbox bilan hamkorlik uchun ariza qoldiring. Doimiy mijozlar uchun to'liq hujjatlar to'plami.",
+    "title": "Yuridik shaxslar bilan ishlaymiz",
+    "description": "Ariza qoldiring va menejerimiz tez orada siz bilan bog'lanadi",
+    "benefit1_title": "To'liq hujjatlar",
+    "benefit1_description": "Shartnoma, dalolatnoma, buxgalteriya uchun hisoblar",
+    "benefit2_title": "Tez qayta ishlash",
+    "benefit2_description": "24 soat ichida javob",
+    "benefit3_title": "Individual shartlar",
+    "benefit3_description": "Maxsus narxlar va to'lov muddati",
+    "form_title": "Ariza qoldirish",
+    "company_name": "Kompaniya nomi",
+    "company_name_placeholder": "\"Kompaniya\" MChJ",
+    "contact_person": "Aloqa shaxsi",
+    "contact_name_placeholder": "Ismingiz",
+    "phone": "Telefon",
+    "email": "Email",
+    "comment": "Izoh",
+    "comment_placeholder": "Qaysi mahsulotlar sizni qiziqtiradi?",
+    "loading": "Yuborilmoqda...",
+    "submit": "Arizani yuborish",
+    "privacy_notice": "Tugmani bosish orqali siz maxfiylik siyosatiga rozilik bildirasiz",
+    "success_title": "Ariza yuborildi!",
+    "success_message": "Menejerimiz tez orada siz bilan bog'lanadi",
+    "send_another": "Yana birini yuborish",
+    "error_message": "Ariza yuborishda xatolik. Keyinroq urinib ko'ring."
   }
 }

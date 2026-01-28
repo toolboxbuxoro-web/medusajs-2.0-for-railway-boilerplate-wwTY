@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, FormEvent } from "react"
+import { useTranslations } from "next-intl"
 
-type B2BFormProps = {
-  isRussian: boolean
-}
+type B2BFormProps = {}
 
-export function B2BForm({ isRussian }: B2BFormProps) {
+export function B2BForm({}: B2BFormProps) {
+  const t = useTranslations("b2b")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,12 +41,7 @@ export function B2BForm({ isRussian }: B2BFormProps) {
       // Reset form
       e.currentTarget.reset()
     } catch (err: any) {
-      setError(
-        err.message ||
-          (isRussian
-            ? "Ошибка при отправке заявки. Попробуйте позже."
-            : "Ariza yuborishda xatolik. Keyinroq urinib ko'ring.")
-      )
+      setError(err.message || t("error_message"))
     } finally {
       setLoading(false)
     }
@@ -71,18 +66,16 @@ export function B2BForm({ isRussian }: B2BFormProps) {
           </svg>
         </div>
         <h3 className="text-xl font-bold text-green-800 mb-2">
-          {isRussian ? "Заявка отправлена!" : "Ariza yuborildi!"}
+          {t("success_title")}
         </h3>
         <p className="text-green-700 mb-4">
-          {isRussian
-            ? "Наш менеджер свяжется с вами в ближайшее время"
-            : "Menejerimiz tez orada siz bilan bog'lanadi"}
+          {t("success_message")}
         </p>
         <button
           onClick={() => setSuccess(false)}
           className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
-          {isRussian ? "Отправить еще одну" : "Yana birini yuborish"}
+          {t("send_another")}
         </button>
       </div>
     )
@@ -92,36 +85,33 @@ export function B2BForm({ isRussian }: B2BFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {isRussian ? "Название компании" : "Kompaniya nomi"}{" "}
-          <span className="text-red-600">*</span>
+          {t("company_name")} <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
           name="companyName"
           required
           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-          placeholder={isRussian ? 'ООО "Компания"' : '"Kompaniya" MChJ'}
+          placeholder={t("company_name_placeholder")}
         />
       </div>
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {isRussian ? "Контактное лицо" : "Aloqa shaxsi"}{" "}
-          <span className="text-red-600">*</span>
+          {t("contact_person")} <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
           name="contactName"
           required
           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-          placeholder={isRussian ? "Ваше имя" : "Ismingiz"}
+          placeholder={t("contact_name_placeholder")}
         />
       </div>
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {isRussian ? "Телефон" : "Telefon"}{" "}
-          <span className="text-red-600">*</span>
+          {t("phone")} <span className="text-red-600">*</span>
         </label>
         <input
           type="tel"
@@ -134,8 +124,7 @@ export function B2BForm({ isRussian }: B2BFormProps) {
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {isRussian ? "Email" : "Email"}{" "}
-          <span className="text-red-600">*</span>
+          {t("email")} <span className="text-red-600">*</span>
         </label>
         <input
           type="email"
@@ -148,17 +137,13 @@ export function B2BForm({ isRussian }: B2BFormProps) {
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {isRussian ? "Комментарий" : "Izoh"}
+          {t("comment")}
         </label>
         <textarea
           name="comment"
           rows={4}
           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all resize-none"
-          placeholder={
-            isRussian
-              ? "Какие товары вас интересуют?"
-              : "Qaysi mahsulotlar sizni qiziqtiradi?"
-          }
+          placeholder={t("comment_placeholder")}
         />
       </div>
 
@@ -173,19 +158,11 @@ export function B2BForm({ isRussian }: B2BFormProps) {
         disabled={loading}
         className="w-full py-4 rounded-xl bg-red-600 text-white font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-red-600/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading
-          ? isRussian
-            ? "Отправка..."
-            : "Yuborilmoqda..."
-          : isRussian
-          ? "Отправить заявку"
-          : "Arizani yuborish"}
+        {loading ? t("loading") : t("submit")}
       </button>
 
       <p className="text-xs text-gray-500 text-center">
-        {isRussian
-          ? "Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности"
-          : "Tugmani bosish orqali siz maxfiylik siyosatiga rozilik bildirasiz"}
+        {t("privacy_notice")}
       </p>
     </form>
   )
