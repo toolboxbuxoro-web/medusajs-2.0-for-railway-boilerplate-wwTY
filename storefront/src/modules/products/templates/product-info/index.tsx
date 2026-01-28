@@ -68,6 +68,17 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
 
       {isDetails && (
         <div className="space-y-6">
+          {/* Mobile Product Title - shown only on mobile above SKU */}
+          <div className="lg:hidden">
+            <Heading
+              level="h1"
+              className="text-xl font-bold leading-tight text-gray-900 tracking-tight mb-4"
+              data-testid="product-title-mobile"
+            >
+              {getLocalizedField(product, "title", localeStr) || product.title}
+            </Heading>
+          </div>
+
           {/* Metadata Row for Details section (previously in header) */}
           <div className="flex flex-wrap items-center gap-6 text-sm pt-4 border-t border-gray-100">
             {/* Code */}
