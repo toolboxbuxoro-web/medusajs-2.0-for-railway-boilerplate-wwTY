@@ -65,11 +65,14 @@ export default async function syncMoySkladPricesJob(container: MedusaContainer) 
     // Step 3: Match and update prices
     let updatedCount = 0
     let createdCount = 0
+    let skippedCount = 0
     let notFoundCount = 0
     let errorCount = 0
 
     // Process in batches
-    const batchSize = 100
+    const batchSize = 50 // Reduced batch size for price operations
+    const currencyCode = "uzs"
+    
     for (let i = 0; i < allVariants.length; i += batchSize) {
       const batch = allVariants.slice(i, i + batchSize)
       
@@ -86,20 +89,96 @@ export default async function syncMoySkladPricesJob(container: MedusaContainer) 
           // MoySklad price is in UZS (main units), Medusa stores in smallest units (tiyin)
           const newPriceInTiyin = Math.round(moySkladPrice * 100)
 
-          // Price is ready to be synced
-          // Note: ProductVariantDTO doesn't expose prices relation in listAndCount
-          // Full implementation would require using Pricing Module with price sets
-          
-          if ((updatedCount + createdCount) < 10) {
-            const priceDisplay = moySkladPrice.toLocaleString('ru-RU')
-            logger.info(`SKU ${sku}: ${priceDisplay} UZS (${newPriceInTiyin} tiyin)`)
+          // Step 1: Get the price set for this variant using remoteLink
+          const variantPriceSets = await remoteLink.query({
+            entryPoint: "variant_price_set",
+            variables: {
+              filters: {
+                variant_id: variant.id
+              }
+            },
+            fields: ["price_set_id"]
+          })
+
+          if (!variantPriceSets.data || variantPriceSets.data.length === 0) {
+            // No price set found for this variant - skip
+            skippedCount++
+            if (skippedCount <= 5) {
+              logger.warn(`No price set found for SKU ${sku} (variant ${variant.id})`)
+            }
+            return
           }
-          
-          updatedCount++
+
+          const priceSetLink = variantPriceSets.data[0] as any
+          const priceSetId = priceSetLink.price_set_id
+
+          // Step 2: Get the price set with its money amounts
+          const [priceSet] = await pricingModuleService.listPriceSets(
+            { id: priceSetId },
+            { 
+              relations: ["money_amounts"],
+              take: 1 
+            }
+          )
+
+          if (!priceSet) {
+            skippedCount++
+            return
+          }
+
+          // Step 3: Find existing money amount for UZS currency
+          const existingMoneyAmount = priceSet.money_amounts?.find(
+            (ma: any) => ma.currency_code === currencyCode
+          )
+
+          if (existingMoneyAmount) {
+            // Check if price changed
+            const currentPrice = existingMoneyAmount.amount || 0
+            
+            if (currentPrice !== newPriceInTiyin) {
+              // Update existing price
+              await pricingModuleService.updateMoneyAmounts([
+                {
+                  id: existingMoneyAmount.id,
+                  amount: newPriceInTiyin
+                }
+              ])
+              
+              updatedCount++
+              
+              if (updatedCount <= 10) {
+                const oldPriceDisplay = (currentPrice / 100).toLocaleString('ru-RU')
+                const newPriceDisplay = moySkladPrice.toLocaleString('ru-RU')
+                logger.info(`✓ Updated SKU ${sku}: ${oldPriceDisplay} → ${newPriceDisplay} UZS`)
+              }
+            } else {
+              skippedCount++
+            }
+          } else {
+            // Create new money amount for this currency
+            await pricingModuleService.addPrices({
+              priceSetId: priceSetId,
+              prices: [
+                {
+                  currency_code: currencyCode,
+                  amount: newPriceInTiyin
+                }
+              ]
+            })
+            
+            createdCount++
+            
+            if (createdCount <= 10) {
+              const priceDisplay = moySkladPrice.toLocaleString('ru-RU')
+              logger.info(`✓ Created price for SKU ${sku}: ${priceDisplay} UZS`)
+            }
+          }
 
         } catch (err) {
           errorCount++
-          logger.error(`Error processing price for SKU ${sku}:`, err)
+          if (errorCount <= 5) {
+            logger.error(`Error processing price for SKU ${sku}:`, err)
+          }
         }
       })
 
@@ -114,11 +193,13 @@ export default async function syncMoySkladPricesJob(container: MedusaContainer) 
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1)
     logger.info(`✅ MoySklad price sync completed in ${duration}s`)
-    logger.info(`   💰 Products with prices: ${updatedCount}`)
-    logger.info(`   ❓ Not in MoySklad: ${notFoundCount}`)
-    logger.info(`   ❌ Errors: ${errorCount}`)
-    logger.info(`\n📊 Summary: Fetched and validated ${moySkladPrices.size} retail prices from MoySklad`)
-    logger.info(`   Prices are ready for integration with Medusa pricing system`)
+    logger.info(`   📊 Statistics:`)
+    logger.info(`      💰 Prices updated: ${updatedCount}`)
+    logger.info(`      ➕ Prices created: ${createdCount}`)
+    logger.info(`      ⏭️  Unchanged/skipped: ${skippedCount}`)
+    logger.info(`      ❓ Not in MoySklad: ${notFoundCount}`)
+    logger.info(`      ❌ Errors: ${errorCount}`)
+    logger.info(`\n📈 Total: ${moySkladPrices.size} retail prices fetched from MoySklad`)
 
   } catch (error) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(1)
