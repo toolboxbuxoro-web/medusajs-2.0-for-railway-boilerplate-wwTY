@@ -12,6 +12,34 @@ import { Metadata } from 'next';
 import { getCustomer } from "@lib/data/customer"
 
 export const metadata: Metadata = {
+  title: {
+    template: "%s | Toolbox",
+    default: "Toolbox — Профессиональные инструменты и оборудование",
+  },
+  description: "Toolbox — ваш надежный партнер в мире профессионального инструмента и оборудования в Узбекистане. Широкий ассортимент, гарантия качества и оперативная доставка.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://www.toolbox-tools.uz'),
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    url: "https://www.toolbox-tools.uz",
+    siteName: "Toolbox",
+    title: "Toolbox — Профессиональные инструменты и оборудование",
+    description: "Toolbox — ваш надежный партнер в мире профессионального инструмента и оборудования в Узбекистане. Широкий ассортимент, гарантия качества и оперативная доставка.",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Toolbox",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Toolbox — Профессиональные инструменты и оборудование",
+    description: "Toolbox — ваш надежный партнер в мире профессионального инструмента и оборудования в Узбекистане. Широкий ассортимент, гарантия качества и оперативная доставка.",
+    images: ["/opengraph-image.png"],
+  },
   icons: {
     icon: [
       { url: '/toolbox-icon.ico' },

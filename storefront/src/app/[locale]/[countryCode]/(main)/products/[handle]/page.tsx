@@ -84,7 +84,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   )
 
   return {
-    title: `${seoTitle} | Toolbox`,
+    title: seoTitle,
     description: seoDescription,
     keywords: metadata.seo_keywords.length > 0 ? metadata.seo_keywords : undefined,
     alternates,
