@@ -107,6 +107,11 @@ export default async function Nav({ locale }: NavProps) {
 
             {/* Icons - Compact on mobile, right aligned */}
             <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 navbar-icons ml-auto sm:ml-0">
+              {/* Mobile Language Switcher (left of phone) */}
+              <div className="sm:hidden mr-2">
+                <LanguageSwitcher variant="mobile" />
+              </div>
+
               {/* Phone Button - Mobile only (right) */}
               <a
                 href="tel:+998880811112"
