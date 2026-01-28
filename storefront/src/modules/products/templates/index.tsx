@@ -91,6 +91,16 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     }
   }, [])
 
+  // Auto-scroll to middle of page on mobile
+  useEffect(() => {
+    const isMobile = window.innerWidth < 1024
+    if (isMobile) {
+      // Scroll to half the viewport height to show gallery
+      const scrollTarget = window.innerHeight / 2
+      window.scrollTo({ top: scrollTarget, behavior: 'smooth' })
+    }
+  }, [])
+
   return (
     <>
       {/* Mobile Product Header - Fixed, outside content-container */}
