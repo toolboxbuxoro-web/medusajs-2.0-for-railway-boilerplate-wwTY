@@ -69,13 +69,13 @@ export default function TopBar() {
         </div>
         
         {/* Right side - Phone */}
-        <div className="flex items-center gap-2">
-          <Phone className="w-4 h-4" />
+        <div className="flex items-center gap-2 mr-2">
           <a 
             href="tel:+998880811112" 
-            className="font-semibold hover:text-red-400 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-semibold"
           >
-            +998 88 081-11-12
+            <Phone className="w-4 h-4" />
+            <span>+998 88 081-11-12</span>
           </a>
         </div>
       </div>
