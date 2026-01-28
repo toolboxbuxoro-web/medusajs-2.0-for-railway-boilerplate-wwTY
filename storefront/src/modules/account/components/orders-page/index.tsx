@@ -71,10 +71,9 @@ const OrdersPage: React.FC = () => {
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            <span>{refreshing ? t("loading") : "Обновить"}</span>
+            <span>{refreshing ? t("loading") : t("refresh")}</span>
           </button>
         </div>
-        <p className="text-gray-500">{t("orders_description")}</p>
       </div>
       {renderContent()}
     </div>

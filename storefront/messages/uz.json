@@ -152,7 +152,11 @@
     "trust_protected": "Himoyalangan",
     "otp_login_description": "Telefon raqami orqali kiring",
     "change_phone": "Raqamni o'zgartirish",
-    "change_phone_description": "Yangi telefon raqamini kiriting. Biz unga tasdiqlash kodini yuboramiz."
+    "change_phone_description": "Yangi telefon raqamini kiriting. Biz unga tasdiqlash kodini yuboramiz.",
+    "delivery": "Yetkazib berish va to'lov",
+    "customer_service": "Qo'llab-quvvatlash",
+    "about_us": "Kompaniya haqida",
+    "refresh": "Yangilash"
   },
   "cart": {
     "your_cart": "Xarid savati",

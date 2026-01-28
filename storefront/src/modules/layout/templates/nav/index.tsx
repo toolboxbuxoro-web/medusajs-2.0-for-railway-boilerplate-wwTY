@@ -115,7 +115,7 @@ export default async function Nav({ locale }: NavProps) {
               {/* Phone Button - Mobile only (right) */}
               <a
                 href="tel:+998880811112"
-                className="sm:hidden px-3 py-2 mr-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center justify-center"
+                className="sm:hidden px-2 py-1.5 mr-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center justify-center"
                 title={t('call') || "Позвонить"}
               >
                 <Phone size="20" />
