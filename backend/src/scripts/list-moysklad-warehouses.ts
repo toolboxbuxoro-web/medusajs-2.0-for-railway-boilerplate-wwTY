@@ -10,7 +10,7 @@ export default async function listMoySkladWarehouses({ container }: ExecArgs) {
     const moySkladService: MoySkladService = container.resolve("moysklad");
     
     logger.info("Fetching list of warehouses from MoySklad...");
-    const stores = await moySkladService.retrieveStores();
+    const stores = await moySkladService.listStores();
     
     if (stores.length === 0) {
         logger.info("No warehouses found.");
