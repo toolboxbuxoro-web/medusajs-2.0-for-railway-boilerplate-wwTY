@@ -11,7 +11,6 @@ import ProductUseCases from "@modules/products/components/product-use-cases"
 import { getLocalizedField } from "@lib/util/localization"
 import { parseProductMetadata } from "@modules/products/types/product-metadata"
 
-import RatingSummary from "@modules/products/components/rating-summary"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -47,18 +46,7 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
               {getLocalizedField(product, "title", localeStr) || product.title}
             </Heading>
           </div>
-          
-          <div className="flex items-center gap-6">
-            <RatingSummary 
-              ratingAvg={metadata.rating_avg} 
-              ratingCount={metadata.rating_count} 
-            />
-            {metadata.brand && (
-              <span className="text-gray-400 text-sm">
-                {t('brand')}: <span className="text-red-600 font-bold hover:underline cursor-pointer">{metadata.brand}</span>
-              </span>
-            )}
-          </div>
+
         </div>
       )}
 
@@ -66,25 +54,6 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
         <div className="space-y-6">
           {/* Metadata Row for Details section (previously in header) */}
           <div className="flex flex-wrap items-center gap-6 text-sm pt-4 border-t border-gray-100">
-             {/* Brand */}
-             {metadata.brand && (
-              <div className="flex flex-col gap-1">
-                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('brand')}</span>
-                <span className="text-red-600 font-bold hover:underline cursor-pointer">
-                  {metadata.brand}
-                </span>
-              </div>
-            )}
-            
-            {/* Rating */}
-            <div className="flex flex-col gap-1">
-              <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('rating')}</span>
-              <RatingSummary 
-                ratingAvg={metadata.rating_avg} 
-                ratingCount={metadata.rating_count} 
-              />
-            </div>
-
             {/* Code */}
             <div className="flex flex-col gap-1">
               <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('code')}</span>

@@ -56,13 +56,13 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
     return (
       <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
         <p className="text-red-700 text-sm font-medium mb-2">
-          {t("review_error") || "Не удалось загрузить отзывы"}
+          {t("review_error") || t("failed_to_load_reviews")}
         </p>
         <button
           onClick={() => window.location.reload()}
           className="text-red-600 hover:text-red-700 text-sm underline"
         >
-          Обновить страницу
+          {t("refresh_page")}
         </button>
       </div>
     )
@@ -96,7 +96,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
       {/* End of List */}
       {!hasMore && reviews && reviews.length > 0 && (
         <div className="text-center py-6 text-sm text-gray-400">
-          Все отзывы загружены
+          {t("all_reviews_loaded")}
         </div>
       )}
     </div>

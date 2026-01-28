@@ -245,7 +245,7 @@ export default function ProductActions({
             </svg>
             <span className="text-green-700 font-medium">{t('bts_pickup_today')}</span>
           </div>
-          <div className="text-xs text-gray-500 ml-7">{t('bts_pickup_subtitle')}</div>
+
           <a 
             href={`/${countryCode}/stores`}
             className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 ml-7 transition-colors"
@@ -294,9 +294,7 @@ export default function ProductActions({
         >
           {t('quick_order')}
         </Button>
-        <div className="text-xs text-gray-500 text-center mt-2">
-          {t('quick_order_microcopy')}
-        </div>
+
         <QuickOrderModal
           product={product}
           variant={selectedVariant}

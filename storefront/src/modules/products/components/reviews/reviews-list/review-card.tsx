@@ -14,8 +14,9 @@ type ReviewCardProps = {
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
   const t = useTranslations("product")
+  const tCommon = useTranslations("common")
   const isPending = review.status === "pending"
-  const customerName = "Покупатель"
+  const customerName = t("default_buyer_name")
   const initials = customerName.charAt(0).toUpperCase()
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -62,7 +63,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
                   size="small"
                   className="rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-medium"
                 >
-                  ✓ Проверенная покупка
+                  {t("verified_purchase")}
                 </Badge>
               )}
 
@@ -73,7 +74,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
                   size="small"
                   className="rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-medium"
                 >
-                  На модерации
+                  {t("review_status_pending")}
                 </Badge>
               )}
 
@@ -158,11 +159,11 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
                     "hover:border-gray-300 transition-all duration-200 group",
                     "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                   )}
-                  aria-label={`Просмотр изображения ${idx + 1}`}
+                  aria-label={`${t("view_image_aria")} ${idx + 1}`}
                 >
                   <img
                     src={img}
-                    alt={`Review image ${idx + 1}`}
+                    alt={`${t("view_image_aria")} ${idx + 1}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                     loading="lazy"
                   />
@@ -193,7 +194,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="font-semibold text-gray-900 text-xs sm:text-sm">
-                    Ответ администратора
+                    {t("admin_response")}
                   </span>
                   {review.admin_response_at && (
                     <span className="text-[10px] sm:text-xs text-gray-400">
@@ -217,12 +218,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, locale }) => {
           onClick={() => setLightboxOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Просмотр изображения"
+          aria-label={t("view_image_aria")}
         >
           <button
             className="absolute top-4 right-4 sm:top-6 sm:right-6 text-white text-3xl sm:text-4xl hover:text-gray-300 transition-colors z-10 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-white/10"
             onClick={() => setLightboxOpen(false)}
-            aria-label="Закрыть"
+            aria-label={tCommon("close")}
           >
             ×
           </button>
