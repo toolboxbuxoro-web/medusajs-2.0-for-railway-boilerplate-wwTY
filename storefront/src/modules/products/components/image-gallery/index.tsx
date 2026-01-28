@@ -305,7 +305,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
         {/* Mobile Thumbnails */}
         {images.length > 1 && (
-          <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1 justify-center px-2">
             {images.map((image, idx) => (
               <button
                 key={image.id || idx}
