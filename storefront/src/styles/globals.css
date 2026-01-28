@@ -597,3 +597,13 @@
 .animate-partners-scroll:hover {
   animation-play-state: paused;
 }
+
+/* Mobile Product Page Specific Styles - Hide Global Header */
+@media (max-width: 1023px) {
+  body.product-page-mobile .navbar-header,
+  body.product-page-mobile .navbar-categories,
+  body.product-page-mobile .navbar-mobile-search,
+  body.product-page-mobile .navbar-header + div { /* the spacer */
+    display: none !important;
+  }
+}

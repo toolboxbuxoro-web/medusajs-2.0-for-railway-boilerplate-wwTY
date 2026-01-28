@@ -15,6 +15,8 @@ import { getLocalizedField } from "@lib/util/localization"
 import { useTranslations } from "next-intl"
 
 import ReviewsSection from "@modules/products/components/reviews"
+import MobileProductHeader from "@modules/products/components/mobile-product-header"
+import { useEffect } from "react"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -64,6 +66,18 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         ) as HttpTypes.StoreProductImage[])
       : (product.images || [])
 
+  useEffect(() => {
+    // Add class to body on mobile to hide global header
+    const isMobile = window.innerWidth < 1024
+    if (isMobile) {
+      document.body.classList.add("product-page-mobile")
+    }
+
+    return () => {
+      document.body.classList.remove("product-page-mobile")
+    }
+  }, [])
+
   return (
     <>
       <div className="bg-white min-h-screen">
@@ -87,6 +101,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
           {/* Mobile Layout */}
           <div className="lg:hidden">
+            <MobileProductHeader product={product} />
             <div className="space-y-6">
               {/* Uzum Mobile: Gallery - Full Width */}
               <div className="-mx-4 sm:-mx-6">
