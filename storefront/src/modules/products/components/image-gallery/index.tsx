@@ -286,13 +286,6 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
               </div>
             ))}
           </div>
-
-          {/* Mobile Image Counter Badge (1 / N) */}
-          {images.length > 1 && (
-            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">
-              {selectedImage + 1} / {images.length}
-            </div>
-          )}
         </div>
 
         {/* Mobile Indicator dots */}
