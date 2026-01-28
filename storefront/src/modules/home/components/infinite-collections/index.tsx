@@ -70,9 +70,9 @@ export default function InfiniteCollections({
   }
 
   return (
-    <div className="flex flex-col gap-y-8">
+    <div className="flex flex-col gap-y-4">
       {/* Render collections */}
-      <ul className="flex flex-col gap-y-8 list-none p-0 m-0">
+      <ul className="flex flex-col gap-y-4 list-none p-0 m-0">
         {collections.map((collection, index) => (
           <li key={collection.id}>
             <ProductRail
@@ -87,7 +87,7 @@ export default function InfiniteCollections({
 
       {/* Loading more skeleton */}
       {isLoadingMore && (
-        <div className="flex flex-col gap-y-8">
+        <div className="flex flex-col gap-y-4">
           {[...Array(2)].map((_, i) => (
             <SkeletonCollectionRail key={`loading-more-${i}`} />
           ))}

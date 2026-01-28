@@ -48,7 +48,7 @@ export default function ProductRail({
 
   const content = (
     <div 
-      className={`relative ${hasCustomBg ? 'isolate py-10 px-4 sm:px-8 rounded-[2.5rem] overflow-hidden' : 'mb-6 sm:mb-10'}`}
+      className={`relative ${hasCustomBg ? 'isolate py-5 px-4 sm:px-8 rounded-[2.5rem] overflow-hidden' : 'mb-3 sm:mb-5'}`}
       style={hasCustomBg ? containerStyle : undefined}
     >
       {isWinterTheme && (
@@ -176,7 +176,7 @@ export default function ProductRail({
   )
 
   return hasCustomBg ? (
-    <div className="mb-6 sm:mb-10">
+    <div className="mb-3 sm:mb-5">
       {content}
     </div>
   ) : content
