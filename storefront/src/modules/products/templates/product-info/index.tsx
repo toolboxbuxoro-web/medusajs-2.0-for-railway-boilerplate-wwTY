@@ -80,7 +80,7 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
           </div>
 
           {/* Metadata Row for Details section (previously in header) */}
-          <div className="flex flex-wrap items-center gap-6 text-sm pt-4 border-t border-gray-100">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm pt-4 border-t border-gray-100">
             {/* Code */}
             <div className="flex flex-col gap-1">
               <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('code')}</span>
@@ -88,6 +88,24 @@ const ProductInfo = ({ product, variant = "full" }: ProductInfoProps) => {
                 {(product.metadata as any)?.code || product.handle}
               </span>
             </div>
+
+            {/* Brand */}
+            {product.metadata?.brand && (
+              <div className="flex flex-col gap-1">
+                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('brand')}</span>
+                <span className="text-gray-900 font-semibold text-base">
+                  {String(product.metadata.brand)}
+                </span>
+              </div>
+            )}
+
+            {/* Rating */}
+            {product.metadata?.rating_avg && Number(product.metadata.rating_avg) > 0 && (
+              <div className="flex flex-col gap-1">
+                <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t('rating')}</span>
+                <RatingSummary product={product} variant="inline" />
+              </div>
+            )}
 
             {/* Warranty Badge */}
             {warrantyYears && (
