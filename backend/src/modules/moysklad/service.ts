@@ -4,6 +4,25 @@ type InjectedDependencies = {
   logger: Logger
 }
 
+interface MoySkladPriceType {
+  id: string
+  name: string
+  externalCode?: string
+}
+
+interface MoySkladSalePrice {
+  value: number  // Price in smallest currency units (e.g., tiyin for UZS)
+  currency: {
+    meta: { href: string }
+    name: string
+  }
+  priceType: {
+    meta: { href: string; type: string }
+    id: string
+    name: string
+  }
+}
+
 interface MoySkladProduct {
   id: string
   name: string
@@ -13,6 +32,7 @@ interface MoySkladProduct {
   stock: number
   reserve: number
   inTransit: number
+  salePrices?: MoySkladSalePrice[]
 }
 
 interface MoySkladAssortmentResponse {
@@ -33,6 +53,7 @@ interface MoySkladStockByStore {
   code: string
   article?: string
   name: string
+  salePrices?: MoySkladSalePrice[]
   stockByStore: Array<{
     meta: {
       href: string
@@ -147,48 +168,58 @@ export default class MoySkladService {
     this.logger_.info(`Filtering by ${WAREHOUSE_IDS.length} warehouses`)
 
     try {
-      // Fetch stock for each warehouse and sum them up
-      for (const warehouseId of WAREHOUSE_IDS) {
-        this.logger_.info(`Fetching stock from warehouse ${warehouseId}...`)
+      // Use /report/stock/bystore endpoint which provides actual per-warehouse breakdown
+      const batchSize = 1000
+      let offset = 0
+      let totalProducts = 0
+      let totalFetched = 0
+
+      do {
+        const url = `${this.baseUrl_}/report/stock/bystore?limit=${batchSize}&offset=${offset}`
         
-        const batchSize = 1000
-        let offset = 0
-        let totalFetched = 0
-        let totalProducts = 0
+        const response = await fetch(url, {
+          headers: this.getHeaders()
+        })
 
-        do {
-          const url = `${this.baseUrl_}/entity/assortment?limit=${batchSize}&offset=${offset}&stockStore=https://api.moysklad.ru/api/remap/1.2/entity/store/${warehouseId}`
+        if (!response.ok) {
+          throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+        }
+
+        const data: MoySkladStockByStoreResponse = await response.json()
+        totalProducts = data.meta.size
+
+        for (const product of data.rows) {
+          if (!product.code) continue
+
+          // Sum stock only from our configured warehouses
+          let warehouseStock = 0
           
-          const response = await fetch(url, {
-            headers: this.getHeaders()
-          })
-
-          if (!response.ok) {
-            throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
-          }
-
-          const data: MoySkladAssortmentResponse = await response.json()
-          totalProducts = data.meta.size
-
-          for (const product of data.rows) {
-            if (product.code) {
-              const currentStock = stockMap.get(product.code) || 0
-              stockMap.set(product.code, currentStock + (product.stock || 0))
+          if (product.stockByStore && Array.isArray(product.stockByStore)) {
+            for (const storeStock of product.stockByStore) {
+              // Extract warehouse ID from the meta.href
+              // Format: https://api.moysklad.ru/api/remap/1.2/entity/store/{id}
+              const warehouseId = storeStock.meta.href.split('/').pop()
+              
+              if (warehouseId && WAREHOUSE_IDS.includes(warehouseId)) {
+                warehouseStock += (storeStock.stock || 0)
+              }
             }
           }
 
-          totalFetched += data.rows.length
-          offset += batchSize
-
-          // Small delay to avoid rate limiting
-          if (offset < totalProducts) {
-            await new Promise(resolve => setTimeout(resolve, 100))
+          if (warehouseStock > 0) {
+            stockMap.set(product.code, warehouseStock)
           }
+        }
 
-        } while (offset < totalProducts)
-        
-        this.logger_.info(`Fetched ${totalFetched} products from warehouse ${warehouseId}`)
-      }
+        totalFetched += data.rows.length
+        offset += batchSize
+
+        // Small delay to avoid rate limiting
+        if (offset < totalProducts) {
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+
+      } while (offset < totalProducts)
 
       this.logger_.info(`Successfully retrieved stock for ${stockMap.size} unique products from ${WAREHOUSE_IDS.length} warehouses`)
       return stockMap
@@ -254,6 +285,108 @@ export default class MoySkladService {
 
     } catch (error) {
       this.logger_.error("Failed to retrieve stores from MoySklad", error)
+      throw error
+    }
+  }
+
+  /**
+   * Retrieve all price types from MoySklad
+   */
+  async retrievePriceTypes(): Promise<MoySkladPriceType[]> {
+    if (!this.token_) {
+      throw new Error("MOYSKLAD_TOKEN is not configured")
+    }
+
+    const url = `${this.baseUrl_}/context/companysettings/pricetype`
+    
+    try {
+      const response = await fetch(url, {
+        headers: this.getHeaders()
+      })
+
+      if (!response.ok) {
+        throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data as MoySkladPriceType[]
+
+    } catch (error) {
+      this.logger_.error("Failed to retrieve price types from MoySklad", error)
+      throw error
+    }
+  }
+
+  /**
+   * Retrieve all products with prices in bulk
+   * Returns a Map of SKU => retail price
+   * Uses "Розничная цена" price type
+   */
+  async retrieveAllRetailPrices(retailPriceTypeName: string = "Розничная цена"): Promise<Map<string, number>> {
+    if (!this.token_) {
+      throw new Error("MOYSKLAD_TOKEN is not configured")
+    }
+
+    const priceMap = new Map<string, number>()
+    
+    this.logger_.info("Starting bulk retail price retrieval from MoySklad...")
+    this.logger_.info(`Looking for price type: "${retailPriceTypeName}"`)
+
+    try {
+      // Use /report/stock/bystore which also includes salePrices
+      const batchSize = 1000
+      let offset = 0
+      let totalProducts = 0
+      let totalFetched = 0
+      let pricesFound = 0
+
+      do {
+        const url = `${this.baseUrl_}/report/stock/bystore?limit=${batchSize}&offset=${offset}`
+        
+        const response = await fetch(url, {
+          headers: this.getHeaders()
+        })
+
+        if (!response.ok) {
+          throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+        }
+
+        const data: MoySkladStockByStoreResponse = await response.json()
+        totalProducts = data.meta.size
+
+        for (const product of data.rows) {
+          if (!product.code) continue
+
+          // Find retail price
+          if (product.salePrices && Array.isArray(product.salePrices)) {
+            const retailPrice = product.salePrices.find(
+              price => price.priceType?.name === retailPriceTypeName
+            )
+
+            if (retailPrice && retailPrice.value) {
+              // Convert from smallest units to main units (e.g., tiyin to sum)
+              const priceInMainUnits = retailPrice.value / 100
+              priceMap.set(product.code, priceInMainUnits)
+              pricesFound++
+            }
+          }
+        }
+
+        totalFetched += data.rows.length
+        offset += batchSize
+
+        // Small delay to avoid rate limiting
+        if (offset < totalProducts) {
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+
+      } while (offset < totalProducts)
+
+      this.logger_.info(`Successfully retrieved ${pricesFound} retail prices for ${totalFetched} products`)
+      return priceMap
+
+    } catch (error) {
+      this.logger_.error("Failed to retrieve retail prices from MoySklad", error)
       throw error
     }
   }
