@@ -53,7 +53,8 @@ interface MoySkladStockByStore {
   code: string
   article?: string
   name: string
-  salePrices?: MoySkladSalePrice[]
+  // NOTE: salePrices is NOT included in /report/stock/bystore response!
+  // For prices, use /entity/assortment with expand=salePrices
   stockByStore: Array<{
     meta: {
       href: string
@@ -98,64 +99,51 @@ export default class MoySkladService {
     }
   }
 
-  /**
-   * Get default headers for MoySklad API requests
-   * MoySklad supports both Basic Auth (base64 login:password) and Bearer Token
-   * If token is hex format (like d315552c...), use Bearer
-   * If token is base64 format, use Basic
-   */
-  private getHeaders(): HeadersInit {
-    // Auto-detect: if token contains only hex chars, it's likely an Access Token (use Bearer)
-    // Otherwise, it's base64-encoded credentials (use Basic)
-    const isAccessToken = /^[a-f0-9]+$/i.test(this.token_)
-    const authScheme = isAccessToken ? 'Bearer' : 'Basic'
-    
+  private getHeaders() {
     return {
-      "Authorization": `${authScheme} ${this.token_}`,
-      "Accept": "application/json;charset=utf-8",
+      "Authorization": `Bearer ${this.token_}`,
       "Accept-Encoding": "gzip",
       "Content-Type": "application/json"
     }
   }
 
   /**
-   * Retrieve stock for a single SKU (code)
+   * Get stock quantity for a specific SKU across configured warehouses
    */
   async retrieveStockBySku(sku: string): Promise<number> {
     if (!this.token_) {
       throw new Error("MOYSKLAD_TOKEN is not configured")
     }
 
-    const url = `${this.baseUrl_}/entity/assortment?filter=code=${encodeURIComponent(sku)}`
-    
     try {
+      // Fetch assortment item by SKU
+      const url = `${this.baseUrl_}/entity/assortment?filter=code=${encodeURIComponent(sku)}`
       const response = await fetch(url, {
         headers: this.getHeaders()
       })
 
       if (!response.ok) {
-        throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+        throw new Error(`MoySklad API error: ${response.status}`)
       }
 
-      const data: MoySkladAssortmentResponse = await response.json()
+      const data = await response.json()
       
-      if (data.rows && data.rows.length > 0) {
-        const product = data.rows[0]
-        return product.quantity || 0
+      if (!data.rows || data.rows.length === 0) {
+        return 0
       }
 
-      this.logger_.warn(`Product with SKU ${sku} not found in MoySklad`)
-      return 0
+      const product = data.rows[0]
+      return product.stock || 0
+
     } catch (error) {
-      this.logger_.error(`Failed to retrieve stock for SKU ${sku} from MoySklad`, error)
+      this.logger_.error(`Failed to retrieve stock for SKU ${sku}`, error)
       throw error
     }
   }
 
   /**
-   * Retrieve all products with stock in bulk (with pagination)
-   * Returns a Map of code => quantity for efficient lookup
-   * Only includes stock from configured warehouses
+   * Retrieve all products with stock in bulk
+   * Returns a Map of SKU => total quantity across all warehouses
    */
   async retrieveAllStock(): Promise<Map<string, number>> {
     if (!this.token_) {
@@ -165,10 +153,8 @@ export default class MoySkladService {
     const stockMap = new Map<string, number>()
     
     this.logger_.info("Starting bulk stock retrieval from MoySklad...")
-    this.logger_.info(`Filtering by ${WAREHOUSE_IDS.length} warehouses`)
 
     try {
-      // Use /report/stock/bystore endpoint which provides actual per-warehouse breakdown
       const batchSize = 1000
       let offset = 0
       let totalProducts = 0
@@ -182,7 +168,7 @@ export default class MoySkladService {
         })
 
         if (!response.ok) {
-          throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+          throw new Error(`MoySklad API error: ${response.status}`)
         }
 
         const data: MoySkladStockByStoreResponse = await response.json()
@@ -191,24 +177,14 @@ export default class MoySkladService {
         for (const product of data.rows) {
           if (!product.code) continue
 
-          // Sum stock only from our configured warehouses
-          let warehouseStock = 0
-          
+          let totalStock = 0
           if (product.stockByStore && Array.isArray(product.stockByStore)) {
-            for (const storeStock of product.stockByStore) {
-              // Extract warehouse ID from the meta.href
-              // Format: https://api.moysklad.ru/api/remap/1.2/entity/store/{id}
-              const warehouseId = storeStock.meta.href.split('/').pop()
-              
-              if (warehouseId && WAREHOUSE_IDS.includes(warehouseId)) {
-                warehouseStock += (storeStock.stock || 0)
-              }
+            for (const store of product.stockByStore) {
+              totalStock += store.stock || 0
             }
           }
 
-          if (warehouseStock > 0) {
-            stockMap.set(product.code, warehouseStock)
-          }
+          stockMap.set(product.code, totalStock)
         }
 
         totalFetched += data.rows.length
@@ -221,36 +197,35 @@ export default class MoySkladService {
 
       } while (offset < totalProducts)
 
-      this.logger_.info(`Successfully retrieved stock for ${stockMap.size} unique products from ${WAREHOUSE_IDS.length} warehouses`)
+      this.logger_.info(`Successfully retrieved stock for ${stockMap.size} products from MoySklad`)
       return stockMap
 
     } catch (error) {
-      this.logger_.error("Failed to retrieve bulk stock from MoySklad", error)
+      this.logger_.error("Failed to retrieve stock from MoySklad", error)
       throw error
     }
   }
 
   /**
-   * Get total count of products in MoySklad
+   * Get total product count from MoySklad
    */
   async getProductCount(): Promise<number> {
     if (!this.token_) {
       throw new Error("MOYSKLAD_TOKEN is not configured")
     }
 
-    const url = `${this.baseUrl_}/entity/assortment?limit=1`
-    
     try {
+      const url = `${this.baseUrl_}/entity/assortment?limit=1`
       const response = await fetch(url, {
         headers: this.getHeaders()
       })
 
       if (!response.ok) {
-        throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+        throw new Error(`MoySklad API error: ${response.status}`)
       }
 
-      const data: MoySkladAssortmentResponse = await response.json()
-      return data.meta.size
+      const data = await response.json()
+      return data.meta.size || 0
 
     } catch (error) {
       this.logger_.error("Failed to get product count from MoySklad", error)
@@ -259,57 +234,53 @@ export default class MoySkladService {
   }
 
   /**
-   * Retrieve all stores (warehouses)
+   * List all stores/warehouses
    */
-  async retrieveStores(): Promise<{ id: string; name: string }[]> {
+  async listStores(): Promise<any[]> {
     if (!this.token_) {
       throw new Error("MOYSKLAD_TOKEN is not configured")
     }
 
-    const url = `${this.baseUrl_}/entity/store`
-    
     try {
+      const url = `${this.baseUrl_}/entity/store`
       const response = await fetch(url, {
         headers: this.getHeaders()
       })
 
       if (!response.ok) {
-        throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+        throw new Error(`MoySklad API error: ${response.status}`)
       }
 
       const data = await response.json()
-      return data.rows.map((store: any) => ({
-        id: store.id,
-        name: store.name
-      }))
+      return data.rows || []
 
     } catch (error) {
-      this.logger_.error("Failed to retrieve stores from MoySklad", error)
+      this.logger_.error("Failed to list stores from MoySklad", error)
       throw error
     }
   }
 
   /**
    * Retrieve all price types from MoySklad
+   * Useful for discovering available price type names
    */
   async retrievePriceTypes(): Promise<MoySkladPriceType[]> {
     if (!this.token_) {
       throw new Error("MOYSKLAD_TOKEN is not configured")
     }
 
-    const url = `${this.baseUrl_}/context/companysettings/pricetype`
-    
     try {
+      const url = `${this.baseUrl_}/context/companysettings/pricetype`
       const response = await fetch(url, {
         headers: this.getHeaders()
       })
 
       if (!response.ok) {
-        throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+        throw new Error(`MoySklad API error: ${response.status}`)
       }
 
       const data = await response.json()
-      return data as MoySkladPriceType[]
+      return data || []
 
     } catch (error) {
       this.logger_.error("Failed to retrieve price types from MoySklad", error)
@@ -319,8 +290,10 @@ export default class MoySkladService {
 
   /**
    * Retrieve all products with prices in bulk
-   * Returns a Map of SKU => retail price
-   * Uses "Розничная цена" price type
+   * Returns a Map of SKU => retail price (in main currency units, e.g., UZS)
+   * 
+   * IMPORTANT: Uses /entity/assortment endpoint with expand=salePrices
+   * The /report/stock/bystore endpoint does NOT return salePrices!
    */
   async retrieveAllRetailPrices(retailPriceTypeName: string = "Розничная цена"): Promise<Map<string, number>> {
     if (!this.token_) {
@@ -333,47 +306,86 @@ export default class MoySkladService {
     this.logger_.info(`Looking for price type: "${retailPriceTypeName}"`)
 
     try {
-      // Use /report/stock/bystore which also includes salePrices
+      // Use /entity/assortment which includes products and variants
+      // with salePrices when expanded
       const batchSize = 1000
       let offset = 0
       let totalProducts = 0
       let totalFetched = 0
       let pricesFound = 0
+      let skippedNoCode = 0
+      let skippedNoPrices = 0
+      let skippedWrongPriceType = 0
 
       do {
-        const url = `${this.baseUrl_}/report/stock/bystore?limit=${batchSize}&offset=${offset}`
+        // CRITICAL: Must use expand=salePrices to get price data
+        const url = `${this.baseUrl_}/entity/assortment?limit=${batchSize}&offset=${offset}&expand=salePrices`
         
         const response = await fetch(url, {
           headers: this.getHeaders()
         })
 
         if (!response.ok) {
-          throw new Error(`MoySklad API error: ${response.status} ${response.statusText}`)
+          const errorText = await response.text()
+          throw new Error(`MoySklad API error: ${response.status} ${response.statusText}. Body: ${errorText}`)
         }
 
-        const data: MoySkladStockByStoreResponse = await response.json()
+        const data: MoySkladAssortmentResponse = await response.json()
+        
+        // Safety check
+        if (!data || !data.meta) {
+          throw new Error("Invalid response from MoySklad API: missing meta")
+        }
+        
+        if (!data.rows || !Array.isArray(data.rows)) {
+          throw new Error("Invalid response from MoySklad API: missing or invalid rows array")
+        }
+
         totalProducts = data.meta.size
 
         for (const product of data.rows) {
-          if (!product.code) continue
-
-          // Find retail price
-          if (product.salePrices && Array.isArray(product.salePrices)) {
-            const retailPrice = product.salePrices.find(
-              price => price.priceType?.name === retailPriceTypeName
-            )
-
-            if (retailPrice && retailPrice.value) {
-              // Convert from smallest units to main units (e.g., tiyin to sum)
-              const priceInMainUnits = retailPrice.value / 100
-              priceMap.set(product.code, priceInMainUnits)
-              pricesFound++
-            }
+          // Skip if no SKU/code
+          if (!product.code) {
+            skippedNoCode++
+            continue
           }
+
+          // Safety check for salePrices
+          if (!product.salePrices || !Array.isArray(product.salePrices)) {
+            skippedNoPrices++
+            continue
+          }
+
+          // Find retail price with matching price type name
+          const retailPrice = product.salePrices.find(
+            price => price?.priceType?.name === retailPriceTypeName
+          )
+
+          if (!retailPrice) {
+            skippedWrongPriceType++
+            continue
+          }
+
+          // Validate price value
+          if (typeof retailPrice.value !== 'number' || retailPrice.value < 0) {
+            this.logger_.warn(`Invalid price value for SKU ${product.code}: ${retailPrice.value}`)
+            continue
+          }
+
+          // Convert from smallest units to main units (e.g., tiyin to sum)
+          // MoySklad stores prices in kopecks/tiyin (smallest units)
+          const priceInMainUnits = retailPrice.value / 100
+          priceMap.set(product.code, priceInMainUnits)
+          pricesFound++
         }
 
         totalFetched += data.rows.length
         offset += batchSize
+
+        // Log progress every 2000 items
+        if (totalFetched % 2000 === 0 && totalFetched > 0) {
+          this.logger_.info(`Progress: fetched ${totalFetched}/${totalProducts} products, found ${pricesFound} prices`)
+        }
 
         // Small delay to avoid rate limiting
         if (offset < totalProducts) {
@@ -382,11 +394,22 @@ export default class MoySkladService {
 
       } while (offset < totalProducts)
 
-      this.logger_.info(`Successfully retrieved ${pricesFound} retail prices for ${totalFetched} products`)
+      // Final summary
+      this.logger_.info(`Successfully retrieved ${pricesFound} retail prices from ${totalFetched} products`)
+      this.logger_.info(`  Skipped: ${skippedNoCode} without code, ${skippedNoPrices} without salePrices, ${skippedWrongPriceType} without "${retailPriceTypeName}"`)
+      
+      if (pricesFound === 0) {
+        this.logger_.warn(`⚠️ WARNING: No prices found! Check if price type "${retailPriceTypeName}" exists in MoySklad`)
+      }
+      
       return priceMap
 
     } catch (error) {
-      this.logger_.error("Failed to retrieve retail prices from MoySklad", error)
+      this.logger_.error("Failed to retrieve retail prices from MoySklad:", error)
+      // Re-throw with more context
+      if (error instanceof Error) {
+        throw new Error(`MoySklad price retrieval failed: ${error.message}`)
+      }
       throw error
     }
   }
