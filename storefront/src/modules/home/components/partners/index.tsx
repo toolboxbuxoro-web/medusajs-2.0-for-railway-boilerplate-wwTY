@@ -24,7 +24,7 @@ export default function PartnersBrandBlock() {
   const t = useTranslations('home')
 
   return (
-    <div className="py-8 sm:py-12 bg-gray-50 border-y border-gray-100 mb-8 sm:mb-12">
+    <div className="bg-gray-50 border-y border-gray-100">
       <div className="content-container mb-6 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
           {t('our_partners') || "Наши партнеры"}
