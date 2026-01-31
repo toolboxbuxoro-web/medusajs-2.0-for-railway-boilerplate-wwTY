@@ -1,5 +1,6 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useState, useEffect, useMemo } from "react"
+import { convertToWebP, uploadFile } from "./utils/image-processor"
 
 type BannerData = {
   image_url: string
@@ -66,69 +67,19 @@ const CollectionBannerWidget = ({ data }: WidgetProps) => {
     setCurrentBanner(prev => ({ ...prev, [field]: value }))
   }
 
-  // Convert image file to WebP format using Canvas API
-  const convertToWebP = async (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement("canvas")
-        canvas.width = img.width
-        canvas.height = img.height
-        const ctx = canvas.getContext("2d")
-        if (!ctx) {
-          reject(new Error("Canvas context not available"))
-          return
-        }
-        ctx.drawImage(img, 0, 0)
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error("Failed to convert to WebP"))
-              return
-            }
-            const baseName = file.name.replace(/\.[^.]+$/, "")
-            const webpFile = new File([blob], `${baseName}.webp`, { type: "image/webp" })
-            resolve(webpFile)
-          },
-          "image/webp",
-          0.85 // quality 85%
-        )
-      }
-      img.onerror = () => reject(new Error("Failed to load image"))
-      img.src = URL.createObjectURL(file)
-    })
-  }
-
-  const uploadFile = async (): Promise<{ url: string; file_id?: string } | null> => {
+  const uploadFileTask = async (): Promise<{ url: string; file_id?: string } | null> => {
     if (!currentFile) return null
+
+    // Validation: Max 10MB
+    if (currentFile.size > 10 * 1024 * 1024) {
+      throw new Error("Файл слишком большой (макс. 10МБ)")
+    }
 
     setIsUploading(true)
     try {
       // Convert to WebP first
       const webpFile = await convertToWebP(currentFile)
-      
-      const form = new FormData()
-      form.append("files", webpFile)
-
-      const uploadRes = await fetch("/admin/uploads", {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      })
-
-      if (!uploadRes.ok) {
-        throw new Error("Upload failed")
-      }
-
-      const uploadJson = (await uploadRes.json()) as UploadResponse
-      const uploaded = uploadJson.files?.[0]
-      const url = uploaded?.url || uploaded?.file_url
-      const file_id = uploaded?.id
-
-      if (!url) {
-        throw new Error("No URL in upload response")
-      }
-
+      const { url, id: file_id } = await uploadFile(webpFile)
       return { url, file_id }
     } catch (error) {
       throw error
@@ -148,7 +99,7 @@ const CollectionBannerWidget = ({ data }: WidgetProps) => {
 
     try {
       // Upload file to MinIO
-      const uploadResult = await uploadFile()
+      const uploadResult = await uploadFileTask()
       if (!uploadResult) {
         throw new Error("Failed to upload file")
       }

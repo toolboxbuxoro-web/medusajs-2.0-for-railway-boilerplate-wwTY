@@ -1,5 +1,6 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useEffect, useMemo, useState } from "react"
+import { uploadFile } from "./utils/image-processor"
 
 type WidgetProps = {
   data: {
@@ -39,30 +40,17 @@ const CollectionIconWidget = ({ data }: WidgetProps) => {
       return
     }
 
+    // Validation: Max 5MB for icons
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: "error", text: "Файл слишком большой (макс. 5МБ)" })
+      return
+    }
+
     setIsSaving(true)
     setMessage(null)
 
     try {
-      const form = new FormData()
-      form.append("files", file)
-
-      const uploadRes = await fetch("/admin/uploads", {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      })
-
-      if (!uploadRes.ok) {
-        throw new Error("Upload failed")
-      }
-
-      const uploadJson = (await uploadRes.json()) as UploadResponse
-      const uploaded = uploadJson.files?.[0]
-      const url = uploaded?.url || uploaded?.file_url
-
-      if (!url) {
-        throw new Error("Upload did not return a URL")
-      }
+      const { url } = await uploadFile(file)
 
       const saveRes = await fetch(`/admin/collections/${data.id}`, {
         method: "POST",
@@ -233,7 +221,7 @@ const CollectionIconWidget = ({ data }: WidgetProps) => {
 }
 
 export const config = defineWidgetConfig({
-  zone: "product_collection.details.side.after",
+  zone: "product_collection.details.after",
 })
 
 export default CollectionIconWidget

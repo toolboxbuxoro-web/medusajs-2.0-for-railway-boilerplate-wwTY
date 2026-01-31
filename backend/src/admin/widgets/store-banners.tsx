@@ -1,5 +1,6 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useEffect, useMemo, useState } from "react"
+import { convertToWebP, uploadFile } from "./utils/image-processor"
 
 type Banner = {
   id: string
@@ -99,42 +100,15 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
     }
   }
 
-  // Convert image file to WebP format using Canvas API
-  const convertToWebP = async (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement("canvas")
-        canvas.width = img.width
-        canvas.height = img.height
-        const ctx = canvas.getContext("2d")
-        if (!ctx) {
-          reject(new Error("Canvas context not available"))
-          return
-        }
-        ctx.drawImage(img, 0, 0)
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error("Failed to convert to WebP"))
-              return
-            }
-            const baseName = file.name.replace(/\.[^.]+$/, "")
-            const webpFile = new File([blob], `${baseName}.webp`, { type: "image/webp" })
-            resolve(webpFile)
-          },
-          "image/webp",
-          0.85 // quality 85%
-        )
-      }
-      img.onerror = () => reject(new Error("Failed to load image"))
-      img.src = URL.createObjectURL(file)
-    })
-  }
-
   const addBanner = async () => {
     if (!file) {
       setMessage({ type: "error", text: "Выберите файл баннера" })
+      return
+    }
+
+    // Validation: Max 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: "error", text: "Файл слишком большой (макс. 10МБ)" })
       return
     }
 
@@ -146,20 +120,9 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
       setMessage({ type: "success", text: "Конвертация в WebP..." })
       const webpFile = await convertToWebP(file)
       
-      // Upload to Medusa file service (MinIO if configured)
-      const form = new FormData()
-      form.append("files", webpFile)
-      const uploadRes = await fetch("/admin/uploads", {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      })
-      if (!uploadRes.ok) throw new Error("Upload failed")
-      const uploadJson = (await uploadRes.json()) as UploadResponse
-      const uploaded = uploadJson.files?.[0]
-      const imageUrl = uploaded?.url || uploaded?.file_url
-      const fileId = uploaded?.id
-      if (!imageUrl) throw new Error("Upload did not return url")
+      // Upload to Medusa file service
+      setMessage({ type: "success", text: "Загрузка файла..." })
+      const { url: imageUrl, id: fileId } = await uploadFile(webpFile)
 
       const next: Banner = {
         id: uid(),
