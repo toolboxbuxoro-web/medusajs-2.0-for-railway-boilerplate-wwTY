@@ -21,6 +21,8 @@ import {
   MINIO_ACCESS_KEY,
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
+  MINIO_PORT,
+  MINIO_USE_SSL,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
   PAYME_ID,
@@ -95,7 +97,9 @@ const medusaConfig = {
               endPoint: MINIO_ENDPOINT,
               accessKey: MINIO_ACCESS_KEY,
               secretKey: MINIO_SECRET_KEY,
-              bucket: MINIO_BUCKET // Optional, default: medusa-media
+              bucket: MINIO_BUCKET, // Optional, default: medusa-media
+              port: MINIO_PORT ? parseInt(MINIO_PORT) : undefined,
+              useSSL: MINIO_USE_SSL !== undefined ? MINIO_USE_SSL === 'true' : undefined
             }
           }] : [{
             resolve: '@medusajs/file-local',

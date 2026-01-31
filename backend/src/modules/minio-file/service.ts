@@ -21,6 +21,8 @@ interface MinioServiceConfig {
   accessKey: string
   secretKey: string
   bucket?: string
+  port?: number
+  useSSL?: boolean
 }
 
 export interface MinioFileProviderOptions {
@@ -28,6 +30,8 @@ export interface MinioFileProviderOptions {
   accessKey: string
   secretKey: string
   bucket?: string
+  port?: number
+  useSSL?: boolean
 }
 
 const DEFAULT_BUCKET = 'medusa-media'
@@ -49,18 +53,20 @@ class MinioFileProviderService extends AbstractFileProviderService {
       endPoint: options.endPoint,
       accessKey: options.accessKey,
       secretKey: options.secretKey,
-      bucket: options.bucket
+      bucket: options.bucket,
+      port: options.port,
+      useSSL: options.useSSL
     }
 
     // Use provided bucket or default
     this.bucket = this.config_.bucket || DEFAULT_BUCKET
     this.logger_.info(`MinIO service initialized with bucket: ${this.bucket}`)
 
-    // Initialize Minio client with hardcoded SSL settings
+    // Initialize Minio client
     this.client = new Client({
       endPoint: this.config_.endPoint,
-      port: 443,
-      useSSL: true,
+      port: this.config_.port || 443,
+      useSSL: this.config_.useSSL ?? true,
       accessKey: this.config_.accessKey,
       secretKey: this.config_.secretKey
     })
