@@ -158,7 +158,7 @@ export default function BannerSlider({ slides: serverSlides }: { slides?: Banner
       onMouseLeave={handleMouseLeave}
     >
       {/* Aspect ratio: 3:1 mobile, 6:1 desktop */}
-      <div className="relative w-full aspect-[3/1] sm:aspect-[6/1]">
+      <div className="relative w-full aspect-[3/1]">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
