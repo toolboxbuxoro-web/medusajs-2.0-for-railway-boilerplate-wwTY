@@ -106,9 +106,9 @@ const StoreBannersWidget = ({ data }: WidgetProps) => {
       return
     }
 
-    // Validation: Max 10MB
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage({ type: "error", text: "Файл слишком большой (макс. 10МБ)" })
+    // Validation: Max 15MB
+    if (file.size > 15 * 1024 * 1024) {
+      setMessage({ type: "error", text: "Файл слишком большой (макс. 15МБ)" })
       return
     }
 

@@ -70,9 +70,9 @@ const CollectionBannerWidget = ({ data }: WidgetProps) => {
   const uploadFileTask = async (): Promise<{ url: string; file_id?: string } | null> => {
     if (!currentFile) return null
 
-    // Validation: Max 10MB
-    if (currentFile.size > 10 * 1024 * 1024) {
-      throw new Error("Файл слишком большой (макс. 10МБ)")
+    // Validation: Max 15MB
+    if (currentFile.size > 15 * 1024 * 1024) {
+      throw new Error("Файл слишком большой (макс. 15МБ)")
     }
 
     setIsUploading(true)
