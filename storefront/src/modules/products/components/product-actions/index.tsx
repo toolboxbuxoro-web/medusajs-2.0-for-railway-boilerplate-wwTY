@@ -71,6 +71,12 @@ export default function ProductActions({
       return
     }
 
+    // If there is only one variant, always return it regardless of options
+    // This handles cases where data might be incomplete or "Simple Product" usage
+    if (product.variants.length === 1) {
+      return product.variants[0]
+    }
+
     return product.variants.find((v) => {
       const variantOptions = optionsAsKeymap(v.options)
       return isEqual(variantOptions, options)
