@@ -44,7 +44,7 @@ export default async function RelatedProducts({
   }
   (queryParams as any).is_giftcard = false
 
-  const products = await getProductsList({
+  let products = await getProductsList({
     queryParams,
     countryCode,
   }).then(({ response }) => {
@@ -52,6 +52,30 @@ export default async function RelatedProducts({
       (responseProduct) => responseProduct.id !== product.id
     )
   })
+
+  // FALLBACK: If we didn't find enough related products, fetch generic products from the same region
+  if (products.length < 4) {
+     const fallbackParams: StoreProductParamsWithTags = {
+       region_id: region.id,
+       is_giftcard: false,
+       limit: 8 // Fetch enough to fill the gap
+     }
+     
+     const fallbackProducts = await getProductsList({
+       queryParams: fallbackParams,
+       countryCode,
+     }).then(({ response }) => {
+       return response.products.filter(
+         (responseProduct) => responseProduct.id !== product.id && 
+         !products.find(p => p.id === responseProduct.id) // Avoid duplicates
+       )
+     })
+     
+     products = [...products, ...fallbackProducts]
+  }
+
+  // Limit to 4 products total
+  products = products.slice(0, 4)
 
   if (!products.length) {
     return null

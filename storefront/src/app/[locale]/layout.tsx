@@ -90,21 +90,22 @@ export default async function LocaleLayout(props: {
   return (
     <html lang={validLocale} data-mode="light" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ToasterProvider />
-        <NextIntlClientProvider locale={validLocale} messages={messages}>
-          <AuthProvider initialCustomer={customer}>
-            <FavoritesProvider>
-              <PickupPointProvider 
-                cartId={cart?.id} 
-                initialData={(cart?.metadata as any)?.bts_delivery}
-              >
-                <CitySearchProvider>
-                  <main className="relative">{children}</main>
-                </CitySearchProvider>
-              </PickupPointProvider>
-            </FavoritesProvider>
-          </AuthProvider>
-        </NextIntlClientProvider>
+        <ToasterProvider>
+          <NextIntlClientProvider locale={validLocale} messages={messages}>
+            <AuthProvider initialCustomer={customer}>
+              <FavoritesProvider>
+                <PickupPointProvider 
+                  cartId={cart?.id} 
+                  initialData={(cart?.metadata as any)?.bts_delivery}
+                >
+                  <CitySearchProvider>
+                    <main className="relative">{children}</main>
+                  </CitySearchProvider>
+                </PickupPointProvider>
+              </FavoritesProvider>
+            </AuthProvider>
+          </NextIntlClientProvider>
+        </ToasterProvider>
       </body>
     </html>
   )
