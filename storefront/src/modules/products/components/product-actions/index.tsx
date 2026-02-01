@@ -66,8 +66,17 @@ export default function ProductActions({
     }
   }, [product.variants])
 
+  // Debug logging
+  useEffect(() => {
+    console.log("[ProductActions] Product:", product)
+    console.log("[ProductActions] Options State:", options)
+    console.log("[ProductActions] Selected Variant:", selectedVariant)
+    console.log("[ProductActions] In Stock:", inStock)
+  }, [product, options, selectedVariant, inStock])
+
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
+      console.log("[ProductActions] No variants found")
       return
     }
 
@@ -79,7 +88,9 @@ export default function ProductActions({
 
     return product.variants.find((v) => {
       const variantOptions = optionsAsKeymap(v.options)
-      return isEqual(variantOptions, options)
+      const match = isEqual(variantOptions, options)
+      console.log(`[ProductActions] Checking variant ${v.id}:`, { variantOptions, currentOptions: options, match })
+      return match
     })
   }, [product.variants, options])
 
@@ -114,6 +125,14 @@ export default function ProductActions({
     // Otherwise, we can't add to cart
     return false
   }, [selectedVariant])
+
+  // Debug logging
+  useEffect(() => {
+    console.log("[ProductActions] Product:", product)
+    console.log("[ProductActions] Options State:", options)
+    console.log("[ProductActions] Selected Variant:", selectedVariant)
+    console.log("[ProductActions] In Stock:", inStock)
+  }, [product, options, selectedVariant, inStock])
 
   const actionsRef = useRef<HTMLDivElement>(null)
 
