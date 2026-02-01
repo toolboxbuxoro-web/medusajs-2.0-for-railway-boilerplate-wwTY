@@ -144,7 +144,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   <Suspense
                     fallback={
                       <ProductActions
-                        disabled={true}
                         product={product}
                         region={region}
                       />
@@ -216,7 +215,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   <Suspense
                     fallback={
                       <ProductActions
-                        disabled={true}
                         product={product}
                         region={region}
                       />
