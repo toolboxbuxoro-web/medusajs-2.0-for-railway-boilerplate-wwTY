@@ -124,7 +124,9 @@ export default function ProductActions({
     console.log("[ProductActions] Options State:", options)
     console.log("[ProductActions] Selected Variant:", selectedVariant)
     console.log("[ProductActions] In Stock:", inStock)
-  }, [product, options, selectedVariant, inStock])
+    console.log("[ProductActions] Disabled Prop:", disabled)
+    console.log("[ProductActions] Is Adding:", isAdding)
+  }, [product, options, selectedVariant, inStock, disabled, isAdding])
 
   const actionsRef = useRef<HTMLDivElement>(null)
 
