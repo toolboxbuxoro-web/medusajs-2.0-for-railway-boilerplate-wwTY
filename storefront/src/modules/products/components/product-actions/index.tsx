@@ -66,14 +66,6 @@ export default function ProductActions({
     }
   }, [product.variants])
 
-  // Debug logging
-  useEffect(() => {
-    console.log("[ProductActions] Product:", product)
-    console.log("[ProductActions] Options State:", options)
-    console.log("[ProductActions] Selected Variant:", selectedVariant)
-    console.log("[ProductActions] In Stock:", inStock)
-  }, [product, options, selectedVariant, inStock])
-
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
       console.log("[ProductActions] No variants found")
