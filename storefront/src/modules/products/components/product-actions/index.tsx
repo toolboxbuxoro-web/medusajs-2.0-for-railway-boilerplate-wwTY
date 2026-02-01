@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslations } from 'next-intl'
 
 import { useIntersection } from "@lib/hooks/use-in-view"
+import { useToast } from "@lib/context/toast-context"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 
@@ -55,6 +56,7 @@ export default function ProductActions({
   const [isQuickOrdering, setIsQuickOrdering] = useState(false)
   const countryCode = useParams().countryCode as string
   const router = useRouter()
+  const { toast } = useToast()
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
@@ -126,11 +128,29 @@ export default function ProductActions({
       })
       
       if (!res.success) {
-        setAddError(res.error || "Не удалось добавить товар в корзину")
+        const errorMsg = res.error || "Не удалось добавить товар в корзину"
+        setAddError(errorMsg)
+        toast({
+          title: "Ошибка",
+          description: errorMsg,
+          variant: "error"
+        })
+      } else {
+        toast({
+          title: "Успешно",
+          description: "Товар добавлен в корзину",
+          variant: "success"
+        })
       }
     } catch (e: any) {
       console.error("[ProductActions] addToCart failed:", e)
-      setAddError(e?.message || "Не удалось добавить товар в корзину")
+      const errorMsg = e?.message || "Не удалось добавить товар в корзину"
+      setAddError(errorMsg)
+      toast({
+        title: "Ошибка",
+        description: errorMsg,
+        variant: "error"
+      })
     } finally {
       setIsAdding(false)
     }
@@ -154,7 +174,13 @@ export default function ProductActions({
         if (res.success) {
           router.push(`/${countryCode}/checkout`)
         } else {
-          setAddError(res.error || "Не удалось добавить товар")
+          const errorMsg = res.error || "Не удалось добавить товар"
+          setAddError(errorMsg)
+          toast({
+             title: "Ошибка",
+             description: errorMsg,
+             variant: "error"
+          })
         }
       } else {
         // Guest user: Open Quick Order Modal
@@ -281,6 +307,11 @@ export default function ProductActions({
             ? t('out_of_stock')
             : t('add_to_cart')}
         </Button>
+        {addError && (
+          <div className="text-red-600 text-sm mt-2 mb-2 text-center" data-testid="add-error-message">
+            {addError}
+          </div>
+        )}
         {/* Trust micro-copy */}
         <div className="text-xs text-gray-400 text-center mt-2 mb-3 px-4">
           {t('trust_microcopy')}

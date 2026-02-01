@@ -6,6 +6,7 @@ import { FavoritesProvider } from "@lib/context/favorites-context"
 import { AuthProvider } from "@lib/context/auth-context"
 import { PickupPointProvider } from "@lib/context/pickup-point-context"
 import { CitySearchProvider } from "@lib/context/city-search-context"
+import ToasterProvider from "./toaster-provider"
 
 import { Metadata, Viewport } from 'next';
 
@@ -89,6 +90,7 @@ export default async function LocaleLayout(props: {
   return (
     <html lang={validLocale} data-mode="light" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <ToasterProvider />
         <NextIntlClientProvider locale={validLocale} messages={messages}>
           <AuthProvider initialCustomer={customer}>
             <FavoritesProvider>
