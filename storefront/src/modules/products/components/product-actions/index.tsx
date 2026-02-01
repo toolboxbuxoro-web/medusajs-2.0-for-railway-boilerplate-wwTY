@@ -316,12 +316,6 @@ export default function ProductActions({
           variant="primary"
           className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-bold text-lg mb-3 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-100"
           isLoading={isAdding}
-        <Button
-          onClick={handleAddToCart}
-          disabled={!inStock || !selectedVariant || !!disabled || isAdding}
-          variant="primary"
-          className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-bold text-lg mb-3 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-red-100 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none"
-          isLoading={isAdding}
           data-testid="add-product-button"
         >
           {!selectedVariant
